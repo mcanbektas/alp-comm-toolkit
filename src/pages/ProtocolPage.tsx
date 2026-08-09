@@ -97,13 +97,18 @@ function resolveActiveTab(requested: string | null, available: readonly Workspac
   return available[0] ?? 'overview';
 }
 
+/**
+ * Sekmeye düşen araçlar. Eşleşme yoksa BOŞ döner — eskiden tüm listeye
+ * düşülüyordu ve ölçüldüğünde 1015 (protokol, sekme) çiftinin 586'sı bu yola
+ * giriyordu: dokuz sekme birbirinin aynı içeriğini basıyor, sekme çubuğu
+ * anlamını yitiriyordu. Boş sekme, yanlış dolu sekmeden dürüsttür.
+ */
 function selectToolsForTab(tools: readonly string[], tab: WorkspaceTab): readonly string[] {
   const keywords = TAB_TOOL_KEYWORDS[tab];
-  const matched = tools.filter((tool) => {
+  return tools.filter((tool) => {
     const lower = tool.toLocaleLowerCase('en');
     return keywords.some((keyword) => lower.includes(keyword));
   });
-  return matched.length > 0 ? matched : tools;
 }
 
 export function ProtocolPage(): ReactElement {
@@ -333,16 +338,22 @@ export function ProtocolPage(): ReactElement {
               <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
                 {t('protocol.tools')}
               </h2>
-              <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {visibleTools.map((tool) => (
-                  <li
-                    key={tool}
-                    className="rounded-token-sm border border-line bg-surface px-2 py-1.5 text-sm text-text"
-                  >
-                    {tool}
-                  </li>
-                ))}
-              </ul>
+              {visibleTools.length > 0 ? (
+                <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                  {visibleTools.map((tool) => (
+                    <li
+                      key={tool}
+                      className="rounded-token-sm border border-line bg-surface px-2 py-1.5 text-sm text-text"
+                    >
+                      {tool}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                // Bu sekmede taksonomiden gelen araç yok. Tüm listeye düşmek
+                // sekmeleri birbirinin kopyası yapardı; boş olduğunu söylemek dürüst.
+                <p className="text-sm text-muted">{t('protocol.noToolsForTab')}</p>
+              )}
             </div>
           </>
         )}

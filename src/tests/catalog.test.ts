@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DOMAIN_IDS, allEntries, catalog, catalogCounts, findEntry, searchCatalog } from '@/app/catalog';
+import { PROTOCOL_CATEGORIES } from '@/protocol-core';
 
 /**
  * Katalog grafiğinin değişmezleri. Bu dosya bir "sayım testi" değil, veri
@@ -79,6 +80,38 @@ describe('catalog protocol content', () => {
     }
   });
 
+  /**
+   * Alias mekanizmasının tek amacı, aynı protokolün birden çok alan sayfasında
+   * görünmesine izin verirken TEK bir kanonik kayıt bırakmak. Var olan `aliasOf`
+   * yollarını doğrulamak bunu bekçilemez: eksik `aliasOf` sessizce ikinci bir
+   * kanonik kayıt yaratır ve sayımlar şişer. Bu test o boşluğu kapatır —
+   * bir kez gerçekten kaçtı (bina otomasyonundaki iki Modbus kaydı).
+   */
+  it('leaves exactly one canonical record per protocol name', () => {
+    const byName = new Map<string, string[]>();
+    for (const entry of allEntries()) {
+      if (entry.protocol.aliasOf !== undefined) continue;
+      const paths = byName.get(entry.protocol.name) ?? [];
+      paths.push(entry.path);
+      byName.set(entry.protocol.name, paths);
+    }
+
+    const duplicated = [...byName.entries()].filter(([, paths]) => paths.length > 1);
+    expect(
+      duplicated,
+      `aliasOf taşımayan ikinci kayıt: ${duplicated.map(([name, paths]) => `${name} → ${paths.join(', ')}`).join(' | ')}`,
+    ).toEqual([]);
+  });
+
+  /**
+   * `ProtocolCategory` katalog tipini bilerek import etmiyor (protocol-core
+   * katalogdan bağımsız kalmalı), ama iki değer kümesi ayrışırsa eklenti kaydı
+   * bir domain'e bağlanamaz. Bağımsızlığın bedeli bu testtir.
+   */
+  it('keeps ProtocolCategory in step with the catalog domain ids', () => {
+    expect([...PROTOCOL_CATEGORIES].sort()).toEqual([...DOMAIN_IDS].sort());
+  });
+
   it('promises at least three tools and a summary on every protocol', () => {
     for (const entry of allEntries()) {
       expect(entry.protocol.tools.length, `${entry.path} has too few tools`).toBeGreaterThanOrEqual(
@@ -97,5 +130,14 @@ describe('searchCatalog', () => {
 
   it('returns nothing for a blank query', () => {
     expect(searchCatalog('   ')).toHaveLength(0);
+  });
+
+  it('never returns an alias record — the same protocol must not appear twice', () => {
+    for (const query of ['mqtt', 'coap', 'modbus', 'canopen', 'm-bus', 'rtcm', 'nmea']) {
+      const aliases = searchCatalog(query, 50).filter(
+        (entry) => entry.protocol.aliasOf !== undefined,
+      );
+      expect(aliases.map((entry) => entry.path), `"${query}" alias döndürdü`).toEqual([]);
+    }
   });
 });

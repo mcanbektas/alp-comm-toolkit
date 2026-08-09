@@ -38,9 +38,17 @@ export function SearchBox(): ReactElement {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const activeOptionRef = useRef<HTMLLIElement | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Liste `max-h-80` ile kaydırmalı: ok tuşuyla listenin altına inildiğinde
+  // etkin satır görünür alanın dışında kalır ve klavye kullanıcısı neyi
+  // seçtiğini göremez. `block: 'nearest'` gereksiz zıplamayı önler.
+  useEffect(() => {
+    activeOptionRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [activeIndex]);
 
   const results = useMemo<readonly CatalogEntry[]>(
     () => searchCatalog(searchQuery, MAX_SEARCH_RESULTS),
@@ -156,7 +164,9 @@ export function SearchBox(): ReactElement {
         role="combobox"
         autoComplete="off"
         aria-expanded={isListVisible}
-        aria-controls={listId}
+        // `<ul id={listId}>` yalnız sonuç varken basılıyor; sonuçsuz aramada
+        // sabit bir `aria-controls` boşluğa işaret eden IDREF olurdu.
+        aria-controls={isListVisible && results.length > 0 ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={activeOptionId}
         aria-describedby={`${inputId}-hint`}
@@ -204,6 +214,7 @@ export function SearchBox(): ReactElement {
                   <li
                     key={entry.path}
                     id={`${optionIdPrefix}-${index}`}
+                    ref={index === activeIndex ? activeOptionRef : undefined}
                     role="option"
                     aria-selected={index === activeIndex}
                     // Fare imleci vurguyu da taşır ki klavye ve fare tek bir

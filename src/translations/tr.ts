@@ -69,6 +69,7 @@ export const tr = {
   'protocol.backToFamily': 'Aileye dön',
   'protocol.plannedNotice':
     'Bu protokolün çözümleyicisi henüz bağlanmadı; sayfa şimdilik kapsamı ve araç listesini gösterir.',
+  'protocol.noToolsForTab': 'Bu sekmeye bağlı bir araç yok.',
 
   // --- Workspace sekmeleri (adlar catalog'daki WorkspaceTab ile birebir) ---
   'tab.overview': 'Genel bakış',

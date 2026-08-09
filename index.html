@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr" data-theme="dark">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +8,23 @@
       content="ALP Comm Toolkit — haberleşme protokolleri için analiz, çözümleme ve protokol geliştirme platformu."
     />
     <title>ALP Comm Toolkit</title>
+    <script>
+      /*
+        Boya öncesi tema. React mount olana kadar beklenirse, koyu tema seçmiş
+        bir kullanıcı önce açık bir kare görüp koyuya sıçrar (FOUC). Bu script
+        senkron ve <head> içinde olmak ZORUNDA — defer/module olursa geç kalır.
+        localStorage erişimi private mode'da atabilir, o yüzden try/catch.
+        Anahtar ThemeProvider ile aynı: alp-comm-theme.
+      */
+      try {
+        var stored = localStorage.getItem('alp-comm-theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.dataset.theme = stored;
+        }
+        /* 'system' ya da kayıt yok: attribute yazılmaz, token dosyası
+           prefers-color-scheme'e düşer. */
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

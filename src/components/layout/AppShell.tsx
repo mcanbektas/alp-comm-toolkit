@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { useUiStore } from '@/app/store/uiStore';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
@@ -40,6 +41,8 @@ function useIsDesktop(): boolean {
 export function AppShell(): ReactElement {
   const { t } = useTranslation();
   const isDesktop = useIsDesktop();
+  const location = useLocation();
+  const sidebarRef = useRef<HTMLElement>(null);
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUiStore((state) => state.setSidebarOpen);
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
@@ -53,14 +56,28 @@ export function AppShell(): ReactElement {
 
   const isOverlay = sidebarOpen && !isDesktop;
 
+  /**
+   * Overlay menü açıkken odak yönetimi. Üç parça da gerekli, biri eksik olursa
+   * klavye kullanıcısı görünmeyen bir menüde ya da menünün arkasında dolaşır:
+   * Escape kapatır, açılışta odak menüye taşınır, kapanışta çağıran düğmeye döner.
+   * `main`in `inert` olması arkadaki içeriğin Tab sırasından çıkmasını sağlar.
+   */
   useEffect(() => {
     if (!isOverlay) return;
+
+    const previouslyFocused = document.activeElement;
+    sidebarRef.current?.focus();
+
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') setSidebarOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) {
+        previouslyFocused.focus();
+      }
     };
   }, [isOverlay, setSidebarOpen]);
 
@@ -91,6 +108,10 @@ export function AppShell(): ReactElement {
             kaybolursa ilişki koparılmış olur. */}
         <aside
           id={SIDEBAR_ID}
+          ref={sidebarRef}
+          // Overlay modunda programatik odak hedefi; Tab sırasına GİRMEZ (-1).
+          tabIndex={isOverlay ? -1 : undefined}
+          aria-label={t('nav.domains')}
           className={[
             'border-line bg-surface',
             sidebarOpen ? '' : 'hidden',
@@ -109,9 +130,19 @@ export function AppShell(): ReactElement {
 
         <main
           id="main"
-          className={`min-w-0 flex-1 p-4 ${isOverlay ? 'overflow-hidden' : 'overflow-y-auto'}`}
+          // Atlama bağlantısının hedefi odaklanabilir olmalı: yoksa Safari ve
+          // Firefox yalnız kaydırır, odak başta kalır ve sonraki Tab başa döner.
+          tabIndex={-1}
+          // Overlay açıkken arkadaki içerik Tab sırasından ve ekran okuyucudan çıkar.
+          inert={isOverlay ? '' : undefined}
+          className={`min-w-0 flex-1 p-4 focus-visible:outline-none ${isOverlay ? 'overflow-hidden' : 'overflow-y-auto'}`}
         >
-          <Outlet />
+          {/* Sınır Outlet'i sarar, kabuğu değil: bir sayfa çökerse başlık ve menü
+              ayakta kalır, kullanıcı başka protokole geçebilir. `resetKey` rota
+              yolu — gezinme hatayı kendiliğinden temizler. */}
+          <ErrorBoundary resetKey={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

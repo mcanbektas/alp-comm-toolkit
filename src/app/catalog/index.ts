@@ -81,6 +81,11 @@ export function catalogCounts(): CatalogCounts {
 /**
  * Ad, özet ve araç adları üzerinde büyük/küçük harf duyarsız arama.
  * Katalog 172 kayıtla küçük olduğu için indeks kurulmaz — doğrusal tarama yeterli.
+ *
+ * Alias kayıtları sonuçlardan ELENİR. "mqtt" araması hem kanonik hem alias
+ * kaydı döndürseydi kullanıcı aynı protokolü iki kez görürdü — alias
+ * mekanizmasının varlık sebebi tam olarak bunu önlemek. Alias sayfasına
+ * gezinerek hâlâ ulaşılabilir, arama yalnız kanoniği gösterir.
  */
 export function searchCatalog(query: string, limit = 30): readonly CatalogEntry[] {
   const needle = query.trim().toLocaleLowerCase('en');
@@ -88,6 +93,7 @@ export function searchCatalog(query: string, limit = 30): readonly CatalogEntry[
 
   const scored: Array<{ entry: CatalogEntry; score: number }> = [];
   for (const entry of entries) {
+    if (entry.protocol.aliasOf !== undefined) continue;
     const name = entry.protocol.name.toLocaleLowerCase('en');
     let score = -1;
     if (name === needle) score = 0;

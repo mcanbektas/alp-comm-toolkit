@@ -184,16 +184,22 @@ export interface ProtocolEncoder<TMessage> {
  * bağımsız kalmalı, worker içinde katalog verisini yanında sürüklememeli.
  * Katalogda domain eklenirse bu liste de elle güncellenir —
  * `src/app/catalog/types.ts` içindeki `DOMAIN_IDS` ile eşleşmesi bir değişmezdir.
+ *
+ * Tip değil SABİT olarak yazılıyor: yalnız tip olsaydı iki kümenin ayrışması
+ * derlemeye de teste de yakalanmazdı. `catalog.test.ts` ikisini karşılaştırır.
  */
-export type ProtocolCategory =
-  | 'interfaces-framing'
-  | 'industrial-automation'
-  | 'automotive'
-  | 'marine-navigation'
-  | 'aerospace-uav'
-  | 'building-automation'
-  | 'network-ethernet'
-  | 'wireless-iot';
+export const PROTOCOL_CATEGORIES = [
+  'interfaces-framing',
+  'industrial-automation',
+  'automotive',
+  'marine-navigation',
+  'aerospace-uav',
+  'building-automation',
+  'network-ethernet',
+  'wireless-iot',
+] as const;
+
+export type ProtocolCategory = (typeof PROTOCOL_CATEGORIES)[number];
 
 /**
  * Bir protokolün sunduğu hesap aracının kimliği. Motor değil, yalnız TANIM:

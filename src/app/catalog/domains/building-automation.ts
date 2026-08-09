@@ -248,6 +248,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           // Offset, Unit, Enum, Bit Definitions) — klasik vendor map.
           definitions: ['vendor-map'],
           related: ['interfaces-framing/serial-interfaces/rs-485'],
+          // Endüstriyel Modbus parser'ının bina kılığı; kanonik kayıt orada.
+          aliasOf: 'industrial-automation/modbus/modbus-rtu',
         },
         {
           id: 'modbus-tcp',
@@ -283,6 +285,7 @@ export const buildingAutomationDomain: CatalogDomain = {
             'Polling Optimizer',
           ],
           definitions: ['vendor-map'],
+          aliasOf: 'industrial-automation/modbus/modbus-tcp',
         },
       ],
     },

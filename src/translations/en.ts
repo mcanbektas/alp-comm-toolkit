@@ -67,6 +67,7 @@ export const en: TranslationDictionary = {
   'protocol.backToFamily': 'Back to family',
   'protocol.plannedNotice':
     'No decoder is wired up for this protocol yet; the page currently shows its scope and tooling.',
+  'protocol.noToolsForTab': 'No tool is mapped to this tab.',
 
   // --- Workspace tabs (names mirror WorkspaceTab in the catalog) ---
   'tab.overview': 'Overview',

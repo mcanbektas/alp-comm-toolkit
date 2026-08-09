@@ -50,8 +50,21 @@
   --radius-token-sm: var(--radius-sm);
 }
 
+/*
+  `color-scheme` kaydırma çubuklarını ve yerleşik form denetimlerini boyar.
+  Tema attribute'u zorlandığında bunun da zorlanması gerek; yoksa koyu sayfada
+  işletim sistemi açıkken kaydırma çubuğu beyaz kalır.
+*/
 html {
   color-scheme: light dark;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 body {
