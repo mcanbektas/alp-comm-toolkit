@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+@import '@mcanbektas/design/tokens/index.css';
+
+/*
+  Tema seçimi `<html data-theme="light|dark">` ile yapılır; attribute yoksa
+  token dosyası `prefers-color-scheme`e düşer. Aşağıdaki `dark:` varyantı
+  yalnız token setiyle ifade edilemeyen tek tük durumlar için kaçış yoludur —
+  varsayılan yol token kullanmaktır.
+*/
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+  `inline` önemli: üretilen utility'ler değeri kopyalamak yerine var()'a
+  başvurur, böylece tema attribute'u değişince renkler yeniden derlemeye
+  gerek kalmadan güncellenir.
+*/
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-strong: var(--danger-strong);
+  --color-on-danger: var(--on-danger);
+
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-token: var(--radius);
+  --radius-token-sm: var(--radius-sm);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Bayt/hex verisi hizalı okunmalı — tarayıcı varsayılanı yeterli değil. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}

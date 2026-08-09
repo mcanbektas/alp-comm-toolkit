@@ -1,0 +1,99 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+// `matchLanguageTag` bilerek kullanılmıyor — bkz. detectInitialLanguage yorumu.
+import { DEFAULT_LANGUAGE, interpolate, resolveLanguage, translations } from '@/translations';
+import type { Language, TranslationKey } from '@/translations';
+
+/** localStorage anahtarı. Süit içindeki diğer SPA'larla çakışmaması için `alp-comm-` önekli. */
+export const LANGUAGE_STORAGE_KEY = 'alp-comm-lang';
+
+export interface LanguageContextValue {
+  t: (key: TranslationKey, vars?: Readonly<Record<string, string | number>>) => string;
+  lang: Language;
+  setLang: (next: Language) => void;
+}
+
+/**
+ * Varsayılan `null`: provider'sız kullanım "sessizce Türkçe göster" değil,
+ * gürültülü hata olmalı — yoksa ağaçtan düşmüş bir bileşen fark edilmez.
+ */
+const LanguageContext = createContext<LanguageContextValue | null>(null);
+
+/**
+ * localStorage private/lockdown modunda ERİŞİMDE BİLE atabilir (Safari'de
+ * `getItem` SecurityError verir), o yüzden okuma da yazma da try/catch içinde.
+ * Dil tercihi kritik veri değil; kaybolursa varsayılana düşmek doğru davranış.
+ */
+function readStoredLanguage(): Language | undefined {
+  try {
+    const raw = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return raw !== null && raw !== '' ? resolveLanguage(raw) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeStoredLanguage(lang: Language): void {
+  try {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  } catch {
+    // Kota dolu ya da depolama kapalı: tercih yalnız bu oturum boyunca yaşar.
+  }
+}
+
+/**
+ * İlk açılış dili. Sıra: kayıtlı tercih → varsayılan (tr).
+ *
+ * Tarayıcı dili BİLEREK pazarlık edilmiyor. Spec §4 "arayüz başlangıçta Türkçe"
+ * diyor; `navigator.languages` okunsaydı `en-US` bir tarayıcı uygulamayı İngilizce
+ * açardı ve bu kural sessizce çiğnenirdi. Tek istisna Türkçe'yi açıkça tercih eden
+ * tarayıcıdır — o zaten varsayılana düşüyor, yani ek koda gerek yok.
+ * Dil pazarlığı istenirse buradan tek fonksiyonla açılır.
+ */
+function detectInitialLanguage(): Language {
+  if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
+
+  const stored = readStoredLanguage();
+  if (stored !== undefined) return stored;
+
+  return DEFAULT_LANGUAGE;
+}
+
+export function LanguageProvider({ children }: { children: ReactNode }): ReactElement {
+  // Başlangıç değeri lazy: localStorage ve navigator okuması her render'da değil,
+  // yalnız ilk mount'ta yapılsın.
+  const [lang, setLangState] = useState<Language>(detectInitialLanguage);
+
+  // `<html lang>` yalnız süs değil: ekran okuyucunun sesletimi ve tarayıcının
+  // çeviri önerisi buna bakar.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const setLang = useCallback((next: Language): void => {
+    // Yazma yalnız AÇIK seçimde; tarayıcıdan tahmin edilen dil kalıcılaştırılmaz,
+    // yoksa kullanıcı hiç dokunmadan tercihi çakılı kalır.
+    writeStoredLanguage(next);
+    setLangState(next);
+  }, []);
+
+  const t = useCallback(
+    (key: TranslationKey, vars?: Readonly<Record<string, string | number>>): string =>
+      // `translations` ve sözlükler sonlu mapped type; anahtarın karşılığı
+      // derleyici tarafından garanti, çalışma zamanı fallback'i gereksiz.
+      interpolate(translations[lang][key], vars),
+    [lang],
+  );
+
+  const value = useMemo<LanguageContextValue>(() => ({ t, lang, setLang }), [t, lang, setLang]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+}
+
+export function useTranslation(): LanguageContextValue {
+  const context = useContext(LanguageContext);
+  if (context === null) {
+    throw new Error('useTranslation must be used inside a <LanguageProvider>.');
+  }
+  return context;
+}

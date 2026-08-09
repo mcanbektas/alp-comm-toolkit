@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: comm — typecheck + test + build
+    runs-on: ubuntu-latest
+    steps:
+      # Comm, tasarım token'larını @mcanbektas/design'dan `file:../alp-platform/design`
+      # yoluyla alıyor. Paket henüz GitHub Packages'a yayınlanmadığı için CI iki depoyu
+      # yan yana çıkarır. Yayınlandığı gün (Faz 4) ikinci checkout ve design adımı düşer,
+      # geriye sade bir `npm ci` kalır.
+      - uses: actions/checkout@v4
+        with:
+          path: alp-comm-toolkit
+      - uses: actions/checkout@v4
+        with:
+          repository: mcanbektas/alp-platform
+          path: alp-platform
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: |
+            alp-comm-toolkit/package-lock.json
+            alp-platform/design/package-lock.json
+
+      # Token CSS'i dist/ altında üretilir; comm'un `exports` üzerinden okuduğu yol orası.
+      - name: design paketini derle
+        run: npm ci && npm run build
+        working-directory: alp-platform/design
+
+      - run: npm ci
+        working-directory: alp-comm-toolkit
+
+      - run: npm run typecheck
+        working-directory: alp-comm-toolkit
+
+      - run: npm test -- --run
+        working-directory: alp-comm-toolkit
+
+      - run: npm run build
+        working-directory: alp-comm-toolkit
+
+      # jsdom CSS'i hiç değerlendirmez: birim testler boş bir sayfayı da yeşil gösterir.
+      # Duman testi uygulamanın gerçekten açıldığını doğrulayan tek adım.
+      - run: npx playwright install --with-deps chromium
+        working-directory: alp-comm-toolkit
+      - run: npm run test:e2e
+        working-directory: alp-comm-toolkit
