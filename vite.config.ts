@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 // Comm SPA süit içinde /comm altından servis edilir (Faz 4'te nginx path routing).
 // Geliştirmede kendi portunda koşar: PCB 3000'i tuttuğu için Comm 3001.
 export default defineConfig({
-  base: '/',
+  base: '/comm/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
