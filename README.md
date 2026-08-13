@@ -145,6 +145,61 @@ Fiziksel değer dönüşümü `Physical = Raw × Scale + CalibrationOffset`. Spe
 adı iki farklı şeyi anlatıyor — çerçevedeki bayt konumu ve kalibrasyon sabiti; kodda
 `byteOffset` ve `calibrationOffset` olarak ayrıldılar.
 
+## Protokol tanım biçimi (Protocol Definition Format)
+
+Kullanıcı tanımlı protokoller JSON şemasıyla anlatılır. Şema **veridir, kod
+değildir**: yorumlanır, derlenip çalıştırılmaz — spec §41 `eval` ve dinamik kod
+çalıştırmayı yasaklıyor. Alt panelde üretilen C/Python/TypeScript ayrıştırıcıları
+kullanıcının kopyalayacağı metinlerdir; uygulama onları asla çalıştırmaz.
+
+Asgari örnek (spec §9.6'nın kanonik şeması):
+
+```json
+{
+  "name": "ALP Sensor Protocol",
+  "version": "1.0",
+  "framing": { "type": "startEnd", "startBytes": [170], "endBytes": [85], "maximumFrameLength": 256 },
+  "fields": [
+    { "id": "address", "name": "Device Address", "type": "uint8", "offset": 1, "length": 1 },
+    { "id": "payloadLength", "name": "Payload Length", "type": "uint8", "offset": 3, "length": 1 },
+    { "id": "payload", "name": "Payload", "type": "rawBytes", "offset": 4, "lengthFrom": "payloadLength" },
+    { "id": "checksum", "name": "Checksum", "type": "checksum", "algorithm": "xor8",
+      "coverage": { "startField": "address", "endField": "payload" } }
+  ]
+}
+```
+
+**Alan tipleri (33).** `uint8…int64`, `float16/32/64`, `boolean`, `bitField`,
+`enum`, `ascii`, `utf8`, `bcd`, `unixTimestamp`, `dateTime`, `rawBytes`,
+`array`, `structure`, `checksum`, `crc`, `padding`, `reserved`, `delimiter`,
+`length`, `sequenceCounter`, `address`, `command`.
+Spec §9.1'in başlığı "32 tip" diyor ama listesi 33 ad taşıyor; liste esas alındı.
+
+**Kurallar.**
+
+- `offset` **bayt konumudur**. Fiziksel değer formülündeki kalibrasyon sabiti
+  ayrı bir anahtardır: `calibrationOffset`. Spec ikisini de "Offset" diye
+  anıyor; aynı adı iki anlama vermek sessiz hata kaynağı olurdu.
+- `offset` verilmezse alan, önceki alanın bittiği yerden başlar. Dinamik
+  uzunluklu bir alandan sonra gelen alanın konumu zaten önceden bilinemez.
+- `lengthFrom` başka bir alanın **değerinden** uzunluk alır. Referans **geriye**
+  bakmak zorundadır; çevrimler ve ileri referanslar yüklemede reddedilir
+  (`Protocol definition contains circular length references`).
+- `checksum`/`crc` alanlarının uzunluğu **algoritmadan türetilir**, ayrıca
+  yazılmaz. Kapsam bayt aralığıyla değil **alan kimliği aralığıyla** verilir.
+- Fiziksel değer: `ham × scale + calibrationOffset`.
+
+**Spec dışı genişletmeler** (§9.1 yetenekleri adıyla sayıyor ama §9.6 örneğinde
+söz dizimi yok): `fields` (iç içe yapı), `repeatCount` (sabit sayı ya da
+`{ "fromField": "…" }`), `condition` (`{ "field": "…", "equals": n }`),
+`bitOffset`/`bitLength`/`bitOrder`, `defaultValue`, `color`.
+
+**Bilinen spec tutarsızlığı.** §10'un Packet Builder örneği
+`AA 05 20 02 02 4B 6C 55` yazıyor ama `6C` hiçbir makul hesapla çıkmıyor
+(XOR8 = `6E`, start dahil = `C4`, SUM8 = `74`). §9.6 şeması ve §43 fixture'ı
+kendi içinde tutarlı; motor doğru olanı üretir, ayrıntı
+`src/protocol-core/schemas/specFixture.ts` içinde belgelendi.
+
 ## Web Serial kullanımı
 
 Canlı monitör `/live-monitor` adresindedir ve iki kaynakla çalışır.

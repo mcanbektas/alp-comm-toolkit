@@ -10,31 +10,25 @@
  * yapılandırma mümkün olmasın diye.
  */
 
-import { crc } from '../../protocol-core/checksums/crcEngine';
-import { CRC_CATALOGUE, type CrcAlgorithmId } from '../../protocol-core/checksums/crcCatalogue';
-import { sum8Checksum, xor8Checksum } from '../../protocol-core/checksums/simpleChecksums';
-import { lrcChecksum } from '../../protocol-core/checksums/lrc';
-import { bytesToNumber } from '../../protocol-core/buffers/endianness';
+import {
+  CHECKSUM_ALGORITHMS,
+  checksumWidthBytes,
+  computeChecksum,
+  isSimpleChecksumAlgorithm,
+  readStoredChecksum,
+  type ChecksumAlgorithm,
+} from '../../protocol-core/checksums/algorithmCatalogue';
 import type { FrameValidity } from '../../protocol-core/statistics/commStatistics';
 
-/** Ekrandaki seçim listesi — katalogun tamamı değil, seri hatta gerçekten görülenler. */
-export const FRAME_CHECKSUM_ALGORITHMS = [
-  'none',
-  'xor8',
-  'sum8',
-  'lrc',
-  'CRC8',
-  'CRC8_MAXIM',
-  'CRC16_MODBUS',
-  'CRC16_CCITT_FALSE',
-  'CRC16_XMODEM',
-  'CRC16_X25',
-  'CRC32',
-] as const;
-
-export type FrameChecksumAlgorithm = (typeof FRAME_CHECKSUM_ALGORITHMS)[number];
-
-const SIMPLE_ALGORITHMS = new Set<FrameChecksumAlgorithm>(['xor8', 'sum8', 'lrc']);
+/**
+ * Algoritma listesi ve hesabı `protocol-core/checksums/algorithmCatalogue`de
+ * yaşar: Protocol Studio ve Packet Builder de aynı listeyi kullanıyor, kopya
+ * tutmak üçünün sessizce ayrışması demekti. Buradaki adlar geriye dönük
+ * uyumluluk için korunuyor.
+ */
+export const FRAME_CHECKSUM_ALGORITHMS = CHECKSUM_ALGORITHMS;
+export type FrameChecksumAlgorithm = ChecksumAlgorithm;
+export { checksumWidthBytes };
 
 export interface FrameValidationConfig {
   readonly algorithm: FrameChecksumAlgorithm;
@@ -60,33 +54,6 @@ export const SIMULATED_FRAME_VALIDATION: FrameValidationConfig = {
   trailingBytesAfterChecksum: 1,
   skipLeadingBytes: 0,
 };
-
-export function checksumWidthBytes(algorithm: FrameChecksumAlgorithm): number {
-  if (algorithm === 'none') {
-    return 0;
-  }
-  if (SIMPLE_ALGORITHMS.has(algorithm)) {
-    return 1;
-  }
-  const params = CRC_CATALOGUE[algorithm as CrcAlgorithmId];
-  // 4 bitlik CRC de bir bayt kaplar; genişlik yukarı yuvarlanır.
-  return Math.ceil(params.width / 8);
-}
-
-function computeChecksum(bytes: Uint8Array, algorithm: FrameChecksumAlgorithm): bigint | undefined {
-  switch (algorithm) {
-    case 'none':
-      return undefined;
-    case 'xor8':
-      return BigInt(xor8Checksum(bytes));
-    case 'sum8':
-      return BigInt(sum8Checksum(bytes));
-    case 'lrc':
-      return BigInt(lrcChecksum(bytes));
-    default:
-      return crc(bytes, CRC_CATALOGUE[algorithm]);
-  }
-}
 
 /**
  * Çerçeveyi doğrular.
@@ -114,12 +81,11 @@ export function validateFrame(bytes: Uint8Array, config: FrameValidationConfig):
     return 'unchecked';
   }
 
-  const storedBytes = bytes.subarray(checksumStart, checksumEnd);
-  const stored = BigInt(bytesToNumber(storedBytes, config.endianness));
+  const stored = readStoredChecksum(bytes.subarray(checksumStart, checksumEnd), config.endianness);
 
   if (stored === computed) {
     return 'valid';
   }
   // Spec §39 CRC hatalarını basit checksum hatalarından ayrı sayıyor.
-  return SIMPLE_ALGORITHMS.has(config.algorithm) ? 'checksum-error' : 'crc-error';
+  return isSimpleChecksumAlgorithm(config.algorithm) ? 'checksum-error' : 'crc-error';
 }
