@@ -5,3 +5,4 @@ export * from './lrc';
 export * from './nmeaChecksum';
 export * from './crcEngine';
 export * from './crcCatalogue';
+export * from './checksumFinder';

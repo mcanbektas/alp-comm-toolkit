@@ -2,6 +2,8 @@ import type { ReactElement } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { AppShell } from '@/components/layout/AppShell';
+import { CalculatorPage } from '@/pages/CalculatorPage';
+import { CalculatorsPage } from '@/pages/CalculatorsPage';
 import { DomainPage } from '@/pages/DomainPage';
 import { FamilyPage } from '@/pages/FamilyPage';
 import { HomePage } from '@/pages/HomePage';
@@ -21,6 +23,8 @@ export function AppRoutes(): ReactElement {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<HomePage />} />
+        <Route path="calculators" element={<CalculatorsPage />} />
+        <Route path="calculators/:toolId" element={<CalculatorPage />} />
         <Route path=":domainId" element={<DomainPage />} />
         <Route path=":domainId/:familyId" element={<FamilyPage />} />
         <Route path=":domainId/:familyId/:protocolId" element={<ProtocolPage />} />
