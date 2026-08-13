@@ -122,7 +122,7 @@ kullanılır: CRC (`123456789` → `0xF4` / `0x29B1` / `0x4B37` / `0xCBF43926`),
    yap.
 
 Protokolün alan kırılımları, formülleri ve örnek çerçeveleri
-`~/Desktop/commtoolkit/ozet/` altındaki özet dosyalarındadır. Önce onu oku.
+`docs/spec/ozet/` altındaki özet dosyalarındadır. Önce onu oku.
 
 ## Protokol tanım biçimi
 

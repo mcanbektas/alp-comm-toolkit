@@ -14,10 +14,10 @@ burada **değil**, `alp-platform` deposundadır.
 | **alp-platform** | `api/` (ASP.NET Core 9), `deploy/`, `design/` (tasarım token'ları + `@mcanbektas/design`) |
 | **alp-pcb-toolkit** | PCB SPA'sı |
 
-Kaynak spesifikasyon `~/Desktop/commtoolkit/` altındadır: 43 bin satırlık ana doküman ve
-11 parçalı özeti (`ozet/`). **Protokol ekleyecek ya da bir motoru yazacaksan önce ilgili
-özet dosyasını oku** — alan kırılımları, formüller ve doğrulama fixture'ları oradadır.
-Faz planı: `~/Desktop/commtoolkit/plan-fazlar.md`.
+Kaynak spesifikasyon bu deponun `docs/spec/` klasöründedir: 43 bin satırlık ana doküman ve
+12 parçalı özeti (`docs/spec/ozet/`). **Protokol ekleyecek ya da bir motoru yazacaksan önce
+ilgili özet dosyasını oku** — alan kırılımları, formüller ve doğrulama fixture'ları oradadır.
+Faz planı: `docs/plan-fazlar.md`.
 
 ## Komutlar
 
@@ -35,7 +35,7 @@ açılır ama kimlik uçları sessizce 404 döner.
 
 **Tasarım token'ları `@mcanbektas/design`dan gelir** ve paket henüz yayınlanmadığı için
 `file:../alp-platform/design` ile bağlıdır. İki depo **kardeş dizin** olmak zorunda
-(`~/Projects/alp-comm-toolkit` ve `~/Projects/alp-platform`). Token'ları değiştirdiysen
+(`~/Desktop/alp-comm-toolkit` ve `~/Desktop/alp-platform`). Token'ları değiştirdiysen
 platform tarafında `npm run build` koşmadan burada göremezsin — `dist/` okunuyor,
 kaynak değil.
 
