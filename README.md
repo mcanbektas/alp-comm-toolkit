@@ -145,6 +145,43 @@ Fiziksel değer dönüşümü `Physical = Raw × Scale + CalibrationOffset`. Spe
 adı iki farklı şeyi anlatıyor — çerçevedeki bayt konumu ve kalibrasyon sabiti; kodda
 `byteOffset` ve `calibrationOffset` olarak ayrıldılar.
 
+## Web Serial kullanımı
+
+Canlı monitör `/live-monitor` adresindedir ve iki kaynakla çalışır.
+
+**Simülasyon (donanım gerekmez).** Varsayılan kaynak. Spec §8.3'ün kanonik
+çerçevesini (`AA 05 10 06 …`) üretir; parçalı chunk, bozuk checksum ve çöp bayt
+da üretir, yani çerçeveleme ve hata kurtarma gerçekten sınanır. Uçtan uca
+tarayıcı testleri de bu kaynağı kullanır.
+
+**Web Serial (gerçek cihaz).** Gereksinimler:
+
+- Chromium tabanlı tarayıcı (Chrome, Edge, Opera). Firefox ve Safari Web Serial
+  desteklemez — bu durumda düğme kapalı kalır ve ekran sebebini yazar.
+- **Güvenli bağlam**: `https://` ya da `http://localhost`. Ağdaki bir makineye
+  düz `http` ile bağlanırsanız `navigator.serial` tanımsızdır.
+- Portu tarayıcı seçtirir; **kullanıcı jesti** olmadan açılamaz (spec §41).
+
+```
+Kaynak: Web Serial → Baud/veri biti/parity/akış denetimi → Bağlan → port seç
+```
+
+Ayarlar spec §8.1 listesidir: baud (300…2 000 000 ve serbest giriş), veri biti
+(7/8), stop biti (1/2), parity, akış denetimi, arabellek boyutu.
+
+Çerçeveleme hazır ayarlardan seçilir: simülasyon telemetrisi (uzunluk alanı),
+satır sonu (CR LF), Modbus RTU (sessiz aralık + CRC16/MODBUS), SLIP, COBS.
+Doğrulama algoritması ayara bağlıdır; genişliği algoritmadan türetilir.
+
+Kayıtlar CSV, JSON ve TXT olarak indirilebilir. **Dosya tarayıcıda üretilir,
+hiçbir bayt sunucuya gitmez.**
+
+### Yerel bridge kullanımı
+
+Henüz yok. Web Serial'i olmayan tarayıcılar ve TCP/UDP kaynakları için yerel
+bir agent (WebSocket köprüsü) sonraki fazlarda gelecek; `src/connection/`
+altındaki `websocket/` klasörü aynı `ByteSource` sözleşmesini gerçekleyecek.
+
 ## Güvenlik ve gizlilik
 
 - Seri port mesajları, CAN logları, ağ paketleri, protokol tanımları ve şifreleme
@@ -160,10 +197,10 @@ adı iki farklı şeyi anlatıyor — çerçevedeki bayt konumu ve kalibrasyon s
 |---|---|---|
 | 2 | İskelet: katalog, protocol-core, i18n, ByteViewer, routing | ✅ |
 | 3 | Platform tarafında `Comm` API modülü ve `comm` DB şeması | sırada |
-| 5 | Byte utils, conversion engine, CRC engine, timing hesapları | |
-| 6 | Stream buffer, framing engine (15 yöntem), parser state machine, Worker | |
-| 7 | Custom Protocol Studio + Packet Builder, kod üreticiler | |
-| 8 | Live Serial Monitor: Web Serial, ring buffer, grafik, istatistik | |
+| 5 | Byte utils, conversion engine, CRC engine, timing hesapları | ✅ |
+| 6 | Stream buffer, framing engine (15 yöntem), parser state machine, Worker | ✅ |
+| 8 | Live Serial Monitor: Web Serial, ring buffer, grafik, istatistik | ✅ |
+| 7 | Custom Protocol Studio + Packet Builder, kod üreticiler | atlandı, geri dönülecek |
 | 9 | İlk protokoller: Modbus, NMEA 0183, CAN, DBC, J1939 | |
 | 10+ | Kalan protokol dalgaları | |
 

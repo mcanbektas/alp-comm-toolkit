@@ -37,7 +37,10 @@ test('token rengi uygulanmış — sayfa çıplak beyaz değil', async ({ page }
 });
 
 test('protokol sayfasına derin bağlantı çalışır ve ByteViewer çizer', async ({ page }) => {
-  await page.goto('/interfaces-framing/framing-stream-protocols/custom-binary-protocol?tab=decode');
+  // `/comm/` öneki ZORUNLU: `vite.config.ts` base'i `/comm/` yapıyor, preview
+  // sunucusu kök altındaki derin yolları SPA'ya düşürmeden 404 veriyor. Önek
+  // olmadan test uygulamayı hiç yüklemeden düşer.
+  await page.goto('/comm/interfaces-framing/framing-stream-protocols/custom-binary-protocol?tab=decode');
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Custom Binary Protocol');
   // ByteViewer örnek çerçeveyi (AA 05 10 03 34 12 7F 4F 55) HEX olarak basmalı.
@@ -45,7 +48,7 @@ test('protokol sayfasına derin bağlantı çalışır ve ByteViewer çizer', as
 });
 
 test('bilinmeyen rota 404 sayfası basar, patlamaz', async ({ page }) => {
-  await page.goto('/boyle-bir-alan-yok');
+  await page.goto('/comm/boyle-bir-alan-yok');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('link').first()).toBeVisible();
 });

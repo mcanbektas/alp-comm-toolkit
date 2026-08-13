@@ -6,3 +6,4 @@ export * from './encoding';
 export * from './timing';
 export * from './framing';
 export * from './streams';
+export * from './statistics';

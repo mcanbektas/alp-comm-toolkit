@@ -46,6 +46,47 @@ describe('streamParser.worker — createWorkerMessageHandler', () => {
     if (errorMessages[0]?.type === 'error') expect(errorMessages[0].error.code).toBe('truncated-frame');
   });
 
+  it('"error" mesajı çerçevelerle AYNI zaman tabanında damgalanır', () => {
+    const { posted, handle } = setUp();
+    handle({ type: 'init', config: { method: 'cobs' }, maxFrameLength: 1024 });
+
+    const before = performance.timeOrigin + performance.now();
+    handle({ type: 'push', chunk: Uint8Array.from([0x03, 0x11, 0x00]) });
+    const after = performance.timeOrigin + performance.now();
+
+    const [errorMessage] = posted.filter((message) => message.type === 'error');
+    expect(errorMessage?.type).toBe('error');
+    if (errorMessage?.type === 'error') {
+      // Damga Worker'da atılmalı: ana thread toplu boşaltma yaparsa hata,
+      // kendisinden sonraki çerçevelerden geç görünür ve liste zamanda geri gider.
+      expect(errorMessage.timestamp).toBeGreaterThanOrEqual(before);
+      expect(errorMessage.timestamp).toBeLessThanOrEqual(after);
+    }
+  });
+
+  it('hata ve çerçeve damgaları üretim sırasını korur', () => {
+    const { posted, handle } = setUp();
+    handle({ type: 'init', config: { method: 'slip' }, maxFrameLength: 1024 });
+    // Önce sağlam bir çerçeve, sonra bozuk kaçış dizisi.
+    handle({ type: 'push', chunk: Uint8Array.from([0xc0, 0x01, 0x02, 0xc0]) });
+    handle({ type: 'push', chunk: Uint8Array.from([0xdb, 0x99, 0xc0]) });
+
+    const stamps = posted
+      .map((message) =>
+        message.type === 'frame'
+          ? message.frame.timestamp
+          : message.type === 'error'
+            ? message.timestamp
+            : undefined,
+      )
+      .filter((value): value is number => value !== undefined);
+
+    expect(stamps.length).toBeGreaterThan(1);
+    for (let index = 1; index < stamps.length; index += 1) {
+      expect(stamps[index] ?? 0).toBeGreaterThanOrEqual(stamps[index - 1] ?? 0);
+    }
+  });
+
   it('cancel sonrası init dışındaki mesajlar yok sayılır', () => {
     const { posted, handle } = setUp();
     handle({ type: 'init', config: { method: 'slip' }, maxFrameLength: 1024 });

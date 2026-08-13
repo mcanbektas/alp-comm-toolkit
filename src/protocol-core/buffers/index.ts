@@ -5,6 +5,7 @@
  * içinde en alt seviyedir ve hiçbir protokole özgü bilgi barındırmaz.
  */
 export * from './representation';
+export * from './ringBuffer';
 export * from './endianness';
 export * from './bitOps';
 export * from './physicalValue';

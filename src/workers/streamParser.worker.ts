@@ -61,6 +61,16 @@ export interface WorkerErrorMessage {
   readonly type: 'error';
   readonly error: FramingError;
   readonly recoverable: boolean;
+  /**
+   * Hatanın SAPTANDIĞI an, epoch ms — `RawFrame.timestamp` ile aynı taban
+   * (`performance.timeOrigin + performance.now()`).
+   *
+   * Neden Worker damgalıyor: ana thread mesajları kareye bir kez toplu
+   * boşaltıyor. Damga orada atılsaydı hata, kendisinden SONRA ayrıştırılmış
+   * çerçevelerden daha geç görünürdü ve canlı listede zaman damgaları geri
+   * giderdi — tam da sebep-sonuç izlemenin dayandığı sıra bozulurdu.
+   */
+  readonly timestamp: number;
 }
 export interface WorkerStateMessage {
   readonly type: 'state';
@@ -95,7 +105,14 @@ export function createWorkerMessageHandler(post: PostMessageFn): (message: Worke
           ...(message.channel !== undefined ? { channel: message.channel } : {}),
         });
         buffer.onFrame((frame) => post({ type: 'frame', frame }));
-        buffer.onError((error, recoverable) => post({ type: 'error', error, recoverable }));
+        buffer.onError((error, recoverable) =>
+          post({
+            type: 'error',
+            error,
+            recoverable,
+            timestamp: performance.timeOrigin + performance.now(),
+          }),
+        );
         buffer.onStateChange((state) => post({ type: 'state', state }));
         return;
       }
