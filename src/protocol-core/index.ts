@@ -4,3 +4,5 @@ export * from './buffers';
 export * from './checksums';
 export * from './encoding';
 export * from './timing';
+export * from './framing';
+export * from './streams';
