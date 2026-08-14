@@ -1431,6 +1431,72 @@ export const en: TranslationDictionary = {
   'protocol.obd.example.unknownMode.description':
     'The mode is not in the table: the field is marked invalid but the frame is still shown.',
 
+  // --- CANopen ---
+  'protocol.canopen.error.frameTooShort':
+    'The record is not long enough to carry the CAN identifier and length fields.',
+  'protocol.canopen.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.canopen.error.aborted': 'Parsing was cancelled.',
+  'protocol.canopen.error.extendedNotSupported':
+    'CANopen’s Predefined Connection Set only defines base (11-bit) identifiers; this frame is extended.',
+  'protocol.canopen.error.unknownFunctionCode':
+    'The function code does not match any of CiA 301’s fifteen assigned values (0xD/0xF are reserved).',
+  'protocol.canopen.warning.remoteFrame':
+    'Remote flag is set; the Predefined Connection Set does not use remote frames.',
+  'protocol.canopen.warning.truncatedPayload':
+    'The declared data length is not present in the record; the available bytes are shown.',
+  'protocol.canopen.warning.pdoNeedsMapping':
+    'The PDO data is shown raw: which byte maps to which Object Dictionary entry depends on the PDO mapping/EDS and is not guessed here.',
+  'protocol.canopen.warning.emcyNeedsDatabase':
+    'The Error Code is shown raw: the full error code table is device-profile-specific and the spec does not provide it.',
+  'protocol.canopen.warning.sdoDataNeedsSchema':
+    'The data bytes are shown raw: their type depends on the Object Dictionary entry and is unknown without an EDS.',
+  'protocol.canopen.warning.sdoAbortNeedsTable':
+    'The abort code is shown raw: the full code table lives in CiA 301’s normative body and the spec does not provide it.',
+  'protocol.canopen.warning.unknownNmtState':
+    'The byte does not match any of CiA 301’s four NMT states (Boot-up/Stopped/Operational/Pre-operational).',
+  'protocol.canopen.summary.nmt': 'NMT network management command',
+  'protocol.canopen.summary.sync': 'SYNC synchronization message',
+  'protocol.canopen.summary.emcy': 'EMCY emergency message',
+  'protocol.canopen.summary.time': 'TIME message',
+  'protocol.canopen.summary.pdo1Tx': 'PDO1 (Tx) process data',
+  'protocol.canopen.summary.pdo1Rx': 'PDO1 (Rx) process data',
+  'protocol.canopen.summary.pdo2Tx': 'PDO2 (Tx) process data',
+  'protocol.canopen.summary.pdo2Rx': 'PDO2 (Rx) process data',
+  'protocol.canopen.summary.pdo3Tx': 'PDO3 (Tx) process data',
+  'protocol.canopen.summary.pdo3Rx': 'PDO3 (Rx) process data',
+  'protocol.canopen.summary.pdo4Tx': 'PDO4 (Tx) process data',
+  'protocol.canopen.summary.pdo4Rx': 'PDO4 (Rx) process data',
+  'protocol.canopen.summary.sdoTx': 'SDO (Tx) service request/response',
+  'protocol.canopen.summary.sdoRx': 'SDO (Rx) service request/response',
+  'protocol.canopen.summary.heartbeat': 'NMT Heartbeat',
+  'protocol.canopen.summary.unknown': 'Unrecognized CANopen message',
+  'protocol.canopen.documentation.summary':
+    'CiA 301 Predefined Connection Set: decodes the message type (NMT/SYNC/EMCY/PDOn/SDO/Heartbeat) from the COB-ID’s function code + Node-ID split. The payload’s meaning depends on the EDS/Object Dictionary and is left raw — the same boundary as J1939 leaving SPN to the DBC.',
+  'protocol.canopen.example.nmtStartRemoteNode.name': 'NMT: Start Remote Node',
+  'protocol.canopen.example.nmtStartRemoteNode.description':
+    'COB-ID 0x000, command 0x01, target node 0x00 (broadcast). The command byte’s meaning stays raw.',
+  'protocol.canopen.example.sync.name': 'SYNC',
+  'protocol.canopen.example.sync.description':
+    'COB-ID 0x080, function code 1 and node 0 → SYNC; no payload expected.',
+  'protocol.canopen.example.emcyNode5.name': 'EMCY (node 5)',
+  'protocol.canopen.example.emcyNode5.description':
+    'COB-ID 0x085 = 0x080 + 5. Error Code/Register are split into fields, meaning stays raw.',
+  'protocol.canopen.example.pdoStatuswordVelocity.name': 'PDO1 Tx (spec summary §04:102)',
+  'protocol.canopen.example.pdoStatuswordVelocity.description':
+    'CAN ID 0x181, node 1. The spec’s own example decodes this into Statusword/Velocity, but that needs mapping/EDS — the data stays raw here.',
+  'protocol.canopen.example.sdoWriteControlword.name': 'SDO write (spec summary §03:87)',
+  'protocol.canopen.example.sdoWriteControlword.description':
+    'Index 6040 Sub 00, expedited write, value 000F — the spec’s own example.',
+  'protocol.canopen.example.sdoAbort.name': 'SDO Abort',
+  'protocol.canopen.example.sdoAbort.description':
+    'Command byte 0x80: Abort Transfer. The abort code is shown raw, not bound to a table.',
+  'protocol.canopen.example.heartbeatOperational.name': 'Heartbeat (Operational)',
+  'protocol.canopen.example.heartbeatOperational.description':
+    'COB-ID 0x702 = 0x700 + 2, state byte 0x05 → Operational.',
+  'protocol.canopen.example.reservedFunctionCodeRejected.name': 'Reserved function code',
+  'protocol.canopen.example.reservedFunctionCodeRejected.description':
+    'Function code 0xD: not one of CiA 301’s fifteen assigned values, an error is reported.',
+
   // --- DBC definition file ---
   'definition.dbc.action.import': 'Import DBC file',
   'definition.dbc.action.export': 'Export as DBC',

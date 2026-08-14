@@ -423,7 +423,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'CiA standardized CAN application layer addressing device data through a 16-bit index / 8-bit sub-index object dictionary served by PDO, SDO, NMT and EMCY.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'canopen',
           tabs: [
             'overview',
             'live',

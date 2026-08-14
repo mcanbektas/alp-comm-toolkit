@@ -73,4 +73,7 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'obd-ii', () =>
     import('./automotive/obd/obd').then((module) => module.obdPlugin),
   );
+  registerOnce(registry, 'canopen', () =>
+    import('./industrial/canopen/canopen').then((module) => module.canopenPlugin),
+  );
 }

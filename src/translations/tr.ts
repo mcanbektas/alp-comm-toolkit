@@ -1433,6 +1433,72 @@ export const tr = {
   'protocol.obd.example.unknownMode.description':
     'Mod tabloda yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
 
+  // --- CANopen ---
+  'protocol.canopen.error.frameTooShort':
+    'Kayıt CAN kimliği ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.canopen.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.canopen.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.canopen.error.extendedNotSupported':
+    'CANopen’ın Predefined Connection Set’i yalnız base (11-bit) identifier tanımlar; bu çerçeve extended.',
+  'protocol.canopen.error.unknownFunctionCode':
+    'Function code CiA 301’in on beş atanmış değerinden hiçbirine uymuyor (0xD/0xF ayrılmış).',
+  'protocol.canopen.warning.remoteFrame':
+    'Remote bayrağı set; Predefined Connection Set remote çerçeve kullanmaz.',
+  'protocol.canopen.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.canopen.warning.pdoNeedsMapping':
+    'PDO verisi ham gösteriliyor: hangi baytın hangi Object Dictionary girdisine karşılık geldiği PDO mapping’e/EDS’e bağlıdır, burada tahmin edilmez.',
+  'protocol.canopen.warning.emcyNeedsDatabase':
+    'Error Code ham gösteriliyor: tam hata kodu tablosu cihaza özgü profildendir, spec’te yok.',
+  'protocol.canopen.warning.sdoDataNeedsSchema':
+    'Veri baytları ham gösteriliyor: tipi Object Dictionary girdisine bağlıdır, EDS olmadan bilinmez.',
+  'protocol.canopen.warning.sdoAbortNeedsTable':
+    'Abort kodu ham gösteriliyor: tam kod tablosu CiA 301’in normatif gövdesindedir, spec vermiyor.',
+  'protocol.canopen.warning.unknownNmtState':
+    'Bayt CiA 301’in dört NMT durumundan (Boot-up/Stopped/Operational/Pre-operational) hiçbirine uymuyor.',
+  'protocol.canopen.summary.nmt': 'NMT ağ yönetimi komutu',
+  'protocol.canopen.summary.sync': 'SYNC senkronizasyon mesajı',
+  'protocol.canopen.summary.emcy': 'EMCY acil durum mesajı',
+  'protocol.canopen.summary.time': 'TIME zaman mesajı',
+  'protocol.canopen.summary.pdo1Tx': 'PDO1 (Tx) süreç verisi',
+  'protocol.canopen.summary.pdo1Rx': 'PDO1 (Rx) süreç verisi',
+  'protocol.canopen.summary.pdo2Tx': 'PDO2 (Tx) süreç verisi',
+  'protocol.canopen.summary.pdo2Rx': 'PDO2 (Rx) süreç verisi',
+  'protocol.canopen.summary.pdo3Tx': 'PDO3 (Tx) süreç verisi',
+  'protocol.canopen.summary.pdo3Rx': 'PDO3 (Rx) süreç verisi',
+  'protocol.canopen.summary.pdo4Tx': 'PDO4 (Tx) süreç verisi',
+  'protocol.canopen.summary.pdo4Rx': 'PDO4 (Rx) süreç verisi',
+  'protocol.canopen.summary.sdoTx': 'SDO (Tx) servis isteği/yanıtı',
+  'protocol.canopen.summary.sdoRx': 'SDO (Rx) servis isteği/yanıtı',
+  'protocol.canopen.summary.heartbeat': 'NMT Heartbeat',
+  'protocol.canopen.summary.unknown': 'Tanınmayan CANopen mesajı',
+  'protocol.canopen.documentation.summary':
+    'CiA 301 Predefined Connection Set: COB-ID’nin function code + Node-ID kırılımından mesaj tipini (NMT/SYNC/EMCY/PDOn/SDO/Heartbeat) çözer. Payload’ın anlamı EDS/Object Dictionary’ye bağlı olduğu için ham kalır — J1939’un SPN’i DBC’ye bırakmasıyla aynı sınır.',
+  'protocol.canopen.example.nmtStartRemoteNode.name': 'NMT: Start Remote Node',
+  'protocol.canopen.example.nmtStartRemoteNode.description':
+    'COB-ID 0x000, komut 0x01, hedef node 0x00 (yayın). Komut baytının anlamı ham kalır.',
+  'protocol.canopen.example.sync.name': 'SYNC',
+  'protocol.canopen.example.sync.description':
+    'COB-ID 0x080, function code 1 ve node 0 → SYNC; payload beklenmez.',
+  'protocol.canopen.example.emcyNode5.name': 'EMCY (node 5)',
+  'protocol.canopen.example.emcyNode5.description':
+    'COB-ID 0x085 = 0x080 + 5. Error Code/Register alanlara ayrılır, anlamı ham kalır.',
+  'protocol.canopen.example.pdoStatuswordVelocity.name': 'PDO1 Tx (spec özet 04:102)',
+  'protocol.canopen.example.pdoStatuswordVelocity.description':
+    'CAN ID 0x181, node 1. Spec’in kendi örneği Statusword/Velocity’e çözüyor ama bu, mapping/EDS ister — burada veri ham kalır.',
+  'protocol.canopen.example.sdoWriteControlword.name': 'SDO yazma (spec özet 03:87)',
+  'protocol.canopen.example.sdoWriteControlword.description':
+    'Index 6040 Sub 00, expedited yazma, değer 000F — spec’in verdiği örnek.',
+  'protocol.canopen.example.sdoAbort.name': 'SDO Abort',
+  'protocol.canopen.example.sdoAbort.description':
+    'Komut baytı 0x80: Abort Transfer. Abort kodu ham gösterilir, tabloya bağlanmaz.',
+  'protocol.canopen.example.heartbeatOperational.name': 'Heartbeat (Operational)',
+  'protocol.canopen.example.heartbeatOperational.description':
+    'COB-ID 0x702 = 0x700 + 2, durum baytı 0x05 → Operational.',
+  'protocol.canopen.example.reservedFunctionCodeRejected.name': 'Ayrılmış function code',
+  'protocol.canopen.example.reservedFunctionCodeRejected.description':
+    'Function code 0xD: CiA 301’in on beş atanmış değerinden biri değil, hata basılır.',
+
   // --- DBC tanım dosyası ---
   'definition.dbc.action.import': 'DBC dosyası içe aktar',
   'definition.dbc.action.export': 'DBC olarak dışa aktar',
