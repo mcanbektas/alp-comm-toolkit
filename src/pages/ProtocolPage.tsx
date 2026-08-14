@@ -73,6 +73,15 @@ const DecodePanel = lazy(async () => {
 });
 
 /**
+ * DBC paneli de TEMBEL: tanım dosyası motoru yalnız CAN ailesinin `definitions`
+ * sekmesinde gerekiyor, 172 protokolün açılış paketine giremez.
+ */
+const DbcPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/DbcPanel');
+  return { default: module.DbcPanel };
+});
+
+/**
  * Spec §43'ün custom binary protocol fixture'ı: `AA 05 10 03 34 12 7F 4F 55`.
  * YALNIZ eklentisi olmayan protokoller için geçici örnek — motoru olan protokol
  * bu sabiti hiç görmez, `DecodePanel` gerçek parser'ın çıktısını basar.
@@ -214,6 +223,14 @@ export function ProtocolPage(): ReactElement {
   // Rozet de aynı zincirden gelir: alias sayfası çalışan bir çözümleyicinin
   // üstünde "Planlandı" yazmamalı.
   const decodeStatus = resolveStatus(protocol);
+  /**
+   * DBC paneli, kaydın DBC'yi tanım biçimi olarak SAYDIĞI sayfalarda açılır.
+   * `pluginId` ile ilgisi yoktur: DBC bir protokol değil tanım dosyasıdır ve
+   * kaydın kendi `definitions` listesinden gelir (alias zincirine inilmez —
+   * hangi tanım biçimlerinin gösterileceği sayfanın kendi verisidir).
+   */
+  const showsDbcPanel =
+    activeTab === 'definitions' && protocol.definitions?.includes('dbc') === true;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
@@ -342,6 +359,10 @@ export function ProtocolPage(): ReactElement {
             {activeTab === 'decode' && decodePluginId !== null ? (
               <Suspense fallback={<DecodeFallback />}>
                 <DecodePanel pluginId={decodePluginId} />
+              </Suspense>
+            ) : showsDbcPanel ? (
+              <Suspense fallback={<DecodeFallback />}>
+                <DbcPanel />
               </Suspense>
             ) : (
               <>

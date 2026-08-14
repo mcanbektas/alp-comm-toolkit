@@ -1318,4 +1318,49 @@ export const en: TranslationDictionary = {
   'protocol.j1939.example.baseFrameRejected.name': 'Base frame (cannot be decoded)',
   'protocol.j1939.example.baseFrameRejected.description':
     'A frame carrying an 11-bit identifier: an error is reported but the frame is still shown field by field.',
+
+  // --- DBC definition file ---
+  'definition.dbc.action.import': 'Import DBC file',
+  'definition.dbc.action.export': 'Export as DBC',
+  'definition.dbc.sampleNotice':
+    'Showing a sample definition. You can import your own DBC file; it never leaves your device.',
+  'definition.dbc.version': 'Version',
+  'definition.dbc.messageCount': 'Message count',
+  'definition.dbc.nodes': 'Nodes',
+  'definition.dbc.line': 'Line',
+  'definition.dbc.message.label': 'Message',
+  'definition.dbc.sampleHex.label': 'Sample frame bytes (HEX)',
+  'definition.dbc.table.signals': 'Signal definitions',
+  'definition.dbc.table.decoded': 'Decoded signals',
+  'definition.dbc.column.signal': 'Signal',
+  'definition.dbc.column.start': 'Start bit',
+  'definition.dbc.column.length': 'Bit length',
+  'definition.dbc.column.byteOrder': 'Byte order',
+  'definition.dbc.column.signed': 'Signed',
+  'definition.dbc.column.factorOffset': 'Factor / offset',
+  'definition.dbc.column.range': 'Range',
+  'definition.dbc.column.unit': 'Unit',
+  'definition.dbc.column.multiplex': 'Multiplex',
+  'definition.dbc.column.label': 'Label',
+  'definition.dbc.signals.empty': 'This message defines no signals.',
+  'definition.dbc.decoded.empty':
+    'No signal could be decoded from this frame; it may be shorter than the message expects.',
+  'definition.dbc.error.readFailed': 'The file could not be read.',
+  'definition.dbc.error.parseFailed':
+    'The DBC file could not be parsed; it contains no message definitions.',
+  'definition.dbc.issue.emptyInput': 'The file is empty.',
+  'definition.dbc.issue.noMessages': 'The file contains no message definitions.',
+  'definition.dbc.issue.malformedMessage': 'The message line is not in the expected format.',
+  'definition.dbc.issue.malformedSignal': 'The signal line is not in the expected format.',
+  'definition.dbc.issue.signalWithoutMessage': 'The signal is not attached to a message.',
+  'definition.dbc.issue.malformedValueTable':
+    'The value table line is not in the expected format.',
+  'definition.dbc.issue.unknownValueTableTarget':
+    'The message or signal the value table points to does not exist.',
+  'definition.dbc.issue.unsupportedSection':
+    'This section was not read; it does not affect signal decoding.',
+  'definition.dbc.issue.duplicateMessageId':
+    'The same identifier is defined more than once; the first definition was kept.',
+  'definition.dbc.issue.signalExceedsMessage':
+    'The signal does not fit the length the message declares.',
 };

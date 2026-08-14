@@ -1320,6 +1320,50 @@ export const tr = {
   'protocol.j1939.example.baseFrameRejected.name': 'Base çerçeve (çözülemez)',
   'protocol.j1939.example.baseFrameRejected.description':
     '11-bit identifier taşıyan çerçeve: hata basılır ama çerçeve yine alan alan gösterilir.',
+
+  // --- DBC tanım dosyası ---
+  'definition.dbc.action.import': 'DBC dosyası içe aktar',
+  'definition.dbc.action.export': 'DBC olarak dışa aktar',
+  'definition.dbc.sampleNotice':
+    'Örnek tanım gösteriliyor. Kendi DBC dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.dbc.version': 'Sürüm',
+  'definition.dbc.messageCount': 'Mesaj sayısı',
+  'definition.dbc.nodes': 'Düğümler',
+  'definition.dbc.line': 'Satır',
+  'definition.dbc.message.label': 'Mesaj',
+  'definition.dbc.sampleHex.label': 'Örnek çerçeve baytları (HEX)',
+  'definition.dbc.table.signals': 'Sinyal tanımları',
+  'definition.dbc.table.decoded': 'Çözümlenmiş sinyaller',
+  'definition.dbc.column.signal': 'Sinyal',
+  'definition.dbc.column.start': 'Başlangıç biti',
+  'definition.dbc.column.length': 'Bit uzunluğu',
+  'definition.dbc.column.byteOrder': 'Bayt sırası',
+  'definition.dbc.column.signed': 'İşaretli',
+  'definition.dbc.column.factorOffset': 'Çarpan / offset',
+  'definition.dbc.column.range': 'Aralık',
+  'definition.dbc.column.unit': 'Birim',
+  'definition.dbc.column.multiplex': 'Çoklama',
+  'definition.dbc.column.label': 'Etiket',
+  'definition.dbc.signals.empty': 'Bu mesajda tanımlı sinyal yok.',
+  'definition.dbc.decoded.empty':
+    'Bu çerçevede çözülebilen sinyal yok; çerçeve mesajın beklediğinden kısa olabilir.',
+  'definition.dbc.error.readFailed': 'Dosya okunamadı.',
+  'definition.dbc.error.parseFailed':
+    'DBC dosyası çözümlenemedi; içinde hiç mesaj tanımı bulunamadı.',
+  'definition.dbc.issue.emptyInput': 'Dosya boş.',
+  'definition.dbc.issue.noMessages': 'Dosyada hiç mesaj tanımı yok.',
+  'definition.dbc.issue.malformedMessage': 'Mesaj satırı beklenen biçimde değil.',
+  'definition.dbc.issue.malformedSignal': 'Sinyal satırı beklenen biçimde değil.',
+  'definition.dbc.issue.signalWithoutMessage': 'Sinyal bir mesaja bağlı değil.',
+  'definition.dbc.issue.malformedValueTable': 'Değer tablosu satırı beklenen biçimde değil.',
+  'definition.dbc.issue.unknownValueTableTarget':
+    'Değer tablosunun işaret ettiği mesaj ya da sinyal yok.',
+  'definition.dbc.issue.unsupportedSection':
+    'Bu bölüm okunmadı; sinyal çözümünü etkilemiyor.',
+  'definition.dbc.issue.duplicateMessageId':
+    'Aynı identifier birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
+  'definition.dbc.issue.signalExceedsMessage':
+    'Sinyal mesajın bildirdiği uzunluğa sığmıyor.',
 } as const;
 
 /**
