@@ -1319,6 +1319,118 @@ export const en: TranslationDictionary = {
   'protocol.j1939.example.baseFrameRejected.description':
     'A frame carrying an 11-bit identifier: an error is reported but the frame is still shown field by field.',
 
+  // --- ISO-TP ---
+  'protocol.isotp.error.frameTooShort':
+    'The record is not long enough to carry the CAN identifier and length fields.',
+  'protocol.isotp.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.isotp.error.aborted': 'Parsing was cancelled.',
+  'protocol.isotp.error.missingPci': 'Payload is empty: no PCI byte, ISO-TP cannot be decoded.',
+  'protocol.isotp.error.incompleteFirstFramePci':
+    'The First Frame’s second PCI byte (the low eight bits of FF_DL) is missing.',
+  'protocol.isotp.error.unknownPciType':
+    'The PCI high nibble does not match any of ISO-TP’s four types (Single/First/Consecutive Frame, Flow Control).',
+  'protocol.isotp.warning.remoteFrame':
+    'Remote flag is set; ISO-TP does not use remote frames.',
+  'protocol.isotp.warning.truncatedPayload':
+    'The declared data length is not present in the record; the available bytes are shown.',
+  'protocol.isotp.warning.truncatedSingleFrameData':
+    'The data promised by SF_DL is not present in the record; the available bytes are shown.',
+  'protocol.isotp.warning.transportSession':
+    'This frame is part of a multi-frame ISO-TP session; reassembly and sequence validation are the analysis layer’s job and are not performed here.',
+  'protocol.isotp.warning.unknownFlowStatus':
+    'The Flow Status value is none of Continue To Send / Wait / Overflow.',
+  'protocol.isotp.summary.singleFrame': 'Single-frame ISO-TP message',
+  'protocol.isotp.summary.firstFrame': 'First frame of a multi-frame ISO-TP session',
+  'protocol.isotp.summary.consecutiveFrame': 'Consecutive frame of a multi-frame ISO-TP session',
+  'protocol.isotp.summary.flowControl': 'ISO-TP flow control frame',
+  'protocol.isotp.summary.unknownPciType': 'Unrecognized ISO-TP PCI type',
+  'protocol.isotp.documentation.summary':
+    'ISO 15765-2 transport layer: decodes the CAN payload’s PCI byte into Single/First/Consecutive Frame and Flow Control. Multi-frame reassembly, sequence validation and STmin timing are deliberately out of scope — a single-frame parser holds no session state.',
+  'protocol.isotp.example.singleFrame.name': 'Single Frame (spec summary §04)',
+  'protocol.isotp.example.singleFrame.description':
+    'PCI 0x02 → SF_DL 2, data 10 01 — the spec’s own inline example.',
+  'protocol.isotp.example.firstFrame.name': 'First Frame (spec summary §04)',
+  'protocol.isotp.example.firstFrame.description':
+    'PCI 0x10 0x14 → FF_DL 20 bytes — the spec’s own inline example; the remaining six bytes are illustrative.',
+  'protocol.isotp.example.consecutiveFrame.name': 'Consecutive Frame',
+  'protocol.isotp.example.consecutiveFrame.description':
+    'PCI 0x21 → sequence number 1, a seven-byte data chunk.',
+  'protocol.isotp.example.flowControlContinue.name': 'Flow Control (Continue To Send)',
+  'protocol.isotp.example.flowControlContinue.description':
+    'FS Continue To Send, BS unlimited (0), STmin shown as a raw byte.',
+  'protocol.isotp.example.singleFrameTruncated.name': 'Single Frame (truncated data)',
+  'protocol.isotp.example.singleFrameTruncated.description':
+    'SF_DL promises seven bytes but only three are present in the record.',
+  'protocol.isotp.example.unknownPciTypeRejected.name': 'Unrecognized PCI type',
+  'protocol.isotp.example.unknownPciTypeRejected.description':
+    'High nibble 0xF: none of ISO-TP’s four PCI types.',
+
+  // --- UDS ---
+  'protocol.uds.error.emptyPdu': 'The PDU is empty: at least a SID byte is required.',
+  'protocol.uds.error.incompleteNegativeResponse':
+    'The negative response envelope is incomplete: Response Code, Original SID and NRC are all required.',
+  'protocol.uds.error.frameTooLong': 'The PDU exceeds the allowed maximum length.',
+  'protocol.uds.error.aborted': 'Parsing was cancelled.',
+  'protocol.uds.warning.unknownSid': 'The SID is not in the spec’s service table.',
+  'protocol.uds.warning.nrcNeedsDatabase':
+    'The NRC is shown raw: the full code table lives in ISO 14229’s normative body and the spec does not provide it, so it is not guessed.',
+  'protocol.uds.warning.trailingBytes': 'There are extra bytes after the negative response envelope.',
+  'protocol.uds.summary.request': 'UDS service request',
+  'protocol.uds.summary.positiveResponse': 'UDS positive response',
+  'protocol.uds.summary.negativeResponse': 'UDS negative response',
+  'protocol.uds.documentation.summary':
+    'The SID/NRC envelope of ISO 14229 diagnostic services: distinguishes a request, a positive response (SID+0x40) and a negative response (0x7F + original SID + NRC). The service parameter body and the full NRC table are left raw because the spec does not provide them.',
+  'protocol.uds.example.readDataByIdentifierRequest.name':
+    'Read Data By Identifier request (spec summary §04)',
+  'protocol.uds.example.readDataByIdentifierRequest.description':
+    '22 F1 90 — the spec’s own example: a request to read DID 0xF190 (VIN).',
+  'protocol.uds.example.readDataByIdentifierPositiveResponse.name':
+    'Read Data By Identifier positive response',
+  'protocol.uds.example.readDataByIdentifierPositiveResponse.description':
+    '0x62 = 0x22 + 0x40: the request’s positive response, echoing the same DID.',
+  'protocol.uds.example.negativeResponseRequestOutOfRange.name':
+    'Negative response: Request Out Of Range (spec summary §04)',
+  'protocol.uds.example.negativeResponseRequestOutOfRange.description':
+    '7F 22 31 — the spec’s own example: NRC 0x31.',
+  'protocol.uds.example.testerPresentRequest.name': 'Tester Present request',
+  'protocol.uds.example.testerPresentRequest.description':
+    'The minimal service request that keeps a session alive.',
+  'protocol.uds.example.unknownSid.name': 'Unrecognized SID',
+  'protocol.uds.example.unknownSid.description':
+    'The SID is not in the table: the field is marked invalid but the frame is still shown.',
+  'protocol.uds.example.negativeResponseTruncated.name': 'Negative response (missing NRC)',
+  'protocol.uds.example.negativeResponseTruncated.description':
+    'The NRC byte is missing: only the Response Code and Original SID are decoded.',
+
+  // --- OBD-II ---
+  'protocol.obd.error.emptyPdu': 'The PDU is empty: at least a mode byte is required.',
+  'protocol.obd.error.frameTooLong': 'The PDU exceeds the allowed maximum length.',
+  'protocol.obd.error.aborted': 'Parsing was cancelled.',
+  'protocol.obd.warning.unknownMode': 'The mode does not match any of the spec’s nine modes.',
+  'protocol.obd.summary.request': 'OBD-II mode request',
+  'protocol.obd.summary.response': 'OBD-II mode response',
+  'protocol.obd.documentation.summary':
+    'SAE J1979 / ISO 15031-5 emissions diagnostic model: decodes the identity of the nine modes and the mode+0x40 response rule. PIDs are NOT bound to a name or formula — the spec does not give PID numbers, only three formulas (Engine RPM, Vehicle Speed, Coolant Temperature) exposed as separate calculation functions.',
+  'protocol.obd.calculator.engineRpm.description':
+    'RPM = (A×256+B)/4 — spec summary §04 fixture: A=0x1A, B=0xF8 → 1726 rpm.',
+  'protocol.obd.calculator.vehicleSpeed.description': 'Speed = A km/h.',
+  'protocol.obd.calculator.coolantTemperature.description': 'T = A − 40 °C.',
+  'protocol.obd.example.currentDataRequest.name': 'Mode 01 request',
+  'protocol.obd.example.currentDataRequest.description':
+    'Current Data mode; the PID byte is illustrative and stays a raw parameter.',
+  'protocol.obd.example.engineRpmResponse.name': 'Engine RPM response (spec summary §04)',
+  'protocol.obd.example.engineRpmResponse.description':
+    '41 0C 1A F8 — the spec’s fixture: Raw 1A F8, 1726 rpm via decodeEngineRpm.',
+  'protocol.obd.example.storedDtcRequest.name': 'Mode 03 request',
+  'protocol.obd.example.storedDtcRequest.description':
+    'Stored DTC mode; requires no PID, a single-byte request.',
+  'protocol.obd.example.vehicleInformationRequest.name': 'Mode 09 request',
+  'protocol.obd.example.vehicleInformationRequest.description':
+    'Vehicle Information mode; the InfoType byte stays a raw parameter.',
+  'protocol.obd.example.unknownMode.name': 'Unrecognized mode',
+  'protocol.obd.example.unknownMode.description':
+    'The mode is not in the table: the field is marked invalid but the frame is still shown.',
+
   // --- DBC definition file ---
   'definition.dbc.action.import': 'Import DBC file',
   'definition.dbc.action.export': 'Export as DBC',

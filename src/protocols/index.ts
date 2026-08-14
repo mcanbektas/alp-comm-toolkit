@@ -62,4 +62,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'j1939', () =>
     import('./automotive/j1939/j1939').then((module) => module.j1939Plugin),
   );
+  registerOnce(registry, 'iso-tp', () =>
+    import('./automotive/isotp/isotp').then((module) => module.isoTpPlugin),
+  );
+  registerOnce(registry, 'uds', () =>
+    import('./automotive/uds/uds').then((module) => module.udsPlugin),
+  );
+  // UDS'ten SONRA: OBD-II'nin mod+0x40 yanıt kuralı UDS'in SID+0x40 kuralıyla
+  // aynı aileden (dosya başı, obd.ts) — okuma sırası bu ilişkiyi yansıtır.
+  registerOnce(registry, 'obd-ii', () =>
+    import('./automotive/obd/obd').then((module) => module.obdPlugin),
+  );
 }

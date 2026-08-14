@@ -1321,6 +1321,118 @@ export const tr = {
   'protocol.j1939.example.baseFrameRejected.description':
     '11-bit identifier taşıyan çerçeve: hata basılır ama çerçeve yine alan alan gösterilir.',
 
+  // --- ISO-TP ---
+  'protocol.isotp.error.frameTooShort':
+    'Kayıt CAN kimliği ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.isotp.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.isotp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.isotp.error.missingPci': 'Payload boş: PCI baytı yok, ISO-TP çözülemez.',
+  'protocol.isotp.error.incompleteFirstFramePci':
+    'First Frame’in ikinci PCI baytı (FF_DL’in alt sekiz biti) eksik.',
+  'protocol.isotp.error.unknownPciType':
+    'PCI üst nibble’ı ISO-TP’nin dört tipinden (Single/First/Consecutive Frame, Flow Control) hiçbirine uymuyor.',
+  'protocol.isotp.warning.remoteFrame':
+    'Remote bayrağı set; ISO-TP remote çerçeve kullanmaz.',
+  'protocol.isotp.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.isotp.warning.truncatedSingleFrameData':
+    'SF_DL’in vaat ettiği veri kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.isotp.warning.transportSession':
+    'Bu çerçeve çok çerçeveli bir ISO-TP oturumunun parçasıdır; birleştirme ve sıra doğrulaması analiz katmanının işidir, burada yapılmaz.',
+  'protocol.isotp.warning.unknownFlowStatus':
+    'Flow Status değeri Continue To Send / Wait / Overflow’dan hiçbiri değil.',
+  'protocol.isotp.summary.singleFrame': 'Tek çerçevelik ISO-TP mesajı',
+  'protocol.isotp.summary.firstFrame': 'Çok çerçeveli ISO-TP oturumunun ilk çerçevesi',
+  'protocol.isotp.summary.consecutiveFrame': 'Çok çerçeveli ISO-TP oturumunun ardıl çerçevesi',
+  'protocol.isotp.summary.flowControl': 'ISO-TP akış kontrolü çerçevesi',
+  'protocol.isotp.summary.unknownPciType': 'Tanınmayan ISO-TP PCI tipi',
+  'protocol.isotp.documentation.summary':
+    'ISO 15765-2 taşıma katmanı: CAN payload’ının PCI baytını Single/First/Consecutive Frame ve Flow Control olarak çözer. Çok çerçeveli birleştirme, sıra doğrulaması ve STmin zamanlaması bilinçli olarak kapsam dışıdır — tek çerçeve parser’ı oturum durumu tutmaz.',
+  'protocol.isotp.example.singleFrame.name': 'Single Frame (spec özet §04)',
+  'protocol.isotp.example.singleFrame.description':
+    'PCI 0x02 → SF_DL 2, veri 10 01 — spec’in metin içi örneği.',
+  'protocol.isotp.example.firstFrame.name': 'First Frame (spec özet §04)',
+  'protocol.isotp.example.firstFrame.description':
+    'PCI 0x10 0x14 → FF_DL 20 bayt — spec’in metin içi örneği; kalan altı bayt göstermelik.',
+  'protocol.isotp.example.consecutiveFrame.name': 'Consecutive Frame',
+  'protocol.isotp.example.consecutiveFrame.description':
+    'PCI 0x21 → sıra numarası 1, yedi baytlık veri parçası.',
+  'protocol.isotp.example.flowControlContinue.name': 'Flow Control (Continue To Send)',
+  'protocol.isotp.example.flowControlContinue.description':
+    'FS Continue To Send, BS sınırsız (0), STmin ham bayt olarak gösterilir.',
+  'protocol.isotp.example.singleFrameTruncated.name': 'Single Frame (eksik veri)',
+  'protocol.isotp.example.singleFrameTruncated.description':
+    'SF_DL yedi bayt vaat ediyor ama kayıtta yalnız üç bayt var.',
+  'protocol.isotp.example.unknownPciTypeRejected.name': 'Tanınmayan PCI tipi',
+  'protocol.isotp.example.unknownPciTypeRejected.description':
+    'Üst nibble 0xF: ISO-TP’nin dört PCI tipinden hiçbiri değil.',
+
+  // --- UDS ---
+  'protocol.uds.error.emptyPdu': 'PDU boş: en az SID baytı gerekir.',
+  'protocol.uds.error.incompleteNegativeResponse':
+    'Negatif yanıt zarfı eksik: Response Code, Original SID ve NRC’nin üçü de gerekir.',
+  'protocol.uds.error.frameTooLong': 'PDU izin verilen azami uzunluğu aşıyor.',
+  'protocol.uds.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.uds.warning.unknownSid': 'SID spec’in verdiği servis tablosunda yok.',
+  'protocol.uds.warning.nrcNeedsDatabase':
+    'NRC ham gösteriliyor: tam kod tablosu ISO 14229’un normatif gövdesindedir ve spec bunu vermiyor, tahmin edilmez.',
+  'protocol.uds.warning.trailingBytes': 'Negatif yanıt zarfından sonra artan baytlar var.',
+  'protocol.uds.summary.request': 'UDS servis isteği',
+  'protocol.uds.summary.positiveResponse': 'UDS pozitif yanıtı',
+  'protocol.uds.summary.negativeResponse': 'UDS negatif yanıtı',
+  'protocol.uds.documentation.summary':
+    'ISO 14229 tanı servislerinin SID/NRC zarfı: istek, pozitif yanıt (SID+0x40) ve negatif yanıt (0x7F + orijinal SID + NRC) ayrımı. Servis parametre gövdesi ve tam NRC tablosu spec’te olmadığı için ham bırakılır.',
+  'protocol.uds.example.readDataByIdentifierRequest.name':
+    'Read Data By Identifier isteği (spec özet §04)',
+  'protocol.uds.example.readDataByIdentifierRequest.description':
+    '22 F1 90 — spec’in verdiği örnek: DID 0xF190 (VIN) okuma isteği.',
+  'protocol.uds.example.readDataByIdentifierPositiveResponse.name':
+    'Read Data By Identifier pozitif yanıtı',
+  'protocol.uds.example.readDataByIdentifierPositiveResponse.description':
+    '0x62 = 0x22 + 0x40: isteğin pozitif yanıtı, aynı DID’i yankılar.',
+  'protocol.uds.example.negativeResponseRequestOutOfRange.name':
+    'Negatif yanıt: Request Out Of Range (spec özet §04)',
+  'protocol.uds.example.negativeResponseRequestOutOfRange.description':
+    '7F 22 31 — spec’in verdiği örnek: NRC 0x31.',
+  'protocol.uds.example.testerPresentRequest.name': 'Tester Present isteği',
+  'protocol.uds.example.testerPresentRequest.description':
+    'Bağlantıyı canlı tutan minimal servis isteği.',
+  'protocol.uds.example.unknownSid.name': 'Tanınmayan SID',
+  'protocol.uds.example.unknownSid.description':
+    'SID tabloda yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
+  'protocol.uds.example.negativeResponseTruncated.name': 'Negatif yanıt (eksik NRC)',
+  'protocol.uds.example.negativeResponseTruncated.description':
+    'NRC baytı eksik: yalnız Response Code ve Original SID çözülür.',
+
+  // --- OBD-II ---
+  'protocol.obd.error.emptyPdu': 'PDU boş: en az mod baytı gerekir.',
+  'protocol.obd.error.frameTooLong': 'PDU izin verilen azami uzunluğu aşıyor.',
+  'protocol.obd.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.obd.warning.unknownMode': 'Mod spec’in verdiği dokuz moddan hiçbirine uymuyor.',
+  'protocol.obd.summary.request': 'OBD-II mod isteği',
+  'protocol.obd.summary.response': 'OBD-II mod yanıtı',
+  'protocol.obd.documentation.summary':
+    'SAE J1979 / ISO 15031-5 emisyon tanı modeli: dokuz modun kimliği ve mod+0x40 yanıt kuralı çözülür. PID’ler isme/formüle BAĞLANMAZ — spec PID numaralarını vermiyor, yalnız üç formülü (Engine RPM, Vehicle Speed, Coolant Temperature) ayrı hesap fonksiyonu olarak sunar.',
+  'protocol.obd.calculator.engineRpm.description':
+    'RPM = (A×256+B)/4 — spec özet §04 fixture’ı: A=0x1A, B=0xF8 → 1726 rpm.',
+  'protocol.obd.calculator.vehicleSpeed.description': 'Speed = A km/h.',
+  'protocol.obd.calculator.coolantTemperature.description': 'T = A − 40 °C.',
+  'protocol.obd.example.currentDataRequest.name': 'Mode 01 isteği',
+  'protocol.obd.example.currentDataRequest.description':
+    'Current Data modu; PID baytı gösterim amaçlı, ham parametre olarak kalır.',
+  'protocol.obd.example.engineRpmResponse.name': 'Engine RPM yanıtı (spec özet §04)',
+  'protocol.obd.example.engineRpmResponse.description':
+    '41 0C 1A F8 — spec’in fixture’ı: Raw 1A F8, decodeEngineRpm ile 1726 rpm.',
+  'protocol.obd.example.storedDtcRequest.name': 'Mode 03 isteği',
+  'protocol.obd.example.storedDtcRequest.description':
+    'Stored DTC modu; PID gerektirmez, tek baytlık istek.',
+  'protocol.obd.example.vehicleInformationRequest.name': 'Mode 09 isteği',
+  'protocol.obd.example.vehicleInformationRequest.description':
+    'Vehicle Information modu; InfoType baytı ham parametre olarak kalır.',
+  'protocol.obd.example.unknownMode.name': 'Tanınmayan mod',
+  'protocol.obd.example.unknownMode.description':
+    'Mod tabloda yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
+
   // --- DBC tanım dosyası ---
   'definition.dbc.action.import': 'DBC dosyası içe aktar',
   'definition.dbc.action.export': 'DBC olarak dışa aktar',

@@ -538,7 +538,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'ISO 15765-2 transport protocol that segments diagnostic messages longer than a CAN payload into first, consecutive and flow-control frames.',
           layer: 'transport',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'iso-tp',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           // Sequence number 1..F sonrası 0'a sarar; eksik CF tespiti bu sarmayı
           // hesaba katmazsa her 16 frame'de yanlış alarm üretir.
@@ -567,7 +568,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'ISO 14229 unified diagnostic services defining sessions, data identifiers, DTC access, security access and ECU programming independently of the underlying transport.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'uds',
           tabs: [
             'overview',
             'live',
@@ -606,7 +608,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Standardized emissions-related access model (SAE J1979) exposing live data, stored and pending DTCs, freeze frames and vehicle information through numbered modes and PIDs.',
           layer: 'application',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'obd-ii',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Modes',

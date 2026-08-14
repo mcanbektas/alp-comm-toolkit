@@ -9,11 +9,14 @@ const BUILT_IN_IDS = [
   'can-2-0b',
   'can-fd',
   'can-xl',
+  'iso-tp',
   'j1939',
   'modbus-ascii',
   'modbus-rtu',
   'modbus-tcp',
   'nmea-0183',
+  'obd-ii',
+  'uds',
 ];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
@@ -21,11 +24,14 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'can-2-0b': 'automotive',
   'can-fd': 'automotive',
   'can-xl': 'automotive',
+  'iso-tp': 'automotive',
   j1939: 'automotive',
   'modbus-ascii': 'industrial-automation',
   'modbus-rtu': 'industrial-automation',
   'modbus-tcp': 'industrial-automation',
   'nmea-0183': 'marine-navigation',
+  'obd-ii': 'automotive',
+  uds: 'automotive',
 };
 
 describe('registerBuiltInProtocols', () => {
