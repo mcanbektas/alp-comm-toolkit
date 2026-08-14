@@ -5,6 +5,7 @@ import { useTranslation } from '@/app/providers/LanguageProvider';
 import { findCalculator } from '@/features/calculators';
 import { ChecksumFinderTool } from '@/features/calculators/tools/ChecksumFinderTool';
 import { CodeArrayGeneratorTool } from '@/features/calculators/tools/codeGeneratorTools';
+import { CrcCalculatorTool } from '@/features/calculators/tools/CrcCalculatorTool';
 import {
   BcdConverterTool,
   BitMaskTool,
@@ -61,6 +62,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'spi-timing': () => <SpiTimingTool />,
   'i2c-timing': () => <I2cTimingTool />,
   'pmbus-linear': () => <PmbusLinearTool />,
+  'crc-calculator': () => <CrcCalculatorTool />,
   'checksum-finder': () => <ChecksumFinderTool />,
 };
 

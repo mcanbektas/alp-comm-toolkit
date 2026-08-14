@@ -28,7 +28,8 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
-import { CopyButton, ResultField } from '@/components/forms';
+import { CopyButton, ResultField, TextField } from '@/components/forms';
+import { ProjectPanel } from '@/features/projects';
 import { bytesToHex } from '@/protocol-core/buffers/representation';
 import {
   generateCArray,
@@ -115,6 +116,8 @@ export function PacketBuilderScreen(): ReactNode {
   const [buildRequests, setBuildRequests] = useState(0);
   /** İndirme başarısızsa (Blob URL yok) sessiz kalmıyoruz — bkz. `downloadTextFile`. */
   const [exportErrorKey, setExportErrorKey] = useState<string | null>(null);
+  /** Şablon adı yerel kalır: kaydedilene kadar store'a girmesinin bir anlamı yok. */
+  const [templateName, setTemplateName] = useState('');
 
   const outgoing = builder.outgoingBytes;
   const outgoingHex = useMemo(() => (outgoing === null ? '' : bytesToHex(outgoing)), [outgoing]);
@@ -298,6 +301,34 @@ export function PacketBuilderScreen(): ReactNode {
           </section>
         </div>
       </div>
+
+      {/* Şablon = formun o anki değerleri; proje = şema + şablonlar (spec §40).
+          İkisi aynı bölümde duruyor çünkü şablon kaydetmeden proje dosyası boş
+          `packetTemplates` ile çıkar ve kaydetme hollow bir düğme olurdu. */}
+      <section className={sectionClass()} data-testid="builder-project-section">
+        <h2 className={headingClass()}>{t('builder.section.project')}</h2>
+        <div className="flex flex-wrap items-end gap-2">
+          <TextField
+            id="builder-template-name"
+            label={t('builder.template.nameLabel')}
+            value={templateName}
+            onChange={setTemplateName}
+          />
+          <button
+            type="button"
+            data-testid="builder-save-template"
+            disabled={templateName.trim() === '' || builder.schema === null}
+            onClick={() => {
+              builder.saveAsTemplate(templateName.trim());
+              setTemplateName('');
+            }}
+            className="rounded-token border border-line bg-raised px-3 py-1.5 text-sm text-text transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:text-muted"
+          >
+            {t('builder.template.save')}
+          </button>
+        </div>
+        <ProjectPanel onApplyTemplate={builder.applyTemplate} />
+      </section>
 
       {/* --- Spec §42'nin 13 bölümü ---------------------------------------- */}
       <section className={sectionClass()} data-testid="builder-doc">

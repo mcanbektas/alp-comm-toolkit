@@ -12,6 +12,7 @@
  * bağlı `schemas/protocolSchema`yı buradan çekmek pakete bayt eklemez.
  */
 
+import type { PacketTemplate } from '@/features/projects/projectFile';
 import type { ProtocolSchema } from '@/protocol-core/schemas/protocolSchema';
 import type {
   BuilderFieldDescriptor,
@@ -81,6 +82,14 @@ export interface PacketBuilderApi {
   readonly send: () => void;
   readonly stopSending: () => void;
   readonly reloadSchema: () => void;
+  /**
+   * Formun o anki değerlerini paylaşılan store'a şablon olarak yazar. Şema
+   * yoksa ya da ad boşsa hiçbir şey olmaz: şablon `schemaName` taşımak zorunda
+   * (spec §40) ve adsız bir kayıt bir sonraki açılışta sessizce düşerdi.
+   */
+  readonly saveAsTemplate: (name: string) => void;
+  /** Şablonun değerlerini forma TOPTAN yazar; eski değerler korunmaz. */
+  readonly applyTemplate: (template: PacketTemplate) => void;
 }
 
 /**

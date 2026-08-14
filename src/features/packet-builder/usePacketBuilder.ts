@@ -39,6 +39,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useProtocolSchemaStore } from '@/app/store/protocolSchemaStore';
 import { createSimulatedSource } from '@/connection/mock/simulatedSource';
+import type { PacketTemplate } from '@/features/projects/projectFile';
 import { DEFAULT_SERIAL_OPTIONS } from '@/connection/serial/serialOptions';
 import { createSerialSource } from '@/connection/serial/serialSource';
 import { requestSerialPort } from '@/connection/serial/webSerialTypes';
@@ -374,6 +375,7 @@ function toBuilderStatus(status: ConnectionStatus): BuilderConnectionState['stat
 
 export function usePacketBuilder(): PacketBuilderApi {
   const schemaJson = useProtocolSchemaStore((state) => state.schemaJson);
+  const savePacketTemplate = useProtocolSchemaStore((state) => state.savePacketTemplate);
   /** `reloadSchema` tetiği: metin aynı kalsa bile şemayı yeniden çözmeyi zorlar. */
   const [reloadToken, setReloadToken] = useState(0);
 
@@ -537,6 +539,39 @@ export function usePacketBuilder(): PacketBuilderApi {
 
   const reloadSchema = useCallback(() => {
     setReloadToken((token) => token + 1);
+  }, []);
+
+  // --- Şablonlar ----------------------------------------------------------
+
+  /**
+   * Şablon şemanın ADIYLA bağlanır, kimliğiyle değil: şemaların kimliği yok
+   * (spec §40 `PacketTemplate`). Şema çözülemiyorsa yazacak bir ad da yok ve
+   * `schemaName`i boş bırakılmış şablon, dosyaya yazılırsa kendi
+   * çözümleyicimizce reddedilirdi — bu yüzden sessiz no-op.
+   *
+   * Değerler `latestRef`ten değil doğrudan state'ten okunuyor: kaydetme bir
+   * kullanıcı jestidir, o anda render edilmiş değerler zaten günceldir.
+   */
+  const saveAsTemplate = useCallback(
+    (name: string) => {
+      if (schema === null) {
+        return;
+      }
+      savePacketTemplate(name, schema.name, { ...values });
+    },
+    [savePacketTemplate, schema, values],
+  );
+
+  /**
+   * Değerler TOPTAN değiştirilir, mevcutlarla birleştirilmez: birleştirseydik
+   * başka bir şemanın şablonu uygulandığında ekranda iki şemanın alanları
+   * karışır ve kullanıcı hangi değerin nereden geldiğini bilemezdi.
+   *
+   * Şemada karşılığı olmayan yollar zararsız: `toEncodeValues` yalnız
+   * `fields` üzerinde gezer, tanımadığı anahtarı kodlayıcıya hiç geçirmez.
+   */
+  const applyTemplate = useCallback((template: PacketTemplate) => {
+    setValues({ ...template.values });
   }, []);
 
   // --- Bağlantı -----------------------------------------------------------
@@ -735,6 +770,8 @@ export function usePacketBuilder(): PacketBuilderApi {
     setPostProcessing,
     setSchedulerConfig,
     setResponseTimeoutMs,
+    saveAsTemplate,
+    applyTemplate,
     connect,
     disconnect,
     send,

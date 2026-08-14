@@ -23,6 +23,7 @@ import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { NumberField, SelectField, TextField } from '@/components/forms';
 import type { SelectFieldOption } from '@/components/forms';
+import { ProjectPanel } from '@/features/projects';
 import type { Endianness } from '@/protocol-core/encoding/ieee754';
 import type { TranslationKey } from '@/translations';
 import { readTextFile } from '@/utils/readTextFile';
@@ -491,6 +492,15 @@ export function ProtocolStudioScreen(): ReactNode {
             {announcementKey === null ? '' : t(announcementKey)}
           </p>
         </div>
+      </section>
+
+      {/* Proje, şemadan AYRI bir şey: şema tek bir protokol tanımıdır, proje ise
+          şema + kayıtlı paket şablonlarını birlikte taşır (spec §40). Bu yüzden
+          üstteki "Şema JSON'u içe aktar" akışının yerine geçmez, yanında durur.
+          Şablon uygulama Studio'da YOK — burada dolduracak bir form yok. */}
+      <section className={SECTION_CLASS}>
+        <h2 className={HEADING_CLASS}>{t('studio.section.project')}</h2>
+        <ProjectPanel />
       </section>
 
       {/* `items-start`: sağ panel açık bir alanın 23 özelliğiyle uzayınca grid'in

@@ -35,7 +35,14 @@
  *   aşarsa bölünemez.
  */
 
-import type { ChecksumAlgorithm } from '@/protocol-core/checksums/algorithmCatalogue';
+import {
+  CHECKSUM_ALGORITHMS,
+  isSimpleChecksumAlgorithm,
+} from '@/protocol-core/checksums/algorithmCatalogue';
+import type {
+  ChecksumAlgorithm,
+  SimpleChecksumAlgorithm,
+} from '@/protocol-core/checksums/algorithmCatalogue';
 import { CRC_CATALOGUE } from '@/protocol-core/checksums/crcCatalogue';
 import type { CrcParams } from '@/protocol-core/checksums/crcEngine';
 import type { FieldType } from '@/protocol-core/schemas/fieldTypes';
@@ -295,20 +302,27 @@ function byteOrderLiteral(field: ProtocolFieldSchema, schema: ProtocolSchema): s
 
 /**
  * Alanın CRC parametreleri; basit checksum'larda ve `none`'da `undefined`.
- * `switch` ile daraltılıyor — `as` dönüşümü kullanmadan `CRC_CATALOGUE`
- * anahtarına inmenin tek tip-güvenli yolu bu.
+ * Daraltma `isSimpleChecksumAlgorithm` ile yapılıyor — `as` dönüşümü kullanmadan
+ * `CRC_CATALOGUE` anahtarına inmenin tek tip-güvenli yolu bu, ve katalog
+ * büyüdüğünde elle bakımı gereken bir `case` listesi bırakmaz.
  */
 function crcParamsFor(algorithm: ChecksumAlgorithm): CrcParams | undefined {
-  switch (algorithm) {
-    case 'none':
-    case 'xor8':
-    case 'sum8':
-    case 'lrc':
-      return undefined;
-    default:
-      return CRC_CATALOGUE[algorithm];
+  if (algorithm === 'none' || isSimpleChecksumAlgorithm(algorithm)) {
+    return undefined;
   }
+  return CRC_CATALOGUE[algorithm];
 }
+
+/** Basit algoritmanın üretilen modüldeki yardımcı adı. Sabit tablo, şablon değil. */
+const SIMPLE_HELPER_NAMES: Readonly<Record<SimpleChecksumAlgorithm, string>> = {
+  xor8: '_xor8',
+  sum8: '_sum8',
+  lrc: '_lrc',
+  nmeaXor: '_nmea_xor',
+  fletcher16: '_fletcher16',
+  fletcher32: '_fletcher32',
+  adler32: '_adler32',
+};
 
 /** Bit alanının kapsadığı bayt sayısı; `bitLength` yoksa 1 bit varsayılır. */
 function bitFieldGeometry(field: ProtocolFieldSchema): {
@@ -395,9 +409,13 @@ interface ClassPlan {
 interface HelperUsage {
   bcd: boolean;
   crc: boolean;
-  xor8: boolean;
-  sum8: boolean;
-  lrc: boolean;
+  /**
+   * Kullanılan basit (CRC olmayan) algoritmalar. Algoritma başına ayrı bir
+   * `boolean` yerine küme: katalog büyüdükçe alan eklemek gerekmesin ve
+   * "eklendi ama yazılmadı" hâli olmasın. Yazım sırası kümenin gezinme
+   * sırasından DEĞİL, `CHECKSUM_ALGORITHMS`ten alınır — çıktı deterministik.
+   */
+  readonly simple: Set<SimpleChecksumAlgorithm>;
 }
 
 interface PlanContext {
@@ -613,12 +631,8 @@ function planClass(
       const params = crcParamsFor(field.algorithm);
       if (params !== undefined) {
         context.helpers.crc = true;
-      } else if (field.algorithm === 'xor8') {
-        context.helpers.xor8 = true;
-      } else if (field.algorithm === 'sum8') {
-        context.helpers.sum8 = true;
-      } else if (field.algorithm === 'lrc') {
-        context.helpers.lrc = true;
+      } else if (isSimpleChecksumAlgorithm(field.algorithm)) {
+        context.helpers.simple.add(field.algorithm);
       }
       if (field.algorithm !== 'none') {
         expectedLocal = localAllocator(`${local}_expected`);
@@ -882,7 +896,16 @@ function emitChecksumVerification(
   const lines: string[] = [];
   const params = crcParamsFor(algorithm);
   if (params === undefined) {
-    const helper = algorithm === 'xor8' ? '_xor8' : algorithm === 'sum8' ? '_sum8' : '_lrc';
+    if (!isSimpleChecksumAlgorithm(algorithm)) {
+      // `none` yukarıda elendi, CRC'lerin parametresi var: buraya yalnız
+      // katalogda olup burada karşılığı YAZILMAMIŞ bir algoritma düşebilir.
+      // Sessizce atlamak yerine üretilen dosyada görünür bir not bırakılır.
+      return commentBlock(
+        `"${singleLine(field.name)}" alanının "${algorithm}" algoritması bu üreticide DESTEKLENMİYOR; doğrulama üretilmedi.`,
+        width,
+      );
+    }
+    const helper = SIMPLE_HELPER_NAMES[algorithm];
     lines.push(`${expectedLocal} = ${helper}(${covered})`);
   } else {
     lines.push(
@@ -1192,6 +1215,92 @@ function emitSimpleChecksumHelper(
   ].join('\n');
 }
 
+interface SimpleChecksumSource {
+  readonly doc: string;
+  readonly body: readonly string[];
+}
+
+/**
+ * Basit algoritmaların Python gövdesi. `Record` olduğu için katalogda yeni bir
+ * basit algoritma belirdiğinde BURASI DERLENMEZ — üreticinin sessizce eksik
+ * kalmasının önü kapalı.
+ *
+ * Sabitler (255 / 65535 / 65521) TS motorundakilerle aynı olmak zorunda; ikisi
+ * ayrışırsa üretilen ayrıştırıcı uygulamanın kendi doğrulamasıyla çelişir.
+ */
+function simpleChecksumSource(
+  algorithm: SimpleChecksumAlgorithm,
+  indent: string,
+): SimpleChecksumSource {
+  const sources: Readonly<Record<SimpleChecksumAlgorithm, SimpleChecksumSource>> = {
+    xor8: {
+      doc: "Tüm baytların XOR'u; sıra bağımsızdır.",
+      body: ['result = 0', 'for byte in payload:', indentLines('result ^= byte', indent), 'return result'],
+    },
+    sum8: {
+      doc: 'Baytların toplamı, 8 bite taşarsa kırpılır.',
+      body: [
+        'total = 0',
+        'for byte in payload:',
+        indentLines('total = (total + byte) & 0xFF', indent),
+        'return total',
+      ],
+    },
+    lrc: {
+      doc: "Modbus ASCII LRC: bayt toplamının 8 bitlik two's complement'i.",
+      body: [
+        'total = 0',
+        'for byte in payload:',
+        indentLines('total = (total + byte) & 0xFF', indent),
+        'return (256 - total) & 0xFF',
+      ],
+    },
+    nmeaXor: {
+      doc: 'NMEA 0183 checksum: "$" ile "*" ARASINDAKİ baytların XOR\'u. Sınırlayıcılar kapsama girmediği için hesap XOR8 ile aynıdır.',
+      body: ['result = 0', 'for byte in payload:', indentLines('result ^= byte', indent), 'return result'],
+    },
+    fletcher16: {
+      doc: 'Fletcher-16. Modülüs 255 (256 DEĞİL): dağılım özelliği bu asimetrik mod\'a dayanır.',
+      body: [
+        'sum1 = 0',
+        'sum2 = 0',
+        'for byte in payload:',
+        indentLines(['sum1 = (sum1 + byte) % 255', 'sum2 = (sum2 + sum1) % 255'].join('\n'), indent),
+        'return (sum2 << 8) | sum1',
+      ],
+    },
+    fletcher32: {
+      doc: 'Fletcher-32: 16 bitlik kelimeler, üst bayt önce. Tek sayıda baytta son kelimenin alt baytı 0 ile doldurulur.',
+      body: [
+        'sum1 = 0',
+        'sum2 = 0',
+        'for index in range(0, len(payload), 2):',
+        indentLines(
+          [
+            'high = payload[index]',
+            'low = payload[index + 1] if index + 1 < len(payload) else 0',
+            'sum1 = (sum1 + ((high << 8) | low)) % 65535',
+            'sum2 = (sum2 + sum1) % 65535',
+          ].join('\n'),
+          indent,
+        ),
+        'return (sum2 << 16) | sum1',
+      ],
+    },
+    adler32: {
+      doc: "Adler-32 (zlib). \"a\" 1'den başlar ve modülüs 16 bite sığan en büyük ASAL olan 65521'dir.",
+      body: [
+        'a = 1',
+        'b = 0',
+        'for byte in payload:',
+        indentLines(['a = (a + byte) % 65521', 'b = (b + a) % 65521'].join('\n'), indent),
+        'return (b << 16) | a',
+      ],
+    },
+  };
+  return sources[algorithm];
+}
+
 function collectPlans(plan: ClassPlan, accumulator: ClassPlan[]): void {
   // Post-order: iç sınıflar dışarıdakinden ÖNCE tanımlanır. Çalışma zamanında
   // şart değil (açıklamalar metin, çağrılar modül yüklendikten sonra) ama
@@ -1222,7 +1331,11 @@ export function generatePythonParser(
   const errorClass = allocateModuleName(`${rootClassName}ParseError`);
   const rootFunctionName = allocateModuleName(`_parse_${toIdentifier(schema.name, 'snake')}`);
 
-  const helpers: HelperUsage = { bcd: false, crc: false, xor8: false, sum8: false, lrc: false };
+  const helpers: HelperUsage = {
+    bcd: false,
+    crc: false,
+    simple: new Set<SimpleChecksumAlgorithm>(),
+  };
   const enums: EnumPlan[] = [];
   const context: PlanContext = { schema, allocateModuleName, enums, helpers, errorClass };
 
@@ -1262,44 +1375,14 @@ export function generatePythonParser(
   if (helpers.crc) {
     definitions.push(emitReflectHelper(indent), emitCrcHelper(indent));
   }
-  if (helpers.xor8) {
+  // Sıra kümeden değil katalogdan: aynı şema her zaman aynı metni versin.
+  for (const algorithm of CHECKSUM_ALGORITHMS) {
+    if (!isSimpleChecksumAlgorithm(algorithm) || !helpers.simple.has(algorithm)) {
+      continue;
+    }
+    const source = simpleChecksumSource(algorithm, indent);
     definitions.push(
-      emitSimpleChecksumHelper(
-        '_xor8',
-        "Tüm baytların XOR'u; sıra bağımsızdır.",
-        ['result = 0', 'for byte in payload:', indentLines('result ^= byte', indent), 'return result'],
-        indent,
-      ),
-    );
-  }
-  if (helpers.sum8) {
-    definitions.push(
-      emitSimpleChecksumHelper(
-        '_sum8',
-        'Baytların toplamı, 8 bite taşarsa kırpılır.',
-        [
-          'total = 0',
-          'for byte in payload:',
-          indentLines('total = (total + byte) & 0xFF', indent),
-          'return total',
-        ],
-        indent,
-      ),
-    );
-  }
-  if (helpers.lrc) {
-    definitions.push(
-      emitSimpleChecksumHelper(
-        '_lrc',
-        "Modbus ASCII LRC: bayt toplamının 8 bitlik two's complement'i.",
-        [
-          'total = 0',
-          'for byte in payload:',
-          indentLines('total = (total + byte) & 0xFF', indent),
-          'return (256 - total) & 0xFF',
-        ],
-        indent,
-      ),
+      emitSimpleChecksumHelper(SIMPLE_HELPER_NAMES[algorithm], source.doc, source.body, indent),
     );
   }
 

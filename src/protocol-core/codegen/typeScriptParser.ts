@@ -42,7 +42,8 @@
  * göre SIRALANIR — nesne anahtar sırası şemadan gelen JSON'a bağlı kalmasın.
  */
 
-import type { ChecksumAlgorithm } from '../checksums/algorithmCatalogue';
+import { isSimpleChecksumAlgorithm } from '../checksums/algorithmCatalogue';
+import type { SimpleChecksumAlgorithm } from '../checksums/algorithmCatalogue';
 import { CRC_CATALOGUE } from '../checksums/crcCatalogue';
 import type { CrcParams } from '../checksums/crcEngine';
 import type { ProtocolFieldSchema, ProtocolSchema } from '../schemas/protocolSchema';
@@ -143,6 +144,10 @@ const HELPER_NAMES = [
   'computeXor8',
   'computeSum8',
   'computeLrc',
+  'computeNmeaXor',
+  'computeFletcher16',
+  'computeFletcher32',
+  'computeAdler32',
   'reflectBits',
   'computeCrc',
 ] as const;
@@ -163,6 +168,12 @@ const HELPER_DEPENDENCIES: Readonly<Record<HelperName, readonly HelperName[]>> =
   computeXor8: [],
   computeSum8: [],
   computeLrc: ['computeSum8'],
+  // NMEA'nın XOR'u sayısal olarak XOR8'in aynısı; ayrı yardımcı YAZILMAZ, aynı
+  // gövde iki adla üretilseydi okuyan iki farklı hesap sanırdı.
+  computeNmeaXor: ['computeXor8'],
+  computeFletcher16: [],
+  computeFletcher32: [],
+  computeAdler32: [],
   reflectBits: [],
   computeCrc: ['reflectBits'],
 };
@@ -309,6 +320,60 @@ function computeSum8(bytes: Uint8Array): number {
   computeLrc: `/** Modbus ASCII LRC: bayt toplamının 8 bitlik two's complement'i. */
 function computeLrc(bytes: Uint8Array): number {
   return (256 - computeSum8(bytes)) % 256;
+}`,
+  computeNmeaXor: `/**
+ * NMEA 0183 checksum'ı: \`$\` ve \`*\` ARASINDAKİ baytların XOR'u. Sınırlayıcılar
+ * kapsama girmez — hangi baytların kapsandığı şemadaki \`coverage\` ile belirlenir,
+ * bu yüzden hesap XOR8'in aynısıdır.
+ */
+function computeNmeaXor(bytes: Uint8Array): number {
+  return computeXor8(bytes);
+}`,
+  computeFletcher16: `/**
+ * Fletcher-16. Modülüs 255'tir (256 DEĞİL): Fletcher'ın dağılım özelliği bu
+ * asimetrik mod'a dayanır, yuvarlak sayıya çevirmek checksum'ı bozar.
+ */
+function computeFletcher16(bytes: Uint8Array): number {
+  let sum1 = 0;
+  let sum2 = 0;
+  for (const byte of bytes) {
+    sum1 = (sum1 + byte) % 255;
+    sum2 = (sum2 + sum1) % 255;
+  }
+  return (sum2 << 8) | sum1;
+}`,
+  computeFletcher32: `/**
+ * Fletcher-32: 16 bitlik kelimeler üzerinde, üst bayt önce. Tek sayıda baytta
+ * son kelimenin alt baytı 0 ile doldurulur.
+ *
+ * Sonuç \`sum2 * 65536 + sum1\` ile birleştirilir, \`<<\` ile DEĞİL: \`<<\`
+ * işleneni 32 bit İŞARETLİ tamsayıya çevirir ve sum2'nin üst biti 1 olduğunda
+ * negatif sonuç üretirdi.
+ */
+function computeFletcher32(bytes: Uint8Array): number {
+  let sum1 = 0;
+  let sum2 = 0;
+  for (let index = 0; index < bytes.length; index += 2) {
+    const high = bytes[index] ?? 0;
+    const low = index + 1 < bytes.length ? (bytes[index + 1] ?? 0) : 0;
+    sum1 = (sum1 + ((high << 8) | low)) % 65535;
+    sum2 = (sum2 + sum1) % 65535;
+  }
+  return sum2 * 65536 + sum1;
+}`,
+  computeAdler32: `/**
+ * Adler-32 (zlib). Fletcher'dan iki farkı: \`a\` 1'den başlar (tamamı sıfır veri
+ * boş veriden ayrışsın diye) ve modülüs 16 bite sığan en büyük ASAL olan
+ * 65521'dir.
+ */
+function computeAdler32(bytes: Uint8Array): number {
+  let a = 1;
+  let b = 0;
+  for (const byte of bytes) {
+    a = (a + byte) % 65521;
+    b = (b + a) % 65521;
+  }
+  return b * 65536 + a;
 }`,
   reflectBits: `/** Değerin alt \`width\` bitini ters çevirir; refin/refout için. */
 function reflectBits(value: bigint, width: number): bigint {
@@ -741,17 +806,29 @@ function resolveDynamicLength(
   return numberLiteral(fieldByteLength(field) ?? 0);
 }
 
-function crcParametersOf(algorithm: ChecksumAlgorithm): CrcParams | null {
-  if (
-    algorithm === 'none' ||
-    algorithm === 'xor8' ||
-    algorithm === 'sum8' ||
-    algorithm === 'lrc'
-  ) {
-    return null;
-  }
-  return CRC_CATALOGUE[algorithm];
-}
+/**
+ * Basit algoritmanın hangi yardımcıyı çağıracağı. Sabit tablo: ad şablonla
+ * (`compute${...}`) üretilseydi `HelperName` birleşimiyle bağı kopar, katalogda
+ * yeni bir algoritma belirdiğinde derleyici uyarmaz olurdu.
+ */
+const SIMPLE_CHECKSUM_HELPERS: Readonly<Record<SimpleChecksumAlgorithm, HelperName>> = {
+  xor8: 'computeXor8',
+  sum8: 'computeSum8',
+  lrc: 'computeLrc',
+  nmeaXor: 'computeNmeaXor',
+  fletcher16: 'computeFletcher16',
+  fletcher32: 'computeFletcher32',
+  adler32: 'computeAdler32',
+};
+
+/**
+ * Üretilen ayrıştırıcı checksum alanını `readUnsignedNumber` ile `number` okur;
+ * o yardımcı 2^53'ten büyük değeri sessizce yuvarlar. 48 bitten geniş bir CRC
+ * (katalogda CRC64) için karşılaştırma bu yüzden ÜRETİLMEZ — üretilseydi
+ * doğrulama rastgele başarısız olur, kullanıcı hatayı kendi protokolünde
+ * arardı.
+ */
+const MAX_VERIFIABLE_CRC_WIDTH_BITS = 48;
 
 /** Katalogdaki değerler `0x8005n` gibi, register genişliğine göre sıfır dolgulu yazılır. */
 function crcHexLiteral(value: bigint, width: number): string {
@@ -937,15 +1014,24 @@ function emitChecksumVerification(
 
   const covered = `${FRAME_PARAMETER}.subarray(${start.coverageStartLocal}, ${end.coverageEndLocal})`;
   const computedLocal = `${planned.local}Computed`;
-  const crcParams = crcParametersOf(algorithm);
 
-  if (crcParams === null) {
-    const helper: HelperName =
-      algorithm === 'xor8' ? 'computeXor8' : algorithm === 'sum8' ? 'computeSum8' : 'computeLrc';
+  if (isSimpleChecksumAlgorithm(algorithm)) {
+    const helper = SIMPLE_CHECKSUM_HELPERS[algorithm];
     useHelper(context, helper);
     line(out, indent, depth, `const ${computedLocal} = ${helper}(${covered});`);
     line(out, indent, depth, `if (${computedLocal} !== ${planned.local}) {`);
   } else {
+    const crcParams = CRC_CATALOGUE[algorithm];
+    if (crcParams.width > MAX_VERIFIABLE_CRC_WIDTH_BITS) {
+      line(
+        out,
+        indent,
+        depth,
+        `// ${algorithm} ${crcParams.width} bit: alan \`number\` okunuyor ve 2^53'ü aşıyor,`,
+      );
+      line(out, indent, depth, '// karşılaştırma sessizce yanlış olurdu; doğrulama üretilmedi.');
+      return;
+    }
     useHelper(context, 'computeCrc');
     line(out, indent, depth, `const ${computedLocal} = computeCrc(${covered}, {`);
     for (const parameterLine of crcParameterLines(crcParams)) {

@@ -251,13 +251,23 @@ altındaki `websocket/` klasörü aynı `ByteSource` sözleşmesini gerçekleyec
 | Faz | İçerik | Durum |
 |---|---|---|
 | 2 | İskelet: katalog, protocol-core, i18n, ByteViewer, routing | ✅ |
-| 3 | Platform tarafında `Comm` API modülü ve `comm` DB şeması | sırada |
 | 5 | Byte utils, conversion engine, CRC engine, timing hesapları | ✅ |
 | 6 | Stream buffer, framing engine (15 yöntem), parser state machine, Worker | ✅ |
 | 8 | Live Serial Monitor: Web Serial, ring buffer, grafik, istatistik | ✅ |
-| 7 | Custom Protocol Studio + Packet Builder, kod üreticiler | atlandı, geri dönülecek |
+| 7 | Custom Protocol Studio + Packet Builder, 6 kod üretici | ✅ |
+| 3 | Platform tarafında `Comm` API modülü ve `comm` DB şeması | sırada (`alp-platform`) |
+| 4 | Süit yüzü: statik landing, nginx path routing, compose'a comm servisi | (`alp-platform`) |
 | 9 | İlk protokoller: Modbus, NMEA 0183, CAN, DBC, J1939 | |
 | 10+ | Kalan protokol dalgaları | |
+
+Sıra numaraya göre değil bağımlılığa göre ilerledi: 3 ve 4 kardeş depoda olduğu için
+SPA tarafı 5→6→8→7 diye gitti. Faz 9 bu depoda sıradaki büyük iş.
+
+**Bugün ne çalışıyor:** spec §50'nin "gerçekten çalışmalı" dediği 15 araçtan 10'u —
+HEX/ASCII, IEEE-754, endian, CRC hesaplayıcı, UART/SPI/I²C zamanlama, Live Serial Monitor,
+Custom Protocol Studio, Packet Builder. Eksik 5'i protokol decoder'ları (Modbus RTU/TCP,
+NMEA 0183, CAN, J1939) ve hepsi Faz 9'da. Katalogdaki 172 protokol kaydı hâlâ
+`status: 'planned'` — sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
 
 ## Lisans
 

@@ -57,7 +57,11 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'i2c-timing', category: 'timing', nameKey: 'calc.i2cTiming.name', summaryKey: 'calc.i2cTiming.summary' },
   { id: 'pmbus-linear', category: 'timing', nameKey: 'calc.pmbusLinear.name', summaryKey: 'calc.pmbusLinear.summary' },
 
-  // --- CRC/checksum bulucu (spec §11) ---
+  // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
+  // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer
+  // hangi algoritmadan çıktı" sorusundan daha sık sorulur ve bulucunun girdisi
+  // çoğu zaman burada üretilir.
+  { id: 'crc-calculator', category: 'checksum', nameKey: 'calc.crcCalculator.name', summaryKey: 'calc.crcCalculator.summary' },
   { id: 'checksum-finder', category: 'checksum', nameKey: 'calc.checksumFinder.name', summaryKey: 'calc.checksumFinder.summary' },
 ] as const;
 
