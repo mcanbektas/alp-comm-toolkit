@@ -20,10 +20,14 @@ const ALIAS_DEFINITIONS_PATH =
   '/comm/marine-navigation/marine-machinery/marine-j1939?tab=definitions';
 /**
  * Regresyon bekçisi: `definitions` sekmesi VAR ama DBC saymayan bir kayıt.
- * CANopen tanım biçimi olarak EDS kullanır; DBC paneli burada AÇILMAMALI.
+ *
+ * Dalga 1c'den ÖNCE bu yol CANopen'a işaret ediyordu, ama CANopen artık EDS
+ * paneli açıyor (dalga 1c) — o yol bu bekçi için artık YANLIŞ. PSI5'in
+ * dalga 3'teki taşınma gerekçesiyle aynı mantıkla LIN'e taşındı: LIN
+ * `definitions: ['ldf']` taşıyor ama LDF motoru plan-fazlar.md'nin hiçbir
+ * dalgasında yok, yakın vadede bir panel almayacak.
  */
-const NON_DBC_DEFINITIONS_PATH =
-  '/comm/automotive/vehicle-network-protocols/canopen?tab=definitions';
+const NON_DBC_DEFINITIONS_PATH = '/comm/automotive/vehicle-network-protocols/lin?tab=definitions';
 
 async function openPage(page: Page, path: string): Promise<string[]> {
   const consoleErrors: string[] = [];

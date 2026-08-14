@@ -199,8 +199,13 @@ export const automotiveDomain: CatalogDomain = {
             'timing',
             'data',
             'diagnostics',
+            'definitions',
             'examples',
           ],
+          // Katalog borcu (dalga 1c'de kapatıldı): DBC paneli önceden yalnız
+          // marine-j1939 ALIAS'ında açılıyordu, kanonik kayıtta değil — zincir
+          // ters yönde işliyordu. `definitions` artık kanonikte de var.
+          definitions: ['dbc'],
           // PGN hesabı PF eşiğine bağlıdır: PDU1'de PS bir hedef adrestir ve
           // PGN'den düşülür, PDU2'de group extension olarak PGN'e girer.
           tools: [

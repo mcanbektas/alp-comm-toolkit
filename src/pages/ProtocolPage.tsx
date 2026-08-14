@@ -81,6 +81,23 @@ const DbcPanel = lazy(async () => {
   return { default: module.DbcPanel };
 });
 
+/** EDS paneli de aynı gerekçeyle TEMBEL: yalnız CANopen'ın `definitions` sekmesinde gerekir. */
+const EdsPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/EdsPanel');
+  return { default: module.EdsPanel };
+});
+
+/**
+ * Tanım biçimi → panel eşlemesi. Dalga 1c'den ÖNCE bu tek satırlık bir
+ * `showsDbcPanel` boolean'ıydı; ikinci biçim (EDS) eklenince üçlü ternary'yi
+ * büyütmek yerine seçici bir yapıya çevrildi — üçüncü bir biçim geldiğinde
+ * yalnız bu tabloya satır eklenir, render dalına dokunulmaz.
+ */
+const DEFINITION_PANELS: Partial<Record<DefinitionFormat, typeof DbcPanel>> = {
+  dbc: DbcPanel,
+  eds: EdsPanel,
+};
+
 /**
  * Spec §43'ün custom binary protocol fixture'ı: `AA 05 10 03 34 12 7F 4F 55`.
  * YALNIZ eklentisi olmayan protokoller için geçici örnek — motoru olan protokol
@@ -224,13 +241,17 @@ export function ProtocolPage(): ReactElement {
   // üstünde "Planlandı" yazmamalı.
   const decodeStatus = resolveStatus(protocol);
   /**
-   * DBC paneli, kaydın DBC'yi tanım biçimi olarak SAYDIĞI sayfalarda açılır.
-   * `pluginId` ile ilgisi yoktur: DBC bir protokol değil tanım dosyasıdır ve
-   * kaydın kendi `definitions` listesinden gelir (alias zincirine inilmez —
-   * hangi tanım biçimlerinin gösterileceği sayfanın kendi verisidir).
+   * Hangi tanım paneli açılacağı kaydın `definitions` listesinden gelir
+   * (alias zincirine inilmez — hangi biçimlerin gösterileceği sayfanın kendi
+   * verisidir). Motoru olmayan bir biçim (`gsd`, `ldf`, …) listede olsa da
+   * `DEFINITION_PANELS`te karşılığı yoksa `undefined` kalır ve "planlandı"
+   * dalına düşülür — birden çok biçim varsa (`marine-j1939`'un
+   * `['dbc', 'custom-schema']`ı gibi) İLK eşleşen kazanır.
    */
-  const showsDbcPanel =
-    activeTab === 'definitions' && protocol.definitions?.includes('dbc') === true;
+  const DefinitionPanel =
+    activeTab === 'definitions'
+      ? protocol.definitions?.map((format) => DEFINITION_PANELS[format]).find((panel) => panel !== undefined)
+      : undefined;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
@@ -360,9 +381,9 @@ export function ProtocolPage(): ReactElement {
               <Suspense fallback={<DecodeFallback />}>
                 <DecodePanel pluginId={decodePluginId} />
               </Suspense>
-            ) : showsDbcPanel ? (
+            ) : DefinitionPanel !== undefined ? (
               <Suspense fallback={<DecodeFallback />}>
-                <DbcPanel />
+                <DefinitionPanel />
               </Suspense>
             ) : (
               <>

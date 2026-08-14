@@ -1541,4 +1541,35 @@ export const en: TranslationDictionary = {
     'The same identifier is defined more than once; the first definition was kept.',
   'definition.dbc.issue.signalExceedsMessage':
     'The signal does not fit the length the message declares.',
+
+  // --- EDS definition file ---
+  'definition.eds.action.import': 'Import EDS file',
+  'definition.eds.sampleNotice':
+    'A sample definition is shown. You can import your own EDS file; it never leaves your device.',
+  'definition.eds.fileName': 'File name',
+  'definition.eds.vendorProduct': 'Vendor / Product',
+  'definition.eds.objectCount': 'Object count',
+  'definition.eds.line': 'Line',
+  'definition.eds.object.label': 'Object Dictionary entry',
+  'definition.eds.decodeHex.label': 'Sample value bytes (HEX)',
+  'definition.eds.table.objects': 'Object Dictionary',
+  'definition.eds.column.index': 'Index',
+  'definition.eds.column.name': 'Name',
+  'definition.eds.column.dataType': 'Data type',
+  'definition.eds.column.access': 'Access',
+  'definition.eds.column.default': 'Default',
+  'definition.eds.column.range': 'Range',
+  'definition.eds.column.pdoMapping': 'PDO Mapping',
+  'definition.eds.decode.unavailable':
+    'This entry’s data type is unknown; raw bytes cannot be decoded by type.',
+  'definition.eds.error.readFailed': 'Could not read the file.',
+  'definition.eds.error.parseFailed':
+    'The EDS file could not be parsed; no Object Dictionary entry was found in it.',
+  'definition.eds.issue.emptyInput': 'The file is empty.',
+  'definition.eds.issue.noObjects': 'The file has no Object Dictionary entries.',
+  'definition.eds.issue.malformedLine': 'The line is neither a section header nor a key=value pair.',
+  'definition.eds.issue.unsupportedSection':
+    'This section was not read; it does not affect Object Dictionary resolution.',
+  'definition.eds.issue.duplicateObject':
+    'The same index/sub-index is defined more than once; the first definition was kept.',
 };

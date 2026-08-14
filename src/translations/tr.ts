@@ -1542,6 +1542,37 @@ export const tr = {
     'Aynı identifier birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
   'definition.dbc.issue.signalExceedsMessage':
     'Sinyal mesajın bildirdiği uzunluğa sığmıyor.',
+
+  // --- EDS tanım dosyası ---
+  'definition.eds.action.import': 'EDS dosyası içe aktar',
+  'definition.eds.sampleNotice':
+    'Örnek tanım gösteriliyor. Kendi EDS dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.eds.fileName': 'Dosya adı',
+  'definition.eds.vendorProduct': 'Satıcı / Ürün',
+  'definition.eds.objectCount': 'Nesne sayısı',
+  'definition.eds.line': 'Satır',
+  'definition.eds.object.label': 'Object Dictionary girdisi',
+  'definition.eds.decodeHex.label': 'Örnek değer baytları (HEX)',
+  'definition.eds.table.objects': 'Object Dictionary',
+  'definition.eds.column.index': 'Index',
+  'definition.eds.column.name': 'Ad',
+  'definition.eds.column.dataType': 'Veri tipi',
+  'definition.eds.column.access': 'Erişim',
+  'definition.eds.column.default': 'Varsayılan',
+  'definition.eds.column.range': 'Aralık',
+  'definition.eds.column.pdoMapping': 'PDO Mapping',
+  'definition.eds.decode.unavailable':
+    'Bu girdinin veri tipi bilinmiyor; ham baytlar tipe göre çözülemez.',
+  'definition.eds.error.readFailed': 'Dosya okunamadı.',
+  'definition.eds.error.parseFailed':
+    'EDS dosyası çözümlenemedi; içinde hiç Object Dictionary girdisi bulunamadı.',
+  'definition.eds.issue.emptyInput': 'Dosya boş.',
+  'definition.eds.issue.noObjects': 'Dosyada hiç Object Dictionary girdisi yok.',
+  'definition.eds.issue.malformedLine': 'Satır ne bölüm başlığı ne anahtar=değer biçiminde.',
+  'definition.eds.issue.unsupportedSection':
+    'Bu bölüm okunmadı; Object Dictionary çözümünü etkilemiyor.',
+  'definition.eds.issue.duplicateObject':
+    'Aynı index/sub-index birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
 } as const;
 
 /**
