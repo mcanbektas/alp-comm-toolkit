@@ -1499,6 +1499,38 @@ export const tr = {
   'protocol.canopen.example.reservedFunctionCodeRejected.description':
     'Function code 0xD: CiA 301’in on beş atanmış değerinden biri değil, hata basılır.',
 
+  // --- LIN ---
+  'protocol.lin.error.frameTooShort':
+    'Kayıt Sync, PID ve Checksum baytlarını taşıyacak kadar uzun değil.',
+  'protocol.lin.error.frameTooLong': 'Kayıt azami sekiz veri baytının izin verdiği uzunluğu aşıyor.',
+  'protocol.lin.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.lin.error.invalidSync': 'İlk bayt 0x55 değil; bu bir LIN Sync baytı olamaz.',
+  'protocol.lin.error.checksumMismatch':
+    'Checksum ne klasik (yalnız veri) ne geliştirilmiş (PID+veri) konvansiyonuyla eşleşiyor.',
+  'protocol.lin.warning.parityMismatch':
+    'PID’in parite bitleri ID’den hesaplanan değerle eşleşmiyor.',
+  'protocol.lin.summary.frame': 'LIN çerçevesi',
+  'protocol.lin.documentation.summary':
+    'Sync (0x55) + PID + Data + Checksum çözümü. Break fiziksel katman sinyalidir ve bayt olarak modellenmez. PID paritesi spec’in verdiği formülle, checksum LIN 2.1’den dış kaynaklı algoritmayla hesaplanır — hangi konvansiyonun (klasik/geliştirilmiş) kullanıldığı telden okunamadığı için motor ikisini de dener.',
+  'protocol.lin.example.validClassicChecksum.name': 'Geçerli çerçeve (Classic checksum)',
+  'protocol.lin.example.validClassicChecksum.description':
+    'ID 0x01, PID 0xC1. Checksum yalnız veri baytları üzerinden hesaplananla eşleşiyor.',
+  'protocol.lin.example.validEnhancedChecksum.name': 'Geçerli çerçeve (Enhanced checksum)',
+  'protocol.lin.example.validEnhancedChecksum.description':
+    'Aynı PID/veri; checksum PID dahil hesaplananla eşleşiyor, klasikle değil.',
+  'protocol.lin.example.zeroData.name': 'Veri baytı olmayan çerçeve',
+  'protocol.lin.example.zeroData.description':
+    'Sync + PID + Checksum, hiç veri baytı yok — klasik checksum boş toplam üzerinden 0xFF.',
+  'protocol.lin.example.parityMismatch.name': 'Parite hatası',
+  'protocol.lin.example.parityMismatch.description':
+    'Aynı ID ama PID’in parite bitleri sıfırlanmış — uyarı basılır, çerçeve yine gösterilir.',
+  'protocol.lin.example.checksumMismatchRejected.name': 'Checksum hatası',
+  'protocol.lin.example.checksumMismatchRejected.description':
+    'Checksum baytı ne klasik ne geliştirilmiş hesapla eşleşiyor.',
+  'protocol.lin.example.invalidSyncRejected.name': 'Geçersiz Sync baytı',
+  'protocol.lin.example.invalidSyncRejected.description':
+    'İlk bayt 0x55 değil: hata basılır ama PID/checksum yine çözülür.',
+
   // --- DBC tanım dosyası ---
   'definition.dbc.action.import': 'DBC dosyası içe aktar',
   'definition.dbc.action.export': 'DBC olarak dışa aktar',

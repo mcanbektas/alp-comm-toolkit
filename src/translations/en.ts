@@ -1497,6 +1497,38 @@ export const en: TranslationDictionary = {
   'protocol.canopen.example.reservedFunctionCodeRejected.description':
     'Function code 0xD: not one of CiA 301’s fifteen assigned values, an error is reported.',
 
+  // --- LIN ---
+  'protocol.lin.error.frameTooShort':
+    'The record is not long enough to carry the Sync, PID and Checksum bytes.',
+  'protocol.lin.error.frameTooLong': 'The record exceeds the length eight data bytes allow.',
+  'protocol.lin.error.aborted': 'Parsing was cancelled.',
+  'protocol.lin.error.invalidSync': 'The first byte is not 0x55; this cannot be a LIN Sync byte.',
+  'protocol.lin.error.checksumMismatch':
+    'The checksum matches neither the classic (data only) nor the enhanced (PID+data) convention.',
+  'protocol.lin.warning.parityMismatch':
+    'The PID’s parity bits do not match the value computed from the ID.',
+  'protocol.lin.summary.frame': 'LIN frame',
+  'protocol.lin.documentation.summary':
+    'Decodes Sync (0x55) + PID + Data + Checksum. Break is a physical-layer signal and is not modeled as a byte. PID parity uses the spec’s own formula; the checksum uses an algorithm sourced externally from LIN 2.1 — since which convention (classic/enhanced) was used cannot be read off the wire, the engine tries both.',
+  'protocol.lin.example.validClassicChecksum.name': 'Valid frame (Classic checksum)',
+  'protocol.lin.example.validClassicChecksum.description':
+    'ID 0x01, PID 0xC1. The checksum matches the one computed over data bytes only.',
+  'protocol.lin.example.validEnhancedChecksum.name': 'Valid frame (Enhanced checksum)',
+  'protocol.lin.example.validEnhancedChecksum.description':
+    'Same PID/data; the checksum matches the one computed including PID, not the classic one.',
+  'protocol.lin.example.zeroData.name': 'Frame with no data bytes',
+  'protocol.lin.example.zeroData.description':
+    'Sync + PID + Checksum, no data bytes at all — the classic checksum over an empty sum is 0xFF.',
+  'protocol.lin.example.parityMismatch.name': 'Parity error',
+  'protocol.lin.example.parityMismatch.description':
+    'Same ID but the PID’s parity bits are zeroed out — a warning is reported, the frame is still shown.',
+  'protocol.lin.example.checksumMismatchRejected.name': 'Checksum error',
+  'protocol.lin.example.checksumMismatchRejected.description':
+    'The checksum byte matches neither the classic nor the enhanced computation.',
+  'protocol.lin.example.invalidSyncRejected.name': 'Invalid Sync byte',
+  'protocol.lin.example.invalidSyncRejected.description':
+    'The first byte is not 0x55: an error is reported but PID/checksum are still decoded.',
+
   // --- DBC definition file ---
   'definition.dbc.action.import': 'Import DBC file',
   'definition.dbc.action.export': 'Export as DBC',

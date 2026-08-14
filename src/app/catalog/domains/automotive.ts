@@ -268,7 +268,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Low-cost single-wire automotive subnetwork where a commander polls responders through a fixed schedule table of break, sync, PID, data and checksum frames.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'lin',
           tabs: [
             'overview',
             'live',
