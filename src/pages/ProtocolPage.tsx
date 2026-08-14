@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
@@ -9,6 +9,7 @@ import { useUiStore } from '@/app/store/uiStore';
 import { ByteViewer } from '@/components/byte-viewer';
 import type { ByteRegion, SeriesColorIndex } from '@/components/byte-viewer';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { resolvePluginId, resolveStatus } from '@/protocols/pluginBinding';
 import type { TranslationKey } from '@/translations';
 import { ProtocolBadges } from './FamilyPage';
 import { NotFoundPage } from './NotFoundPage';
@@ -62,10 +63,22 @@ const TAB_TOOL_KEYWORDS: Record<WorkspaceTab, readonly string[]> = {
 };
 
 /**
+ * Çözümleme paneli TEMBEL: parser modülünü kayıt defterinden `import()` ile
+ * çekiyor (`registry.ts` lazy), yani panelin kendisi de ana pakete girmemeli.
+ * Yükleme iskeleti AppRouter'daki `LazyFallback` deseninin aynısı.
+ */
+const DecodePanel = lazy(async () => {
+  const module = await import('@/features/protocol-decode/DecodePanel');
+  return { default: module.DecodePanel };
+});
+
+/**
  * Spec §43'ün custom binary protocol fixture'ı: `AA 05 10 03 34 12 7F 4F 55`.
- * Motor yok, ama görüntüleyici gerçek: çerçevenin baytları ve alan sınırları
- * doğrulanmış referans değerlerden geliyor. `AA` başlangıç, `55` bitiş baytı
- * kasıtlı olarak işaretsiz — nötr parçanın da çizildiği görülsün.
+ * YALNIZ eklentisi olmayan protokoller için geçici örnek — motoru olan protokol
+ * bu sabiti hiç görmez, `DecodePanel` gerçek parser'ın çıktısını basar.
+ * Görüntüleyici burada da gerçek: baytlar ve alan sınırları doğrulanmış
+ * referans değerlerden geliyor. `AA` başlangıç, `55` bitiş baytı kasıtlı olarak
+ * işaretsiz — nötr parçanın da çizildiği görülsün.
  */
 const SAMPLE_FRAME_BYTES = new Uint8Array([0xaa, 0x05, 0x10, 0x03, 0x34, 0x12, 0x7f, 0x4f, 0x55]);
 
@@ -109,6 +122,16 @@ function selectToolsForTab(tools: readonly string[], tab: WorkspaceTab): readonl
     const lower = tool.toLocaleLowerCase('en');
     return keywords.some((keyword) => lower.includes(keyword));
   });
+}
+
+/** AppRouter'daki `LazyFallback` ile aynı iş; o bileşen dışa verilmiyor. */
+function DecodeFallback(): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <p role="status" className="text-sm text-muted">
+      {t('common.loading')}
+    </p>
+  );
 }
 
 export function ProtocolPage(): ReactElement {
@@ -186,6 +209,11 @@ export function ProtocolPage(): ReactElement {
   const panelId = `tabpanel-${activeTab}`;
   const activeTabId = `tab-${activeTab}`;
   const visibleTools = selectToolsForTab(protocol.tools, activeTab);
+  // Alias kayıtları kanonik kayda inilerek çözülür; `null` = motoru yok.
+  const decodePluginId = resolvePluginId(protocol);
+  // Rozet de aynı zincirden gelir: alias sayfası çalışan bir çözümleyicinin
+  // üstünde "Planlandı" yazmamalı.
+  const decodeStatus = resolveStatus(protocol);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
@@ -193,7 +221,7 @@ export function ProtocolPage(): ReactElement {
 
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-xl font-semibold text-text sm:text-2xl">{protocol.name}</h1>
-        <ProtocolBadges layer={protocol.layer} status={protocol.status} />
+        <ProtocolBadges layer={protocol.layer} status={decodeStatus} />
         <p className="max-w-3xl text-sm text-muted">{protocol.summary}</p>
       </header>
 
@@ -306,32 +334,45 @@ export function ProtocolPage(): ReactElement {
           </>
         ) : (
           <>
-            <p className="rounded-token border border-line bg-surface p-3 text-sm text-muted">
-              {t('protocol.plannedNotice')}
-            </p>
+            {/*
+              Motoru olan protokolde "planlandı" bildirimi BASILMAZ: sekme artık
+              gerçekten çalışıyor, uyarı yalanlanmış olurdu. Bildirim ve sabit
+              örnek çerçeve yalnız eklentisi olmayan protokollerin dalında kalır.
+            */}
+            {activeTab === 'decode' && decodePluginId !== null ? (
+              <Suspense fallback={<DecodeFallback />}>
+                <DecodePanel pluginId={decodePluginId} />
+              </Suspense>
+            ) : (
+              <>
+                <p className="rounded-token border border-line bg-surface p-3 text-sm text-muted">
+                  {t('protocol.plannedNotice')}
+                </p>
 
-            {activeTab === 'decode' && (
-              <div className="flex flex-col gap-2 overflow-x-auto rounded-token border border-line bg-surface p-3">
-                <ByteViewer
-                  bytes={SAMPLE_FRAME_BYTES}
-                  regions={SAMPLE_FRAME_REGIONS}
-                  selectedRegionId={selectedRegionId}
-                  onRegionSelect={(regionId) => {
-                    setSelectedRegionId((current) => (current === regionId ? null : regionId));
-                  }}
-                  emptyLabel={t('common.empty')}
-                />
-                <ul className="flex flex-wrap gap-2 text-xs">
-                  {SAMPLE_FRAME_REGIONS.map((region) => (
-                    <li
-                      key={region.id}
-                      className={`font-mono ${SERIES_TEXT_CLASS[region.colorIndex ?? 0]}`}
-                    >
-                      {region.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {activeTab === 'decode' && (
+                  <div className="flex flex-col gap-2 overflow-x-auto rounded-token border border-line bg-surface p-3">
+                    <ByteViewer
+                      bytes={SAMPLE_FRAME_BYTES}
+                      regions={SAMPLE_FRAME_REGIONS}
+                      selectedRegionId={selectedRegionId}
+                      onRegionSelect={(regionId) => {
+                        setSelectedRegionId((current) => (current === regionId ? null : regionId));
+                      }}
+                      emptyLabel={t('common.empty')}
+                    />
+                    <ul className="flex flex-wrap gap-2 text-xs">
+                      {SAMPLE_FRAME_REGIONS.map((region) => (
+                        <li
+                          key={region.id}
+                          className={`font-mono ${SERIES_TEXT_CLASS[region.colorIndex ?? 0]}`}
+                        >
+                          {region.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="flex flex-col gap-2">

@@ -992,4 +992,135 @@ export const en: TranslationDictionary = {
   'projects.error.notAnObject': 'The root of the file is not a JSON object.',
   'projects.error.unsupportedVersion': 'This format version is no longer supported.',
   'projects.error.versionNotNumber': 'The format version has to be an integer.',
+
+  // --- Frame decode panel ---
+  'decode.loadFailed': 'The protocol engine could not be loaded.',
+  'decode.example.label': 'Example frame',
+  'decode.example.empty': 'This plugin ships no example frames; enter the bytes by hand.',
+  'decode.hexInput.label': 'Frame bytes (HEX)',
+  // Spec §42'nin birebir metni — `studio.output.parseError.code.invalidHexInput` ile aynı cümle.
+  'decode.error.invalidHex': 'Invalid hexadecimal input',
+  'decode.byteCount': 'Byte count',
+  'decode.noParser':
+    'This plugin has no parser; it only provides encoding and example frames. The bytes are shown raw below.',
+  'decode.parserCrashed': 'The parser stopped with an unexpected error; the raw bytes are below.',
+  'decode.table.label': 'Parsed fields',
+  'decode.column.field': 'Field',
+  'decode.column.offset': 'Offset',
+  'decode.column.length': 'Length',
+  'decode.column.raw': 'Raw value',
+  'decode.column.physical': 'Physical value',
+  'decode.column.validity': 'Validity',
+  'decode.status.valid': 'Valid',
+  'decode.status.invalid': 'Invalid',
+  'decode.fields.empty': 'The parse produced no fields.',
+  'decode.parseError.title': 'The frame could not be parsed',
+  'decode.parseError.offset': 'Error offset',
+  'decode.parseError.consumedBytes': 'Consumed bytes',
+  'decode.parseError.recoverable': 'Recoverable — parsing can pick up at the next frame.',
+  'decode.parseError.unrecoverable': 'Unrecoverable — nothing past this point can be trusted.',
+
+  // --- Modbus ---
+  // Function code and protocol names are DATA and stay untranslated; these strings
+  // only explain what the code does. None of them carries a placeholder — see the
+  // `summaryParams` note in `modbusPdu.ts`.
+  'protocol.modbus.pdu.summary.readCoils': 'Read coils',
+  'protocol.modbus.pdu.summary.readDiscreteInputs': 'Read discrete inputs',
+  'protocol.modbus.pdu.summary.readHoldingRegisters': 'Read holding registers',
+  'protocol.modbus.pdu.summary.readInputRegisters': 'Read input registers',
+  'protocol.modbus.pdu.summary.writeSingleCoil': 'Write single coil',
+  'protocol.modbus.pdu.summary.writeSingleRegister': 'Write single register',
+  'protocol.modbus.pdu.summary.writeMultipleCoils': 'Write multiple coils',
+  'protocol.modbus.pdu.summary.writeMultipleRegisters': 'Write multiple registers',
+  'protocol.modbus.pdu.summary.maskWriteRegister': 'Mask write register',
+  'protocol.modbus.pdu.summary.readWriteMultipleRegisters': 'Read/write multiple registers',
+  'protocol.modbus.pdu.summary.encapsulatedInterfaceTransport':
+    'Encapsulated interface transport (MEI)',
+  'protocol.modbus.pdu.summary.exceptionResponse': 'Exception response',
+  'protocol.modbus.pdu.summary.unknownFunctionCode': 'Unknown function code',
+  'protocol.modbus.pdu.warning.truncatedBody':
+    'The PDU body is shorter than this function code expects; the remaining fields could not be decoded.',
+  'protocol.modbus.pdu.warning.truncatedField':
+    'The field does not fit inside the body and was read incomplete.',
+  'protocol.modbus.pdu.warning.emptyBody': 'The PDU body is empty.',
+  'protocol.modbus.pdu.warning.byteCountMismatch':
+    'The byte count field does not match the amount of data left in the body.',
+  'protocol.modbus.pdu.warning.oddRegisterByteCount':
+    'The register data holds an odd number of bytes; a register is 16 bits.',
+  'protocol.modbus.pdu.warning.trailingBytes': 'There are leftover bytes after the decoded fields.',
+  'protocol.modbus.pdu.warning.zeroQuantity':
+    'The quantity field is zero; no item is read or written.',
+  'protocol.modbus.pdu.warning.unknownFunctionCode':
+    'The function code is not in the table; the body is left as raw bytes.',
+  'protocol.modbus.pdu.warning.illegalCoilValue':
+    'A coil value may only be 0xFF00 (ON) or 0x0000 (OFF).',
+  'protocol.modbus.pdu.warning.missingExceptionCode':
+    'The exception response carries no exception code byte.',
+  'protocol.modbus.pdu.warning.unknownExceptionCode': 'The exception code is not in the table.',
+  'protocol.modbus.pdu.warning.exceptionBitInRequest':
+    'The request PDU has the exception bit (0x80) set; requests never carry it.',
+  'protocol.modbus.rtu.documentation.summary':
+    'The binary serial-line encoding of the Modbus application protocol. Frame boundaries are silent intervals rather than delimiters, and integrity rests on a CRC-16 computed from the address through the end of the PDU.',
+  'protocol.modbus.rtu.error.crcMismatch':
+    'CRC mismatch: the calculated value differs from the one carried in the frame.',
+  'protocol.modbus.rtu.error.frameTooShort':
+    'Frame too short: a Modbus RTU frame carries at least an address, a function code and a two-byte CRC.',
+  'protocol.modbus.rtu.error.frameTooLong':
+    'The frame exceeds the maximum allowed Modbus RTU length.',
+  'protocol.modbus.rtu.error.unsupportedFunctionCode':
+    'Unsupported function code — the frame is still shown byte by byte.',
+  'protocol.modbus.rtu.error.aborted': 'Parsing was cancelled.',
+  'protocol.modbus.rtu.warning.roleInferredRequest':
+    'No direction was given; the frame was decoded as a request based on its body.',
+  'protocol.modbus.rtu.warning.roleInferredResponse':
+    'No direction was given; the frame was decoded as a response based on its body.',
+  'protocol.modbus.rtu.warning.broadcastAddress':
+    'Address 0 is the broadcast address: every device listens and none replies.',
+  'protocol.modbus.rtu.warning.reservedSlaveAddress':
+    'This address is reserved by the standard; individual device addresses run from 1 to 247.',
+  'protocol.modbus.rtu.example.readHoldingRegistersRequest.name': 'Read holding registers request',
+  'protocol.modbus.rtu.example.readHoldingRegistersRequest.description':
+    'Two holding registers requested from device 1 — the reference fixture with a verified CRC.',
+  'protocol.modbus.rtu.example.readHoldingRegistersResponse.name':
+    'Read holding registers response',
+  'protocol.modbus.rtu.example.readHoldingRegistersResponse.description':
+    'Four data bytes: the first register reads 100, the second reads 200.',
+  'protocol.modbus.rtu.example.exceptionResponse.name': 'Exception response',
+  'protocol.modbus.rtu.example.exceptionResponse.description':
+    'The function code has bit 0x80 set: the device rejects the request with Illegal Data Address.',
+  'protocol.modbus.rtu.example.writeMultipleCoilsRequest.name': 'Write multiple coils request',
+  'protocol.modbus.rtu.example.writeMultipleCoilsRequest.description':
+    'Ten coils written to device 17; the data is a bit string packed into two bytes.',
+  'protocol.modbus.rtu.example.crcMismatch.name': 'Broken CRC',
+  'protocol.modbus.rtu.example.crcMismatch.description':
+    'The read request with a single-bit CRC corruption: received 0x0BC5, calculated 0x0BC4.',
+  'protocol.modbus.ascii.documentation.summary':
+    'Serial form that carries Modbus messages as printable hexadecimal characters between a colon and CR LF, protected by an LRC instead of a CRC.',
+  'protocol.modbus.ascii.error.missingColon': 'Frame does not start with a colon',
+  'protocol.modbus.ascii.error.invalidHexCharacter': 'Frame contains a non-hexadecimal character',
+  'protocol.modbus.ascii.error.oddHexDigitCount': 'Odd number of hexadecimal digits',
+  'protocol.modbus.ascii.error.missingCarriageReturn': 'Missing CR before LF',
+  'protocol.modbus.ascii.error.missingLineFeed': 'Frame does not end with LF',
+  'protocol.modbus.ascii.error.frameTooShort':
+    'Frame is too short to carry address, function code and LRC',
+  'protocol.modbus.ascii.error.frameTooLong': 'No frame terminator within the allowed length',
+  'protocol.modbus.ascii.error.lrcMismatch': 'LRC mismatch',
+  'protocol.modbus.ascii.error.parserCancelled': 'Parsing was cancelled',
+  'protocol.modbus.ascii.warning.lrcMismatch': 'Calculated LRC differs from the received LRC',
+  'protocol.modbus.ascii.warning.reservedSlaveAddress':
+    'Slave address falls in the reserved 248-255 range',
+  'protocol.modbus.ascii.example.readHoldingRegistersRequest.description':
+    'Request that reads two holding registers from device 1; documentation addresses 40001-40002.',
+  'protocol.modbus.ascii.example.readHoldingRegistersResponse.description':
+    'Response to that request: four data bytes carrying two register values.',
+  'protocol.modbus.ascii.example.exceptionResponse.description':
+    'Exception response: the function code carries the 0x80 flag and the exception code reports an illegal data address.',
+  'protocol.modbus.ascii.example.invalidHexCharacter.description':
+    'Malformed frame containing a non-hexadecimal character; shows the error path.',
+  'protocol.modbus.ascii.example.lrcMismatch.description':
+    'Frame sent with an off-by-one LRC; fields are still decoded and the frame is marked invalid.',
+  'protocol.modbus.tcp.warning.unexpectedProtocolId':
+    'Protocol ID is not zero; another protocol may be encapsulated on this port.',
+  'protocol.modbus.tcp.warning.oversizedLength':
+    'The length field exceeds the largest PDU size the standard allows.',
 };

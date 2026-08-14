@@ -1,0 +1,80 @@
+import { render, screen } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
+import { registerBuiltInProtocols } from '@/protocols';
+import { translations } from '@/translations';
+
+import { ProtocolPage } from './ProtocolPage';
+
+/**
+ * Sayfa GERÇEK katalogla ve GERÇEK kayıt defteriyle koşuyor: sınanan şey tam da
+ * "katalogdaki `pluginId` motoru ekrana getiriyor mu" zinciri. Kataloğu ya da
+ * defteri sahtelemek o zincirin kendisini taklit etmek olurdu.
+ *
+ * `registerBuiltInProtocols` normalde `main.tsx`te bir kez koşar; test ağacı
+ * oradan geçmediği için burada elle çağrılıyor.
+ */
+registerBuiltInProtocols();
+
+/** Motoru olan kayıt (katalogda `pluginId: 'modbus-rtu'`). */
+const PLUGGED_PATH = 'industrial-automation/modbus/modbus-rtu';
+/** Motoru olmayan ama `decode` sekmesi olan kayıt. */
+const PLANNED_PATH = 'interfaces-framing/serial-interfaces/uart';
+
+function renderAt(path: string): RenderResult {
+  return render(
+    <LanguageProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path=":domainId/:familyId/:protocolId" element={<ProtocolPage />} />
+        </Routes>
+      </MemoryRouter>
+    </LanguageProvider>,
+  );
+}
+
+beforeEach(() => {
+  window.localStorage.clear();
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'tr');
+});
+
+describe('ProtocolPage decode tab', () => {
+  it('mounts the decode panel and drops the planned notice when a plugin is bound', async () => {
+    renderAt(`/${PLUGGED_PATH}?tab=decode`);
+
+    // Panel tembel yüklenir, motoru da öyle: ilk kare Suspense fallback'idir.
+    expect(await screen.findByTestId('decode-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('decode-plugin-name')).toHaveTextContent('Modbus RTU');
+    expect(screen.queryByText(translations.tr['protocol.plannedNotice'])).not.toBeInTheDocument();
+  });
+
+  it('decodes the spec §43 reference frame end to end', async () => {
+    renderAt(`/${PLUGGED_PATH}?tab=decode`);
+    await screen.findByTestId('decode-panel');
+
+    // 01 03 00 00 00 02 C4 0B — CLAUDE.md'deki doğrulanmış Modbus RTU fixture'ı.
+    expect(screen.getByRole('textbox')).toHaveValue('01 03 00 00 00 02 C4 0B');
+    expect(screen.getByTestId('decode-field-table')).toBeInTheDocument();
+    expect(screen.getAllByTestId('decode-field-row').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the planned notice and the placeholder frame when no plugin is bound', () => {
+    renderAt(`/${PLANNED_PATH}?tab=decode`);
+
+    expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
+    // Sabit örnek çerçeve YALNIZ bu dalda kalır.
+    expect(screen.getByTestId('byte-viewer')).toHaveTextContent('AA 05 10 03 34 12 7F 4F 55');
+    expect(screen.queryByTestId('decode-panel')).not.toBeInTheDocument();
+  });
+
+  it('leaves the other tabs of a plugged protocol untouched', () => {
+    renderAt(`/${PLUGGED_PATH}?tab=timing`);
+
+    expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
+    expect(screen.queryByTestId('decode-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('byte-viewer')).not.toBeInTheDocument();
+  });
+});

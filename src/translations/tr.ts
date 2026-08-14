@@ -994,6 +994,137 @@ export const tr = {
   'projects.error.notAnObject': 'Dosyanın kökü JSON nesnesi değil.',
   'projects.error.unsupportedVersion': 'Bu biçim sürümü artık desteklenmiyor.',
   'projects.error.versionNotNumber': 'Biçim sürümü tam sayı olmalı.',
+
+  // --- Çerçeve çözümleme paneli ---
+  'decode.loadFailed': 'Protokol motoru yüklenemedi.',
+  'decode.example.label': 'Örnek çerçeve',
+  'decode.example.empty': 'Bu eklenti örnek çerçeve sunmuyor; baytları elle girebilirsiniz.',
+  'decode.hexInput.label': 'Çerçeve baytları (HEX)',
+  'decode.error.invalidHex': 'Geçersiz onaltılık (hex) girdi',
+  'decode.byteCount': 'Bayt sayısı',
+  'decode.noParser':
+    'Bu eklentinin çözümleyicisi yok; yalnız kodlama ve örnek çerçeveler sunuyor. Baytlar aşağıda ham olarak gösteriliyor.',
+  'decode.parserCrashed': 'Çözümleyici beklenmedik bir hatayla durdu; ham baytlar aşağıda.',
+  'decode.table.label': 'Çözümlenen alanlar',
+  'decode.column.field': 'Alan',
+  'decode.column.offset': 'Ofset',
+  'decode.column.length': 'Uzunluk',
+  'decode.column.raw': 'Ham değer',
+  'decode.column.physical': 'Fiziksel değer',
+  'decode.column.validity': 'Geçerlilik',
+  'decode.status.valid': 'Geçerli',
+  'decode.status.invalid': 'Geçersiz',
+  'decode.fields.empty': 'Çözümleme hiç alan üretmedi.',
+  'decode.parseError.title': 'Çerçeve çözümlenemedi',
+  'decode.parseError.offset': 'Hata offset',
+  'decode.parseError.consumedBytes': 'Tüketilen bayt',
+  'decode.parseError.recoverable': 'Toparlanabilir — sonraki çerçeveden devam edilebilir.',
+  'decode.parseError.unrecoverable': 'Toparlanamaz — bu noktadan sonrası güvenilir değil.',
+
+  // --- Modbus ---
+  // Function code ve protokol adları VERİDİR, çevrilmez; buradaki metinler
+  // yalnız o kodun ne yaptığını anlatır. Hiçbirinde yer tutucu yok:
+  // `modbusPdu.ts` sayıları ayrı alanlarda basar (bkz. oradaki `summaryParams` notu).
+  'protocol.modbus.pdu.summary.readCoils': 'Coil okuma',
+  'protocol.modbus.pdu.summary.readDiscreteInputs': 'Discrete input okuma',
+  'protocol.modbus.pdu.summary.readHoldingRegisters': 'Holding register okuma',
+  'protocol.modbus.pdu.summary.readInputRegisters': 'Input register okuma',
+  'protocol.modbus.pdu.summary.writeSingleCoil': 'Tek coil yazma',
+  'protocol.modbus.pdu.summary.writeSingleRegister': 'Tek register yazma',
+  'protocol.modbus.pdu.summary.writeMultipleCoils': 'Çoklu coil yazma',
+  'protocol.modbus.pdu.summary.writeMultipleRegisters': 'Çoklu register yazma',
+  'protocol.modbus.pdu.summary.maskWriteRegister': 'Maskeli register yazma',
+  'protocol.modbus.pdu.summary.readWriteMultipleRegisters': 'Çoklu register okuma/yazma',
+  'protocol.modbus.pdu.summary.encapsulatedInterfaceTransport':
+    'Kapsüllenmiş arayüz taşıma (MEI)',
+  'protocol.modbus.pdu.summary.exceptionResponse': 'Exception yanıtı',
+  'protocol.modbus.pdu.summary.unknownFunctionCode': 'Bilinmeyen function code',
+  'protocol.modbus.pdu.warning.truncatedBody':
+    'PDU gövdesi bu function code’un beklediğinden kısa; kalan alanlar çözülemedi.',
+  'protocol.modbus.pdu.warning.truncatedField': 'Alan gövdenin sonuna sığmıyor, eksik okundu.',
+  'protocol.modbus.pdu.warning.emptyBody': 'PDU gövdesi boş.',
+  'protocol.modbus.pdu.warning.byteCountMismatch':
+    'Byte count alanı gövdede kalan veri uzunluğuyla uyuşmuyor.',
+  'protocol.modbus.pdu.warning.oddRegisterByteCount':
+    'Register verisi tek sayıda byte içeriyor; bir register 16 bittir.',
+  'protocol.modbus.pdu.warning.trailingBytes': 'Gövdede çözülen alanlardan sonra artan byte var.',
+  'protocol.modbus.pdu.warning.zeroQuantity':
+    'Quantity alanı sıfır; hiçbir öğe okunmaz ya da yazılmaz.',
+  'protocol.modbus.pdu.warning.unknownFunctionCode':
+    'Function code tabloda yok; gövde ham byte olarak bırakıldı.',
+  'protocol.modbus.pdu.warning.illegalCoilValue':
+    'Coil değeri yalnız 0xFF00 (ON) ya da 0x0000 (OFF) olabilir.',
+  'protocol.modbus.pdu.warning.missingExceptionCode':
+    'Exception yanıtında exception code byte’ı yok.',
+  'protocol.modbus.pdu.warning.unknownExceptionCode': 'Exception code tabloda yok.',
+  'protocol.modbus.pdu.warning.exceptionBitInRequest':
+    'İstek PDU’sunda exception biti (0x80) set; istekler bu biti taşımaz.',
+  'protocol.modbus.rtu.documentation.summary':
+    'Modbus uygulama protokolünün seri hatta ikili kodlanmış biçimi. Çerçeve sınırı bir sınırlayıcı değil sessiz aralıktır; bütünlük adresten PDU sonuna kadar hesaplanan CRC-16 ile korunur.',
+  'protocol.modbus.rtu.error.crcMismatch':
+    'CRC uyuşmuyor: hesaplanan değer çerçevede taşınan değerle aynı değil.',
+  'protocol.modbus.rtu.error.frameTooShort':
+    'Çerçeve çok kısa: bir Modbus RTU çerçevesi en az adres, function code ve iki baytlık CRC taşır.',
+  'protocol.modbus.rtu.error.frameTooLong':
+    'Çerçeve, izin verilen en büyük Modbus RTU uzunluğunu aşıyor.',
+  'protocol.modbus.rtu.error.unsupportedFunctionCode':
+    'Desteklenmeyen function code — çerçeve yine de bayt bayt gösteriliyor.',
+  'protocol.modbus.rtu.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.modbus.rtu.warning.roleInferredRequest':
+    'Yön verilmedi; çerçeve gövdesine bakılarak istek olarak çözüldü.',
+  'protocol.modbus.rtu.warning.roleInferredResponse':
+    'Yön verilmedi; çerçeve gövdesine bakılarak yanıt olarak çözüldü.',
+  'protocol.modbus.rtu.warning.broadcastAddress':
+    'Adres 0 yayın adresidir: bütün cihazlar dinler, hiçbiri yanıt vermez.',
+  'protocol.modbus.rtu.warning.reservedSlaveAddress':
+    'Bu adres standartta ayrılmıştır; tekil cihaz adresleri 1 ile 247 arasındadır.',
+  'protocol.modbus.rtu.example.readHoldingRegistersRequest.name':
+    'Holding register okuma isteği',
+  'protocol.modbus.rtu.example.readHoldingRegistersRequest.description':
+    'Cihaz 1’den iki holding register isteniyor — CRC’si doğrulanmış referans örnek.',
+  'protocol.modbus.rtu.example.readHoldingRegistersResponse.name':
+    'Holding register okuma yanıtı',
+  'protocol.modbus.rtu.example.readHoldingRegistersResponse.description':
+    'Dört bayt veri: birinci register 100, ikinci register 200 okunuyor.',
+  'protocol.modbus.rtu.example.exceptionResponse.name': 'Exception yanıtı',
+  'protocol.modbus.rtu.example.exceptionResponse.description':
+    'Function code’un 0x80 biti set: cihaz isteği Illegal Data Address diyerek reddediyor.',
+  'protocol.modbus.rtu.example.writeMultipleCoilsRequest.name': 'Çoklu coil yazma isteği',
+  'protocol.modbus.rtu.example.writeMultipleCoilsRequest.description':
+    'Cihaz 17’ye on coil yazılıyor; veri iki bayta sığdırılmış bit dizisidir.',
+  'protocol.modbus.rtu.example.crcMismatch.name': 'Bozuk CRC',
+  'protocol.modbus.rtu.example.crcMismatch.description':
+    'Okuma isteğinin CRC’si tek bit bozulmuş: alınan 0x0BC5, hesaplanan 0x0BC4.',
+  'protocol.modbus.ascii.documentation.summary':
+    'Modbus mesajlarını iki nokta ile CR LF arasında yazdırılabilir onaltılık karakterlerle taşıyan seri biçim; bütünlük CRC yerine LRC ile korunur.',
+  'protocol.modbus.ascii.error.missingColon': 'Çerçeve iki nokta (:) ile başlamıyor',
+  'protocol.modbus.ascii.error.invalidHexCharacter': 'Çerçevede onaltılık olmayan karakter var',
+  'protocol.modbus.ascii.error.oddHexDigitCount': 'Onaltılık basamak sayısı tek',
+  'protocol.modbus.ascii.error.missingCarriageReturn': 'LF’ten önce CR yok',
+  'protocol.modbus.ascii.error.missingLineFeed': 'Çerçeve LF ile bitmiyor',
+  'protocol.modbus.ascii.error.frameTooShort':
+    'Çerçeve adres, fonksiyon ve LRC baytlarını taşıyacak kadar uzun değil',
+  'protocol.modbus.ascii.error.frameTooLong':
+    'İzin verilen uzunluk içinde çerçeve sonu bulunamadı',
+  'protocol.modbus.ascii.error.lrcMismatch': 'LRC uyuşmuyor',
+  'protocol.modbus.ascii.error.parserCancelled': 'Çözümleme iptal edildi',
+  'protocol.modbus.ascii.warning.lrcMismatch': 'Hesaplanan LRC alınan LRC’den farklı',
+  'protocol.modbus.ascii.warning.reservedSlaveAddress':
+    'Slave adresi standardın ayırdığı 248-255 aralığında',
+  'protocol.modbus.ascii.example.readHoldingRegistersRequest.description':
+    '1 numaralı cihazdan iki holding register okuma isteği; dokümantasyon adresleri 40001-40002.',
+  'protocol.modbus.ascii.example.readHoldingRegistersResponse.description':
+    'Aynı isteğin yanıtı: dört bayt veri, iki register değeri.',
+  'protocol.modbus.ascii.example.exceptionResponse.description':
+    'Exception yanıtı: fonksiyon kodunda 0x80 biti set, exception kodu geçersiz veri adresini bildiriyor.',
+  'protocol.modbus.ascii.example.invalidHexCharacter.description':
+    'Onaltılık olmayan karakter içeren bozuk çerçeve; hata yolunu gösterir.',
+  'protocol.modbus.ascii.example.lrcMismatch.description':
+    'LRC’si bir eksik gönderilmiş çerçeve; alanlar yine çözülür, çerçeve geçersiz işaretlenir.',
+  'protocol.modbus.tcp.warning.unexpectedProtocolId':
+    'Protocol ID sıfır değil; bu port üzerinde başka bir protokol kapsülleniyor olabilir.',
+  'protocol.modbus.tcp.warning.oversizedLength':
+    'Uzunluk alanı standardın izin verdiği en büyük PDU boyutunu aşıyor.',
 } as const;
 
 /**

@@ -43,7 +43,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           // Seri çerçeveleme + function-code uygulaması aynı spec'te tanımlı:
           // katman tek başına data-link ya da application değil.
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'modbus-rtu',
           tabs: [
             'overview',
             'live',
@@ -81,7 +82,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Modbus messages carried as printable hex characters between a colon and CR LF, used on links where binary transparency cannot be guaranteed.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'modbus-ascii',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'ASCII Frame',
@@ -103,7 +105,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Modbus PDUs wrapped in an MBAP header on TCP/IP, where responses are matched by transaction ID and integrity is delegated to the TCP stack.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'modbus-tcp',
           tabs: [
             'overview',
             'live',

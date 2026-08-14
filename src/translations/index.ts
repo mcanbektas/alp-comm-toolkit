@@ -52,6 +52,21 @@ export function interpolate(
   });
 }
 
+/**
+ * Bir metnin sözlükte karşılığı olup olmadığını söyler.
+ *
+ * Neden gerekli: `protocol-core` altındaki çözümleyiciler saf TypeScript'tir ve
+ * yerelleştirilmiş metin üretemezler; `ParsedField.warnings` ve
+ * `ProtocolWarning.message` alanlarına ÇEVİRİ ANAHTARI koyup çeviriyi arayüze
+ * bırakırlar. Arayüz de anahtarı körlemesine `t()`'ye veremez: sözleşme (spec §7)
+ * o alanları düz metin olarak tanımlıyor, yani anahtar olmayan bir metin de
+ * gelebilir. Ölçüldü (2026-08-14): Modbus çözümleme sekmesinde uyarı satırı
+ * ekranda ham `protocol.modbus.rtu.warning.roleInferredRequest` olarak göründü.
+ */
+export function isTranslationKey(value: string): value is TranslationKey {
+  return Object.hasOwn(tr, value);
+}
+
 /** Dışarıdan gelen (localStorage, URL, navigator) değeri güvenle daraltır. */
 export function isLanguage(value: unknown): value is Language {
   return typeof value === 'string' && (LANGUAGES as readonly string[]).includes(value);
