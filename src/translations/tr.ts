@@ -1186,6 +1186,140 @@ export const tr = {
   'protocol.nmea.0183.example.mwvGenericEnvelope.name': 'MWV — generic envelope örneği',
   'protocol.nmea.0183.example.mwvGenericEnvelope.description':
     'GNSS 7’lisinin dışında kalan bir cümle tipi: formatter tanınır ama alanlar yalnız ham liste olarak gösterilir.',
+
+  // --- CAN ailesi (ortak çerçeve çekirdeği) ---
+  'protocol.can.frame.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar çözüldü.',
+  'protocol.can.frame.warning.trailingBytes':
+    'Kayıt sabit çerçeve boyunu aşıyor; fazla baytlar çerçeveye ait değil.',
+  'protocol.can.frame.warning.errorFlagSet':
+    'Error bayrağı set: bu bir veri çerçevesi değil, hata bildirimidir.',
+  'protocol.can.frame.warning.remoteWithPayload':
+    'Remote çerçeve veri taşıyor; remote istek veri alanı taşımaz.',
+  'protocol.can.frame.warning.extendedOnBasePage':
+    'Bu çerçeve 29-bit extended identifier taşıyor; sayfa 11-bit base biçimi için.',
+  'protocol.can.frame.warning.baseOnExtendedPage':
+    'Bu çerçeve 11-bit base identifier taşıyor; sayfa 29-bit extended biçimi için.',
+  'protocol.can.frame.warning.nonCanonicalFdLength':
+    'Uzunluk hiçbir CAN FD DLC koduna karşılık gelmiyor; geçerli değerler 0-8, 12, 16, 20, 24, 32, 48 ve 64’tür.',
+  'protocol.can.frame.warning.missingFdfFlag':
+    'FDF bayrağı yok; kayıt CAN FD çerçevesi olarak işaretlenmemiş.',
+  'protocol.can.frame.warning.higherLayerCandidates':
+    '29-bit identifier tek başına protokol kanıtı değildir; J1939, NMEA 2000, ISO-TP Extended, CANopen Extended ve üreticiye özel biçimler hepsi adaydır.',
+  'protocol.can.frame.summary.classicData': 'Classical CAN veri çerçevesi',
+  'protocol.can.frame.summary.classicRemote': 'Classical CAN remote çerçevesi',
+  'protocol.can.frame.summary.fdData': 'CAN FD veri çerçevesi',
+
+  // --- CAN 2.0A / 2.0B ---
+  'protocol.can.classic.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.can.classic.error.frameTooLong':
+    'Kayıt sabit çerçeve boyunu aşıyor; çerçeve sınırı kaymış olabilir.',
+  'protocol.can.classic.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.can.classic.base.documentation.summary':
+    '11-bit identifier ve en çok 8 bayt veri taşıyan Classical CAN base çerçevesi. Girdi, SocketCAN kaydının bayt düzenidir: identifier little-endian dört bayt, ardından uzunluk ve veri.',
+  'protocol.can.classic.extended.documentation.summary':
+    '29-bit identifier taşıyan Classical CAN extended çerçevesi; J1939 ve NMEA 2000 gibi üst katmanların taşıyıcısıdır. Girdi, SocketCAN kaydının bayt düzenidir.',
+  'protocol.can.classic.example.baseDataFrame.name': 'Base veri çerçevesi',
+  'protocol.can.classic.example.baseDataFrame.description':
+    'Identifier 0x321, sekiz bayt veri — spec’in DLC örneğinin birebir karşılığı.',
+  'protocol.can.classic.example.baseArbitrationWinner.name': 'Arbitrasyonu kazanan çerçeve',
+  'protocol.can.classic.example.baseArbitrationWinner.description':
+    'Identifier 0x120; spec’in arbitrasyon örneğinde 0x123’e karşı kazanan taraf, çünkü küçük identifier yüksek önceliktir.',
+  'protocol.can.classic.example.baseRemoteFrame.name': 'Remote çerçeve',
+  'protocol.can.classic.example.baseRemoteFrame.description':
+    'RTR bayrağı set, veri alanı yok: veri talebi, veri taşımaz.',
+  'protocol.can.classic.example.extendedJ1939Identifier.name': 'Extended identifier (spec §43)',
+  'protocol.can.classic.example.extendedJ1939Identifier.description':
+    'Identifier 0x18F00401 — spec aynı değeri hem extended çerçeve örneği hem J1939 fixture’ı olarak kullanıyor.',
+  'protocol.can.classic.example.extendedBaseFrameMismatch.name': 'Base çerçeve (biçim uyuşmazlığı)',
+  'protocol.can.classic.example.extendedBaseFrameMismatch.description':
+    'Extended sayfasına düşen 11-bit çerçeve: hata değil, uyarı yolunu gösterir.',
+
+  // --- CAN FD ---
+  'protocol.can.fd.error.frameTooShort':
+    'Kayıt identifier, uzunluk ve bayrak alanlarını taşıyacak kadar uzun değil.',
+  'protocol.can.fd.error.frameTooLong': 'Kayıt CAN FD çerçevesinin sabit boyunu aşıyor.',
+  'protocol.can.fd.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.can.fd.documentation.summary':
+    'Veri alanını 64 bayta çıkaran ve veri fazında daha hızlı bit rate’e geçebilen ikinci nesil CAN çerçevesi. Uzunluk alanı gerçek bayt sayısıdır; DLC kodu gösterim için geri türetilir.',
+  'protocol.can.fd.example.fdBrs12Byte.name': '12 baytlık BRS çerçevesi',
+  'protocol.can.fd.example.fdBrs12Byte.description':
+    'DLC kodu 9’a karşılık gelen 12 bayt: klasik CAN’in 8 bayt sınırının hemen üstü, eşlemenin kırıldığı ilk nokta.',
+  'protocol.can.fd.example.fdMaxPayload.name': '64 baytlık azami yük',
+  'protocol.can.fd.example.fdMaxPayload.description':
+    'DLC kodu 15, CAN FD’nin üst sınırı; extended identifier ve bit rate geçişi ile birlikte.',
+  'protocol.can.fd.example.fdErrorPassive.name': 'Error passive gönderen',
+  'protocol.can.fd.example.fdErrorPassive.description':
+    'ESI bayrağı set: gönderen düğüm error passive durumunda.',
+  'protocol.can.fd.example.fdNonCanonicalLength.name': 'Kanonik olmayan uzunluk',
+  'protocol.can.fd.example.fdNonCanonicalLength.description':
+    '13 bayt hiçbir DLC koduna karşılık gelmez; uzunluk alanı geçersiz işaretlenir ama veri yine gösterilir.',
+
+  // --- CAN XL ---
+  'protocol.can.xl.error.frameTooShort':
+    'Kayıt CAN XL başlığını taşıyacak kadar uzun değil.',
+  'protocol.can.xl.error.frameTooLong': 'Kayıt CAN XL’in azami çerçeve boyunu aşıyor.',
+  'protocol.can.xl.error.lengthOutOfRange':
+    'Veri uzunluğu izin verilen aralığın dışında; CAN XL veri alanı 1 ile 2048 bayt arasındadır.',
+  'protocol.can.xl.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.can.xl.warning.missingXlfFlag':
+    'XLF bayrağı yok; kayıt CAN XL çerçevesi olarak işaretlenmemiş.',
+  'protocol.can.xl.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.can.xl.warning.trailingBytes':
+    'Bildirilen uzunluktan fazla bayt var; fazlası çerçeveye ait değil.',
+  'protocol.can.xl.summary.frame': 'CAN XL çerçevesi',
+  'protocol.can.xl.documentation.summary':
+    'Veri alanı 1–2048 bayt olan üçüncü nesil CAN çerçevesi. Klasik identifier ikiye ayrılır: 11-bit Priority ID yalnız arbitrasyon içindir, içerik ve adres bilgisi 32-bit Acceptance Field’a taşınır. Bu sürümde kapsam çerçeve incelemesiyle sınırlıdır.',
+  'protocol.can.xl.example.xlShortFrame.name': 'Kısa CAN XL çerçevesi',
+  'protocol.can.xl.example.xlShortFrame.description':
+    'On altı baytlık yük, tanımlı VCID ve acceptance field ile temel alan görünümü.',
+  'protocol.can.xl.example.xlLargePayload.name': 'Büyük yük',
+  'protocol.can.xl.example.xlLargePayload.description':
+    'Klasik CAN’in sekiz baytıyla kıyaslanamayacak 256 baytlık yük; görüntüleyicinin kaydırmasını gerektirir.',
+  'protocol.can.xl.example.xlSecureFrame.name': 'SEC bayraklı çerçeve',
+  'protocol.can.xl.example.xlSecureFrame.description':
+    'Simple Extended Content bayrağı set; yük üst katmanın güvenlik biçimine göre yorumlanır.',
+
+  // --- J1939 ---
+  'protocol.j1939.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.j1939.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.j1939.error.notExtended':
+    'J1939 29-bit extended identifier gerektirir; 11-bit çerçeveden PGN çıkarılamaz.',
+  'protocol.j1939.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.j1939.warning.reservedBitSet':
+    'Ayrılmış bit set; identifier bozuk olabilir ya da güncel standardın genişletilmiş sayfa semantiği kullanılıyor olabilir.',
+  'protocol.j1939.warning.nullSourceAddress':
+    'Kaynak adres null adres: gönderen düğüm geçerli bir adres talep edememiş.',
+  'protocol.j1939.warning.remoteFrame':
+    'Remote bayrağı set; J1939 remote çerçeve kullanmaz.',
+  'protocol.j1939.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.j1939.warning.spnNeedsDatabase':
+    'Veri alanı ham gösteriliyor: parametrelerin isim, çözünürlük ve birimleri lisanslı J1939 veritabanından gelir, tahmin edilmez.',
+  'protocol.j1939.warning.transportSession':
+    'Bu bir taşıma ya da ağ yönetimi mesajıdır; tam anlamı ancak aynı oturumun diğer çerçeveleriyle birlikte çıkar.',
+  'protocol.j1939.summary.pdu1': 'Hedefe yönelik J1939 mesajı',
+  'protocol.j1939.summary.pdu2': 'Yayın J1939 mesajı',
+  'protocol.j1939.documentation.summary':
+    '29-bit CAN identifier’ını önceliğe, sayfa seçimine, PGN’e ve kaynak adrese ayıran ağır vasıta haberleşme mimarisi. PGN kuralı PDU Format eşiğine bağlıdır: 240’ın altında PDU Specific bir hedef adrestir ve PGN’den düşülür, 240 ve üstünde group extension olarak PGN’e girer.',
+  'protocol.j1939.example.pdu2Broadcast.name': 'Yayın mesajı (spec §43)',
+  'protocol.j1939.example.pdu2Broadcast.description':
+    'Identifier 0x18F00401 — spec’in doğrulanmış fixture’ı: öncelik 6, PGN 61444, kaynak adres 1.',
+  'protocol.j1939.example.pdu1DestinationSpecific.name': 'Hedefe yönelik mesaj',
+  'protocol.j1939.example.pdu1DestinationSpecific.description':
+    'PDU Format 239 eşiğin altında: PDU Specific alanı hedef adrestir ve PGN hesabında sıfırlanır.',
+  'protocol.j1939.example.addressClaimed.name': 'Adres talebi',
+  'protocol.j1939.example.addressClaimed.description':
+    'Ağ yönetimi mesajı; hedef yayın adresidir, yani talep bütün düğümlere duyurulur.',
+  'protocol.j1939.example.transportDataTransfer.name': 'Taşıma veri paketi',
+  'protocol.j1939.example.transportDataTransfer.description':
+    'Sekiz baytı aşan bir mesajın parçası; ilk bayt paket sırasıdır, birleştirme oturum katmanının işidir.',
+  'protocol.j1939.example.baseFrameRejected.name': 'Base çerçeve (çözülemez)',
+  'protocol.j1939.example.baseFrameRejected.description':
+    '11-bit identifier taşıyan çerçeve: hata basılır ama çerçeve yine alan alan gösterilir.',
 } as const;
 
 /**

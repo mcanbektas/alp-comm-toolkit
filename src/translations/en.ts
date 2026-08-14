@@ -1185,4 +1185,137 @@ export const en: TranslationDictionary = {
   'protocol.nmea.0183.example.mwvGenericEnvelope.name': 'MWV — generic envelope example',
   'protocol.nmea.0183.example.mwvGenericEnvelope.description':
     'A sentence type outside the GNSS seven: the formatter is recognized but fields are shown only as a raw list.',
+
+  // --- CAN family (shared frame core) ---
+  'protocol.can.frame.warning.truncatedPayload':
+    'The declared data length is not present in the record; the available bytes were decoded.',
+  'protocol.can.frame.warning.trailingBytes':
+    'The record exceeds the fixed frame size; the extra bytes do not belong to the frame.',
+  'protocol.can.frame.warning.errorFlagSet':
+    'The error flag is set: this is an error notification, not a data frame.',
+  'protocol.can.frame.warning.remoteWithPayload':
+    'The remote frame carries data; a remote request has no data field.',
+  'protocol.can.frame.warning.extendedOnBasePage':
+    'This frame carries a 29-bit extended identifier; the page is for the 11-bit base format.',
+  'protocol.can.frame.warning.baseOnExtendedPage':
+    'This frame carries an 11-bit base identifier; the page is for the 29-bit extended format.',
+  'protocol.can.frame.warning.nonCanonicalFdLength':
+    'The length matches no CAN FD DLC code; the valid values are 0-8, 12, 16, 20, 24, 32, 48 and 64.',
+  'protocol.can.frame.warning.missingFdfFlag':
+    'The FDF flag is absent; the record is not marked as a CAN FD frame.',
+  'protocol.can.frame.warning.higherLayerCandidates':
+    'A 29-bit identifier alone is not proof of a protocol; J1939, NMEA 2000, ISO-TP Extended, CANopen Extended and vendor-specific formats are all candidates.',
+  'protocol.can.frame.summary.classicData': 'Classical CAN data frame',
+  'protocol.can.frame.summary.classicRemote': 'Classical CAN remote frame',
+  'protocol.can.frame.summary.fdData': 'CAN FD data frame',
+
+  // --- CAN 2.0A / 2.0B ---
+  'protocol.can.classic.error.frameTooShort':
+    'The record is too short to carry the identifier and length fields.',
+  'protocol.can.classic.error.frameTooLong':
+    'The record exceeds the fixed frame size; the frame boundary may have shifted.',
+  'protocol.can.classic.error.aborted': 'Parsing was cancelled.',
+  'protocol.can.classic.base.documentation.summary':
+    'Classical CAN base frame with an 11-bit identifier and up to 8 data bytes. The input is the byte layout of a SocketCAN record: a little-endian four-byte identifier followed by length and data.',
+  'protocol.can.classic.extended.documentation.summary':
+    'Classical CAN extended frame carrying a 29-bit identifier, the transport for higher layers such as J1939 and NMEA 2000. The input is the byte layout of a SocketCAN record.',
+  'protocol.can.classic.example.baseDataFrame.name': 'Base data frame',
+  'protocol.can.classic.example.baseDataFrame.description':
+    'Identifier 0x321 with eight data bytes — the exact counterpart of the DLC example in the specification.',
+  'protocol.can.classic.example.baseArbitrationWinner.name': 'Arbitration winner',
+  'protocol.can.classic.example.baseArbitrationWinner.description':
+    'Identifier 0x120; the winning side against 0x123 in the arbitration example, because a lower identifier means higher priority.',
+  'protocol.can.classic.example.baseRemoteFrame.name': 'Remote frame',
+  'protocol.can.classic.example.baseRemoteFrame.description':
+    'The RTR flag is set and there is no data field: a request for data carries none itself.',
+  'protocol.can.classic.example.extendedJ1939Identifier.name': 'Extended identifier (spec §43)',
+  'protocol.can.classic.example.extendedJ1939Identifier.description':
+    'Identifier 0x18F00401 — the specification uses the same value both as an extended frame example and as the J1939 fixture.',
+  'protocol.can.classic.example.extendedBaseFrameMismatch.name': 'Base frame (format mismatch)',
+  'protocol.can.classic.example.extendedBaseFrameMismatch.description':
+    'An 11-bit frame landing on the extended page: not an error, it shows the warning path.',
+
+  // --- CAN FD ---
+  'protocol.can.fd.error.frameTooShort':
+    'The record is too short to carry the identifier, length and flag fields.',
+  'protocol.can.fd.error.frameTooLong': 'The record exceeds the fixed CAN FD frame size.',
+  'protocol.can.fd.error.aborted': 'Parsing was cancelled.',
+  'protocol.can.fd.documentation.summary':
+    'Second-generation CAN frame extending the data field to 64 bytes and allowing the data phase to switch to a faster bit rate. The length field is the actual byte count; the DLC code is derived back from it for display.',
+  'protocol.can.fd.example.fdBrs12Byte.name': '12-byte BRS frame',
+  'protocol.can.fd.example.fdBrs12Byte.description':
+    'Twelve bytes, matching DLC code 9: just past the 8-byte limit of classical CAN, the first point where the mapping breaks.',
+  'protocol.can.fd.example.fdMaxPayload.name': '64-byte maximum payload',
+  'protocol.can.fd.example.fdMaxPayload.description':
+    'DLC code 15, the CAN FD upper limit, together with an extended identifier and a bit rate switch.',
+  'protocol.can.fd.example.fdErrorPassive.name': 'Error passive transmitter',
+  'protocol.can.fd.example.fdErrorPassive.description':
+    'The ESI flag is set: the transmitting node is in the error passive state.',
+  'protocol.can.fd.example.fdNonCanonicalLength.name': 'Non-canonical length',
+  'protocol.can.fd.example.fdNonCanonicalLength.description':
+    'Thirteen bytes match no DLC code; the length field is marked invalid but the data is still shown.',
+
+  // --- CAN XL ---
+  'protocol.can.xl.error.frameTooShort': 'The record is too short to carry the CAN XL header.',
+  'protocol.can.xl.error.frameTooLong': 'The record exceeds the maximum CAN XL frame size.',
+  'protocol.can.xl.error.lengthOutOfRange':
+    'The data length is outside the permitted range; the CAN XL data field is between 1 and 2048 bytes.',
+  'protocol.can.xl.error.aborted': 'Parsing was cancelled.',
+  'protocol.can.xl.warning.missingXlfFlag':
+    'The XLF flag is absent; the record is not marked as a CAN XL frame.',
+  'protocol.can.xl.warning.truncatedPayload':
+    'The declared data length is not present in the record; the available bytes were shown.',
+  'protocol.can.xl.warning.trailingBytes':
+    'There are more bytes than the declared length; the surplus does not belong to the frame.',
+  'protocol.can.xl.summary.frame': 'CAN XL frame',
+  'protocol.can.xl.documentation.summary':
+    'Third-generation CAN frame with a 1–2048 byte data field. The classical identifier splits in two: an 11-bit priority ID serves arbitration alone, while content and address information move to a 32-bit acceptance field. Scope in this release is limited to frame inspection.',
+  'protocol.can.xl.example.xlShortFrame.name': 'Short CAN XL frame',
+  'protocol.can.xl.example.xlShortFrame.description':
+    'A sixteen-byte payload with a defined VCID and acceptance field, showing the basic field layout.',
+  'protocol.can.xl.example.xlLargePayload.name': 'Large payload',
+  'protocol.can.xl.example.xlLargePayload.description':
+    'A 256-byte payload beyond anything classical CAN could carry in its eight bytes; the viewer has to scroll.',
+  'protocol.can.xl.example.xlSecureFrame.name': 'Frame with the SEC flag',
+  'protocol.can.xl.example.xlSecureFrame.description':
+    'The simple extended content flag is set; the payload is interpreted according to the security format of the higher layer.',
+
+  // --- J1939 ---
+  'protocol.j1939.error.frameTooShort':
+    'The record is too short to carry the identifier and length fields.',
+  'protocol.j1939.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.j1939.error.notExtended':
+    'J1939 requires a 29-bit extended identifier; a PGN cannot be derived from an 11-bit frame.',
+  'protocol.j1939.error.aborted': 'Parsing was cancelled.',
+  'protocol.j1939.warning.reservedBitSet':
+    'The reserved bit is set; the identifier may be corrupt, or the extended page semantics of the current standard may be in use.',
+  'protocol.j1939.warning.nullSourceAddress':
+    'The source address is the null address: the sending node could not claim a valid address.',
+  'protocol.j1939.warning.remoteFrame':
+    'The remote flag is set; J1939 does not use remote frames.',
+  'protocol.j1939.warning.truncatedPayload':
+    'The declared data length is not present in the record; the available bytes were shown.',
+  'protocol.j1939.warning.spnNeedsDatabase':
+    'The data field is shown raw: parameter names, resolutions and units come from the licensed J1939 database and are not guessed.',
+  'protocol.j1939.warning.transportSession':
+    'This is a transport or network management message; its full meaning emerges only together with the other frames of the same session.',
+  'protocol.j1939.summary.pdu1': 'Destination-specific J1939 message',
+  'protocol.j1939.summary.pdu2': 'Broadcast J1939 message',
+  'protocol.j1939.documentation.summary':
+    'Heavy-duty communication architecture that splits the 29-bit CAN identifier into priority, page selection, PGN and source address. The PGN rule depends on the PDU format threshold: below 240 the PDU specific field is a destination address and is cleared from the PGN, at 240 and above it enters the PGN as a group extension.',
+  'protocol.j1939.example.pdu2Broadcast.name': 'Broadcast message (spec §43)',
+  'protocol.j1939.example.pdu2Broadcast.description':
+    'Identifier 0x18F00401 — the verified fixture of the specification: priority 6, PGN 61444, source address 1.',
+  'protocol.j1939.example.pdu1DestinationSpecific.name': 'Destination-specific message',
+  'protocol.j1939.example.pdu1DestinationSpecific.description':
+    'PDU format 239 falls below the threshold: the PDU specific field is a destination address and is cleared when the PGN is computed.',
+  'protocol.j1939.example.addressClaimed.name': 'Address claim',
+  'protocol.j1939.example.addressClaimed.description':
+    'A network management message; the destination is the broadcast address, so the claim reaches every node.',
+  'protocol.j1939.example.transportDataTransfer.name': 'Transport data packet',
+  'protocol.j1939.example.transportDataTransfer.description':
+    'Part of a message longer than eight bytes; the first byte is the packet sequence number and reassembly belongs to the session layer.',
+  'protocol.j1939.example.baseFrameRejected.name': 'Base frame (cannot be decoded)',
+  'protocol.j1939.example.baseFrameRejected.description':
+    'A frame carrying an 11-bit identifier: an error is reported but the frame is still shown field by field.',
 };

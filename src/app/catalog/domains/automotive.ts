@@ -39,7 +39,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Classical CAN base frame format with an 11-bit identifier and up to 8 data bytes, the baseline bus of nearly every powertrain and body network.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'can-2-0a',
           tabs: [
             'overview',
             'live',
@@ -75,7 +76,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Classical CAN extended frame format whose 29-bit identifier (11-bit base plus 18-bit extension) carries higher-layer protocols such as J1939 and NMEA 2000.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'can-2-0b',
           tabs: [
             'overview',
             'live',
@@ -118,7 +120,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Second-generation CAN data-link format extending the payload to 64 bytes and allowing the data phase to switch to a faster bit rate.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'can-fd',
           tabs: [
             'overview',
             'live',
@@ -154,7 +157,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Third-generation CAN data-link layer with a 1–2048 byte data field that splits the classical identifier into an 11-bit priority ID and a 32-bit acceptance field.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'can-xl',
           // Kaynak ilk sürüm için bilinçli olarak tam stack yerine yalnız
           // frame-level inspection istiyor: build/timing/diagnostics yok.
           tabs: ['overview', 'live', 'decode', 'data', 'definitions', 'examples'],
@@ -185,7 +189,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'CAN-based communication architecture for heavy-duty trucks, agricultural and construction machinery, addressing messages by PGN and nodes by claimed source address.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'j1939',
           tabs: [
             'overview',
             'live',

@@ -3,9 +3,25 @@ import { describe, expect, it } from 'vitest';
 import { createProtocolRegistry } from '@/protocol-core/registry';
 import { registerBuiltInProtocols } from './index';
 
-const BUILT_IN_IDS = ['modbus-ascii', 'modbus-rtu', 'modbus-tcp', 'nmea-0183'];
+/** `registeredProtocolIds()` ALFABETİK döner; liste o sırayla yazılır. */
+const BUILT_IN_IDS = [
+  'can-2-0a',
+  'can-2-0b',
+  'can-fd',
+  'can-xl',
+  'j1939',
+  'modbus-ascii',
+  'modbus-rtu',
+  'modbus-tcp',
+  'nmea-0183',
+];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
+  'can-2-0a': 'automotive',
+  'can-2-0b': 'automotive',
+  'can-fd': 'automotive',
+  'can-xl': 'automotive',
+  j1939: 'automotive',
   'modbus-ascii': 'industrial-automation',
   'modbus-rtu': 'industrial-automation',
   'modbus-tcp': 'industrial-automation',

@@ -27,8 +27,13 @@ const ALIAS_DECODE_PATH = '/comm/building-automation/modbus-building/modbus-rtu?
  * Regresyon bekçisi: eklentisi olmayan bir protokol. Faz 9 "planlandı"
  * bildirimini yalnız motoru OLAN sayfadan kaldırdı; motorsuz sayfada bildirimin
  * durması gerekir, yoksa boş bir sekme basılmış olur (spec §50).
+ *
+ * Dalga 3'te `automotive/can-family/can-2-0a`dan TAŞINDI: CAN motoru gelince
+ * o sayfa artık "planlandı" basmıyor ve bekçi anlamını yitiriyordu. PSI5
+ * bilinçli seçildi — akım modülasyonlu sensör arayüzü, plan-fazlar.md'deki
+ * hiçbir dalga listesinde geçmiyor, yani yakın vadede motor almayacak.
  */
-const PLANNED_DECODE_PATH = '/comm/automotive/can-family/can-2-0a?tab=decode';
+const PLANNED_DECODE_PATH = '/comm/automotive/sensor-interfaces/psi5?tab=decode';
 
 /** Spec §43 fixture'ı — eklentinin ilk örnek çerçevesi de birebir budur. */
 const FIXTURE_HEX = '01 03 00 00 00 02 C4 0B';

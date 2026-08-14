@@ -45,4 +45,21 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'nmea-0183', () =>
     import('./marine/nmea/nmea0183').then((module) => module.nmea0183Plugin),
   );
+  // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
+  // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
+  registerOnce(registry, 'can-2-0a', () =>
+    import('./automotive/can/canClassic').then((module) => module.can20aPlugin),
+  );
+  registerOnce(registry, 'can-2-0b', () =>
+    import('./automotive/can/canClassic').then((module) => module.can20bPlugin),
+  );
+  registerOnce(registry, 'can-fd', () =>
+    import('./automotive/can/canFd').then((module) => module.canFdPlugin),
+  );
+  registerOnce(registry, 'can-xl', () =>
+    import('./automotive/can/canXl').then((module) => module.canXlPlugin),
+  );
+  registerOnce(registry, 'j1939', () =>
+    import('./automotive/j1939/j1939').then((module) => module.j1939Plugin),
+  );
 }
