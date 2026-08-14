@@ -23,6 +23,22 @@ const LiveMonitorPage = lazy(async () => {
   return { default: module.LiveMonitorPage };
 });
 
+/**
+ * Studio ve Packet Builder de TEMBEL: ikisi de `schemas/protocolSchema` üzerinden
+ * zod'u DEĞER olarak çeker (ölçüldü: ana paket 239 → 309 kB). Protokol tanımıyla
+ * hiç uğraşmayan kullanıcı o 70 kB'ı indirmemeli — `protocol-core/index.ts`
+ * barrel'ının zod'u dışarıda tutma gerekçesiyle aynı.
+ */
+const ProtocolStudioPage = lazy(async () => {
+  const module = await import('@/pages/ProtocolStudioPage');
+  return { default: module.ProtocolStudioPage };
+});
+
+const PacketBuilderPage = lazy(async () => {
+  const module = await import('@/pages/PacketBuilderPage');
+  return { default: module.PacketBuilderPage };
+});
+
 function LazyFallback(): ReactElement {
   const { t } = useTranslation();
   return <p className="p-4 text-sm text-muted">{t('common.loading')}</p>;
@@ -51,6 +67,22 @@ export function AppRoutes(): ReactElement {
           element={
             <Suspense fallback={<LazyFallback />}>
               <LiveMonitorPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="protocol-studio"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <ProtocolStudioPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="packet-builder"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <PacketBuilderPage />
             </Suspense>
           }
         />

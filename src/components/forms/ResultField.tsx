@@ -8,10 +8,23 @@ export interface ResultFieldProps {
   value: string;
   error?: string;
   monospace?: boolean;
+  /**
+   * Kopyalama düğmesini gizler. Değeri henüz HESAPLANMAMIŞ yer tutucu alanlarda
+   * (Packet Builder'ın türetilmiş checksum/length satırları) çalışan bir "Kopyala"
+   * düğmesi panoya nötr tireyi yazıyordu — düğme işlev vaat edip yanıltıyordu.
+   */
+  hideCopy?: boolean;
 }
 
 /** Salt-okunur hesap çıktısı — kopyalama düğmesi gömülü. Girdi alanları için `TextField`. */
-export function ResultField({ id, label, value, error, monospace = true }: ResultFieldProps): ReactElement {
+export function ResultField({
+  id,
+  label,
+  value,
+  error,
+  monospace = true,
+  hideCopy = false,
+}: ResultFieldProps): ReactElement {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-medium text-muted">
@@ -26,7 +39,7 @@ export function ResultField({ id, label, value, error, monospace = true }: Resul
         >
           {error === undefined ? value : ''}
         </output>
-        <CopyButton value={value} disabled={error !== undefined} />
+        {!hideCopy && <CopyButton value={value} disabled={error !== undefined} />}
       </div>
       {error !== undefined && (
         <p role="alert" className="text-xs text-danger">
