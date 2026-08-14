@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { createProtocolRegistry } from '@/protocol-core/registry';
 import { registerBuiltInProtocols } from './index';
 
-const BUILT_IN_IDS = ['modbus-ascii', 'modbus-rtu', 'modbus-tcp'];
+const BUILT_IN_IDS = ['modbus-ascii', 'modbus-rtu', 'modbus-tcp', 'nmea-0183'];
+
+const EXPECTED_CATEGORY: Record<string, string> = {
+  'modbus-ascii': 'industrial-automation',
+  'modbus-rtu': 'industrial-automation',
+  'modbus-tcp': 'industrial-automation',
+  'nmea-0183': 'marine-navigation',
+};
 
 describe('registerBuiltInProtocols', () => {
   it('registers every built-in engine', () => {
@@ -41,7 +48,7 @@ describe('registerBuiltInProtocols', () => {
       // Registry yüklenen modülün id'sini kayıt anahtarıyla karşılaştırır; buraya
       // gelmek kayıt ile modülün eşleştiğinin de kanıtıdır.
       expect(plugin.id, id).toBe(id);
-      expect(plugin.category, id).toBe('industrial-automation');
+      expect(plugin.category, id).toBe(EXPECTED_CATEGORY[id]);
       expect(plugin.exampleFrames.length, `${id} has no example frames`).toBeGreaterThan(0);
       expect(registry.getLoadedPlugin(id), id).toBe(plugin);
     }

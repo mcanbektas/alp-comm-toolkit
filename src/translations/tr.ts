@@ -1125,6 +1125,67 @@ export const tr = {
     'Protocol ID sıfır değil; bu port üzerinde başka bir protokol kapsülleniyor olabilir.',
   'protocol.modbus.tcp.warning.oversizedLength':
     'Uzunluk alanı standardın izin verdiği en büyük PDU boyutunu aşıyor.',
+
+  // --- NMEA 0183 ---
+  'protocol.nmea.sentence.warning.insufficientFields':
+    'Cümle beklenenden az alan taşıyor; eksik alanlar için sonuç üretilmedi.',
+  'protocol.nmea.sentence.warning.trailingFields':
+    'Cümle beklenenden fazla alan taşıyor; artan alanlar ham olarak gösterildi.',
+  'protocol.nmea.sentence.warning.unparseableNumber':
+    'Alan sayısal biçime uymuyor; ham değer olduğu gibi gösterildi.',
+  'protocol.nmea.sentence.warning.genericFieldsOnly':
+    'Bu cümle tipi yalnız ham alan listesiyle gösteriliyor; alan anlamları seçilen NMEA revizyon veritabanı yüklenmeden adlandırılamaz.',
+  'protocol.nmea.sentence.warning.unknownFormatter':
+    'Bilinmeyen cümle formatı; alanlar semantik ad almadan ham olarak gösterildi.',
+  'protocol.nmea.sentence.summary.generic': 'Tanınan formatter, ham alan listesi',
+  'protocol.nmea.sentence.summary.unknown': 'Bilinmeyen cümle formatı',
+  'protocol.nmea.sentence.summary.gga': 'GPS konum çözümü',
+  'protocol.nmea.sentence.summary.rmc': 'Asgari önerilen seyir bilgisi',
+  'protocol.nmea.sentence.summary.gsa': 'DOP ve aktif uydular',
+  'protocol.nmea.sentence.summary.gsv': 'Görüş alanındaki uydular',
+  'protocol.nmea.sentence.summary.vtg': 'Seyir ve hız',
+  'protocol.nmea.sentence.summary.gll': 'Coğrafi konum',
+  'protocol.nmea.sentence.summary.zda': 'Saat ve tarih',
+  'protocol.nmea.0183.error.sentenceTooShort':
+    'Cümle en kısa anlamlı NMEA 0183 cümlesinden daha kısa.',
+  'protocol.nmea.0183.error.sentenceTooLong':
+    'Cümle NMEA 0183’ün klasik 82 karakter sınırını aşıyor.',
+  'protocol.nmea.0183.error.startDelimiterNotFound': 'Cümle $ ile başlamıyor.',
+  'protocol.nmea.0183.error.missingChecksumDelimiter': 'Cümlede checksum ayracı (*) yok.',
+  'protocol.nmea.0183.error.malformedIdentifier':
+    'Talker+formatter alanı en az üç karakter olmalı.',
+  'protocol.nmea.0183.error.checksumMismatch':
+    'Checksum uyuşmuyor: hesaplanan değer cümlede taşınan değerle aynı değil.',
+  'protocol.nmea.0183.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.nmea.0183.documentation.summary':
+    'Tek talker / çoklu listener yazdırılabilir ASCII cümle protokolü; alan sınırı virgül, bütünlük $ ile * arasındaki karakterlerin XOR checksum’uyla korunur.',
+  'protocol.nmea.0183.example.ggaFix.name': 'GGA konum çözümü (spec §43)',
+  'protocol.nmea.0183.example.ggaFix.description':
+    'Spec §43’ün doğrulanmış referans cümlesi: enlem 48.1173°, boylam 11.516666...°, checksum geçerli.',
+  'protocol.nmea.0183.example.ggaChecksumMismatch.name': 'Bozuk checksum',
+  'protocol.nmea.0183.example.ggaChecksumMismatch.description':
+    'Aynı GGA cümlesi, son checksum hanesi tek bit bozulmuş: alınan 0x48, hesaplanan 0x47.',
+  'protocol.nmea.0183.example.rmcFix.name': 'RMC asgari seyir bilgisi',
+  'protocol.nmea.0183.example.rmcFix.description':
+    'GGA fixture’ıyla aynı konum ve zamanı taşıyan klasik RMC referans cümlesi.',
+  'protocol.nmea.0183.example.gsaActiveSatellites.name': 'GSA aktif uydular ve DOP',
+  'protocol.nmea.0183.example.gsaActiveSatellites.description':
+    '3D fix, altı aktif uydu PRN’i ve PDOP/HDOP/VDOP değerlerini taşıyan klasik referans cümle.',
+  'protocol.nmea.0183.example.gsvSatellitesInView.name': 'GSV görüş alanındaki uydular',
+  'protocol.nmea.0183.example.gsvSatellitesInView.description':
+    'Üç mesajlık dizinin ilki: 11 uydu görüş alanında, bu mesaj dört uydunun PRN/elevation/azimuth/SNR bilgisini taşıyor.',
+  'protocol.nmea.0183.example.vtgCourseSpeed.name': 'VTG seyir ve hız',
+  'protocol.nmea.0183.example.vtgCourseSpeed.description':
+    'Gerçek ve manyetik seyri, knot ve km/h hızını birlikte taşıyan klasik referans cümle.',
+  'protocol.nmea.0183.example.gllPosition.name': 'GLL coğrafi konum',
+  'protocol.nmea.0183.example.gllPosition.description':
+    'Yalnız enlem/boylam, saat ve durum taşıyan sade konum cümlesi.',
+  'protocol.nmea.0183.example.zdaTimeDate.name': 'ZDA saat ve tarih',
+  'protocol.nmea.0183.example.zdaTimeDate.description':
+    'UTC saatini, takvim tarihini ve yerel dilim ofsetini taşıyan cümle.',
+  'protocol.nmea.0183.example.mwvGenericEnvelope.name': 'MWV — generic envelope örneği',
+  'protocol.nmea.0183.example.mwvGenericEnvelope.description':
+    'GNSS 7’lisinin dışında kalan bir cümle tipi: formatter tanınır ama alanlar yalnız ham liste olarak gösterilir.',
 } as const;
 
 /**

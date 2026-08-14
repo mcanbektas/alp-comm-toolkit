@@ -42,7 +42,8 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'Printable-ASCII sentence protocol on a single-talker / multiple-listener serial bus (4800 baud, 38.4 kbaud in HS form) carrying position, heading, depth and wind between shipboard instruments.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'nmea-0183',
           tabs: [
             'overview',
             'live',

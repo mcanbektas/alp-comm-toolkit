@@ -42,4 +42,7 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'modbus-tcp', () =>
     import('./industrial/modbus/modbusTcp').then((module) => module.modbusTcpPlugin),
   );
+  registerOnce(registry, 'nmea-0183', () =>
+    import('./marine/nmea/nmea0183').then((module) => module.nmea0183Plugin),
+  );
 }

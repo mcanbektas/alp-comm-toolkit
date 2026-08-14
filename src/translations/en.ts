@@ -1123,4 +1123,66 @@ export const en: TranslationDictionary = {
     'Protocol ID is not zero; another protocol may be encapsulated on this port.',
   'protocol.modbus.tcp.warning.oversizedLength':
     'The length field exceeds the largest PDU size the standard allows.',
+
+  // --- NMEA 0183 ---
+  'protocol.nmea.sentence.warning.insufficientFields':
+    'The sentence carries fewer fields than expected; the missing fields were not resolved.',
+  'protocol.nmea.sentence.warning.trailingFields':
+    'The sentence carries more fields than expected; the extra fields are shown raw.',
+  'protocol.nmea.sentence.warning.unparseableNumber':
+    'The field does not match the expected numeric format; the raw value is shown as-is.',
+  'protocol.nmea.sentence.warning.genericFieldsOnly':
+    'This sentence type is shown as a raw field list only; field meanings cannot be named without a loaded NMEA revision database.',
+  'protocol.nmea.sentence.warning.unknownFormatter':
+    'Unrecognized sentence format; fields are shown raw without semantic names.',
+  'protocol.nmea.sentence.summary.generic': 'Recognized formatter, raw field list',
+  'protocol.nmea.sentence.summary.unknown': 'Unrecognized sentence format',
+  'protocol.nmea.sentence.summary.gga': 'GPS position fix',
+  'protocol.nmea.sentence.summary.rmc': 'Recommended minimum navigation information',
+  'protocol.nmea.sentence.summary.gsa': 'DOP and active satellites',
+  'protocol.nmea.sentence.summary.gsv': 'Satellites in view',
+  'protocol.nmea.sentence.summary.vtg': 'Course and speed',
+  'protocol.nmea.sentence.summary.gll': 'Geographic position',
+  'protocol.nmea.sentence.summary.zda': 'Time and date',
+  'protocol.nmea.0183.error.sentenceTooShort':
+    'The sentence is shorter than the shortest meaningful NMEA 0183 sentence.',
+  'protocol.nmea.0183.error.sentenceTooLong':
+    'The sentence exceeds the classic 82-character NMEA 0183 limit.',
+  'protocol.nmea.0183.error.startDelimiterNotFound': 'The sentence does not start with $.',
+  'protocol.nmea.0183.error.missingChecksumDelimiter':
+    'The sentence has no checksum delimiter (*).',
+  'protocol.nmea.0183.error.malformedIdentifier':
+    'The talker+formatter field must be at least three characters.',
+  'protocol.nmea.0183.error.checksumMismatch':
+    'Checksum mismatch: the calculated value does not match the value carried in the sentence.',
+  'protocol.nmea.0183.error.aborted': 'Parsing was cancelled.',
+  'protocol.nmea.0183.documentation.summary':
+    'Single-talker / multiple-listener printable-ASCII sentence protocol; fields are comma-delimited and integrity is protected by an XOR checksum over the characters between $ and *.',
+  'protocol.nmea.0183.example.ggaFix.name': 'GGA position fix (spec §43)',
+  'protocol.nmea.0183.example.ggaFix.description':
+    'The verified spec §43 reference sentence: latitude 48.1173°, longitude 11.516666...°, valid checksum.',
+  'protocol.nmea.0183.example.ggaChecksumMismatch.name': 'Broken checksum',
+  'protocol.nmea.0183.example.ggaChecksumMismatch.description':
+    'The same GGA sentence with a single-digit checksum corruption: received 0x48, calculated 0x47.',
+  'protocol.nmea.0183.example.rmcFix.name': 'RMC minimum navigation information',
+  'protocol.nmea.0183.example.rmcFix.description':
+    'The classic RMC reference sentence carrying the same position and time as the GGA fixture.',
+  'protocol.nmea.0183.example.gsaActiveSatellites.name': 'GSA active satellites and DOP',
+  'protocol.nmea.0183.example.gsaActiveSatellites.description':
+    'Classic reference sentence carrying a 3D fix, six active satellite PRNs and PDOP/HDOP/VDOP values.',
+  'protocol.nmea.0183.example.gsvSatellitesInView.name': 'GSV satellites in view',
+  'protocol.nmea.0183.example.gsvSatellitesInView.description':
+    'First of a three-message sequence: 11 satellites in view, this message carries PRN/elevation/azimuth/SNR for four of them.',
+  'protocol.nmea.0183.example.vtgCourseSpeed.name': 'VTG course and speed',
+  'protocol.nmea.0183.example.vtgCourseSpeed.description':
+    'Classic reference sentence carrying true and magnetic course together with speed in knots and km/h.',
+  'protocol.nmea.0183.example.gllPosition.name': 'GLL geographic position',
+  'protocol.nmea.0183.example.gllPosition.description':
+    'A minimal position sentence carrying only latitude/longitude, time and status.',
+  'protocol.nmea.0183.example.zdaTimeDate.name': 'ZDA time and date',
+  'protocol.nmea.0183.example.zdaTimeDate.description':
+    'Sentence carrying UTC time, calendar date and the local zone offset.',
+  'protocol.nmea.0183.example.mwvGenericEnvelope.name': 'MWV — generic envelope example',
+  'protocol.nmea.0183.example.mwvGenericEnvelope.description':
+    'A sentence type outside the GNSS seven: the formatter is recognized but fields are shown only as a raw list.',
 };
