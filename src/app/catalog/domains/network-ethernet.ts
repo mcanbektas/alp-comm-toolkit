@@ -34,7 +34,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The dominant MAC frame format on wired LANs, where the two bytes after the addresses carry an EtherType that selects the upper-layer parser.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ethernet-ii',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Frame Decoder',
@@ -58,7 +59,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The base Ethernet standard family (MAC plus many PHY classes) whose classic frame reads the same two bytes as a payload Length and continues into an LLC/SNAP header.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ieee-802-3',
           tabs: ['overview', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'Length vs EtherType Interpretation',
@@ -76,7 +78,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A four-byte tag inserted after the MAC addresses that carries priority and VLAN identity, used to segment switched industrial and office networks.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'vlan-802-1q',
           tabs: ['overview', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'Tag Decoder',

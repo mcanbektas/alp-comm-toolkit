@@ -1943,6 +1943,68 @@ export const tr = {
   'protocol.mavlink.example.v1Truncated.name': 'Eksik çerçeve (hata yolu)',
   'protocol.mavlink.example.v1Truncated.description':
     'Header LEN 4 bildiriyor ama payload + checksum için yeterli bayt yok — truncated-frame basar, header yine görünür.',
+
+  // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
+  'protocol.ethernet.error.typeLengthTruncated':
+    'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',
+  'protocol.ethernet.error.vlanTagTruncated':
+    'VLAN TPID görüldü ama TCI’ın (2 bayt) tamamı gelmedi.',
+  'protocol.ethernet.error.frameTooShort':
+    'Çerçeve en az DST MAC + SRC MAC + 2 baytlık alan (14 bayt) kadar uzun olmalı.',
+  'protocol.ethernet.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ethernet.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ethernet.warning.etherTypeHigherLayer':
+    'EtherType üst katman protokolünü adlandırır; payload bu protokolün kendi sayfasında çözülür (motorlar zincir kurmaz).',
+  'protocol.ethernet.warning.unknownEtherType':
+    'EtherType değeri dar adlandırma kümesinde (IPv4/ARP/IPv6) yok; payload ham kalır.',
+  'protocol.ethernet.warning.undefinedTypeLengthRange':
+    'Değer 1501-1535 aralığında: ne EtherType ne IEEE 802.3 Length olarak tanımlı; çözüm yine de sürer.',
+  'protocol.ethernet.warning.tooManyVlanTags':
+    '3’ten fazla iç içe VLAN tag’i desteklenmiyor; kalan baytlar ham payload olarak gösterildi.',
+  'protocol.ethernet.warning.fcsOpportunisticMatch':
+    'Son 4 bayt CRC-32 ile uyuşuyor — bu FCS’in gerçekten var olduğunun kanıtı DEĞİLDİR (rastgele eşleşme ihtimali var), yalnız bilgi notu.',
+  'protocol.ethernet.warning.looksLikeEthernetII':
+    'Bu çerçeve Ethernet II gibi görünüyor (EtherType alanı) — Ethernet II sayfasına bakın.',
+  'protocol.ethernet.warning.looksLikeIeee8023':
+    'Bu çerçeve IEEE 802.3 gibi görünüyor (Length alanı) — IEEE 802.3 sayfasına bakın.',
+  'protocol.ethernet.warning.looksLikeVlanTagged':
+    'Bu çerçeve VLAN etiketli gibi görünüyor (0x8100 TPID) — VLAN 802.1Q sayfasına bakın.',
+
+  'protocol.ethernet.ethernetII.documentation.summary':
+    'Ethernet II çerçevesi: Destination/Source MAC (broadcast/multicast/unicast sınıflandırmasıyla), EtherType (IPv4/ARP/IPv6 dar kümesi adlandırılır, payload çözülmez) ve VLAN 802.1Q tag’i (varsa) alan alan çözülür. FCS hiç varsayılmaz — "FCS not captured" bilgi alanı her zaman basılır, son 4 bayt CRC-32 ile fırsatçı eşleşirse yalnız bilgi notu eklenir.',
+  'protocol.ethernet.ethernetII.example.broadcastArp.name': 'Broadcast ARP (spec örneği)',
+  'protocol.ethernet.ethernetII.example.broadcastArp.description':
+    'DST broadcast, SRC 00:11:22:33:44:55, EtherType 0x0806 → ARP adlandırılır, payload ham kalır.',
+  'protocol.ethernet.ethernetII.example.ipv4Unicast.name': 'Unicast IPv4 çerçevesi',
+  'protocol.ethernet.ethernetII.example.ipv4Unicast.description':
+    'EtherType 0x0800 → IPv4 adlandırılır ve üst katman uyarısı basılır.',
+  'protocol.ethernet.ethernetII.example.unknownEtherType.name': 'Tanınmayan EtherType',
+  'protocol.ethernet.ethernetII.example.unknownEtherType.description':
+    'EtherType 0x9000 dar adlandırma kümesinde yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
+  'protocol.ethernet.ethernetII.example.fcsOpportunisticMatch.name': 'Fırsatçı FCS eşleşmesi',
+  'protocol.ethernet.ethernetII.example.fcsOpportunisticMatch.description':
+    'Son 4 bayt bağımsız hesaplanan CRC-32 ile uyuşuyor — yalnız bilgi notu, PASS/FAIL iddiası değil.',
+
+  'protocol.ethernet.ieee8023.documentation.summary':
+    'MAC çiftinden sonraki 2 baytlık alan IEEE 802.3’te Length olarak yorumlanır (Ethernet II’nin EtherType yorumunun tersi). 1501-1535 aralığı ne EtherType ne Length’tir — uyarı basılır, çözüm durmaz. LLC/SNAP payload’ı bu sayfada çözülmez, ham kalır.',
+  'protocol.ethernet.ieee8023.example.snapLengthFrame.name': 'Length yorumu (spec örneği: 0x002E)',
+  'protocol.ethernet.ieee8023.example.snapLengthFrame.description':
+    '0x002E → IEEE 802.3 Payload Length = 46 bayt.',
+  'protocol.ethernet.ieee8023.example.undefinedRange.name': 'Tanımsız aralık (1520)',
+  'protocol.ethernet.ieee8023.example.undefinedRange.description':
+    '1501-1535 aralığı ne EtherType ne Length’tir: uyarı basılır, hata değil.',
+
+  'protocol.ethernet.vlan8021q.documentation.summary':
+    'VLAN 802.1Q tag’i (TPID 0x8100 + TCI) MAC çiftinden sonra araya girer: PCP (3 bit öncelik), DEI (1 bit) ve VLAN ID (12 bit) ayrı alanlar olarak çözülür, iç EtherType 4 bayt kaydırmayla okunur. Çift/üçlü tag (stacking) desteklenir, 3’ten fazlası uyarıyla durdurulur.',
+  'protocol.ethernet.vlan8021q.example.singleTag.name': 'Tek VLAN tag (spec örneği: PCP5/VID100)',
+  'protocol.ethernet.vlan8021q.example.singleTag.description':
+    'PCP 5, DEI 0, VLAN ID 100; iç EtherType 0x0800 IPv4 adlandırılır.',
+  'protocol.ethernet.vlan8021q.example.doubleTagStacked.name': 'Çift VLAN tag (stacking)',
+  'protocol.ethernet.vlan8021q.example.doubleTagStacked.description':
+    'Tag#1 VID100 / Tag#2 VID20 — spec’in stacking örneğiyle aynı değerler.',
+  'protocol.ethernet.vlan8021q.example.truncatedTci.name': 'Eksik TCI (hata yolu)',
+  'protocol.ethernet.vlan8021q.example.truncatedTci.description':
+    'TPID var ama TCI’ın yalnız ilk baytı var — truncated-frame basar, MAC alanları yine görünür.',
 } as const;
 
 /**

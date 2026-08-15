@@ -106,4 +106,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mavlink', () =>
     import('./aerospace/mavlink/mavlink').then((module) => module.mavlinkPlugin),
   );
+  // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
+  // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
+  // canClassic.ts'in üç-plugin-tek-parser emsali).
+  registerOnce(registry, 'ethernet-ii', () =>
+    import('./network/ethernet/ethernet').then((module) => module.ethernetIiPlugin),
+  );
+  registerOnce(registry, 'ieee-802-3', () =>
+    import('./network/ethernet/ethernet').then((module) => module.ieee8023Plugin),
+  );
+  registerOnce(registry, 'vlan-802-1q', () =>
+    import('./network/ethernet/ethernet').then((module) => module.vlan8021qPlugin),
+  );
 }

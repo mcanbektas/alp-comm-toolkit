@@ -1944,4 +1944,66 @@ export const en: TranslationDictionary = {
   'protocol.mavlink.example.v1Truncated.name': 'Truncated frame (error path)',
   'protocol.mavlink.example.v1Truncated.description':
     "The header declares LEN 4, but there are not enough bytes left for the payload and checksum — reports truncated-frame while the header still shows.",
+
+  // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
+  'protocol.ethernet.error.typeLengthTruncated':
+    'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',
+  'protocol.ethernet.error.vlanTagTruncated':
+    'A VLAN TPID was seen, but the full 2-byte TCI did not arrive.',
+  'protocol.ethernet.error.frameTooShort':
+    'A frame must be at least Destination MAC + Source MAC + the 2-byte field (14 bytes) long.',
+  'protocol.ethernet.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.ethernet.error.aborted': 'Decoding was cancelled.',
+  'protocol.ethernet.warning.etherTypeHigherLayer':
+    'EtherType names the upper-layer protocol; the payload is decoded on that protocol’s own page (engines do not chain).',
+  'protocol.ethernet.warning.unknownEtherType':
+    'The EtherType value is not in the narrow naming set (IPv4/ARP/IPv6); the payload stays raw.',
+  'protocol.ethernet.warning.undefinedTypeLengthRange':
+    'The value falls in the 1501-1535 range: it is defined as neither EtherType nor an IEEE 802.3 Length — decoding still continues.',
+  'protocol.ethernet.warning.tooManyVlanTags':
+    'More than 3 nested VLAN tags are not supported; the remaining bytes are shown as raw payload.',
+  'protocol.ethernet.warning.fcsOpportunisticMatch':
+    'The last 4 bytes match a CRC-32 — this is NOT proof that an FCS is actually present (there is a chance of a random match), it is an informational note only.',
+  'protocol.ethernet.warning.looksLikeEthernetII':
+    'This frame looks like Ethernet II (an EtherType field) — see the Ethernet II page.',
+  'protocol.ethernet.warning.looksLikeIeee8023':
+    'This frame looks like IEEE 802.3 (a Length field) — see the IEEE 802.3 page.',
+  'protocol.ethernet.warning.looksLikeVlanTagged':
+    'This frame looks VLAN-tagged (a 0x8100 TPID) — see the VLAN 802.1Q page.',
+
+  'protocol.ethernet.ethernetII.documentation.summary':
+    'An Ethernet II frame: Destination/Source MAC (with broadcast/multicast/unicast classification), EtherType (the narrow IPv4/ARP/IPv6 set is named, the payload is not decoded) and a VLAN 802.1Q tag (if present) are decoded field by field. FCS is never assumed — a "FCS not captured" info field is always shown, and an opportunistic CRC-32 match on the last 4 bytes only adds an informational note.',
+  'protocol.ethernet.ethernetII.example.broadcastArp.name': 'Broadcast ARP (spec example)',
+  'protocol.ethernet.ethernetII.example.broadcastArp.description':
+    'DST broadcast, SRC 00:11:22:33:44:55, EtherType 0x0806 → named as ARP, payload stays raw.',
+  'protocol.ethernet.ethernetII.example.ipv4Unicast.name': 'Unicast IPv4 frame',
+  'protocol.ethernet.ethernetII.example.ipv4Unicast.description':
+    'EtherType 0x0800 → named as IPv4, and an upper-layer warning is reported.',
+  'protocol.ethernet.ethernetII.example.unknownEtherType.name': 'Unrecognized EtherType',
+  'protocol.ethernet.ethernetII.example.unknownEtherType.description':
+    'EtherType 0x9000 is not in the narrow naming set: the field is marked invalid, the frame is still shown.',
+  'protocol.ethernet.ethernetII.example.fcsOpportunisticMatch.name': 'Opportunistic FCS match',
+  'protocol.ethernet.ethernetII.example.fcsOpportunisticMatch.description':
+    'The last 4 bytes match an independently computed CRC-32 — an informational note only, not a PASS/FAIL claim.',
+
+  'protocol.ethernet.ieee8023.documentation.summary':
+    'The 2-byte field after the MAC pair is interpreted as a Length under IEEE 802.3 (the opposite of Ethernet II’s EtherType interpretation). The 1501-1535 range is neither EtherType nor Length — a warning is reported, decoding does not stop. LLC/SNAP payload is not decoded on this page, it stays raw.',
+  'protocol.ethernet.ieee8023.example.snapLengthFrame.name': 'Length interpretation (spec example: 0x002E)',
+  'protocol.ethernet.ieee8023.example.snapLengthFrame.description':
+    '0x002E → IEEE 802.3 Payload Length = 46 bytes.',
+  'protocol.ethernet.ieee8023.example.undefinedRange.name': 'Undefined range (1520)',
+  'protocol.ethernet.ieee8023.example.undefinedRange.description':
+    'The 1501-1535 range is neither EtherType nor Length: a warning is reported, not an error.',
+
+  'protocol.ethernet.vlan8021q.documentation.summary':
+    'A VLAN 802.1Q tag (TPID 0x8100 + TCI) is inserted after the MAC pair: PCP (3-bit priority), DEI (1 bit) and VLAN ID (12 bits) are decoded as separate fields, and the inner EtherType is read with a 4-byte offset shift. Double/triple tags (stacking) are supported, beyond 3 is stopped with a warning.',
+  'protocol.ethernet.vlan8021q.example.singleTag.name': 'Single VLAN tag (spec example: PCP5/VID100)',
+  'protocol.ethernet.vlan8021q.example.singleTag.description':
+    'PCP 5, DEI 0, VLAN ID 100; the inner EtherType 0x0800 is named as IPv4.',
+  'protocol.ethernet.vlan8021q.example.doubleTagStacked.name': 'Double VLAN tag (stacking)',
+  'protocol.ethernet.vlan8021q.example.doubleTagStacked.description':
+    'Tag #1 VID100 / Tag #2 VID20 — the same values as the spec’s own stacking example.',
+  'protocol.ethernet.vlan8021q.example.truncatedTci.name': 'Incomplete TCI (error path)',
+  'protocol.ethernet.vlan8021q.example.truncatedTci.description':
+    'The TPID is present but only the first byte of the TCI arrived — reports truncated-frame while the MAC fields still show.',
 };

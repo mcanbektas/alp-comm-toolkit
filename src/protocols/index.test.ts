@@ -12,7 +12,9 @@ const BUILT_IN_IDS = [
   'can-xl',
   'canopen',
   'doip',
+  'ethernet-ii',
   'gnss-ubx',
+  'ieee-802-3',
   'iso-14230',
   'iso-9141',
   'iso-tp',
@@ -27,6 +29,7 @@ const BUILT_IN_IDS = [
   'obd-ii',
   'rtcm',
   'uds',
+  'vlan-802-1q',
 ];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
@@ -37,7 +40,9 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'can-xl': 'automotive',
   canopen: 'industrial-automation',
   doip: 'automotive',
+  'ethernet-ii': 'network-ethernet',
   'gnss-ubx': 'marine-navigation',
+  'ieee-802-3': 'network-ethernet',
   'iso-14230': 'automotive',
   'iso-9141': 'automotive',
   'iso-tp': 'automotive',
@@ -52,6 +57,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'obd-ii': 'automotive',
   rtcm: 'marine-navigation',
   uds: 'automotive',
+  'vlan-802-1q': 'network-ethernet',
 };
 
 describe('registerBuiltInProtocols', () => {
