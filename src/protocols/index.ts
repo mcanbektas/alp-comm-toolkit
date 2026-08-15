@@ -76,6 +76,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'canopen', () =>
     import('./industrial/canopen/canopen').then((module) => module.canopenPlugin),
   );
+  registerOnce(registry, 'doip', () =>
+    import('./automotive/doip/doip').then((module) => module.doipPlugin),
+  );
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );

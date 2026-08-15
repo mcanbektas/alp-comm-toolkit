@@ -1433,6 +1433,83 @@ export const tr = {
   'protocol.obd.example.unknownMode.description':
     'Mod tabloda yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
 
+  // --- DoIP ---
+  'protocol.doip.error.headerTruncated':
+    'Generic header eksik: en az 8 bayt gerekir (version, inverse version, payload type, payload length).',
+  'protocol.doip.error.frameTooLong': 'DoIP mesajı izin verilen azami uzunluğu aşıyor.',
+  'protocol.doip.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.doip.error.inverseVersionMismatch':
+    'Inverse Protocol Version, Protocol Version’ın 0xFF ile XOR’u değil — başlık tutarsız.',
+  'protocol.doip.error.payloadTruncated': 'Payload bu tipin gerektirdiği uzunluktan kısa.',
+  'protocol.doip.warning.unknownPayloadType':
+    'Payload type ISO 13400-2’nin tanıdığı 16 koddan hiçbirine uymuyor.',
+  'protocol.doip.warning.payloadLengthMismatch':
+    'Header’ın deklare ettiği payload uzunluğu, mesajda gerçekten bulunan bayt sayısıyla uyuşmuyor.',
+  'protocol.doip.warning.udsPayloadNeedsUdsPage':
+    'UDS gövdesi ham gösteriliyor: SID/NRC çözümü UDS sayfasında yapılır, DoIP payload’ını taşımaz (dalga 1 kararı).',
+  'protocol.doip.warning.trailingBytes': 'Bu payload tipi için beklenenden fazla bayt var.',
+  'protocol.doip.warning.unknownNackCode':
+    'NACK kodu ISO 13400-2’nin Generic NACK tablosunda yok.',
+  'protocol.doip.warning.unknownActivationType':
+    'Activation Type ISO 13400-2’nin tanıdığı değerlerden biri değil.',
+  'protocol.doip.warning.unknownRoutingActivationResponseCode':
+    'Response Code Routing Activation Response tablosunda yok.',
+  'protocol.doip.warning.unknownFurtherAction': 'Further Action Required değeri tabloda yok.',
+  'protocol.doip.warning.unknownSyncStatus': 'VIN/GID Sync Status değeri tabloda yok.',
+  'protocol.doip.warning.unknownNodeType':
+    'Node Type değeri tabloda yok (Gateway/Node dışında).',
+  'protocol.doip.warning.unknownPowerMode': 'Power Mode değeri tabloda yok.',
+  'protocol.doip.warning.unknownDiagnosticAckCode':
+    'ACK Code 0x00 dışında bir değer — Diagnostic Message ACK yalnız bu kodu tanımlıyor.',
+  'protocol.doip.warning.unknownDiagnosticNackCode':
+    'NACK kodu Diagnostic Message NACK tablosunda yok.',
+  'protocol.doip.summary.genericNack': 'DoIP Generic NACK',
+  'protocol.doip.summary.vehicleIdentificationRequest': 'DoIP Vehicle Identification Request',
+  'protocol.doip.summary.vehicleIdentificationRequestEid':
+    'DoIP Vehicle Identification Request (EID)',
+  'protocol.doip.summary.vehicleIdentificationRequestVin':
+    'DoIP Vehicle Identification Request (VIN)',
+  'protocol.doip.summary.vehicleAnnouncement': 'DoIP Vehicle Announcement',
+  'protocol.doip.summary.routingActivationRequest': 'DoIP Routing Activation Request',
+  'protocol.doip.summary.routingActivationResponse': 'DoIP Routing Activation Response',
+  'protocol.doip.summary.aliveCheckRequest': 'DoIP Alive Check Request',
+  'protocol.doip.summary.aliveCheckResponse': 'DoIP Alive Check Response',
+  'protocol.doip.summary.entityStatusRequest': 'DoIP Entity Status Request',
+  'protocol.doip.summary.entityStatusResponse': 'DoIP Entity Status Response',
+  'protocol.doip.summary.powerModeRequest': 'DoIP Power Mode Request',
+  'protocol.doip.summary.powerModeResponse': 'DoIP Power Mode Response',
+  'protocol.doip.summary.diagnosticMessage': 'DoIP Diagnostic Message',
+  'protocol.doip.summary.diagnosticMessageAck': 'DoIP Diagnostic Message ACK',
+  'protocol.doip.summary.diagnosticMessageNack': 'DoIP Diagnostic Message NACK',
+  'protocol.doip.summary.unknownPayloadType': 'DoIP — bilinmeyen payload type',
+  'protocol.doip.documentation.summary':
+    'ISO 13400-2 DoIP: generic header (version, payload type, payload length) ve 16 payload tipinin alan düzeni çözülür — Vehicle Announcement, Routing Activation, Alive Check, Entity Status, Power Mode, Diagnostic Message dahil. Diagnostic Message içindeki UDS gövdesi HAM kalır; SID/NRC çözümü UDS sayfasının işidir (dalga 1 kararı, zincir parser seviyesinde kurulmaz).',
+  'protocol.doip.example.vehicleAnnouncement.name': 'Vehicle Announcement',
+  'protocol.doip.example.vehicleAnnouncement.description':
+    'VIN, Logical Address, EID, GID ve Further Action Required alan alan çözülür.',
+  'protocol.doip.example.routingActivationRequest.name': 'Routing Activation Request (Default)',
+  'protocol.doip.example.routingActivationRequest.description':
+    'Activation Type 0x00: varsayılan aktivasyon isteği.',
+  'protocol.doip.example.routingActivationResponse.name':
+    'Routing Activation Response (Activated)',
+  'protocol.doip.example.routingActivationResponse.description':
+    'Response Code 0x10: aktivasyon başarılı.',
+  'protocol.doip.example.diagnosticMessage.name': 'Diagnostic Message',
+  'protocol.doip.example.diagnosticMessage.description':
+    'SA/TA çözülür; UDS gövdesi (Read Data By Identifier, DID 0xF190) ham kalır.',
+  'protocol.doip.example.genericNack.name': 'Generic NACK (Message Too Large)',
+  'protocol.doip.example.genericNack.description': 'NACK code 0x02: mesaj çok büyük.',
+  'protocol.doip.example.aliveCheckRequest.name': 'Alive Check Request',
+  'protocol.doip.example.aliveCheckRequest.description':
+    'Boş payload — yalnız generic header.',
+  'protocol.doip.example.aliveCheckResponse.name': 'Alive Check Response',
+  'protocol.doip.example.aliveCheckResponse.description':
+    'Source Address 2 baytlık tek alan.',
+  'protocol.doip.example.routingActivationResponseTruncated.name':
+    'Routing Activation Response (eksik)',
+  'protocol.doip.example.routingActivationResponseTruncated.description':
+    'Entity Logical Address’in ikinci baytı eksik: truncated-frame basar, Tester Logical Address yine görünür.',
+
   // --- CANopen ---
   'protocol.canopen.error.frameTooShort':
     'Kayıt CAN kimliği ve uzunluk alanlarını taşıyacak kadar uzun değil.',

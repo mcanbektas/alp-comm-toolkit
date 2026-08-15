@@ -640,7 +640,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'ISO 13400 diagnostics over IP, adding vehicle discovery, routing activation and logical addressing so UDS payloads can travel over TCP/UDP on automotive Ethernet.',
           layer: 'transport',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'doip',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Vehicle Discovery',
