@@ -49,6 +49,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
     import('./marine/nmea2000/nmea2000').then((module) => module.nmea2000Plugin),
   );
   registerOnce(registry, 'ais', () => import('./marine/ais/ais').then((module) => module.aisPlugin));
+  // UBX + RTCM aynı GNSS portunda multipleksli akış (spec 5563); kanonik kayıtları
+  // marine'de, interfaces-framing/aerospace-uav sayfaları alias olarak devralır.
+  registerOnce(registry, 'gnss-ubx', () =>
+    import('./marine/ubx/ubx').then((module) => module.ubxPlugin),
+  );
+  registerOnce(registry, 'rtcm', () =>
+    import('./marine/rtcm/rtcm').then((module) => module.rtcmPlugin),
+  );
   // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
   // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
   registerOnce(registry, 'can-2-0a', () =>

@@ -1,9 +1,10 @@
 /**
  * reveng.sourceforge.io "Catalogue of parametrised CRC algorithms" kaynağından
- * BİREBİR alınan 18 standart CRC tanımı. `poly`/`init`/`xorout` değerleri
- * UYDURULMADI ya da yuvarlanmadı — değiştirilirse `crcEngine.test.ts`'teki
- * `check` fixture'ları (ASCII "123456789" girdisinin beklenen CRC'si) tutmaz.
- * Bu yüzden burada elle "sadeleştirme" ya da "iyileştirme" yapılmaz.
+ * BİREBİR alınan 19 standart CRC tanımı (18'i dalga 1'den, `CRC24_Q` dalga
+ * 10/3c'de RTCM için eklendi). `poly`/`init`/`xorout` değerleri UYDURULMADI ya
+ * da yuvarlanmadı — değiştirilirse `crcEngine.test.ts`'teki `check` fixture'ları
+ * (ASCII "123456789" girdisinin beklenen CRC'si) tutmaz. Bu yüzden burada elle
+ * "sadeleştirme" ya da "iyileştirme" yapılmaz.
  */
 
 import { crc } from './crcEngine';
@@ -25,6 +26,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_X25',
   'CRC16_DNP',
   'CRC24',
+  'CRC24_Q',
   'CRC32',
   'CRC32C',
   'CRC64',
@@ -108,6 +110,25 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     width: 24,
     poly: 0x864cfbn,
     init: 0xb704cen,
+    refin: false,
+    refout: false,
+    xorout: 0x000000n,
+  },
+  /**
+   * CRC-24/Q ("CRC-24Q", RTCM SC-104 / ITU-T H.224 / Qualcomm) — RTCM 3.x çerçeve
+   * bütünlüğünde kullanılır (brief-faz10-dalga3.md). Görev tarifi bunu CRC24'ten
+   * "farklı polinom" diye tanımlıyordu ama bu YANLIŞ: polinom (0x864CFB) CRC24
+   * (OpenPGP) ile BİREBİR AYNI — x^24+x^23+x^18+x^17+x^14+x^11+x^10+x^7+x^6+x^5+
+   * x^4+x^3+x+1 açılımı da 0x1864CFB'ye (üst bit örtük) sadeleşiyor. TEK FARK
+   * `init`: CRC24/OpenPGP 0xB704CE ile başlar, CRC-24/Q 0x000000 ile. `check`
+   * değeri ("123456789" ASCII) bu motorla üretilip 0xB704CE'lik OpenPGP
+   * fixture'ıyla (0x21CF02, üstte) çapraz doğrulandı — ikisi aynı `crc()`
+   * çağrısından geçiyor, yalnız `init` değişiyor.
+   */
+  CRC24_Q: {
+    width: 24,
+    poly: 0x864cfbn,
+    init: 0x000000n,
     refin: false,
     refout: false,
     xorout: 0x000000n,

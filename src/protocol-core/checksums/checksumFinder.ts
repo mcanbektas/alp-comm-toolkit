@@ -1,6 +1,6 @@
 /**
  * Spec §11 "CRC Finder" aracı: bilinen veri + gözlenen checksum çiftinden hangi
- * algoritmanın kullanıldığını bulmaya çalışır. Denenen: 18 standart CRC
+ * algoritmanın kullanıldığını bulmaya çalışır. Denenen: 19 standart CRC
  * (`crcCatalogue`) + 9 basit checksum (§43), HER İKİSİ de gözlenen değerin
  * normal VE bayt sırası TERSİNE ÇEVRİLMİŞ hâliyle karşılaştırılır — çerçeveden
  * okunan çok baytlı bir checksum yanlış endianness'la yorumlanmış olabilir.

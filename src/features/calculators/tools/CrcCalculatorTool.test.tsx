@@ -69,8 +69,8 @@ describe('CrcCalculatorTool', () => {
     renderTool();
 
     const options = within(screen.getByTestId('crc-algorithm')).getAllByRole('option');
-    // 18 katalog CRC'si + 7 basit toplam + 1 özel.
-    expect(options).toHaveLength(26);
+    // 19 katalog CRC'si (dalga 10/3c'de RTCM için CRC24_Q eklendi) + 7 basit toplam + 1 özel.
+    expect(options).toHaveLength(27);
   });
 
   it('shows no computed value before any data is entered', () => {

@@ -12,6 +12,7 @@ const BUILT_IN_IDS = [
   'can-xl',
   'canopen',
   'doip',
+  'gnss-ubx',
   'iso-14230',
   'iso-9141',
   'iso-tp',
@@ -23,6 +24,7 @@ const BUILT_IN_IDS = [
   'nmea-0183',
   'nmea-2000',
   'obd-ii',
+  'rtcm',
   'uds',
 ];
 
@@ -34,6 +36,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'can-xl': 'automotive',
   canopen: 'industrial-automation',
   doip: 'automotive',
+  'gnss-ubx': 'marine-navigation',
   'iso-14230': 'automotive',
   'iso-9141': 'automotive',
   'iso-tp': 'automotive',
@@ -45,6 +48,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'nmea-0183': 'marine-navigation',
   'nmea-2000': 'marine-navigation',
   'obd-ii': 'automotive',
+  rtcm: 'marine-navigation',
   uds: 'automotive',
 };
 

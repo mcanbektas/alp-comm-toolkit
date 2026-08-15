@@ -1270,6 +1270,71 @@ export const en: TranslationDictionary = {
   'protocol.ais.example.ownVesselClassB.description':
     'An AIVDO (own-vessel) formatter with a named Message Type 18 example — channel B.',
 
+  // --- UBX ---
+  'protocol.ubx.error.headerTruncated':
+    'The record is not long enough to carry the Sync/Class/ID/Length fields.',
+  'protocol.ubx.error.frameTooLong': 'The record exceeds the allowed maximum frame length.',
+  'protocol.ubx.error.aborted': 'Parsing was cancelled.',
+  'protocol.ubx.error.invalidSync': 'The record does not start with the B5 62 sync bytes.',
+  'protocol.ubx.error.truncatedPayload':
+    'The payload and/or checksum announced by the Length field is missing from the record.',
+  'protocol.ubx.error.checksumMismatch':
+    'Checksum mismatch: the computed CK_A/CK_B does not match the value carried in the frame.',
+  'protocol.ubx.warning.unknownClass':
+    'The class byte is outside the narrow, publicly documented u-blox class set (NAV/RXM/CFG/ACK/INF/MON…).',
+  'protocol.ubx.warning.payloadNeedsDatabase':
+    'Payload shown raw: the field layout (e.g. NAV-PVT) comes from u-blox’s version-dependent interface manual and is not guessed here.',
+  'protocol.ubx.warning.trailingBytes':
+    'There are extra bytes after Length + checksum; the surplus does not belong to this frame.',
+  'protocol.ubx.summary.frame': 'UBX frame',
+  'protocol.ubx.documentation.summary':
+    'u-blox GNSS receivers’ own byte stream: Sync (B5 62) + Class + ID + little-endian Length + Payload + an 8-bit two-accumulator Checksum (CK_A/CK_B). Checksum coverage runs from Class to the end of the payload, EXCLUDING sync. Class is named from a narrow set; the ID number table and the internal payload layout (e.g. NAV-PVT) come from a version-dependent, licensed interface manual — left raw here.',
+  'protocol.ubx.example.monVerPoll.name': 'MON-VER poll (spec ~5355)',
+  'protocol.ubx.example.monVerPoll.description':
+    'The ONE concrete UBX byte sequence the spec gives: B5 62 0A 06 00 00 10 3A — Class MON, empty payload, valid checksum.',
+  'protocol.ubx.example.payloadNeedsDatabase.name': 'Populated payload (NAV class)',
+  'protocol.ubx.example.payloadNeedsDatabase.description':
+    'The NAV class is recognized, but the four-byte payload is left unnamed — the payloadNeedsDatabase warning fires.',
+  'protocol.ubx.example.unknownClass.name': 'Unrecognized class',
+  'protocol.ubx.example.unknownClass.description':
+    'Class byte 0x99 is outside the narrow set: a warning fires but the frame is still considered valid.',
+  'protocol.ubx.example.checksumMismatch.name': 'Corrupted checksum',
+  'protocol.ubx.example.checksumMismatch.description':
+    'The same body as the MON-VER poll example, with the CK_B byte deliberately corrupted (0x00 instead of 0x3A).',
+
+  // --- RTCM ---
+  'protocol.rtcm.error.headerTruncated':
+    'The record is not long enough to carry the Preamble and Length fields.',
+  'protocol.rtcm.error.frameTooLong': 'The record exceeds the allowed maximum frame length.',
+  'protocol.rtcm.error.aborted': 'Parsing was cancelled.',
+  'protocol.rtcm.error.invalidPreamble': 'The record does not start with the 0xD3 preamble byte.',
+  'protocol.rtcm.error.truncatedPayload':
+    'The payload and/or CRC announced by the Length field is missing from the record.',
+  'protocol.rtcm.error.crcMismatch':
+    'CRC-24Q mismatch: the computed value does not match the value carried in the frame.',
+  'protocol.rtcm.warning.reservedBitSet':
+    'The 6 reserved bits are not zero; the frame may be corrupted or an unknown revision may be using this field.',
+  'protocol.rtcm.warning.payloadNeedsDatabase':
+    'All payload bytes beyond the message number (station ID, observations, MSM/SSR cells …) depend on the official RTCM 10403 revision — shown raw here, not guessed.',
+  'protocol.rtcm.warning.messageNumberUnavailable':
+    'The payload is not long enough to carry the 12-bit message number.',
+  'protocol.rtcm.warning.messageCategoryUnknown':
+    'The message number is outside this page’s narrow category mapping; its full name and category come from the licensed RTCM message table.',
+  'protocol.rtcm.warning.trailingBytes':
+    'There are extra bytes after Length + CRC; the surplus does not belong to this frame.',
+  'protocol.rtcm.summary.frame': 'RTCM frame',
+  'protocol.rtcm.documentation.summary':
+    'The frame format of GNSS correction messages (RTCM 10403.x): a 0xD3 preamble + 6 reserved bits + a 10-bit Length + Payload + CRC-24Q. The first 12 bits of the payload are the message number and are always resolved; the number’s category (Reference Station/MSM/GLONASS…) is named only through the narrow mapping the spec explicitly gives. The message’s human-readable name and field layout come from the licensed RTCM message table — not written here.',
+  'protocol.rtcm.example.referenceStation.name': 'Message 1005 (Reference Station)',
+  'protocol.rtcm.example.referenceStation.description':
+    'Message number 1005, which the spec’s category mapping places under "Reference Station" — valid CRC-24Q.',
+  'protocol.rtcm.example.unclassifiedMessageNumber.name': 'Unclassified message number',
+  'protocol.rtcm.example.unclassifiedMessageNumber.description':
+    'Message number 4095 is outside the narrow category mapping: a warning fires but the frame is still considered valid.',
+  'protocol.rtcm.example.crcMismatch.name': 'Corrupted CRC',
+  'protocol.rtcm.example.crcMismatch.description':
+    'The same body as the message 1005 example, with the last CRC byte deliberately corrupted (0x00 instead of 0x27).',
+
   // --- CAN family (shared frame core) ---
   'protocol.can.frame.warning.truncatedPayload':
     'The declared data length is not present in the record; the available bytes were decoded.',

@@ -27,6 +27,10 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   CRC16_X25: 0x906en,
   CRC16_DNP: 0xea82n,
   CRC24: 0x21cf02n,
+  // CRC-24/Q (RTCM SC-104 / ITU-T H.224): CRC24 (OpenPGP) ile AYNI polinom
+  // (0x864CFB), yalnız init 0x000000 — bu yüzden check değeri de farklı
+  // (crcCatalogue.ts'teki CRC24_Q girdisinin dosya başı notuna bak).
+  CRC24_Q: 0xcde703n,
   CRC32: 0xcbf43926n,
   CRC32C: 0xe3069283n,
   CRC64: 0x995dc9bbdf1939fan,

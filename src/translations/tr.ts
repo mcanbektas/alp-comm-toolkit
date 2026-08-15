@@ -1271,6 +1271,71 @@ export const tr = {
   'protocol.ais.example.ownVesselClassB.description':
     'AIVDO (own-vessel) formatörü ve adlandırılmış Message Type 18 örneği — kanal B.',
 
+  // --- UBX ---
+  'protocol.ubx.error.headerTruncated':
+    'Kayıt Sync/Class/ID/Length alanlarını taşıyacak kadar uzun değil.',
+  'protocol.ubx.error.frameTooLong': 'Kayıt izin verilen azami çerçeve boyunu aşıyor.',
+  'protocol.ubx.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ubx.error.invalidSync': 'Kayıt B5 62 sync baytlarıyla başlamıyor.',
+  'protocol.ubx.error.truncatedPayload':
+    'Length alanının bildirdiği payload ve/veya checksum kayıtta yok.',
+  'protocol.ubx.error.checksumMismatch':
+    'Checksum uyuşmuyor: hesaplanan CK_A/CK_B, çerçevede taşınan değerle aynı değil.',
+  'protocol.ubx.warning.unknownClass':
+    'Class baytı u-blox arayüz kılavuzunun dar, kamuya açık class kümesinde (NAV/RXM/CFG/ACK/INF/MON…) yok.',
+  'protocol.ubx.warning.payloadNeedsDatabase':
+    'Payload ham gösteriliyor: alan düzeni (ör. NAV-PVT) u-blox’un sürüme bağlı arayüz kılavuzundan gelir, burada tahmin edilmez.',
+  'protocol.ubx.warning.trailingBytes':
+    'Length + checksum sonrasında fazladan bayt var; fazlası bu çerçeveye ait değil.',
+  'protocol.ubx.summary.frame': 'UBX çerçevesi',
+  'protocol.ubx.documentation.summary':
+    'u-blox GNSS alıcılarının kendi bayt akışı: Sync (B5 62) + Class + ID + little-endian Length + Payload + 8-bit iki akümülatörlü Checksum (CK_A/CK_B). Checksum kapsamı Class’tan payload sonuna kadardır, sync HARİÇ. Class dar bir kümeden adlandırılır; ID numara tablosu ve payload içi alan düzeni (NAV-PVT gibi) sürüme bağlı, lisanslı arayüz kılavuzundan gelir — burada ham bırakılır.',
+  'protocol.ubx.example.monVerPoll.name': 'MON-VER poll (spec ~5355)',
+  'protocol.ubx.example.monVerPoll.description':
+    'Spec’in verdiği TEK somut UBX bayt dizisi: B5 62 0A 06 00 00 10 3A — Class MON, boş payload, geçerli checksum.',
+  'protocol.ubx.example.payloadNeedsDatabase.name': 'Dolu payload (NAV class)',
+  'protocol.ubx.example.payloadNeedsDatabase.description':
+    'NAV class tanınır ama dört baytlık payload adlandırılmaz — payloadNeedsDatabase uyarısı basılır.',
+  'protocol.ubx.example.unknownClass.name': 'Tanınmayan class',
+  'protocol.ubx.example.unknownClass.description':
+    'Class baytı 0x99 dar kümede yok: uyarı basılır ama çerçeve yine geçerli sayılır.',
+  'protocol.ubx.example.checksumMismatch.name': 'Bozuk checksum',
+  'protocol.ubx.example.checksumMismatch.description':
+    'MON-VER poll örneğiyle aynı gövde, CK_B baytı bilerek bozuldu (0x3A yerine 0x00).',
+
+  // --- RTCM ---
+  'protocol.rtcm.error.headerTruncated':
+    'Kayıt Preamble ve Length alanlarını taşıyacak kadar uzun değil.',
+  'protocol.rtcm.error.frameTooLong': 'Kayıt izin verilen azami çerçeve boyunu aşıyor.',
+  'protocol.rtcm.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rtcm.error.invalidPreamble': 'Kayıt 0xD3 preamble baytıyla başlamıyor.',
+  'protocol.rtcm.error.truncatedPayload':
+    'Length alanının bildirdiği payload ve/veya CRC kayıtta yok.',
+  'protocol.rtcm.error.crcMismatch':
+    'CRC-24Q uyuşmuyor: hesaplanan değer, çerçevede taşınan değerle aynı değil.',
+  'protocol.rtcm.warning.reservedBitSet':
+    'Ayrılmış 6 bit sıfır değil; çerçeve bozuk olabilir ya da bilinmeyen bir revizyon bu alanı kullanıyor olabilir.',
+  'protocol.rtcm.warning.payloadNeedsDatabase':
+    'Mesaj numarası dışındaki tüm payload baytları (istasyon kimliği, gözlemler, MSM/SSR hücreleri …) resmi RTCM 10403 revizyonuna bağlı — burada ham gösterilir, tahmin edilmez.',
+  'protocol.rtcm.warning.messageNumberUnavailable':
+    'Payload, 12-bit mesaj numarasını taşıyacak kadar uzun değil.',
+  'protocol.rtcm.warning.messageCategoryUnknown':
+    'Mesaj numarası bu sayfanın dar kategori eşlemesinde yok; tam adı ve kategorisi lisanslı RTCM mesaj tablosundan gelir.',
+  'protocol.rtcm.warning.trailingBytes':
+    'Length + CRC sonrasında fazladan bayt var; fazlası bu çerçeveye ait değil.',
+  'protocol.rtcm.summary.frame': 'RTCM çerçevesi',
+  'protocol.rtcm.documentation.summary':
+    'GNSS düzeltme mesajlarının çerçeve biçimi (RTCM 10403.x): 0xD3 preamble + 6-bit ayrılmış + 10-bit Length + Payload + CRC-24Q. Payload’ın ilk 12 biti mesaj numarasıdır ve her zaman çözülür; numaranın kategorisi (Reference Station/MSM/GLONASS…) yalnız spec’in açıkça verdiği dar bir eşlemeyle adlandırılır. Mesajın insan-okur adı ve alan düzeni lisanslı RTCM mesaj tablosundan gelir — burada yazılmaz.',
+  'protocol.rtcm.example.referenceStation.name': 'Mesaj 1005 (Reference Station)',
+  'protocol.rtcm.example.referenceStation.description':
+    'Mesaj numarası 1005, spec’in verdiği kategori eşlemesinde "Reference Station" — geçerli CRC-24Q.',
+  'protocol.rtcm.example.unclassifiedMessageNumber.name': 'Kategorisi belirsiz mesaj numarası',
+  'protocol.rtcm.example.unclassifiedMessageNumber.description':
+    'Mesaj numarası 4095, dar kategori eşlemesinde yok: uyarı basılır ama çerçeve yine geçerli sayılır.',
+  'protocol.rtcm.example.crcMismatch.name': 'Bozuk CRC',
+  'protocol.rtcm.example.crcMismatch.description':
+    'Mesaj 1005 örneğiyle aynı gövde, son CRC baytı bilerek bozuldu (0x27 yerine 0x00).',
+
   // --- CAN ailesi (ortak çerçeve çekirdeği) ---
   'protocol.can.frame.warning.truncatedPayload':
     'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar çözüldü.',

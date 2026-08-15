@@ -260,7 +260,8 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'u-blox binary protocol whose SYNC / CLASS / ID / LENGTH / PAYLOAD / CHECKSUM frames deliver receiver navigation solutions such as UBX-NAV-PVT over UART, USB, SPI or I²C.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'gnss-ubx',
           tabs: [
             'overview',
             'live',
@@ -297,7 +298,8 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'Differential GNSS correction format (RTCM 10403.4) whose framed messages carry reference-station, per-constellation, MSM and SSR corrections to high-precision receivers, typically streamed over NTRIP.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rtcm',
           tabs: [
             'overview',
             'live',
