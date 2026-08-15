@@ -2177,6 +2177,50 @@ export const tr = {
   'protocol.mqtt.example.subscribeFixedFlagsViolation.name': 'SUBSCRIBE — sabit flags ihlali (uyarı yolu)',
   'protocol.mqtt.example.subscribeFixedFlagsViolation.description':
     'SUBSCRIBE’ın flags nibble’ı 0b0010 olmalı, burada 0b0000 geldi — uyarı basılır, çerçeve yine çözülür.',
+
+  // --- CoAP ---
+  'protocol.coap.error.headerTruncated': 'Çerçeve 4 baytlık sabit başlık kadar bile uzun değil.',
+  'protocol.coap.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.coap.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.coap.error.tokenLengthReserved':
+    'Token Length 9-15 aralığında — RFC 7252’nin rezerve bıraktığı, geçersiz bir değer ("message format error"). Token/Options/Payload çözülmedi.',
+  'protocol.coap.error.tokenTruncated': 'Token Length’in bildirdiği bayt sayısı tamponda eksik.',
+  'protocol.coap.error.optionTruncated': 'Bir option’ın delta/length uzantı baytı ya da değeri tamponda eksik.',
+  'protocol.coap.error.optionNibbleReserved':
+    'Option baytında delta ya da length nibble’ı tek başına 15 — bu yalnız tam 0xFF payload marker’ında geçerlidir, RFC 7252’nin "message format error"udur.',
+  'protocol.coap.error.payloadMarkerEmpty':
+    '0xFF payload marker’dan sonra hiç bayt gelmedi — RFC 7252 marker varsa payload’ı zorunlu kılar.',
+
+  'protocol.coap.warning.versionUnexpected':
+    'Version alanı 1 değil — RFC 7252 gelecekteki sürümlere karşı sessiz ret istemiyor, çözümleme yine de devam eder.',
+  'protocol.coap.warning.unknownOption':
+    'Option numarası RFC 7252’nin temel option tablosunda yok (Observe/Block gibi sonraki RFC uzantıları da dahil) — ham gösterilir, isim uydurulmaz.',
+
+  'protocol.coap.summary.frame': 'CoAP çerçevesi',
+
+  'protocol.coap.documentation.summary':
+    '4 baytlık sabit başlık (Version/Type/Token Length + Code + Message ID) bitCursor ile bit alanlarına bölünüp çözülür. Code hem ham bayt hem "class.detail" gösterimiyle (ör. 0x45 → "2.05") basılır. Token Length’in bildirdiği kadar Token ham gösterilir; 9-15 aralığı RFC 7252’nin rezerve bıraktığı bir "message format error"dur. Options listesi 0xFF payload marker’a ya da tampon sonuna kadar döner: her option’ın delta/length nibble’ı RFC 7252’nin extended-value kurallarıyla (13→+13, 14→+269) genişler, Option Number önceki delta’ların kümülatif toplamıdır. Yalnız RFC 7252’nin temel option tablosundaki on dört numara adlandırılır, gerisi ham + uyarı. Observe/Block gibi sonraki RFC uzantıları bilerek çözülmez.',
+  'protocol.coap.example.getRequest.name': 'GET isteği — Uri-Path',
+  'protocol.coap.example.getRequest.description':
+    'CON, Token yok, Code=GET (0.01), Uri-Path="temp" — payload yok.',
+  'protocol.coap.example.contentResponse.name': '2.05 Content yanıtı',
+  'protocol.coap.example.contentResponse.description':
+    'ACK, Token=0xABCD, Code=2.05 Content, Content-Format option’ı, 0xFF marker + Payload "23.5".',
+  'protocol.coap.example.multipleUriPath.name': 'Birden fazla Uri-Path segmenti',
+  'protocol.coap.example.multipleUriPath.description':
+    'GET /sensors/temp — iki Uri-Path option’ı, ikincisi delta=0 ile aynı option numarasını (11) kümülatif korur.',
+  'protocol.coap.example.unrecognizedOption.name': 'Tanınmayan option (uyarı yolu)',
+  'protocol.coap.example.unrecognizedOption.description':
+    'Observe (RFC 7641 uzantısı) — dar ad kümesinde yok, ham + uyarı basılır, çerçeve yine valid kalır.',
+  'protocol.coap.example.tokenLengthReserved.name': 'Token Length rezerve (hata yolu)',
+  'protocol.coap.example.tokenLengthReserved.description':
+    'TKL=9 — RFC 7252’nin rezerve bıraktığı aralık, Token/Options hiç çözülmez.',
+  'protocol.coap.example.payloadMarkerEmpty.name': '0xFF sonrası boş payload (hata yolu)',
+  'protocol.coap.example.payloadMarkerEmpty.description':
+    'Payload marker geldi ama ardından tek bayt bile yok — RFC 7252 ihlali.',
+  'protocol.coap.example.optionNibbleReserved.name': 'Option nibble’ı marker dışı 15 (hata yolu)',
+  'protocol.coap.example.optionNibbleReserved.description':
+    'Option baytı 0xF0: delta nibble’ı 15 ama bayt tam 0xFF değil — "message format error".',
 } as const;
 
 /**

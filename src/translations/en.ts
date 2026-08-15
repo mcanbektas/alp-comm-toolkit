@@ -2177,4 +2177,48 @@ export const en: TranslationDictionary = {
   'protocol.mqtt.example.subscribeFixedFlagsViolation.name': 'SUBSCRIBE — fixed flags violation (warning path)',
   'protocol.mqtt.example.subscribeFixedFlagsViolation.description':
     'SUBSCRIBE’s flags nibble should be 0b0010, but 0b0000 arrived — a warning is raised, the frame still decodes.',
+
+  // --- CoAP ---
+  'protocol.coap.error.headerTruncated': 'The frame is not even as long as the 4-byte fixed header.',
+  'protocol.coap.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.coap.error.aborted': 'Parsing was aborted.',
+  'protocol.coap.error.tokenLengthReserved':
+    'Token Length is in the 9-15 range — a value RFC 7252 reserves and leaves invalid (a "message format error"). Token/Options/Payload were not decoded.',
+  'protocol.coap.error.tokenTruncated': 'The byte count declared by Token Length is missing from the buffer.',
+  'protocol.coap.error.optionTruncated': 'An option’s delta/length extension byte, or its value, is missing from the buffer.',
+  'protocol.coap.error.optionNibbleReserved':
+    'An option byte carries 15 alone in either the delta or the length nibble — that value is only valid in the exact 0xFF payload marker, so this is RFC 7252’s "message format error".',
+  'protocol.coap.error.payloadMarkerEmpty':
+    'No bytes followed the 0xFF payload marker — RFC 7252 requires a payload whenever the marker is present.',
+
+  'protocol.coap.warning.versionUnexpected':
+    'The Version field is not 1 — RFC 7252 does not call for a silent reject against future versions, so parsing continues anyway.',
+  'protocol.coap.warning.unknownOption':
+    'The option number is not in RFC 7252’s base option table (this includes later RFC extensions such as Observe/Block) — shown raw, no name is invented.',
+
+  'protocol.coap.summary.frame': 'CoAP frame',
+
+  'protocol.coap.documentation.summary':
+    'The 4-byte fixed header (Version/Type/Token Length + Code + Message ID) is split into bit fields and decoded with bitCursor. Code is shown both as a raw byte and in "class.detail" notation (e.g. 0x45 → "2.05"). Token is shown raw for as many bytes as Token Length declares; the 9-15 range is a "message format error" RFC 7252 reserves. The Options list loops until the 0xFF payload marker or the end of the buffer: each option’s delta/length nibble expands under RFC 7252’s extended-value rules (13→+13, 14→+269), and the Option Number is the cumulative sum of the preceding deltas. Only the fourteen numbers in RFC 7252’s base option table are named; everything else is shown raw with a warning. Later RFC extensions such as Observe/Block are deliberately not decoded.',
+  'protocol.coap.example.getRequest.name': 'GET request — Uri-Path',
+  'protocol.coap.example.getRequest.description':
+    'CON, no Token, Code=GET (0.01), Uri-Path="temp" — no payload.',
+  'protocol.coap.example.contentResponse.name': '2.05 Content response',
+  'protocol.coap.example.contentResponse.description':
+    'ACK, Token=0xABCD, Code=2.05 Content, a Content-Format option, 0xFF marker + Payload "23.5".',
+  'protocol.coap.example.multipleUriPath.name': 'Multiple Uri-Path segments',
+  'protocol.coap.example.multipleUriPath.description':
+    'GET /sensors/temp — two Uri-Path options, the second keeps the same option number (11) cumulatively with delta=0.',
+  'protocol.coap.example.unrecognizedOption.name': 'Unrecognized option (warning path)',
+  'protocol.coap.example.unrecognizedOption.description':
+    'Observe (an RFC 7641 extension) — not in the base name set, shown raw with a warning; the frame still stays valid.',
+  'protocol.coap.example.tokenLengthReserved.name': 'Token Length reserved (error path)',
+  'protocol.coap.example.tokenLengthReserved.description':
+    'TKL=9 — the range RFC 7252 reserves; Token/Options are never decoded.',
+  'protocol.coap.example.payloadMarkerEmpty.name': 'Empty payload after 0xFF (error path)',
+  'protocol.coap.example.payloadMarkerEmpty.description':
+    'The payload marker arrived but not a single byte follows it — an RFC 7252 violation.',
+  'protocol.coap.example.optionNibbleReserved.name': 'Option nibble 15 outside the marker (error path)',
+  'protocol.coap.example.optionNibbleReserved.description':
+    'Option byte 0xF0: the delta nibble is 15 but the byte is not exactly 0xFF — a "message format error".',
 };

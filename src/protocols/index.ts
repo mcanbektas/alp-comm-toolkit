@@ -134,4 +134,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mqtt', () =>
     import('./network/mqtt/mqtt').then((module) => module.mqttPlugin),
   );
+  // CoAP — dalga 4d: UDP üstü, bitCursor'la çözülen 4 baytlık bit alanlı
+  // başlık (RTCM'nin 3c'deki deseninin aynısı); MQTT'den bağımsız chunk.
+  registerOnce(registry, 'coap', () =>
+    import('./network/coap/coap').then((module) => module.coapPlugin),
+  );
 }

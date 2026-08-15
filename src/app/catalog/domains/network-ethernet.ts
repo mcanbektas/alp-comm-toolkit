@@ -583,7 +583,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A REST-style web transfer protocol over UDP for constrained nodes, with its own four-message reliability model and compact binary options.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'coap',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Base Header Decoder',
