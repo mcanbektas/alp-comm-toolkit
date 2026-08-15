@@ -45,6 +45,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'nmea-0183', () =>
     import('./marine/nmea/nmea0183').then((module) => module.nmea0183Plugin),
   );
+  registerOnce(registry, 'nmea-2000', () =>
+    import('./marine/nmea2000/nmea2000').then((module) => module.nmea2000Plugin),
+  );
   // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
   // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
   registerOnce(registry, 'can-2-0a', () =>

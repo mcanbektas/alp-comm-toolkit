@@ -1187,6 +1187,50 @@ export const tr = {
   'protocol.nmea.0183.example.mwvGenericEnvelope.description':
     'GNSS 7’lisinin dışında kalan bir cümle tipi: formatter tanınır ama alanlar yalnız ham liste olarak gösterilir.',
 
+  // --- NMEA 2000 ---
+  'protocol.nmea.2000.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.nmea.2000.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.nmea.2000.error.notExtended':
+    'NMEA 2000 29-bit extended identifier gerektirir; 11-bit çerçeveden PGN çıkarılamaz.',
+  'protocol.nmea.2000.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.nmea.2000.warning.reservedBitSet':
+    'Ayrılmış bit set; identifier bozuk olabilir ya da güncel standardın genişletilmiş sayfa semantiği kullanılıyor olabilir.',
+  'protocol.nmea.2000.warning.nullSourceAddress':
+    'Kaynak adres null adres: gönderen düğüm geçerli bir adres talep edememiş.',
+  'protocol.nmea.2000.warning.remoteFrame':
+    'Remote bayrağı set; NMEA 2000 remote çerçeve kullanmaz.',
+  'protocol.nmea.2000.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.nmea.2000.warning.pgnNeedsDatabase':
+    'PGN numarası hesaplanabiliyor ama adı ve alan düzeni lisanslı NMEA 2000 veritabanından gelir — burada tahmin edilmez.',
+  'protocol.nmea.2000.warning.fastPacketUnknown':
+    'Bu çerçevenin tek başına yeterli mi yoksa çok parçalı bir Fast Packet aktarımının bir parçası mı olduğu, PGN veritabanı ve aynı oturumun diğer çerçeveleri olmadan bilinemez.',
+  'protocol.nmea.2000.warning.possibleJ1939':
+    '29-bit identifier tek başına protokol kanıtı değildir; bu çerçeve aynı bit düzenini paylaşan bir J1939 mesajı da olabilir.',
+  'protocol.nmea.2000.summary.pdu1': 'Hedefe yönelik NMEA 2000 mesajı',
+  'protocol.nmea.2000.summary.pdu2': 'Yayın NMEA 2000 mesajı',
+  'protocol.nmea.2000.documentation.summary':
+    'IEC 61162-3 gemi içi CAN ağı; identifier matematiği J1939 ile birebir aynıdır (Priority/Reserved/Data Page/PDU Format/PDU Specific/Source Address → PGN). PGN’in anlamı ve Fast Packet birleştirmesi lisanslı NMEA 2000 veritabanı ister, bu sayfa yalnız çerçeve düzeyini çözer.',
+  'protocol.nmea.2000.example.sharedJ1939Fixture.name': 'J1939 §43 fixture’ı (paylaşılan formül)',
+  'protocol.nmea.2000.example.sharedJ1939Fixture.description':
+    'J1939’un doğrulanmış §43 fixture’ıyla BİREBİR aynı baytlar: identifier formülü ortak olduğu için (spec 14701 = 38503) burada da Priority 6, PGN 61444, Source Address 1 çıkar.',
+  'protocol.nmea.2000.example.singleFrameCandidate.name': 'Tek çerçeve adayı (kısa payload)',
+  'protocol.nmea.2000.example.singleFrameCandidate.description':
+    'Dört baytlık kısa payload tek başına yeterli bir mesaj gibi görünüyor, ama motor bunu KANITLAYAMAZ — PGN veritabanı olmadan Fast Packet olasılığı hep açık kalır.',
+  'protocol.nmea.2000.example.fastPacketCandidate.name': 'Fast Packet adayı (tam 8 bayt)',
+  'protocol.nmea.2000.example.fastPacketCandidate.description':
+    'Tam sekiz baytlık payload klasik CAN’in üst sınırıdır; bu, çok parçalı bir Fast Packet aktarımının ilk ya da orta çerçevesi de olabilir, tek başına ayırt edilemez.',
+  'protocol.nmea.2000.example.widePgnRange.name': 'Geniş PGN aralığı (Data Page 1)',
+  'protocol.nmea.2000.example.widePgnRange.description':
+    'Data Page biti 1: PGN 65536 ve üstü genişletilmiş aralığa düşer; numaranın anlamı yine lisanslı veritabanına bağlı.',
+  'protocol.nmea.2000.example.pdu1DestinationSpecific.name': 'Hedefe yönelik mesaj (PDU1)',
+  'protocol.nmea.2000.example.pdu1DestinationSpecific.description':
+    'PDU Format eşiğin altında: PDU Specific alanı hedef adrestir ve PGN hesabında sıfırlanır — J1939 ile aynı formül.',
+  'protocol.nmea.2000.example.baseFrameRejected.name': 'Base çerçeve (çözülemez)',
+  'protocol.nmea.2000.example.baseFrameRejected.description':
+    '11-bit identifier taşıyan çerçeve: hata basılır ama çerçeve yine alan alan gösterilir.',
+
   // --- CAN ailesi (ortak çerçeve çekirdeği) ---
   'protocol.can.frame.warning.truncatedPayload':
     'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar çözüldü.',

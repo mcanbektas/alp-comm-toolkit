@@ -22,10 +22,17 @@ const CANONICAL_DECODE_PATH = '/comm/marine-navigation/nmea-family/nmea-0183?tab
 /** Alias kayıt: kendi `pluginId`si YOK, motoru kanonik kayıttan devralır. */
 const ALIAS_DECODE_PATH = '/comm/marine-navigation/gnss-corrections/gps-nmea?tab=decode';
 /**
- * Regresyon bekçisi: aynı ailedeki, dalga 2'nin dokunmadığı bir protokol.
- * NMEA 0183 motoru bağlandıktan sonra bile motorsuz sayfa "planlandı" basmalı.
+ * Regresyon bekçisi: aynı ailedeki, motorsuz kalan bir protokol. NMEA 0183
+ * motoru bağlandıktan sonra bile motorsuz sayfa "planlandı" basmalı.
+ *
+ * Dalga 3a'da `nmea-family/nmea-2000`dan TAŞINDI: NMEA 2000 motoru bağlanınca
+ * o sayfa artık "planlandı" basmıyor ve bekçi anlamını yitiriyordu (bkz.
+ * `nmea2000-decode.spec.ts`). IEC 61162 bilinçli seçildi — aynı ailede (`decode`
+ * sekmesi ve `planned` durumu doğrulandı), plan-fazlar.md'deki hiçbir dalga
+ * listesinde geçmiyor (PSI5'in `modbus-decode.spec.ts`teki taşınma gerekçesiyle
+ * aynı mantık).
  */
-const PLANNED_DECODE_PATH = '/comm/marine-navigation/nmea-family/nmea-2000?tab=decode';
+const PLANNED_DECODE_PATH = '/comm/marine-navigation/nmea-family/iec-61162?tab=decode';
 
 /** Spec §43 fixture'ı — eklentinin ilk örnek çerçevesi de birebir budur. */
 const FIXTURE_HEX =

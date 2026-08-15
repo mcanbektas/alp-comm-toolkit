@@ -88,7 +88,8 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'CAN-based, multi-master, self-configuring marine network (the IEC 61162-3 SOLAS instrument bus) that addresses navigation, engine and electrical data by PGN over a 29-bit identifier.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'nmea-2000',
           tabs: [
             'overview',
             'live',

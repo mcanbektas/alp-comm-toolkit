@@ -20,6 +20,7 @@ const BUILT_IN_IDS = [
   'modbus-rtu',
   'modbus-tcp',
   'nmea-0183',
+  'nmea-2000',
   'obd-ii',
   'uds',
 ];
@@ -40,6 +41,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'modbus-rtu': 'industrial-automation',
   'modbus-tcp': 'industrial-automation',
   'nmea-0183': 'marine-navigation',
+  'nmea-2000': 'marine-navigation',
   'obd-ii': 'automotive',
   uds: 'automotive',
 };

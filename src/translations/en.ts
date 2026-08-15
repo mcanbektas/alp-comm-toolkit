@@ -1186,6 +1186,50 @@ export const en: TranslationDictionary = {
   'protocol.nmea.0183.example.mwvGenericEnvelope.description':
     'A sentence type outside the GNSS seven: the formatter is recognized but fields are shown only as a raw list.',
 
+  // --- NMEA 2000 ---
+  'protocol.nmea.2000.error.frameTooShort':
+    'The record is not long enough to carry the identifier and length fields.',
+  'protocol.nmea.2000.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.nmea.2000.error.notExtended':
+    'NMEA 2000 requires a 29-bit extended identifier; a PGN cannot be extracted from an 11-bit frame.',
+  'protocol.nmea.2000.error.aborted': 'Parsing was cancelled.',
+  'protocol.nmea.2000.warning.reservedBitSet':
+    'The reserved bit is set; the identifier may be corrupt, or the extended page semantics of the current standard may be in use.',
+  'protocol.nmea.2000.warning.nullSourceAddress':
+    'The source address is the null address: the sending node was unable to claim a valid address.',
+  'protocol.nmea.2000.warning.remoteFrame':
+    'The remote flag is set; NMEA 2000 does not use remote frames.',
+  'protocol.nmea.2000.warning.truncatedPayload':
+    'The declared data length is not present in the record; the bytes that are available were shown.',
+  'protocol.nmea.2000.warning.pgnNeedsDatabase':
+    'The PGN number can be computed, but its name and field layout come from the licensed NMEA 2000 database — they are not guessed here.',
+  'protocol.nmea.2000.warning.fastPacketUnknown':
+    'Whether this frame is self-contained or part of a multi-frame Fast Packet transfer cannot be known without a PGN database and the rest of the same session.',
+  'protocol.nmea.2000.warning.possibleJ1939':
+    'A 29-bit identifier alone is not proof of a protocol; this frame could equally be a J1939 message sharing the same bit layout.',
+  'protocol.nmea.2000.summary.pdu1': 'Destination-specific NMEA 2000 message',
+  'protocol.nmea.2000.summary.pdu2': 'Broadcast NMEA 2000 message',
+  'protocol.nmea.2000.documentation.summary':
+    'The IEC 61162-3 shipboard CAN network; identifier math is identical to J1939 (Priority/Reserved/Data Page/PDU Format/PDU Specific/Source Address → PGN). The meaning of a PGN and Fast Packet reassembly both require the licensed NMEA 2000 database — this page only resolves the frame level.',
+  'protocol.nmea.2000.example.sharedJ1939Fixture.name': 'J1939 §43 fixture (shared formula)',
+  'protocol.nmea.2000.example.sharedJ1939Fixture.description':
+    'The exact same bytes as J1939’s verified §43 fixture: since the identifier formula is shared (spec 14701 = 38503), this also resolves to Priority 6, PGN 61444, Source Address 1.',
+  'protocol.nmea.2000.example.singleFrameCandidate.name': 'Single-frame candidate (short payload)',
+  'protocol.nmea.2000.example.singleFrameCandidate.description':
+    'A four-byte short payload looks like a self-contained message, but the engine cannot PROVE it — without a PGN database the Fast Packet possibility always stays open.',
+  'protocol.nmea.2000.example.fastPacketCandidate.name': 'Fast Packet candidate (full 8 bytes)',
+  'protocol.nmea.2000.example.fastPacketCandidate.description':
+    'A full eight-byte payload is classic CAN’s upper limit; this could just as well be the first or a middle frame of a multi-frame Fast Packet transfer — it cannot be told apart on its own.',
+  'protocol.nmea.2000.example.widePgnRange.name': 'Wide PGN range (Data Page 1)',
+  'protocol.nmea.2000.example.widePgnRange.description':
+    'Data Page bit set to 1: the PGN falls into the extended range at 65536 and above; its meaning still depends on the licensed database.',
+  'protocol.nmea.2000.example.pdu1DestinationSpecific.name': 'Destination-specific message (PDU1)',
+  'protocol.nmea.2000.example.pdu1DestinationSpecific.description':
+    'Below the PDU Format threshold: the PDU Specific field is a destination address and is zeroed out of the PGN calculation — the same formula as J1939.',
+  'protocol.nmea.2000.example.baseFrameRejected.name': 'Base frame (cannot be decoded)',
+  'protocol.nmea.2000.example.baseFrameRejected.description':
+    'A frame carrying an 11-bit identifier: an error is raised but the frame is still shown field by field.',
+
   // --- CAN family (shared frame core) ---
   'protocol.can.frame.warning.truncatedPayload':
     'The declared data length is not present in the record; the available bytes were decoded.',
