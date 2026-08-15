@@ -1682,6 +1682,81 @@ export const tr = {
     'Bu bölüm okunmadı; Object Dictionary çözümünü etkilemiyor.',
   'definition.eds.issue.duplicateObject':
     'Aynı index/sub-index birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
+
+  // --- ISO 14230 (KWP2000) ---
+  'protocol.iso14230.error.frameTooShort':
+    'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',
+  'protocol.iso14230.error.frameTooLong': 'KWP2000 mesajı izin verilen azami uzunluğu aşıyor.',
+  'protocol.iso14230.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.iso14230.error.addressBytesTruncated':
+    'FMT baytı adres baytlarını (Target/Source) istiyor ama mesajda ikisi için de yer yok.',
+  'protocol.iso14230.error.lengthByteTruncated':
+    'FMT baytının uzunluk bitleri sıfır — ayrı bir Length baytı bekleniyordu ama mesajda yok.',
+  'protocol.iso14230.error.serviceDataTruncated':
+    'Service ID ve Checksum için mesajda yeterli bayt kalmadı.',
+  'protocol.iso14230.error.checksumMismatch':
+    'Checksum, önceki baytların 8-bit toplamıyla (mod 256) uyuşmuyor.',
+  'protocol.iso14230.warning.unknownAddressMode':
+    'FMT baytının adres kipi bitleri (7-6) tanınan üç değerden biri değil — CARB modu olabilir, ISO 14230’un parçası değil; en iyi çaba ile adres baytı yok varsayıldı.',
+  'protocol.iso14230.warning.serviceNeedsTable':
+    'Service ID ham gösteriliyor: KWP2000 servis tablosu spec’te yok, UDS tablosunu buraya taşımak uydurma olurdu — adlandırma yapılmaz.',
+  'protocol.iso14230.warning.lengthMismatch':
+    'FMT baytının (ya da ayrı Length baytının) deklare ettiği uzunluk, mesajda gerçekten bulunan Service ID + veri bayt sayısıyla uyuşmuyor.',
+  'protocol.iso14230.summary.frame': 'KWP2000 çerçevesi',
+  'protocol.iso14230.documentation.summary':
+    'ISO 14230-2 (KWP2000): FMT baytının adres kipi (No Address/Physical/Functional) ve uzunluk bitleri çözülür, adres baytları (Target/Source) ve uzunluk ayrı bir baytta taşınıyorsa o da ayrıştırılır. Service ID ham kalır — UDS’e evrilen servis tablosu spec’te yok, uydurulmadı. Checksum (8-bit toplam mod 256) doğrulanır, tutmazsa checksum-mismatch basar.',
+  'protocol.iso14230.example.physicalInlineLength.name': 'Fiziksel adresleme (FMT-içi uzunluk)',
+  'protocol.iso14230.example.physicalInlineLength.description':
+    'FMT 0x83: fiziksel adresleme, uzunluk FMT baytının kendi bitlerinde taşınıyor.',
+  'protocol.iso14230.example.functionalSeparateLength.name':
+    'Fonksiyonel adresleme (ayrı Length baytı)',
+  'protocol.iso14230.example.functionalSeparateLength.description':
+    'FMT 0xC0: uzunluk bitleri sıfır, gerçek uzunluk Target/Source’tan sonraki ayrı baytta.',
+  'protocol.iso14230.example.noAddress.name': 'Adres baytı yok',
+  'protocol.iso14230.example.noAddress.description':
+    'FMT 0x02: adres kipi bitleri 00 — Target/Source üretilmez.',
+  'protocol.iso14230.example.carbModeWarning.name': 'CARB modu (uyarı yolu)',
+  'protocol.iso14230.example.carbModeWarning.description':
+    'FMT 0x42: adres kipi bitleri 01 (CARB) — ISO 14230 dışı, uyarı basar ama çözmeye devam eder.',
+  'protocol.iso14230.example.checksumMismatch.name': 'Bozuk checksum',
+  'protocol.iso14230.example.checksumMismatch.description':
+    'Fiziksel adresleme örneğiyle aynı gövde, checksum baytı bilerek bozuldu.',
+  'protocol.iso14230.example.serviceDataTruncated.name': 'Service ID/Checksum için yer yok',
+  'protocol.iso14230.example.serviceDataTruncated.description':
+    'FMT fiziksel adresleme istiyor; Target/Source okunur ama Service ID ve Checksum için mesajda hiç bayt kalmaz.',
+
+  // --- ISO 9141 ---
+  'protocol.iso9141.error.frameTooShort':
+    'Mesaj eksik: en az 4 bayt gerekir (3 baytlık header + Checksum).',
+  'protocol.iso9141.error.frameTooLong': 'ISO 9141 mesajı izin verilen azami uzunluğu aşıyor.',
+  'protocol.iso9141.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.iso9141.error.checksumMismatch':
+    'Checksum, önceki baytların 8-bit toplamıyla (mod 256) uyuşmuyor.',
+  'protocol.iso9141.warning.unexpectedFormatByte':
+    'İlk header baytı 0x68 değil — spec ihlali sayılmaz, ham gösterilip çözümlemeye devam edilir.',
+  'protocol.iso9141.warning.unexpectedTargetAddress':
+    'İkinci header baytı (Target Address) 0x6A değil — ham gösterilip çözümlemeye devam edilir.',
+  'protocol.iso9141.warning.dataNeedsObdPage':
+    'Veri ham gösteriliyor: Mode/PID çözümü OBD-II sayfasının işi, ISO 9141 zincir parser seviyesinde kurulmaz.',
+  'protocol.iso9141.summary.frame': 'ISO 9141 çerçevesi',
+  'protocol.iso9141.documentation.summary':
+    'ISO 9141-2: sabit 3 baytlık header (Format 0x68, Target Address 0x6A, Source Address) çözülür — ilk iki baytın farklı bir değeri hata değil uyarı üretir. Veri (SAE J1979 Mode/PID) ham kalır, çözümü OBD-II sayfasının işidir. Checksum (8-bit toplam mod 256) doğrulanır, tutmazsa checksum-mismatch basar.',
+  'protocol.iso9141.example.standardHeader.name': 'Standart header',
+  'protocol.iso9141.example.standardHeader.description':
+    '0x68/0x6A header, Source Address 0xF1 — Mode 0x41 PID 0x0C (RPM) yanıtı ham kalır.',
+  'protocol.iso9141.example.unexpectedFormatByte.name': 'Beklenmeyen Format baytı (uyarı yolu)',
+  'protocol.iso9141.example.unexpectedFormatByte.description':
+    'İlk header baytı 0x68 değil — uyarı basar ama ham gösterip çözmeye devam eder.',
+  'protocol.iso9141.example.unexpectedTargetAddress.name':
+    'Beklenmeyen Target Address (uyarı yolu)',
+  'protocol.iso9141.example.unexpectedTargetAddress.description':
+    'İkinci header baytı 0x6A değil — uyarı basar ama ham gösterip çözmeye devam eder.',
+  'protocol.iso9141.example.zeroData.name': 'Veri baytı yok',
+  'protocol.iso9141.example.zeroData.description':
+    'Yalnız header + checksum — minimum uzunluk sınırı.',
+  'protocol.iso9141.example.checksumMismatch.name': 'Bozuk checksum',
+  'protocol.iso9141.example.checksumMismatch.description':
+    'Standart header örneğiyle aynı gövde, checksum baytı bilerek bozuldu.',
 } as const;
 
 /**

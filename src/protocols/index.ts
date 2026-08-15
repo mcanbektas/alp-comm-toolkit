@@ -82,4 +82,10 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );
+  registerOnce(registry, 'iso-14230', () =>
+    import('./automotive/iso14230/iso14230').then((module) => module.iso14230Plugin),
+  );
+  registerOnce(registry, 'iso-9141', () =>
+    import('./automotive/iso9141/iso9141').then((module) => module.iso9141Plugin),
+  );
 }

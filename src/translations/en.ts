@@ -1683,4 +1683,79 @@ export const en: TranslationDictionary = {
     'This section was not read; it does not affect Object Dictionary resolution.',
   'definition.eds.issue.duplicateObject':
     'The same index/sub-index is defined more than once; the first definition was kept.',
+
+  // --- ISO 14230 (KWP2000) ---
+  'protocol.iso14230.error.frameTooShort':
+    'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',
+  'protocol.iso14230.error.frameTooLong': 'The KWP2000 message exceeds the allowed maximum length.',
+  'protocol.iso14230.error.aborted': 'Parsing was cancelled.',
+  'protocol.iso14230.error.addressBytesTruncated':
+    'The FMT byte requests address bytes (Target/Source) but the message has no room for either.',
+  'protocol.iso14230.error.lengthByteTruncated':
+    'The FMT byte’s length bits are zero — a separate Length byte was expected but is missing.',
+  'protocol.iso14230.error.serviceDataTruncated':
+    'There are not enough bytes left in the message for Service ID and Checksum.',
+  'protocol.iso14230.error.checksumMismatch':
+    'The checksum does not match the 8-bit sum (mod 256) of the preceding bytes.',
+  'protocol.iso14230.warning.unknownAddressMode':
+    'The FMT byte’s address mode bits (7-6) are not one of the three recognized values — this may be CARB mode, which is not part of ISO 14230; no address byte was assumed as a best effort.',
+  'protocol.iso14230.warning.serviceNeedsTable':
+    'The Service ID is shown raw: the KWP2000 service table is not in the spec, and copying the UDS table here would be fabrication — it is not named.',
+  'protocol.iso14230.warning.lengthMismatch':
+    'The length declared by the FMT byte (or the separate Length byte) does not match the actual Service ID + data byte count in the message.',
+  'protocol.iso14230.summary.frame': 'KWP2000 frame',
+  'protocol.iso14230.documentation.summary':
+    'ISO 14230-2 (KWP2000): decodes the FMT byte’s address mode (No Address/Physical/Functional) and length bits, and separates out the address bytes (Target/Source) and the length byte when it is carried separately. The Service ID stays raw — the service table that later evolved into UDS is not in the spec and was not fabricated. The checksum (8-bit sum mod 256) is verified and reports checksum-mismatch when it fails.',
+  'protocol.iso14230.example.physicalInlineLength.name': 'Physical addressing (inline length)',
+  'protocol.iso14230.example.physicalInlineLength.description':
+    'FMT 0x83: physical addressing, the length is carried in the FMT byte’s own bits.',
+  'protocol.iso14230.example.functionalSeparateLength.name':
+    'Functional addressing (separate Length byte)',
+  'protocol.iso14230.example.functionalSeparateLength.description':
+    'FMT 0xC0: the length bits are zero, the real length follows Target/Source in a separate byte.',
+  'protocol.iso14230.example.noAddress.name': 'No address byte',
+  'protocol.iso14230.example.noAddress.description':
+    'FMT 0x02: address mode bits are 00 — no Target/Source is produced.',
+  'protocol.iso14230.example.carbModeWarning.name': 'CARB mode (warning path)',
+  'protocol.iso14230.example.carbModeWarning.description':
+    'FMT 0x42: address mode bits are 01 (CARB) — outside ISO 14230, warns but keeps decoding.',
+  'protocol.iso14230.example.checksumMismatch.name': 'Corrupted checksum',
+  'protocol.iso14230.example.checksumMismatch.description':
+    'Same body as the physical addressing example, with the checksum byte deliberately corrupted.',
+  'protocol.iso14230.example.serviceDataTruncated.name': 'No room for Service ID/Checksum',
+  'protocol.iso14230.example.serviceDataTruncated.description':
+    'FMT requests physical addressing; Target/Source are read, but no bytes remain for Service ID and Checksum.',
+
+  // --- ISO 9141 ---
+  'protocol.iso9141.error.frameTooShort':
+    'The message is incomplete: at least 4 bytes are required (3-byte header + Checksum).',
+  'protocol.iso9141.error.frameTooLong': 'The ISO 9141 message exceeds the allowed maximum length.',
+  'protocol.iso9141.error.aborted': 'Parsing was cancelled.',
+  'protocol.iso9141.error.checksumMismatch':
+    'The checksum does not match the 8-bit sum (mod 256) of the preceding bytes.',
+  'protocol.iso9141.warning.unexpectedFormatByte':
+    'The first header byte is not 0x68 — this is not treated as a spec violation, it is shown raw and decoding continues.',
+  'protocol.iso9141.warning.unexpectedTargetAddress':
+    'The second header byte (Target Address) is not 0x6A — shown raw and decoding continues.',
+  'protocol.iso9141.warning.dataNeedsObdPage':
+    'The data is shown raw: Mode/PID decoding is the OBD-II page’s job, ISO 9141 does not build a chain parser at this level.',
+  'protocol.iso9141.summary.frame': 'ISO 9141 frame',
+  'protocol.iso9141.documentation.summary':
+    'ISO 9141-2: decodes the fixed 3-byte header (Format 0x68, Target Address 0x6A, Source Address) — a different value in the first two bytes produces a warning, not an error. The data (SAE J1979 Mode/PID) stays raw; decoding it is the OBD-II page’s job. The checksum (8-bit sum mod 256) is verified and reports checksum-mismatch when it fails.',
+  'protocol.iso9141.example.standardHeader.name': 'Standard header',
+  'protocol.iso9141.example.standardHeader.description':
+    '0x68/0x6A header, Source Address 0xF1 — a Mode 0x41 PID 0x0C (RPM) response stays raw.',
+  'protocol.iso9141.example.unexpectedFormatByte.name': 'Unexpected Format byte (warning path)',
+  'protocol.iso9141.example.unexpectedFormatByte.description':
+    'The first header byte is not 0x68 — warns but shows it raw and keeps decoding.',
+  'protocol.iso9141.example.unexpectedTargetAddress.name':
+    'Unexpected Target Address (warning path)',
+  'protocol.iso9141.example.unexpectedTargetAddress.description':
+    'The second header byte is not 0x6A — warns but shows it raw and keeps decoding.',
+  'protocol.iso9141.example.zeroData.name': 'No data bytes',
+  'protocol.iso9141.example.zeroData.description':
+    'Header + checksum only — the minimum length boundary.',
+  'protocol.iso9141.example.checksumMismatch.name': 'Corrupted checksum',
+  'protocol.iso9141.example.checksumMismatch.description':
+    'Same body as the standard header example, with the checksum byte deliberately corrupted.',
 };

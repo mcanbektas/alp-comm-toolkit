@@ -480,7 +480,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Early emissions-related diagnostic communication standard that opens a session with a 5-baud address, exchanges keyword bytes and then checksummed request/response messages.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'iso-9141',
           tabs: ['overview', 'live', 'decode', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Initialization',
@@ -502,7 +503,8 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Keyword Protocol 2000 over K-Line, defining both the addressed header/length framing and the diagnostic service set that UDS later replaced.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'iso-14230',
           tabs: [
             'overview',
             'live',
