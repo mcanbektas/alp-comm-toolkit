@@ -100,4 +100,10 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iso-9141', () =>
     import('./automotive/iso9141/iso9141').then((module) => module.iso9141Plugin),
   );
+  // v1 (0xFE) ve v2 (0xFD) AYNI modülden gelir: magic'e göre dallanan tek
+  // parser, tek kayıt (can-2-0a/can-2-0b'nin iki-plugin deseninin BİLEREK
+  // kullanılmadığı yer — bkz. mavlink.ts dosya başı).
+  registerOnce(registry, 'mavlink', () =>
+    import('./aerospace/mavlink/mavlink').then((module) => module.mavlinkPlugin),
+  );
 }

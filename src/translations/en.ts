@@ -1907,4 +1907,41 @@ export const en: TranslationDictionary = {
   'protocol.iso9141.example.checksumMismatch.name': 'Corrupted checksum',
   'protocol.iso9141.example.checksumMismatch.description':
     'Same body as the standard header example, with the checksum byte deliberately corrupted.',
+
+  // --- MAVLink ---
+  'protocol.mavlink.error.v1HeaderTruncated':
+    'The MAVLink v1 header is incomplete: at least 6 bytes are required (STX, LEN, SEQ, SYSID, COMPID, MSGID).',
+  'protocol.mavlink.error.v2HeaderTruncated':
+    'The MAVLink v2 header is incomplete: at least 10 bytes are required (STX, LEN, Incompat/Compat Flags, SEQ, SYSID, COMPID, 24-bit MSGID).',
+  'protocol.mavlink.error.bodyTruncated':
+    'There are not enough bytes left in the message for the payload, checksum (and signature, if present).',
+  'protocol.mavlink.error.frameTooLong': 'The MAVLink message exceeds the allowed maximum length.',
+  'protocol.mavlink.error.aborted': 'Parsing was cancelled.',
+  'protocol.mavlink.error.unknownMagic':
+    'The first byte is neither 0xFE (v1) nor 0xFD (v2) — this cannot be a MAVLink frame.',
+  'protocol.mavlink.warning.payloadNeedsDialect':
+    'The payload is shown raw: the wire field order is not the same as the XML declaration order, and it cannot be decoded field by field without loading the MAVLink dialect (message definition).',
+  'protocol.mavlink.warning.crcNeedsDialect':
+    'The checksum is shown raw: the CRC-16/MCRF4XX parameters and the message-specific CRC_EXTRA depend on the dialect definition — the spec does not provide them, so no verification is performed (checksum-mismatch is never reported by this engine).',
+  'protocol.mavlink.warning.signatureNeedsKey':
+    'A signature is present but cannot be verified: MAVLink 2 signing verification is impossible without the secret key, and the key never leaves the local machine.',
+  'protocol.mavlink.warning.trailingBytes': 'There are more bytes than this frame expects.',
+  'protocol.mavlink.summary.frame': 'MAVLink frame',
+  'protocol.mavlink.documentation.summary':
+    'The MAVLink v1 (0xFE) and v2 (0xFD) header is fully decoded by branching on the magic byte: v1 carries LEN/SEQ/SYSID/COMPID/an 8-bit MSGID, v2 additionally carries Incompat/Compat Flags, a 24-bit MSGID and (when incompat bit 0x01 is set) a 13-byte signature. The payload stays raw — the wire field order is not the same as the XML declaration order, so fixed offsets are forbidden. The checksum also stays raw: the CRC-16/MCRF4XX parameters and the message-specific CRC_EXTRA depend on the dialect definition and are not in the spec — so checksum-mismatch is never reported, hence `status: partial` (same precedent as OBD-II).',
+  'protocol.mavlink.example.v1Heartbeat.name': 'MAVLink 1 (happy path)',
+  'protocol.mavlink.example.v1Heartbeat.description':
+    "The spec's own example coloring: FE 09 2A 01 01 00 — the header is decoded field by field, the payload and checksum stay raw.",
+  'protocol.mavlink.example.v2GpsRawInt.name': 'MAVLink 2, unsigned (happy path)',
+  'protocol.mavlink.example.v2GpsRawInt.description':
+    'Incompat Flags 0x00: no signature. The 24-bit MSGID is parsed without colliding with the flags/seq/sysid/compid bytes.',
+  'protocol.mavlink.example.v2Signed.name': 'MAVLink 2, signed',
+  'protocol.mavlink.example.v2Signed.description':
+    'Incompat Flags 0x01: the signature flag is set. The 13-byte signature is shown raw, with a signatureNeedsKey warning.',
+  'protocol.mavlink.example.v2LargeMessageId.name': '24-bit MSGID boundary',
+  'protocol.mavlink.example.v2LargeMessageId.description':
+    'MSGID 0xFFFFFF: the upper boundary of the 24-bit field, proving the three bytes are combined correctly and do not collide with neighboring fields.',
+  'protocol.mavlink.example.v1Truncated.name': 'Truncated frame (error path)',
+  'protocol.mavlink.example.v1Truncated.description':
+    "The header declares LEN 4, but there are not enough bytes left for the payload and checksum — reports truncated-frame while the header still shows.",
 };

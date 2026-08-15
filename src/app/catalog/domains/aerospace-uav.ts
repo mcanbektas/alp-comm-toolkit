@@ -31,7 +31,11 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Lightweight binary messaging protocol for UAV and robotics systems, carrying vehicle telemetry, commands, parameters and missions between autopilot components and the ground control station.',
           layer: 'application',
-          status: 'planned',
+          // Header çerçeve düzeyinde tam çözülür ama CRC-16/MCRF4XX + CRC_EXTRA
+          // dialect'e bağlı olduğu için doğrulanamaz — 'ready' yanıltıcı olurdu
+          // (OBD-II emsali, karar turu brief-faz10-dalga3.md).
+          status: 'partial',
+          pluginId: 'mavlink',
           tabs: [
             'overview',
             'live',

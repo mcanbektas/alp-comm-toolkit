@@ -1906,6 +1906,43 @@ export const tr = {
   'protocol.iso9141.example.checksumMismatch.name': 'Bozuk checksum',
   'protocol.iso9141.example.checksumMismatch.description':
     'Standart header örneğiyle aynı gövde, checksum baytı bilerek bozuldu.',
+
+  // --- MAVLink ---
+  'protocol.mavlink.error.v1HeaderTruncated':
+    'MAVLink v1 header eksik: en az 6 bayt gerekir (STX, LEN, SEQ, SYSID, COMPID, MSGID).',
+  'protocol.mavlink.error.v2HeaderTruncated':
+    'MAVLink v2 header eksik: en az 10 bayt gerekir (STX, LEN, Incompat/Compat Flags, SEQ, SYSID, COMPID, 24-bit MSGID).',
+  'protocol.mavlink.error.bodyTruncated':
+    'Payload, checksum (ve varsa imza) için mesajda yeterli bayt yok.',
+  'protocol.mavlink.error.frameTooLong': 'MAVLink mesajı izin verilen azami uzunluğu aşıyor.',
+  'protocol.mavlink.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mavlink.error.unknownMagic':
+    'İlk bayt 0xFE (v1) ya da 0xFD (v2) değil — bu bir MAVLink çerçevesi olamaz.',
+  'protocol.mavlink.warning.payloadNeedsDialect':
+    'Payload ham gösteriliyor: wire alan sırası XML declaration sırasıyla aynı değil, MAVLink dialect tanımı (message definition) yüklenmeden alan alan çözülemez.',
+  'protocol.mavlink.warning.crcNeedsDialect':
+    'Checksum ham gösteriliyor: CRC-16/MCRF4XX’in parametreleri ve mesaj-özel CRC_EXTRA dialect tanımına bağlı — spec’te yok, bu yüzden doğrulama yapılmaz (checksum-mismatch bu motorda hiç basılmaz).',
+  'protocol.mavlink.warning.signatureNeedsKey':
+    'İmza mevcut ama doğrulanamıyor: gizli anahtar olmadan MAVLink 2 signing doğrulaması yapılamaz, anahtar hiçbir zaman yerelden çıkmaz.',
+  'protocol.mavlink.warning.trailingBytes': 'Çerçeve için beklenenden fazla bayt var.',
+  'protocol.mavlink.summary.frame': 'MAVLink çerçevesi',
+  'protocol.mavlink.documentation.summary':
+    'MAVLink v1 (0xFE) ve v2 (0xFD) header’ı magic baytına göre dallanarak tam çözülür: v1’de LEN/SEQ/SYSID/COMPID/8-bit MSGID, v2’de ayrıca Incompat/Compat Flags, 24-bit MSGID ve (incompat bit 0x01 ise) 13 baytlık imza. Payload ham kalır — wire alan sırası XML declaration sırasıyla aynı değildir, sabit offset yasak. Checksum de ham kalır: CRC-16/MCRF4XX parametreleri ve mesaj-özel CRC_EXTRA dialect tanımına bağlı, spec’te yok — bu yüzden checksum-mismatch hiç basılmaz, `status: partial` (OBD-II emsali).',
+  'protocol.mavlink.example.v1Heartbeat.name': 'MAVLink 1 (mutlu yol)',
+  'protocol.mavlink.example.v1Heartbeat.description':
+    'Spec’in kendi örnek renklendirmesi: FE 09 2A 01 01 00 — header alan alan çözülür, payload ve checksum ham kalır.',
+  'protocol.mavlink.example.v2GpsRawInt.name': 'MAVLink 2, imzasız (mutlu yol)',
+  'protocol.mavlink.example.v2GpsRawInt.description':
+    'Incompat Flags 0x00: imza yok. 24-bit MSGID flags/seq/sysid/compid baytlarıyla çakışmadan ayrıştırılır.',
+  'protocol.mavlink.example.v2Signed.name': 'MAVLink 2, imzalı',
+  'protocol.mavlink.example.v2Signed.description':
+    'Incompat Flags 0x01: imza bayrağı set. 13 baytlık imza ham gösterilir, signatureNeedsKey uyarısıyla.',
+  'protocol.mavlink.example.v2LargeMessageId.name': '24-bit MSGID sınırı',
+  'protocol.mavlink.example.v2LargeMessageId.description':
+    'MSGID 0xFFFFFF: 24-bit alanın üst sınırı, üç baytın doğru birleştirildiğini ve komşu alanlarla çakışmadığını kanıtlar.',
+  'protocol.mavlink.example.v1Truncated.name': 'Eksik çerçeve (hata yolu)',
+  'protocol.mavlink.example.v1Truncated.description':
+    'Header LEN 4 bildiriyor ama payload + checksum için yeterli bayt yok — truncated-frame basar, header yine görünür.',
 } as const;
 
 /**
