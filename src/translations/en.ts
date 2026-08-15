@@ -2006,4 +2006,121 @@ export const en: TranslationDictionary = {
   'protocol.ethernet.vlan8021q.example.truncatedTci.name': 'Incomplete TCI (error path)',
   'protocol.ethernet.vlan8021q.example.truncatedTci.description':
     'The TPID is present but only the first byte of the TCI arrived — reports truncated-frame while the MAC fields still show.',
+
+  // --- IPv4 ---
+  'protocol.ipv4.error.frameTooShort': 'The frame must be at least as long as the 20-byte minimum IPv4 header.',
+  'protocol.ipv4.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.ipv4.error.aborted': 'Parsing was aborted.',
+  'protocol.ipv4.error.ihlTooSmall': 'IHL is below 5 (20 bytes) — a structurally impossible header length.',
+  'protocol.ipv4.error.totalLengthTooSmall': 'Total Length is smaller than the header length declared by IHL·4.',
+  'protocol.ipv4.error.headerChecksumMismatch': 'The Header Checksum does not match the computed value.',
+  'protocol.ipv4.warning.unexpectedVersion': 'The Version field is not 4 — parsing continues regardless.',
+  'protocol.ipv4.warning.protocolHigherLayer':
+    'Protocol names the upper-layer protocol; the payload is decoded on that protocol’s own page (engines do not chain).',
+  'protocol.ipv4.warning.unknownProtocol':
+    'The Protocol value is outside the narrow naming set (ICMP/TCP/UDP); the payload stays raw.',
+  'protocol.ipv4.warning.checksumVerificationSkipped':
+    'Checksum verification was skipped because the header boundary (invalid IHL, or missing from the buffer) is unknown.',
+
+  'protocol.ipv4.documentation.summary':
+    'The IPv4 header: Version/IHL, DSCP/ECN, Total Length, Identification/Flags/Fragment Offset (decoded as fields, NO reassembly), TTL, Protocol (the ICMP/TCP/UDP narrow set is named, the payload is not decoded), Header Checksum (does NOT need a pseudo-header, PASS/FAIL is FULLY verified), Source/Destination Address, and Options when present are all decoded field by field.',
+  'protocol.ipv4.example.classicTcpHeader.name': 'Classic header (textbook example)',
+  'protocol.ipv4.example.classicTcpHeader.description':
+    'Protocol=TCP, checksum 0xB1E6 verified with an independent computation (same fixture as internetChecksum.test.ts).',
+  'protocol.ipv4.example.udpCarrying.name': 'Header carrying UDP',
+  'protocol.ipv4.example.udpCarrying.description':
+    'Protocol=17 (UDP) → prints the upper-layer warning, checksum computed independently.',
+  'protocol.ipv4.example.headerChecksumFail.name': 'Broken header checksum (error path)',
+  'protocol.ipv4.example.headerChecksumFail.description':
+    'Checksum is deliberately written as 0x0000 (the real value is 0x66D7) → checksum-mismatch.',
+  'protocol.ipv4.example.unknownProtocol.name': 'Unrecognized Protocol',
+  'protocol.ipv4.example.unknownProtocol.description':
+    'Protocol=253 is outside the narrow set: the field is flagged invalid, the frame is still shown.',
+  'protocol.ipv4.example.ihlTooSmall.name': 'IHL is structurally invalid (error path)',
+  'protocol.ipv4.example.ihlTooSmall.description':
+    'IHL=4 (16 bytes), below the minimum of 5 (20 bytes) — value-out-of-range; Options/Payload/checksum verification are skipped.',
+  'protocol.ipv4.example.totalLengthTooSmall.name': 'Total Length too small (error path)',
+  'protocol.ipv4.example.totalLengthTooSmall.description':
+    'IHL is valid (20 bytes) but Total Length=16 < 20 — length-mismatch, the checksum still passes.',
+
+  // --- IPv6 ---
+  'protocol.ipv6.error.frameTooShort': 'The frame must be at least as long as the fixed 40-byte IPv6 base header.',
+  'protocol.ipv6.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.ipv6.error.aborted': 'Parsing was aborted.',
+  'protocol.ipv6.error.extensionHeaderTruncated':
+    'There are not enough bytes in the buffer for an extension header’s declared length.',
+  'protocol.ipv6.warning.unexpectedVersion': 'The Version field is not 6 — parsing continues regardless.',
+  'protocol.ipv6.warning.nextHeaderHigherLayer':
+    'Next Header names the upper-layer protocol; the payload is decoded on that protocol’s own page (engines do not chain).',
+  'protocol.ipv6.warning.unknownNextHeader':
+    'The Next Header value is outside the known extension-header and upper-layer sets; the chain stops here (infinite-loop guard).',
+  'protocol.ipv6.warning.tooManyExtensionHeaders':
+    'More than 8 nested extension headers are not supported; the remaining bytes are shown as raw payload.',
+
+  'protocol.ipv6.documentation.summary':
+    'The IPv6 base header is a fixed 40 bytes: Version/Traffic Class/Flow Label, Payload Length, Next Header (known extension headers — Hop-by-Hop/Routing/Fragment/Destination Options — are walked as a chain, upper-layer TCP/UDP/ICMPv6 is named, an unknown value stops the chain), Hop Limit, Source/Destination Address (128-bit). There is no checksum field — an "N/A" info field is shown instead.',
+  'protocol.ipv6.example.tcpBasic.name': 'No extension headers, straight to TCP',
+  'protocol.ipv6.example.tcpBasic.description':
+    'Next Header=6 (TCP) → no extension headers at all, straight to the upper-layer warning.',
+  'protocol.ipv6.example.hopByHopThenUdp.name': 'Hop-by-Hop → UDP chain',
+  'protocol.ipv6.example.hopByHopThenUdp.description':
+    'Next Header=0 (Hop-by-Hop) is skipped over; the extension header’s own Next Header of 17 (UDP) is named.',
+  'protocol.ipv6.example.unknownNextHeader.name': 'Unrecognized Next Header',
+  'protocol.ipv6.example.unknownNextHeader.description':
+    'Next Header=253 is outside the narrow set: the chain never starts, a WARNING not an error.',
+  'protocol.ipv6.example.truncatedExtensionHeader.name': 'Incomplete extension header (error path)',
+  'protocol.ipv6.example.truncatedExtensionHeader.description':
+    'The Hop-by-Hop extension header declares 48 bytes but only 2 bytes are in the buffer — reports truncated-frame.',
+
+  // --- UDP ---
+  'protocol.udp.error.frameTooShort': 'The frame must be at least as long as the fixed 8-byte UDP header.',
+  'protocol.udp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.udp.error.aborted': 'Parsing was aborted.',
+  'protocol.udp.error.lengthTooSmall': 'Length is below 8 (the header itself) — structurally impossible.',
+  'protocol.udp.error.declaredLengthExceedsBuffer':
+    'There are not enough bytes in the buffer for the total length declared by the Length field.',
+  'protocol.udp.warning.checksumNeedsPseudoHeader':
+    'Checksum needs a pseudo-header from the IP header; a single-segment input has no such information — it cannot be verified, and is shown raw.',
+  'protocol.udp.warning.checksumZeroMeansDisabledOverIpv4':
+    'If this field is 0x0000 it means "checksum not used" over an IPv4 carrier (IPv6 makes the checksum mandatory).',
+  'protocol.udp.warning.trailingBytes':
+    'The buffer is longer than the Length field declares; the extra bytes are shown in a separate field (may belong to the next datagram).',
+
+  'protocol.udp.documentation.summary':
+    'The UDP header is 8 bytes: Source/Destination Port, Length (total length including itself, payload = length − 8), and Checksum. Because the checksum needs a pseudo-header it CANNOT be verified from a single segment — it is shown raw with a warning, mismatch is never reported; 0x0000 over an IPv4 carrier means "not used".',
+  'protocol.udp.example.dnsQuery.name': 'DNS-like datagram',
+  'protocol.udp.example.dnsQuery.description': 'Source Port=53, checksum shown raw (no pseudo-header).',
+  'protocol.udp.example.checksumDisabledIpv4.name': 'Checksum 0x0000 (IPv4 special case)',
+  'protocol.udp.example.checksumDisabledIpv4.description':
+    'Checksum=0x0000 → the "not used" info note that only applies over an IPv4 carrier.',
+  'protocol.udp.example.lengthTooSmall.name': 'Length too small (error path)',
+  'protocol.udp.example.lengthTooSmall.description': 'Length=4 < 8 (smaller than the header itself) — value-out-of-range.',
+  'protocol.udp.example.trailingBytes.name': 'Extra bytes (trailing data)',
+  'protocol.udp.example.trailingBytes.description':
+    'Length declares 10 but the buffer has 4 extra bytes — shown in a separate field, a warning rather than an error.',
+
+  // --- TCP ---
+  'protocol.tcp.error.frameTooShort': 'The frame must be at least as long as the 20-byte minimum TCP header.',
+  'protocol.tcp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.tcp.error.aborted': 'Parsing was aborted.',
+  'protocol.tcp.error.dataOffsetTooSmall':
+    'Data Offset is below 5 (20 bytes) — a structurally impossible header length.',
+  'protocol.tcp.error.declaredHeaderExceedsBuffer':
+    'There are not enough bytes in the buffer for the header (including options) declared by Data Offset.',
+  'protocol.tcp.warning.checksumNeedsPseudoHeader':
+    'Checksum needs a pseudo-header from the IP header; a single-segment input has no such information — it cannot be verified, and is shown raw.',
+
+  'protocol.tcp.documentation.summary':
+    'The TCP header is at least 20 bytes: Source/Destination Port, Sequence/Acknowledgment Number (32-bit, no relationship is established between them), Data Offset/Reserved, 8 flags (CWR/ECE/URG/ACK/PSH/RST/SYN/FIN), Window Size, Checksum (cannot be verified since it needs a pseudo-header, shown raw), Urgent Pointer, and Options (raw) when present. TCP delivers a BYTE STREAM, not packets — this engine decodes a single segment and does not reassemble the stream.',
+  'protocol.tcp.example.synBasic.name': 'SYN (connection opening)',
+  'protocol.tcp.example.synBasic.description': 'Data Offset=5 (no options), only the SYN flag is set.',
+  'protocol.tcp.example.pshAckWithOptions.name': 'PSH+ACK, with options',
+  'protocol.tcp.example.pshAckWithOptions.description':
+    'Data Offset=6 (24 bytes: 20 + 4 bytes of options), the PSH and ACK flags are set.',
+  'protocol.tcp.example.dataOffsetTooSmall.name': 'Data Offset is structurally invalid (error path)',
+  'protocol.tcp.example.dataOffsetTooSmall.description':
+    'Data Offset=4 (16 bytes), below the minimum of 5 (20 bytes) — value-out-of-range; Options/Payload are not produced.',
+  'protocol.tcp.example.truncatedOptions.name': 'Incomplete options (error path)',
+  'protocol.tcp.example.truncatedOptions.description':
+    'Data Offset=8 declares 32 bytes but only 24 bytes are in the buffer — reports truncated-frame.',
 };

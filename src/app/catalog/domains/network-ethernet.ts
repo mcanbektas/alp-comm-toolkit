@@ -161,7 +161,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The connectionless network-layer datagram protocol that defines addressing and fragmentation while explicitly leaving reliability to upper layers.',
           layer: 'network',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ipv4',
           tabs: ['overview', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'Header Decoder',
@@ -184,7 +185,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The 128-bit successor to IPv4 with a fixed 40-byte base header, an extension-header chain and source-only fragmentation.',
           layer: 'network',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ipv6',
           tabs: ['overview', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'Header Decoder',
@@ -262,7 +264,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A minimal eight-byte connectionless transport that preserves application datagram boundaries and offers no ordering or retransmission.',
           layer: 'transport',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'udp',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Header Decoder',
@@ -285,7 +288,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The connection-oriented, reliable, ordered byte-stream transport whose reassembled stream — not its individual segments — is what application parsers must consume.',
           layer: 'transport',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'tcp',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Header Decoder',

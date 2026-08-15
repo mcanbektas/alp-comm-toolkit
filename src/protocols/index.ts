@@ -118,4 +118,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'vlan-802-1q', () =>
     import('./network/ethernet/ethernet').then((module) => module.vlan8021qPlugin),
   );
+  // IPv4/IPv6 (internet layer) + UDP/TCP (transport) — dalga 4b: ortak
+  // internetChecksum.ts yardımcısını paylaşır ama her biri ayrı motor/dosya
+  // (ethernet'in tek-parser-üç-plugin deseninin AKSİNE, dört ayrı tel biçimi).
+  registerOnce(registry, 'ipv4', () => import('./network/ip/ipv4').then((module) => module.ipv4Plugin));
+  registerOnce(registry, 'ipv6', () => import('./network/ip/ipv6').then((module) => module.ipv6Plugin));
+  registerOnce(registry, 'udp', () =>
+    import('./network/transport/udp').then((module) => module.udpPlugin),
+  );
+  registerOnce(registry, 'tcp', () =>
+    import('./network/transport/tcp').then((module) => module.tcpPlugin),
+  );
 }

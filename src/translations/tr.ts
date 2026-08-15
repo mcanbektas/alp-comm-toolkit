@@ -2005,6 +2005,124 @@ export const tr = {
   'protocol.ethernet.vlan8021q.example.truncatedTci.name': 'Eksik TCI (hata yolu)',
   'protocol.ethernet.vlan8021q.example.truncatedTci.description':
     'TPID var ama TCI’ın yalnız ilk baytı var — truncated-frame basar, MAC alanları yine görünür.',
+
+  // --- IPv4 ---
+  'protocol.ipv4.error.frameTooShort': 'Çerçeve en az 20 baytlık asgari IPv4 başlığı kadar uzun olmalı.',
+  'protocol.ipv4.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ipv4.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ipv4.error.ihlTooSmall': 'IHL 5’ten (20 bayt) küçük — yapısal olarak imkânsız bir başlık uzunluğu.',
+  'protocol.ipv4.error.totalLengthTooSmall': 'Total Length, IHL·4 ile bildirilen başlık uzunluğundan küçük.',
+  'protocol.ipv4.error.headerChecksumMismatch': 'Header Checksum hesaplanan değerle uyuşmuyor.',
+  'protocol.ipv4.warning.unexpectedVersion': 'Version alanı 4 değil — çözüm yine de sürer.',
+  'protocol.ipv4.warning.protocolHigherLayer':
+    'Protocol üst katman protokolünü adlandırır; payload bu protokolün kendi sayfasında çözülür (motorlar zincir kurmaz).',
+  'protocol.ipv4.warning.unknownProtocol':
+    'Protocol değeri dar adlandırma kümesinde (ICMP/TCP/UDP) yok; payload ham kalır.',
+  'protocol.ipv4.warning.checksumVerificationSkipped':
+    'Başlık sınırı (IHL geçersiz ya da tamponda eksik) bilinmediği için checksum doğrulaması atlandı.',
+
+  'protocol.ipv4.documentation.summary':
+    'IPv4 başlığı: Version/IHL, DSCP/ECN, Total Length, Identification/Flags/Fragment Offset (alan olarak, reassembly YOK), TTL, Protocol (ICMP/TCP/UDP dar kümesi adlandırılır, payload çözülmez), Header Checksum (pseudo-header GEREKTİRMEZ, PASS/FAIL TAM DOĞRULANIR), Source/Destination Address ve varsa Options alan alan çözülür.',
+  'protocol.ipv4.example.classicTcpHeader.name': 'Klasik başlık (ders kitabı örneği)',
+  'protocol.ipv4.example.classicTcpHeader.description':
+    'Protocol=TCP, checksum 0xB1E6 bağımsız hesapla doğrulandı (internetChecksum.test.ts aynı fixture).',
+  'protocol.ipv4.example.udpCarrying.name': 'UDP taşıyan başlık',
+  'protocol.ipv4.example.udpCarrying.description':
+    'Protocol=17 (UDP) → üst katman uyarısı basar, checksum bağımsız hesaplandı.',
+  'protocol.ipv4.example.headerChecksumFail.name': 'Bozuk header checksum (hata yolu)',
+  'protocol.ipv4.example.headerChecksumFail.description':
+    'Checksum bilerek 0x0000 yazıldı (gerçek değer 0x66D7) → checksum-mismatch.',
+  'protocol.ipv4.example.unknownProtocol.name': 'Tanınmayan Protocol',
+  'protocol.ipv4.example.unknownProtocol.description':
+    'Protocol=253 dar kümede yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
+  'protocol.ipv4.example.ihlTooSmall.name': 'IHL yapısal olarak geçersiz (hata yolu)',
+  'protocol.ipv4.example.ihlTooSmall.description':
+    'IHL=4 (16 bayt), minimum 5 (20 bayt) altında — value-out-of-range; Options/Payload/checksum doğrulaması atlanır.',
+  'protocol.ipv4.example.totalLengthTooSmall.name': 'Total Length çok küçük (hata yolu)',
+  'protocol.ipv4.example.totalLengthTooSmall.description':
+    'IHL geçerli (20 bayt) ama Total Length=16 < 20 — length-mismatch, checksum yine PASS olur.',
+
+  // --- IPv6 ---
+  'protocol.ipv6.error.frameTooShort': 'Çerçeve en az sabit 40 baytlık IPv6 taban başlığı kadar uzun olmalı.',
+  'protocol.ipv6.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ipv6.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ipv6.error.extensionHeaderTruncated':
+    'Bir uzantı başlığının bildirdiği uzunluk için tamponda yeterli bayt yok.',
+  'protocol.ipv6.warning.unexpectedVersion': 'Version alanı 6 değil — çözüm yine de sürer.',
+  'protocol.ipv6.warning.nextHeaderHigherLayer':
+    'Next Header üst katman protokolünü adlandırır; payload bu protokolün kendi sayfasında çözülür (motorlar zincir kurmaz).',
+  'protocol.ipv6.warning.unknownNextHeader':
+    'Next Header değeri bilinen uzantı başlığı ya da üst katman kümesinde yok; zincir burada durur (sonsuz döngü koruması).',
+  'protocol.ipv6.warning.tooManyExtensionHeaders':
+    '8’den fazla iç içe uzantı başlığı desteklenmiyor; kalan baytlar ham payload olarak gösterildi.',
+
+  'protocol.ipv6.documentation.summary':
+    'IPv6 taban başlığı sabit 40 bayttır: Version/Traffic Class/Flow Label, Payload Length, Next Header (bilinen uzantı başlıkları — Hop-by-Hop/Routing/Fragment/Destination Options — zincir olarak yürünür, üst katman TCP/UDP/ICMPv6 adlandırılır, bilinmeyen değerde zincir durur), Hop Limit, Source/Destination Address (128-bit). Checksum alanı YOK — "N/A" bilgi alanı gösterilir.',
+  'protocol.ipv6.example.tcpBasic.name': 'Uzantı başlıksız, doğrudan TCP',
+  'protocol.ipv6.example.tcpBasic.description':
+    'Next Header=6 (TCP) → hiç uzantı başlığı yok, doğrudan üst katman uyarısı.',
+  'protocol.ipv6.example.hopByHopThenUdp.name': 'Hop-by-Hop → UDP zinciri',
+  'protocol.ipv6.example.hopByHopThenUdp.description':
+    'Next Header=0 (Hop-by-Hop) atlanır, uzantı başlığının kendi Next Header’ı 17 (UDP) adlandırılır.',
+  'protocol.ipv6.example.unknownNextHeader.name': 'Tanınmayan Next Header',
+  'protocol.ipv6.example.unknownNextHeader.description':
+    'Next Header=253 dar kümede yok: zincir hiç başlamaz, HATA değil UYARI.',
+  'protocol.ipv6.example.truncatedExtensionHeader.name': 'Eksik uzantı başlığı (hata yolu)',
+  'protocol.ipv6.example.truncatedExtensionHeader.description':
+    'Hop-by-Hop uzantı başlığı 48 bayt bildiriyor ama tamponda yalnız 2 bayt var — truncated-frame basar.',
+
+  // --- UDP ---
+  'protocol.udp.error.frameTooShort': 'Çerçeve en az 8 baytlık sabit UDP başlığı kadar uzun olmalı.',
+  'protocol.udp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.udp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.udp.error.lengthTooSmall': 'Length 8’den (başlığın kendisi) küçük — yapısal olarak imkânsız.',
+  'protocol.udp.error.declaredLengthExceedsBuffer':
+    'Length alanının bildirdiği toplam uzunluk için tamponda yeterli bayt yok.',
+  'protocol.udp.warning.checksumNeedsPseudoHeader':
+    'Checksum, IP başlığından gelen pseudo-header ister; tek segmentlik girdide bu bilgi yok — doğrulanamaz, ham gösterilir.',
+  'protocol.udp.warning.checksumZeroMeansDisabledOverIpv4':
+    'Bu alan 0x0000 ise IPv4 taşıyıcısında "checksum kullanılmıyor" anlamına gelir (IPv6’da checksum zorunludur).',
+  'protocol.udp.warning.trailingBytes':
+    'Tampon Length alanının bildirdiğinden uzun; fazlası ayrı bir alanda gösterildi (sonraki datagramın parçası olabilir).',
+
+  'protocol.udp.documentation.summary':
+    'UDP başlığı 8 bayttır: Source/Destination Port, Length (kendisi dahil toplam uzunluk, payload = length−8) ve Checksum. Checksum pseudo-header gerektirdiği için tek segmentten DOĞRULANAMAZ — ham gösterilir + uyarı, mismatch hiç basılmaz; IPv4 taşıyıcısında 0x0000 "kullanılmıyor" anlamına gelir.',
+  'protocol.udp.example.dnsQuery.name': 'DNS benzeri datagram',
+  'protocol.udp.example.dnsQuery.description':
+    'Source Port=53, checksum ham gösterilir (pseudo-header yok).',
+  'protocol.udp.example.checksumDisabledIpv4.name': 'Checksum 0x0000 (IPv4 özel durumu)',
+  'protocol.udp.example.checksumDisabledIpv4.description':
+    'Checksum=0x0000 → yalnız IPv4 taşıyıcısında geçerli olan "kullanılmıyor" bilgi notu.',
+  'protocol.udp.example.lengthTooSmall.name': 'Length çok küçük (hata yolu)',
+  'protocol.udp.example.lengthTooSmall.description': 'Length=4 < 8 (başlığın kendisinden küçük) — value-out-of-range.',
+  'protocol.udp.example.trailingBytes.name': 'Fazladan bayt (trailing data)',
+  'protocol.udp.example.trailingBytes.description':
+    'Length=10 bildiriyor ama tamponda 4 bayt fazlası var — ayrı alanda gösterilir, hata değil uyarı.',
+
+  // --- TCP ---
+  'protocol.tcp.error.frameTooShort': 'Çerçeve en az 20 baytlık asgari TCP başlığı kadar uzun olmalı.',
+  'protocol.tcp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.tcp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.tcp.error.dataOffsetTooSmall':
+    'Data Offset 5’ten (20 bayt) küçük — yapısal olarak imkânsız bir başlık uzunluğu.',
+  'protocol.tcp.error.declaredHeaderExceedsBuffer':
+    'Data Offset’in bildirdiği başlık (options dahil) için tamponda yeterli bayt yok.',
+  'protocol.tcp.warning.checksumNeedsPseudoHeader':
+    'Checksum, IP başlığından gelen pseudo-header ister; tek segmentlik girdide bu bilgi yok — doğrulanamaz, ham gösterilir.',
+
+  'protocol.tcp.documentation.summary':
+    'TCP başlığı en az 20 bayttır: Source/Destination Port, Sequence/Acknowledgment Number (32-bit, ilişki kurulmaz), Data Offset/Reserved, 8 bayrak (CWR/ECE/URG/ACK/PSH/RST/SYN/FIN), Window Size, Checksum (pseudo-header gerektirdiği için doğrulanamaz, ham gösterilir), Urgent Pointer ve varsa Options (ham). TCP paket değil BYTE STREAM verir — bu motor tek segmenti çözer, akış birleştirme yapmaz.',
+  'protocol.tcp.example.synBasic.name': 'SYN (bağlantı açılışı)',
+  'protocol.tcp.example.synBasic.description': 'Data Offset=5 (options yok), yalnız SYN bayrağı set.',
+  'protocol.tcp.example.pshAckWithOptions.name': 'PSH+ACK, options’lı',
+  'protocol.tcp.example.pshAckWithOptions.description':
+    'Data Offset=6 (24 bayt: 20 + 4 bayt options), PSH ve ACK bayrakları set.',
+  'protocol.tcp.example.dataOffsetTooSmall.name': 'Data Offset yapısal olarak geçersiz (hata yolu)',
+  'protocol.tcp.example.dataOffsetTooSmall.description':
+    'Data Offset=4 (16 bayt), minimum 5 (20 bayt) altında — value-out-of-range; Options/Payload üretilmez.',
+  'protocol.tcp.example.truncatedOptions.name': 'Eksik options (hata yolu)',
+  'protocol.tcp.example.truncatedOptions.description':
+    'Data Offset=8 (32 bayt bildiriyor) ama tamponda yalnız 24 bayt var — truncated-frame basar.',
 } as const;
 
 /**
