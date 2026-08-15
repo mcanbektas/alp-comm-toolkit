@@ -2123,4 +2123,58 @@ export const en: TranslationDictionary = {
   'protocol.tcp.example.truncatedOptions.name': 'Incomplete options (error path)',
   'protocol.tcp.example.truncatedOptions.description':
     'Data Offset=8 declares 32 bytes but only 24 bytes are in the buffer — reports truncated-frame.',
+
+  // --- MQTT ---
+  'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
+  'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.mqtt.error.aborted': 'Parsing was aborted.',
+  'protocol.mqtt.error.reservedPacketType': 'Packet type 0 is none of the 15 types OASIS defines — a reserved value.',
+  'protocol.mqtt.error.invalidQos': 'PUBLISH QoS bits are 0b11 (3) — a value OASIS reserves and leaves invalid.',
+  'protocol.mqtt.error.remainingLengthMalformed':
+    'Remaining Length never drops its continuation bit across four bytes — the Variable Byte Integer encoding is at most four bytes (OASIS §1.5.5).',
+  'protocol.mqtt.error.remainingLengthTruncated': 'The data ended before Remaining Length was complete — more bytes are needed.',
+  'protocol.mqtt.error.bodyTruncated': 'The body declared by Remaining Length is missing from the buffer.',
+  'protocol.mqtt.error.connectFieldTruncated': 'A CONNECT field is missing from the buffer.',
+  'protocol.mqtt.error.connectPropertiesTruncated':
+    'Protocol Level=5 requires a Properties field, but the declared length is missing from the buffer.',
+  'protocol.mqtt.error.publishFieldTruncated': 'A PUBLISH field is missing from the buffer.',
+  'protocol.mqtt.error.packetIdentifierTruncated': 'There are not two bytes left in the buffer for Packet Identifier.',
+
+  'protocol.mqtt.warning.fixedFlagsViolation':
+    'This packet type has a fixed flags value defined by OASIS; the byte that arrived violates it. The frame is still decoded.',
+  'protocol.mqtt.warning.unknownProtocolLevel':
+    'Protocol Level is neither 4 (v3.1.1) nor 5 (v5) — the version is unknown, Properties was not attempted.',
+  'protocol.mqtt.warning.unexpectedProtocolName': 'Protocol Name is not "MQTT" — an unexpected value.',
+  'protocol.mqtt.warning.connectFlagsReservedBit': 'The reserved bit (bit 0) of Connect Flags should be zero, but it arrived set.',
+  'protocol.mqtt.warning.unknownPropertyId':
+    'An unrecognised Property Identifier was seen; the remaining block from this id onward is shown raw since its type is unknown.',
+  'protocol.mqtt.warning.propertyTruncated': 'A known property’s value does not fit within the Properties Length boundary — the remaining block is shown raw.',
+  'protocol.mqtt.warning.propertiesVersionAssumed':
+    'This packet type does not by itself announce the MQTT version (no prior CONNECT is remembered); this field was decoded ASSUMING the v5 Properties TLV format, and that assumption is unverified.',
+  'protocol.mqtt.warning.trailingBytes': 'More bytes arrived than Remaining Length declared — shown in a separate field.',
+
+  'protocol.mqtt.summary.frame': 'MQTT frame',
+
+  'protocol.mqtt.documentation.summary':
+    'The MQTT Fixed Header (Packet Type + flags + Variable Byte Integer Remaining Length) is the same for every packet type. CONNECT and PUBLISH are fully decoded: CONNECT reads and names Protocol Level (4=v3.1.1, 5=v5), and when Level=5 the v5 Properties TLV (from OASIS’s narrow id table) is decoded as mandatory. PUBLISH decodes Topic Name, Packet Identifier when QoS>0, and Properties when present (under an unverified version assumption); the rest is Payload. The other 13 types only name Packet Identifier when present; the remaining body is shown raw. The input is a SINGLE MQTT Control Packet — no reassembly from a TCP stream is performed.',
+  'protocol.mqtt.example.connectV311.name': 'CONNECT — MQTT 3.1.1',
+  'protocol.mqtt.example.connectV311.description':
+    'Protocol Level=4, Clean Session=1, Keep Alive=60, Client Identifier "sensor-01" — no will/user/password.',
+  'protocol.mqtt.example.connectV5Properties.name': 'CONNECT — MQTT 5.0, with Properties',
+  'protocol.mqtt.example.connectV5Properties.description':
+    'Protocol Level=5, Properties: Session Expiry Interval=3600 + Receive Maximum=20, Client Identifier "sensor-02".',
+  'protocol.mqtt.example.publishQos0.name': 'PUBLISH — QoS 0',
+  'protocol.mqtt.example.publishQos0.description': 'No Packet Identifier, Topic "sensors/temp", Payload "23.5".',
+  'protocol.mqtt.example.publishQos1.name': 'PUBLISH — QoS 1',
+  'protocol.mqtt.example.publishQos1.description':
+    'QoS 1 + RETAIN, Packet Identifier=0x1234, Topic "cmd/set", Payload "ON".',
+  'protocol.mqtt.example.reservedPacketType.name': 'Reserved packet type (error path)',
+  'protocol.mqtt.example.reservedPacketType.description':
+    'Upper nibble 0x0 — none of the 15 OASIS types; the Fixed Header is still shown.',
+  'protocol.mqtt.example.remainingLengthMalformed.name': 'Malformed Variable Byte Integer (error path)',
+  'protocol.mqtt.example.remainingLengthMalformed.description':
+    'Remaining Length never drops its continuation bit across four bytes (0xFF×4) — a violation of OASIS’s at-most-four-bytes rule.',
+  'protocol.mqtt.example.subscribeFixedFlagsViolation.name': 'SUBSCRIBE — fixed flags violation (warning path)',
+  'protocol.mqtt.example.subscribeFixedFlagsViolation.description':
+    'SUBSCRIBE’s flags nibble should be 0b0010, but 0b0000 arrived — a warning is raised, the frame still decodes.',
 };

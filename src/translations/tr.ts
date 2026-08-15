@@ -2123,6 +2123,60 @@ export const tr = {
   'protocol.tcp.example.truncatedOptions.name': 'Eksik options (hata yolu)',
   'protocol.tcp.example.truncatedOptions.description':
     'Data Offset=8 (32 bayt bildiriyor) ama tamponda yalnız 24 bayt var — truncated-frame basar.',
+
+  // --- MQTT ---
+  'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
+  'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.mqtt.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mqtt.error.reservedPacketType': 'Paket tipi 0 OASIS’in tanımladığı 15 tipten hiçbiri değil — rezerve değer.',
+  'protocol.mqtt.error.invalidQos': 'PUBLISH QoS biti 0b11 (3) — OASIS’in rezerve bıraktığı, geçersiz bir değer.',
+  'protocol.mqtt.error.remainingLengthMalformed':
+    'Remaining Length dört bayt boyunca devam bitini hiç bırakmıyor — Variable Byte Integer kodlaması en çok dört bayt olabilir (OASIS §1.5.5).',
+  'protocol.mqtt.error.remainingLengthTruncated': 'Remaining Length tamamlanmadan veri bitti — daha fazla bayt gerekiyor.',
+  'protocol.mqtt.error.bodyTruncated': 'Remaining Length’in bildirdiği gövde tamponda eksik.',
+  'protocol.mqtt.error.connectFieldTruncated': 'CONNECT’in bir alanı tamponda eksik kaldı.',
+  'protocol.mqtt.error.connectPropertiesTruncated':
+    'Protocol Level=5 için Properties alanı zorunlu ama bildirilen uzunluk tamponda eksik.',
+  'protocol.mqtt.error.publishFieldTruncated': 'PUBLISH’in bir alanı tamponda eksik kaldı.',
+  'protocol.mqtt.error.packetIdentifierTruncated': 'Packet Identifier için tamponda iki bayt yok.',
+
+  'protocol.mqtt.warning.fixedFlagsViolation':
+    'Bu paket tipinin OASIS’in verdiği sabit flags değeri var; gelen bayt bunu ihlal ediyor. Çerçeve yine çözülür.',
+  'protocol.mqtt.warning.unknownProtocolLevel':
+    'Protocol Level ne 4 (v3.1.1) ne 5 (v5) — sürüm bilinmiyor, Properties denenmedi.',
+  'protocol.mqtt.warning.unexpectedProtocolName': 'Protocol Name "MQTT" değil — beklenmeyen bir değer.',
+  'protocol.mqtt.warning.connectFlagsReservedBit': 'Connect Flags’ın rezerve biti (bit 0) sıfır olmalı, set geldi.',
+  'protocol.mqtt.warning.unknownPropertyId':
+    'Tanınmayan bir Property Identifier görüldü; bu id’den itibaren kalan blok tipinin bilinmediği için ham gösterilir.',
+  'protocol.mqtt.warning.propertyTruncated': 'Bilinen bir property’nin değeri Properties Length sınırına sığmıyor — kalan blok ham gösterilir.',
+  'protocol.mqtt.warning.propertiesVersionAssumed':
+    'Bu paket tipi tek başına MQTT sürümünü bildirmez (önceki CONNECT hatırlanmaz); bu alan v5 Properties TLV formatı VARSAYILARAK çözüldü, doğrulanamadı.',
+  'protocol.mqtt.warning.trailingBytes': 'Remaining Length’in bildirdiğinden fazla bayt geldi — ayrı alanda gösterilir.',
+
+  'protocol.mqtt.summary.frame': 'MQTT çerçevesi',
+
+  'protocol.mqtt.documentation.summary':
+    'MQTT Fixed Header (Packet Type + flags + Variable Byte Integer Remaining Length) her paket tipinde aynıdır. CONNECT ve PUBLISH tam çözülür: CONNECT’te Protocol Level (4=v3.1.1, 5=v5) okunup adlandırılır, Level=5 ise v5 Properties TLV’si (OASIS’in dar id tablosuyla) zorunlu çözülür. PUBLISH’te Topic Name, QoS>0’da Packet Identifier ve varsa (sürümü doğrulanamayan bir varsayımla) Properties çözülür, gerisi Payload’dır. Diğer 13 tipte yalnız Packet Identifier (varsa) adlandırılır, kalan gövde ham gösterilir. Girdi TEK bir MQTT Control Packet’tir — TCP akışından birleştirme yapılmaz.',
+  'protocol.mqtt.example.connectV311.name': 'CONNECT — MQTT 3.1.1',
+  'protocol.mqtt.example.connectV311.description':
+    'Protocol Level=4, Clean Session=1, Keep Alive=60, Client Identifier "sensor-01" — will/user/password yok.',
+  'protocol.mqtt.example.connectV5Properties.name': 'CONNECT — MQTT 5.0, Properties’li',
+  'protocol.mqtt.example.connectV5Properties.description':
+    'Protocol Level=5, Properties: Session Expiry Interval=3600 + Receive Maximum=20, Client Identifier "sensor-02".',
+  'protocol.mqtt.example.publishQos0.name': 'PUBLISH — QoS 0',
+  'protocol.mqtt.example.publishQos0.description': 'Packet Identifier yok, Topic "sensors/temp", Payload "23.5".',
+  'protocol.mqtt.example.publishQos1.name': 'PUBLISH — QoS 1',
+  'protocol.mqtt.example.publishQos1.description':
+    'QoS 1 + RETAIN, Packet Identifier=0x1234, Topic "cmd/set", Payload "ON".',
+  'protocol.mqtt.example.reservedPacketType.name': 'Rezerve paket tipi (hata yolu)',
+  'protocol.mqtt.example.reservedPacketType.description':
+    'Üst nibble 0x0 — OASIS’in 15 tipinden hiçbiri değil; Fixed Header yine de gösterilir.',
+  'protocol.mqtt.example.remainingLengthMalformed.name': 'Malformed Variable Byte Integer (hata yolu)',
+  'protocol.mqtt.example.remainingLengthMalformed.description':
+    'Remaining Length dört bayt boyunca (0xFF×4) devam bitini hiç bırakmıyor — OASIS’in en-çok-dört-bayt kuralı ihlali.',
+  'protocol.mqtt.example.subscribeFixedFlagsViolation.name': 'SUBSCRIBE — sabit flags ihlali (uyarı yolu)',
+  'protocol.mqtt.example.subscribeFixedFlagsViolation.description':
+    'SUBSCRIBE’ın flags nibble’ı 0b0010 olmalı, burada 0b0000 geldi — uyarı basılır, çerçeve yine çözülür.',
 } as const;
 
 /**

@@ -537,7 +537,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The broker-mediated publish/subscribe protocol of industrial IoT, with three QoS levels, retained messages and a last-will notification on abnormal disconnect.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'mqtt',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Control Packet Decoder',

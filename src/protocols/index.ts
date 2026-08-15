@@ -129,4 +129,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'tcp', () =>
     import('./network/transport/tcp').then((module) => module.tcpPlugin),
   );
+  // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
+  // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
+  registerOnce(registry, 'mqtt', () =>
+    import('./network/mqtt/mqtt').then((module) => module.mqttPlugin),
+  );
 }
