@@ -1230,6 +1230,46 @@ export const en: TranslationDictionary = {
   'protocol.nmea.2000.example.baseFrameRejected.description':
     'A frame carrying an 11-bit identifier: an error is raised but the frame is still shown field by field.',
 
+  // --- AIS ---
+  'protocol.ais.error.sentenceTooShort':
+    'The sentence is not long enough to carry the envelope fields (fragment/sequence/channel/payload/fill bits).',
+  'protocol.ais.error.sentenceTooLong': 'The sentence exceeds NMEA 0183’s fixed 82-character limit.',
+  'protocol.ais.error.startDelimiterNotFound': 'The sentence does not start with !.',
+  'protocol.ais.error.missingChecksumDelimiter': 'The sentence has no checksum delimiter (*).',
+  'protocol.ais.error.malformedIdentifier': 'The identifier (talker+formatter) is shorter than five characters.',
+  'protocol.ais.error.unknownFormatter': 'The sentence formatter is not AIVDM/AIVDO — this page only decodes those two.',
+  'protocol.ais.error.insufficientEnvelopeFields':
+    'The envelope is missing its payload and/or fill bits fields; the fields that are present were still shown.',
+  'protocol.ais.error.emptyPayload': 'The payload field is empty; the Message Type could not be computed.',
+  'protocol.ais.error.checksumMismatch': 'The NMEA checksum does not match.',
+  'protocol.ais.error.aborted': 'Parsing was cancelled.',
+  'protocol.ais.warning.fragmentedMessage':
+    'This message is split across multiple NMEA sentences; this engine does NOT reassemble fragments, it only decodes a single sentence — the full meaning requires all parts to be brought together.',
+  'protocol.ais.warning.messageTypeNeedsDatabase':
+    'The Message Type number can be computed, but its name falls outside the five named on this page — the full name/field layout comes from the licensed ITU-R M.1371 database.',
+  'protocol.ais.warning.fieldsNeedDatabase':
+    'Every bit beyond the Message Type (MMSI, position, speed, navigation status …) depends on the licensed M.1371 message database — it is not guessed here, only the raw bit count is shown.',
+  'protocol.ais.warning.unparseableNumber': 'The field could not be converted to a numeric value.',
+  'protocol.ais.summary.received': 'Received AIS message (AIVDM)',
+  'protocol.ais.summary.ownVessel': 'Own-vessel AIS report (AIVDO)',
+  'protocol.ais.documentation.summary':
+    'The !AIVDM/!AIVDO NMEA 0183 transport sentence; fragment/sequence/channel/payload/fill bits/checksum are FULLY decoded. The 6-bit armored payload is opened into a bit stream, but only the Message Type (first 6 bits) is named — no name is assigned outside the five types the spec names. Every other field (MMSI, position, speed …) requires the licensed ITU-R M.1371 database; this page only resolves the envelope + Message Type level.',
+  'protocol.ais.example.positionReportClassA.name': 'Position Report Class A (Type 1)',
+  'protocol.ais.example.positionReportClassA.description':
+    'A single-fragment example with a named Message Type 1 — channel A, valid checksum.',
+  'protocol.ais.example.multiFragmentStaticData.name': 'Multi-fragment Static Data (Type 5, 2 fragments)',
+  'protocol.ais.example.multiFragmentStaticData.description':
+    'Matches the spec’s own envelope example (2,1,5,A): the first of two fragments, Message Type 5 — the fragmentedMessage warning is raised, no reassembly is performed.',
+  'protocol.ais.example.checksumMismatch.name': 'Corrupted checksum',
+  'protocol.ais.example.checksumMismatch.description':
+    'The same body as the first example, with the last checksum digit deliberately corrupted — an error is raised but the frame is still decoded field by field.',
+  'protocol.ais.example.unnamedMessageType.name': 'Unnamed Message Type (Type 8)',
+  'protocol.ais.example.unnamedMessageType.description':
+    'Binary Broadcast Message: outside the five types the spec names — a raw number plus the messageTypeNeedsDatabase warning are shown.',
+  'protocol.ais.example.ownVesselClassB.name': 'Own vessel, Class B (AIVDO, Type 18)',
+  'protocol.ais.example.ownVesselClassB.description':
+    'An AIVDO (own-vessel) formatter with a named Message Type 18 example — channel B.',
+
   // --- CAN family (shared frame core) ---
   'protocol.can.frame.warning.truncatedPayload':
     'The declared data length is not present in the record; the available bytes were decoded.',

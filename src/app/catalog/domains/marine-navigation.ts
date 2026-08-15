@@ -168,7 +168,11 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'TDMA vessel-reporting system on the VHF maritime mobile band whose ITU-R M.1371 messages reach the analyzer as !AIVDM/!AIVDO sentences carrying 6-bit armoured position, static and voyage data.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Zarf (fragment/seq/channel/fill/checksum) TAM + kimlik alanı (Message
+          // Type) adlandırılıyor — NMEA 2000/PGN emsaliyle aynı gerekçe (ais.ts
+          // dosya başı "DURUM: 'ready'" notuna bak, brief-faz10-dalga3.md).
+          status: 'ready',
+          pluginId: 'ais',
           tabs: [
             'overview',
             'live',

@@ -1231,6 +1231,46 @@ export const tr = {
   'protocol.nmea.2000.example.baseFrameRejected.description':
     '11-bit identifier taşıyan çerçeve: hata basılır ama çerçeve yine alan alan gösterilir.',
 
+  // --- AIS ---
+  'protocol.ais.error.sentenceTooShort':
+    'Cümle zarfın (fragment/sequence/channel/payload/fill bits) alanlarını taşıyacak kadar uzun değil.',
+  'protocol.ais.error.sentenceTooLong': 'Cümle NMEA 0183’ün 82 karakterlik sabit sınırını aşıyor.',
+  'protocol.ais.error.startDelimiterNotFound': 'Cümle ! ile başlamıyor.',
+  'protocol.ais.error.missingChecksumDelimiter': 'Cümlede checksum ayracı (*) yok.',
+  'protocol.ais.error.malformedIdentifier': 'Kimlik (talker+formatter) beş karakterden kısa.',
+  'protocol.ais.error.unknownFormatter': 'Sentence formatter AIVDM/AIVDO değil — bu sayfa yalnız bu ikisini çözer.',
+  'protocol.ais.error.insufficientEnvelopeFields':
+    'Zarfın payload ve/veya fill bits alanları eksik; var olan alanlar yine de gösterildi.',
+  'protocol.ais.error.emptyPayload': 'Payload alanı boş; Message Type hesaplanamadı.',
+  'protocol.ais.error.checksumMismatch': 'NMEA checksum uyuşmuyor.',
+  'protocol.ais.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ais.warning.fragmentedMessage':
+    'Bu mesaj birden fazla NMEA cümlesine bölünmüş; bu motor fragment BİRLEŞTİRMEZ, yalnız tek cümleyi çözer — tam anlam tüm parçaların bir araya getirilmesini ister.',
+  'protocol.ais.warning.messageTypeNeedsDatabase':
+    'Message Type numarası hesaplanabiliyor ama adı bu sayfada adlandırılan beşlinin dışında — tam ad/alan tablosu lisanslı ITU-R M.1371 veritabanından gelir.',
+  'protocol.ais.warning.fieldsNeedDatabase':
+    'Message Type dışındaki tüm bitler (MMSI, konum, hız, seyir durumu …) lisanslı M.1371 mesaj veritabanına bağlıdır — burada tahmin edilmez, ham bit sayısı gösterilir.',
+  'protocol.ais.warning.unparseableNumber': 'Alan sayısal bir değere çevrilemedi.',
+  'protocol.ais.summary.received': 'Alınan AIS mesajı (AIVDM)',
+  'protocol.ais.summary.ownVessel': 'Kendi gemi AIS raporu (AIVDO)',
+  'protocol.ais.documentation.summary':
+    '!AIVDM/!AIVDO NMEA 0183 taşıma cümlesi; fragment/sequence/channel/payload/fill bits/checksum TAM çözülür. 6-bit armored payload bit akışına açılır, yalnız Message Type (ilk 6 bit) adlandırılır — spec’in isimlendirdiği beş tip dışında ad atanmaz. Kalan tüm alanlar (MMSI, konum, hız …) lisanslı ITU-R M.1371 veritabanı ister, bu sayfa yalnız zarf + Message Type düzeyini çözer.',
+  'protocol.ais.example.positionReportClassA.name': 'Position Report Class A (Tip 1)',
+  'protocol.ais.example.positionReportClassA.description':
+    'Tek fragmentli, adlandırılmış Message Type 1 örneği — kanal A, geçerli checksum.',
+  'protocol.ais.example.multiFragmentStaticData.name': 'Çok parçalı Static Data (Tip 5, 2 fragment)',
+  'protocol.ais.example.multiFragmentStaticData.description':
+    'Spec’in kendi zarf örneğiyle (2,1,5,A) aynı şekilde: iki fragmentin ilki, Message Type 5 — fragmentedMessage uyarısı basılır, birleştirme YAPILMAZ.',
+  'protocol.ais.example.checksumMismatch.name': 'Bozuk checksum',
+  'protocol.ais.example.checksumMismatch.description':
+    'İlk örnekle aynı gövde, son checksum hanesi bilerek bozuldu — hata basılır ama çerçeve yine alan alan çözülür.',
+  'protocol.ais.example.unnamedMessageType.name': 'Adsız Message Type (Tip 8)',
+  'protocol.ais.example.unnamedMessageType.description':
+    'Binary Broadcast Message: spec’in adlandırdığı beşli listesinde yok — ham numara + messageTypeNeedsDatabase uyarısı basılır.',
+  'protocol.ais.example.ownVesselClassB.name': 'Kendi gemi, Class B (AIVDO, Tip 18)',
+  'protocol.ais.example.ownVesselClassB.description':
+    'AIVDO (own-vessel) formatörü ve adlandırılmış Message Type 18 örneği — kanal B.',
+
   // --- CAN ailesi (ortak çerçeve çekirdeği) ---
   'protocol.can.frame.warning.truncatedPayload':
     'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar çözüldü.',
