@@ -81,6 +81,15 @@ export type ProtocolErrorCode =
   | 'unsupported-function-code'
   | 'start-delimiter-not-found'
   | 'value-out-of-range'
+  /**
+   * Alan yapısal olarak okunabildi ama KODLAMA BİÇİMİ bu çözücünün kabul
+   * ettiği kümede değil (faz 10 dalga 5e'de eklendi). `value-out-of-range`
+   * değeri yargılar; bu kod değere hiç bakmadan biçimi reddeder — ör. BER'in
+   * long-form etiketi ya da indefinite-length'i. Ayrımı korumak şart:
+   * "bu sayı çok büyük" ile "bu kodlamayı okuyamıyorum" farklı hatalardır ve
+   * kullanıcı ikincisinde veriyi değil aracın sınırını görmelidir.
+   */
+  | 'unsupported-encoding'
   | 'frame-too-long'
   | 'truncated-frame'
   | 'circular-length-reference'

@@ -73,14 +73,16 @@ export type EthernetPageKind = 'ethernet-ii' | 'ieee-802-3' | 'vlan-802-1q';
  * VLAN branch'inde ayrıca ele alınır, hiçbir zaman "final" EtherType olarak
  * buraya düşmez).
  *
- * 0x88A4 (EtherCAT) faz 10 dalga 5d'de eklendi: bu depoda motoru OLAN her
- * EtherType burada ADLANDIRILIR ki `WARN_ETHERTYPE_HIGHER_LAYER` ("kendi
- * sayfasında çöz") yönlendirmesi çalışsın — zincir yine kurulmaz. */
+ * 0x88A4 (EtherCAT) faz 10 dalga 5d'de, 0x88B8 (IEC 61850 GOOSE) 5e'de eklendi:
+ * bu depoda motoru OLAN her EtherType burada ADLANDIRILIR ki
+ * `WARN_ETHERTYPE_HIGHER_LAYER` ("kendi sayfasında çöz") yönlendirmesi çalışsın
+ * — zincir yine kurulmaz. */
 const ETHER_TYPE_NAMES: ReadonlyMap<number, string> = new Map([
   [0x0800, 'IPv4'],
   [0x0806, 'ARP'],
   [0x86dd, 'IPv6'],
   [0x88a4, 'EtherCAT'],
+  [0x88b8, 'GOOSE'],
 ]);
 
 export type EthernetFrameMetadata = {

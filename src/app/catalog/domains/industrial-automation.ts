@@ -700,9 +700,13 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'iec-61850',
           name: 'IEC 61850',
           summary:
-            'Substation automation standard whose IED/logical node information model is served by client-server MMS and by multicast GOOSE for time-critical protection events.',
+            'Substation automation standard whose IED/logical node information model is served by client-server MMS and by multicast GOOSE for time-critical protection events. The decoder covers GOOSE only: the Ethernet frame, the APPID/Length/Reserved header and every BER-coded goosePdu field down to the dataset values. MMS and SCL import are not implemented yet.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Karar 4 (dalga 5e): motor GOOSE-only. Kaydın vaat ettiği MMS ve SCL
+          // BİLİNÇLİ eksik olduğu için rozet 'ready' değil 'partial' — özet
+          // metni neyin çözülüp neyin çözülmediğini açıkça yazar (KWP2000 emsali).
+          status: 'partial',
+          pluginId: 'iec-61850',
           tabs: [
             'overview',
             'live',

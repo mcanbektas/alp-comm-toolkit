@@ -658,6 +658,7 @@ export const tr = {
   'studio.output.parseError.code.truncatedFrame': 'Çerçeve yarım kaldı, baytlar bitti',
   'studio.output.parseError.code.unsupportedFunctionCode': 'Desteklenmeyen fonksiyon kodu',
   'studio.output.parseError.code.valueOutOfRange': 'Değer uint16 aralığını aşıyor',
+  'studio.output.parseError.code.unsupportedEncoding': 'Desteklenmeyen kodlama biçimi',
   'studio.output.parseError.offset': 'Hata offset',
   'studio.output.parseError.recoverable': 'Toparlanabilir — sonraki çerçeveden devam edilebilir.',
   'studio.output.parseError.title': 'Çerçeve çözümlenemedi',
@@ -2466,6 +2467,107 @@ export const tr = {
   'protocol.ethercat.example.frameTooShort.name': 'Çok kısa çerçeve',
   'protocol.ethercat.example.frameTooShort.description':
     '10 bayt: Ethernet başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+
+  // --- IEC 61850 GOOSE ---
+  'protocol.goose.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + GOOSE başlığı (8 bayt) kadar uzun değil.',
+  'protocol.goose.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.goose.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.goose.error.etherTypeNotGoose':
+    'EtherType 0x88B8 değil — bu çerçeve GOOSE değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.goose.error.headerTruncated':
+    'EtherType’tan sonra GOOSE başlığının (APPID + Length + Reserved 1 + Reserved 2, 8 bayt) tamamı gelmedi.',
+  'protocol.goose.error.lengthBelowHeader':
+    'Length alanı 8’den küçük — bu alan APPID’den itibaren sayar ve başlığın kendisini de kapsar, 8’in altına inemez.',
+  'protocol.goose.error.apduTruncated':
+    'Length alanının vaat ettiği APDU tampondaki bayt sayısını aşıyor; yürüyüş telde gerçekten olan baytlarla sınırlandı.',
+  'protocol.goose.error.pduTagNotGoose':
+    'APDU’nun ilk etiketi 0x61 (goosePdu) değil — gövde çözülmedi, ham bırakıldı.',
+  'protocol.goose.error.berTruncated': 'BER değeri okunmadan arabellek (ya da üst TLV) bitti.',
+  'protocol.goose.error.berLongFormTag':
+    'Çok baytlı (long-form) BER etiketi: alt 5 bit 0x1F. Bu çözücü desteklemiyor ve sessizce 31 diye okumuyor — alan ham bırakıldı.',
+  'protocol.goose.error.berIndefiniteLength':
+    'Belirsiz uzunluk (0x80) BER’de vardır ama DER’de ve GOOSE’ta geçersizdir — değer çözülmedi.',
+  'protocol.goose.error.berReservedLengthOctet':
+    'Uzunluk okteti 0xFF: X.690’da ayrılmıştır, uzunluk değildir.',
+  'protocol.goose.error.berLengthOctetsUnsupported':
+    'Uzun form uzunluk 4 oktetten fazlasını kullanıyor; bu çözücü kabul etmiyor.',
+  'protocol.goose.error.berValueOverflow':
+    'BER değeri kendi sınırının (üst TLV ya da çerçeve sonu) dışına taşıyor.',
+  'protocol.goose.error.berUnexpectedValueLength':
+    'BER değerinin uzunluğu tipiyle bağdaşmıyor (ör. tek oktet olması gereken BOOLEAN).',
+  'protocol.goose.warning.destinationNotGooseRange':
+    'Hedef MAC, IEC/TC57’nin GOOSE çok-alıcılı aralığında (01:0C:CD:01:xx:xx) değil. Bu bir hata değildir — bilgi notu.',
+  'protocol.goose.warning.reservedNotZero':
+    'Reserved alanı sıfır değil. Bit 15 tek bir kamu kaynağında “Simulated” olarak geçiyor ama çift teyit edilemedi; alan adlandırılmadan ham gösteriliyor. Simülasyon durumu için çift teyitli `simulation` alanına bakın.',
+  'protocol.goose.warning.gseManagementPdu':
+    'APDU gseMngtPdu (APPLICATION 0) — GOOSE yönetim mesajı. Bu motor yalnız goosePdu’yu çözer; gövde ham bırakıldı.',
+  'protocol.goose.warning.unknownPduField':
+    'goosePdu içinde tanınmayan bir etiket var — adlandırılmadı, ham bırakıldı.',
+  'protocol.goose.warning.missingMandatoryField':
+    'goosePdu’da zorunlu alanlardan biri yok (goID, simulation ve ndsCom opsiyoneldir, onların yokluğu uyarı üretmez).',
+  'protocol.goose.warning.valueNotDecodable':
+    'Alanın etiketi tanındı ama değeri beklenen biçimde değil — çözülmedi, ham gösteriliyor.',
+  'protocol.goose.warning.nonPrintableString':
+    'VisibleString alanında 0x20-0x7E dışında bayt var — metin olarak basılmadı, ham gösteriliyor.',
+  'protocol.goose.warning.timestampLengthUnexpected':
+    'Zaman damgası 8 bayt değil; saniye/kesir/kalite parçalarına bölünmedi — uydurulmuş bir zaman basmaktansa ham bırakıldı.',
+  'protocol.goose.warning.clockNotTrustworthy':
+    'TimeQuality baytı saat arızası ya da senkronsuzluk bildiriyor — zaman damgası taşınıyor ama yayıncı ona güvenmediğini söylüyor.',
+  'protocol.goose.warning.unknownDataType':
+    'Dataset elemanının tip etiketi iki bağımsız kaynakta birden geçmiyor — adlandırılmadı, ham bırakıldı.',
+  'protocol.goose.warning.dataSemanticsNeedScl':
+    'Dataset elemanının hangi Data Attribute’a karşılık geldiği SCL tanımından gelir; tek çerçeveden çıkarılamaz. Tipler adlandırılır, anlamlar adlandırılmaz.',
+  'protocol.goose.warning.dataSetCountMismatch':
+    'numDatSetEntries ile dataset’teki eleman sayısı uyuşmuyor — yayıncı ile abonenin konfigürasyonu ayrışmış olabilir.',
+  'protocol.goose.warning.dataDepthLimit':
+    'İç içe dataset derinliği üst sınıra ulaştı; bu seviyenin altına inilmedi (sonsuz döngü koruması).',
+  'protocol.goose.warning.dataElementLimit':
+    'Dataset eleman sayısı üst sınıra ulaştı; yürüyüş durduruldu (sonsuz döngü koruması).',
+  'protocol.goose.warning.simulationActive':
+    'simulation (test) alanı TRUE — bu yayın simülasyondur; koruma cihazları normalde gerçek olay saymaz.',
+  'protocol.goose.warning.needsCommissioning':
+    'ndsCom TRUE — GOOSE kontrol bloğu devreye alma bekliyor, yayın üretim verisi taşımıyor olabilir.',
+  'protocol.goose.warning.securityNotDecoded':
+    'PDU’da imza/güvenlik için ayrılmış alan var. Şifre çözme ve imza doğrulama bu araçta yoktur; alan ham bırakıldı.',
+  'protocol.goose.warning.paddingNotZero':
+    'APDU’dan sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.goose.warning.trailingBytes':
+    'Length alanının kapsadığı bölgede goosePdu’dan sonra bayt kaldı — APDU beklenenden kısa çözüldü.',
+  'protocol.goose.summary.publication':
+    '{goId} — stNum {stNum}, sqNum {sqNum}, {entryCount} veri',
+  'protocol.goose.summary.management': 'GOOSE yönetim mesajı (APPID {appId})',
+  'protocol.goose.summary.notGoose': 'GOOSE değil (EtherType {etherType})',
+  'protocol.goose.summary.pduUnreadable': 'GOOSE başlığı okundu, PDU çözülemedi (APPID {appId})',
+  'protocol.goose.documentation.summary':
+    'IEC 61850 GOOSE: girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x88B8 çözülür, ardından 8 baytlık GOOSE başlığı (APPID, Length, Reserved 1, Reserved 2) ve BER/TLV kodlu goosePdu gelir. Length alanı APPID’den itibaren sayar (Ethernet başlığını KAPSAMAZ). PDU’nun her alanı adlandırılıp çözülür: gocbRef, timeAllowedtoLive, datSet, goID, t (SecondSinceEpoch + FractionOfSecond + TimeQuality olarak üçe bölünür), stNum, sqNum, simulation, confRev, ndsCom, numDatSetEntries ve allData. Dataset elemanları tip etiketiyle sığ çözülür (boolean, bit-string, integer, unsigned, floating-point, octet-string, visible-string, binary-time, utc-time, array, structure); iç içe yapılara derinlik sınırıyla inilir. ÇÖZÜLMEYENLER dürüstçe: MMS ve SCL içe aktarımı bu sürümde YOK (rozet bu yüzden “Kısmi”), stNum/sqNum zaman çizelgesi ve retransmission analizi çok çerçeve istediği için motorun dışında, dataset elemanlarının SEMANTİĞİ SCL’den geldiği için verilmiyor, imzalı/şifreli alan çözülmüyor. Alan düzenleri Wireshark’ın GOOSE dissector’ı (goose.asn + packet-goose.c) ve libIEC61850 ile çapraz teyitlidir; iki kaynakta birden doğrulanamayan hiçbir etiket adlandırılmaz.',
+  'protocol.goose.example.steadyStatePublication.name': 'Kararlı durum yayını',
+  'protocol.goose.example.steadyStatePublication.description':
+    'Tipik döngüsel GOOSE yayını: stNum 1 (durum değişmedi), sqNum 12 (aynı durumun 12. tekrarı), dört elemanlı dataset (boolean, 13 bitlik bit-string, integer, boolean). Referanslar gerçek kurulumlardaki kadar uzun olduğu için PDU gövdesi 127 baytı aşar ve uzun form BER uzunluğu (0x81 LL) burada gerçekten koşar.',
+  'protocol.goose.example.vlanTaggedPublication.name': 'VLAN tag’li yayın',
+  'protocol.goose.example.vlanTaggedPublication.description':
+    'Aynı yayın 802.1Q tag’li: PCP=4, VID=0 (priority-tagged) — 61850 kurulumlarında alışılmış biçim. Tag 4 bayt eklediği için GOOSE başlığı ve tüm PDU alanları kayar; alan ofsetleri yine HAM çerçeveye göre mutlaktır.',
+  'protocol.goose.example.stateChangePublication.name': 'Durum değişikliği (stNum arttı)',
+  'protocol.goose.example.stateChangePublication.description':
+    'İlk boolean FALSE’tan TRUE’ya döndü: stNum 1’den 2’ye artar ve sqNum 0’a döner. Motor bu ilişkiyi KURMAZ — tek çerçeveye bakar; stNum/sqNum zaman çizelgesi analyzer işidir. İlişki burada yalnız anlatılıyor.',
+  'protocol.goose.example.structuredDataset.name': 'İç içe structure + ölçüm',
+  'protocol.goose.example.structuredDataset.description':
+    'Dataset’in ilk elemanı bir structure: içinde IEEE-754 floating-point (230.5) ve bir bit-string var; ikinci eleman utc-time. İç içe yapıya derinlik sınırıyla inilir ve ölçümün SEMANTİĞİ (hangi Data Attribute) SCL’den geleceği için adlandırılmaz.',
+  'protocol.goose.example.simulatedPublication.name': 'Simülasyon yayını',
+  'protocol.goose.example.simulatedPublication.description':
+    'PDU’nun simulation alanı TRUE (çift teyitli, adlandırılır) ve Reserved 1 sıfırdan farklı. Reserved 1’in bit 15’i yalnız tek kamu kaynağında “Simulated” olarak geçtiği için ADLANDIRILMAZ: alan ham gösterilir, uyarı basılır.',
+  'protocol.goose.example.dataSetCountMismatch.name': 'numDatSetEntries uyuşmazlığı',
+  'protocol.goose.example.dataSetCountMismatch.description':
+    'numDatSetEntries 4 diyor ama dataset’te 2 eleman var. Çerçeve yapısal olarak geçerlidir; yalnız uyarı basılır — konfigürasyon ayrışmasının tel üstündeki ilk işareti budur.',
+  'protocol.goose.example.indefiniteLengthBer.name': 'Bozuk BER uzunluğu',
+  'protocol.goose.example.indefiniteLengthBer.description':
+    'Dataset’in ilk elemanı 0x80 uzunluk okteti taşıyor: BER’de “belirsiz uzunluk”, GOOSE/DER’de yasak. Çözücü net hata verir ve okumayı durdurur — sessizce yanlış bir değer basmaz.',
+  'protocol.goose.example.etherTypeNotGoose.name': 'Yanlış EtherType',
+  'protocol.goose.example.etherTypeNotGoose.description':
+    'Kararlı durum örneğiyle aynı gövde, EtherType kasten 0x0800 (IPv4). MAC alanları yine çözülür ama gövdeye dokunulmaz — yanlış EtherType’ta BER yürümek sessiz-yanlış çözümlemenin ta kendisi olurdu.',
+  'protocol.goose.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.goose.example.frameTooShort.description':
+    '16 bayt: Ethernet başlığı var ama 8 baytlık GOOSE başlığı tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
 } as const;
 
 /**

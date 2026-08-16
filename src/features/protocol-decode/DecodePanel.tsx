@@ -61,6 +61,7 @@ const PARSE_ERROR_LABEL_KEYS: Record<ProtocolErrorCode, TranslationKey> = {
   'unsupported-function-code': 'studio.output.parseError.code.unsupportedFunctionCode',
   'start-delimiter-not-found': 'studio.output.parseError.code.startDelimiterNotFound',
   'value-out-of-range': 'studio.output.parseError.code.valueOutOfRange',
+  'unsupported-encoding': 'studio.output.parseError.code.unsupportedEncoding',
   'frame-too-long': 'studio.output.parseError.code.frameTooLong',
   'truncated-frame': 'studio.output.parseError.code.truncatedFrame',
   'circular-length-reference': 'studio.output.parseError.code.circularLengthReference',

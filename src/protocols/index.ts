@@ -162,4 +162,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'ethercat', () =>
     import('./industrial/ethercat/ethercat').then((module) => module.ethercatPlugin),
   );
+  // IEC 61850 GOOSE — dalga 5e: girdi TAM Ethernet çerçevesi (EtherType 0x88B8),
+  // sonra 8 baytlık GOOSE başlığı + BER/TLV kodlu goosePdu. Kayıt id'si katalog
+  // kaydıyla aynı olmak zorunda: `iec-61850` (katalogda ayrı `goose` kaydı YOK).
+  // Motor GOOSE-only; MMS/SCL yok → katalog status'u 'partial' (karar 4).
+  registerOnce(registry, 'iec-61850', () =>
+    import('./industrial/goose/goose').then((module) => module.goosePlugin),
+  );
 }

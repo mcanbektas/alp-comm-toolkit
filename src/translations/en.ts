@@ -655,6 +655,7 @@ export const en: TranslationDictionary = {
   'studio.output.parseError.code.truncatedFrame': 'Truncated frame, the bytes ran out',
   'studio.output.parseError.code.unsupportedFunctionCode': 'Unsupported function code',
   'studio.output.parseError.code.valueOutOfRange': 'Value exceeds uint16 range',
+  'studio.output.parseError.code.unsupportedEncoding': 'Unsupported encoding form',
   'studio.output.parseError.offset': 'Error offset',
   'studio.output.parseError.recoverable': 'Recoverable — parsing can pick up at the next frame.',
   'studio.output.parseError.title': 'The frame could not be parsed',
@@ -2466,4 +2467,105 @@ export const en: TranslationDictionary = {
   'protocol.ethercat.example.frameTooShort.name': 'Frame too short',
   'protocol.ethercat.example.frameTooShort.description':
     '10 bytes: not even the Ethernet header is complete — a ParseFailure (recoverable, the stream may continue).',
+
+  // --- IEC 61850 GOOSE ---
+  'protocol.goose.error.frameTooShort':
+    'The frame is not long enough for the Ethernet header (14 bytes) plus the GOOSE header (8 bytes).',
+  'protocol.goose.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.goose.error.aborted': 'Decoding was cancelled.',
+  'protocol.goose.error.etherTypeNotGoose':
+    'The EtherType is not 0x88B8 — this frame is not GOOSE; the body was left raw and undecoded.',
+  'protocol.goose.error.headerTruncated':
+    'The GOOSE header (APPID + Length + Reserved 1 + Reserved 2, 8 bytes) is incomplete after the EtherType.',
+  'protocol.goose.error.lengthBelowHeader':
+    'The Length field is below 8 — it counts from APPID onwards and therefore includes the header itself, so it can never be smaller.',
+  'protocol.goose.error.apduTruncated':
+    'The APDU promised by the Length field exceeds the bytes available in the buffer; the walk was clamped to what is actually on the wire.',
+  'protocol.goose.error.pduTagNotGoose':
+    'The first APDU tag is not 0x61 (goosePdu) — the body was left raw and undecoded.',
+  'protocol.goose.error.berTruncated':
+    'The buffer (or the enclosing TLV) ended before the BER value was complete.',
+  'protocol.goose.error.berLongFormTag':
+    'Multi-byte (long-form) BER tag: the low five bits are 0x1F. This decoder does not support it and refuses to silently read it as 31 — the field was left raw.',
+  'protocol.goose.error.berIndefiniteLength':
+    'Indefinite length (0x80) exists in BER but is invalid in DER and in GOOSE — the value was not decoded.',
+  'protocol.goose.error.berReservedLengthOctet':
+    'Length octet 0xFF is reserved by X.690; it is not a length.',
+  'protocol.goose.error.berLengthOctetsUnsupported':
+    'The long-form length uses more than four octets, which this decoder does not accept.',
+  'protocol.goose.error.berValueOverflow':
+    'The BER value reaches past its own boundary (the enclosing TLV or the end of the frame).',
+  'protocol.goose.error.berUnexpectedValueLength':
+    'The BER value length does not match its type (for example a BOOLEAN that is not a single octet).',
+  'protocol.goose.warning.destinationNotGooseRange':
+    'The destination MAC is outside the IEC/TC57 GOOSE multicast range (01:0C:CD:01:xx:xx). This is not an error — it is an informational note.',
+  'protocol.goose.warning.reservedNotZero':
+    'A Reserved field is non-zero. Bit 15 is reported as “Simulated” by a single public source but could not be cross-confirmed, so the field is shown raw rather than named. For simulation state rely on the cross-confirmed `simulation` field.',
+  'protocol.goose.warning.gseManagementPdu':
+    'The APDU is a gseMngtPdu (APPLICATION 0), a GOOSE management message. This engine decodes goosePdu only; the body was left raw.',
+  'protocol.goose.warning.unknownPduField':
+    'The goosePdu contains an unrecognised tag — it was not named and is shown raw.',
+  'protocol.goose.warning.missingMandatoryField':
+    'A mandatory goosePdu field is missing (goID, simulation and ndsCom are optional, so their absence raises no warning).',
+  'protocol.goose.warning.valueNotDecodable':
+    'The field tag was recognised but its value is not in the expected form — it was not decoded and is shown raw.',
+  'protocol.goose.warning.nonPrintableString':
+    'A VisibleString field contains bytes outside 0x20-0x7E — it was not rendered as text and is shown raw.',
+  'protocol.goose.warning.timestampLengthUnexpected':
+    'The timestamp is not 8 bytes, so it was not split into second/fraction/quality parts — showing raw bytes beats inventing a time.',
+  'protocol.goose.warning.clockNotTrustworthy':
+    'The TimeQuality byte reports a clock failure or loss of synchronisation — the timestamp is carried but the publisher says it does not trust it.',
+  'protocol.goose.warning.unknownDataType':
+    'The dataset element type tag does not appear in two independent sources — it was not named and is left raw.',
+  'protocol.goose.warning.dataSemanticsNeedScl':
+    'Which Data Attribute a dataset element maps to comes from the SCL definition and cannot be derived from a single frame. Types are named, meanings are not.',
+  'protocol.goose.warning.dataSetCountMismatch':
+    'numDatSetEntries does not match the number of elements in the dataset — publisher and subscriber configurations may have diverged.',
+  'protocol.goose.warning.dataDepthLimit':
+    'The nested dataset depth limit was reached; this level was not descended into (infinite-loop guard).',
+  'protocol.goose.warning.dataElementLimit':
+    'The dataset element limit was reached; the walk was stopped (infinite-loop guard).',
+  'protocol.goose.warning.simulationActive':
+    'The simulation (test) field is TRUE — this publication is a simulation and protection devices normally do not treat it as a real event.',
+  'protocol.goose.warning.needsCommissioning':
+    'ndsCom is TRUE — the GOOSE control block awaits commissioning, so the publication may not carry production data.',
+  'protocol.goose.warning.securityNotDecoded':
+    'The PDU carries the field reserved for a signature or security data. This tool does not decrypt or verify signatures; the field was left raw.',
+  'protocol.goose.warning.paddingNotZero':
+    'The bytes after the APDU are not zero — Ethernet padding was expected.',
+  'protocol.goose.warning.trailingBytes':
+    'Bytes remain after the goosePdu inside the region covered by the Length field — the APDU decoded shorter than declared.',
+  'protocol.goose.summary.publication': '{goId} — stNum {stNum}, sqNum {sqNum}, {entryCount} values',
+  'protocol.goose.summary.management': 'GOOSE management message (APPID {appId})',
+  'protocol.goose.summary.notGoose': 'Not GOOSE (EtherType {etherType})',
+  'protocol.goose.summary.pduUnreadable': 'GOOSE header read, PDU undecodable (APPID {appId})',
+  'protocol.goose.documentation.summary':
+    'IEC 61850 GOOSE: the input is a COMPLETE Ethernet frame — destination/source MAC, optional VLAN tags and EtherType 0x88B8 are decoded, followed by the 8-byte GOOSE header (APPID, Length, Reserved 1, Reserved 2) and the BER/TLV encoded goosePdu. The Length field counts from APPID onwards and does NOT include the Ethernet header. Every PDU field is named and decoded: gocbRef, timeAllowedtoLive, datSet, goID, t (split into SecondSinceEpoch + FractionOfSecond + TimeQuality), stNum, sqNum, simulation, confRev, ndsCom, numDatSetEntries and allData. Dataset elements are decoded shallowly by type tag (boolean, bit-string, integer, unsigned, floating-point, octet-string, visible-string, binary-time, utc-time, array, structure) and nested structures are descended with a depth limit. What is NOT covered, stated plainly: MMS and SCL import are absent in this release (hence the “Partial” badge), stNum/sqNum timelines and retransmission analysis need multiple frames and live outside the engine, dataset element SEMANTICS come from SCL and are not asserted, and signed or encrypted fields are not decoded. Field layouts are cross-confirmed against the Wireshark GOOSE dissector (goose.asn + packet-goose.c) and libIEC61850; no tag that could not be confirmed by two independent sources is named.',
+  'protocol.goose.example.steadyStatePublication.name': 'Steady-state publication',
+  'protocol.goose.example.steadyStatePublication.description':
+    'A typical cyclic GOOSE publication: stNum 1 (state unchanged), sqNum 12 (the 12th repeat of that state), a four-element dataset (boolean, 13-bit bit-string, integer, boolean). The references are as long as in a real installation, so the PDU body passes 127 bytes and the long-form BER length (0x81 LL) is genuinely exercised here.',
+  'protocol.goose.example.vlanTaggedPublication.name': 'VLAN-tagged publication',
+  'protocol.goose.example.vlanTaggedPublication.description':
+    'The same publication with an 802.1Q tag: PCP=4, VID=0 (priority-tagged), the customary form in 61850 installations. The tag adds four bytes so the GOOSE header and every PDU field shift; field offsets remain absolute against the RAW frame.',
+  'protocol.goose.example.stateChangePublication.name': 'State change (stNum incremented)',
+  'protocol.goose.example.stateChangePublication.description':
+    'The first boolean flipped from FALSE to TRUE: stNum goes from 1 to 2 and sqNum resets to 0. The engine does NOT establish that relationship — it looks at one frame; stNum/sqNum timelines are analyzer work. The relationship is only described here.',
+  'protocol.goose.example.structuredDataset.name': 'Nested structure with a measurement',
+  'protocol.goose.example.structuredDataset.description':
+    'The first dataset element is a structure holding an IEEE-754 floating-point value (230.5) and a bit-string; the second element is a utc-time. Nesting is descended with a depth limit, and the measurement SEMANTICS (which Data Attribute) are not named because they come from SCL.',
+  'protocol.goose.example.simulatedPublication.name': 'Simulated publication',
+  'protocol.goose.example.simulatedPublication.description':
+    'The PDU simulation field is TRUE (cross-confirmed, therefore named) and Reserved 1 is non-zero. Bit 15 of Reserved 1 is reported as “Simulated” by only one public source, so it is NOT named: the field is shown raw and a warning is raised.',
+  'protocol.goose.example.dataSetCountMismatch.name': 'numDatSetEntries mismatch',
+  'protocol.goose.example.dataSetCountMismatch.description':
+    'numDatSetEntries claims 4 but the dataset holds 2 elements. The frame is structurally valid, so only a warning is raised — this is the first on-the-wire sign of a configuration mismatch.',
+  'protocol.goose.example.indefiniteLengthBer.name': 'Malformed BER length',
+  'protocol.goose.example.indefiniteLengthBer.description':
+    'The first dataset element carries a 0x80 length octet: “indefinite length” in BER, forbidden in GOOSE/DER. The decoder raises an explicit error and stops reading rather than silently printing a wrong value.',
+  'protocol.goose.example.etherTypeNotGoose.name': 'Wrong EtherType',
+  'protocol.goose.example.etherTypeNotGoose.description':
+    'The same body as the steady-state example with the EtherType deliberately set to 0x0800 (IPv4). The MAC fields are still decoded but the body is left alone — walking BER under the wrong EtherType would be silently wrong decoding.',
+  'protocol.goose.example.frameTooShort.name': 'Frame too short',
+  'protocol.goose.example.frameTooShort.description':
+    '16 bytes: the Ethernet header is present but the 8-byte GOOSE header is incomplete — a ParseFailure (recoverable, the stream may continue).',
 };
