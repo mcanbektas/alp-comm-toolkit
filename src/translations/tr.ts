@@ -2329,6 +2329,74 @@ export const tr = {
   'protocol.iec104.example.lengthMismatch.name': 'Length uyuşmazlığı',
   'protocol.iec104.example.lengthMismatch.description':
     'Length=10 → 12 baytlık bir çerçeve vaat eder ama tampon yalnız 6 bayt — length-mismatch ile ParseFailure (modbusTcp emsali, kaydedilebilir).',
+
+  // --- M-Bus ---
+  'protocol.mbus.error.emptyFrame': 'Tampon boş — hiçbir çerçeve sınıfı okunamaz.',
+  'protocol.mbus.error.unrecognizedFrameClass':
+    'İlk bayt dört çerçeve sınıfından (0xE5/0x10/0x68) hiçbirine uymuyor.',
+  'protocol.mbus.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.mbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mbus.error.shortFrameTruncated': 'Short Frame sabit 5 bayt uzunluğa ulaşmıyor.',
+  'protocol.mbus.error.longFrameHeaderTruncated':
+    'Control/Long Frame başlığı (Start+L+L+Start, 4 bayt) için yeterli bayt yok.',
+  'protocol.mbus.error.lengthCopiesMismatch':
+    'L alanının iki kopyası birbirini tutmuyor — ilk kopya baz alınarak devam edildi.',
+  'protocol.mbus.error.secondStartInvalid': 'İkinci start baytı 0x68 değil.',
+  'protocol.mbus.error.stopByteInvalid': 'Stop baytı 0x16 değil.',
+  'protocol.mbus.error.checksumMismatch':
+    'Checksum (8-bit aritmetik toplam, mod 256) tutmuyor.',
+  'protocol.mbus.error.bodyTruncated':
+    'L alanının vaat ettiği toplam çerçeve uzunluğu tampondaki bayt sayısını aşıyor.',
+  'protocol.mbus.error.fixedHeaderTruncated':
+    'Fixed Data Header (12 bayt: Identification/Manufacturer/Version/Medium/Access No/Status/Signature) için yeterli bayt yok.',
+  'protocol.mbus.error.recordTruncated': 'Veri kaydı (DIF/DIFE/VIF/VIFE/DATA) yarıda kesildi.',
+  'protocol.mbus.warning.unknownCFunction':
+    'C Field fonksiyon kodu dar ad kümesinde yok (SND_NKE/SND_UD/REQ_UD2/RSP_UD dışında) — ham gösteriliyor.',
+  'protocol.mbus.warning.unknownCi': 'CI Field dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.mbus.warning.ciDataNotDecoded':
+    'CI Field adlandırıldı ama user data bu dalgada çözülmüyor (yalnız CI=0x72 yolu çözülür) — ham gösteriliyor.',
+  'protocol.mbus.warning.trailingBytes': 'Çerçeve sınırından sonra fazladan bayt var.',
+  'protocol.mbus.warning.invalidBcd':
+    'BCD nibble’ları 0-9 aralığının dışında — alan çözülemedi, ham bayt gösteriliyor.',
+  'protocol.mbus.warning.manufacturerSpecificBlock':
+    'DIF=0x0F/0x1F: kalan veri üretici-özel — bu dalgada çözülmüyor, ham gösteriliyor.',
+  'protocol.mbus.warning.specialFunctionDif':
+    'DIF Special Functions kodu (alt nibble 0xF) tanınan alt kümede yok — kalan veri ham gösteriliyor.',
+  'protocol.mbus.warning.unsupportedVifString':
+    'VIF=0x7C: gerçek birim adı ardından gelen ASCII string’te — bu dalgada çözülmüyor, kalan veri ham gösteriliyor.',
+  'protocol.mbus.warning.unknownLvarLength':
+    'LVAR uzunluk baytı ayrılmış (0xFB-0xFF) aralıkta — gerçek uzunluk bilinemiyor, kalan veri ham gösteriliyor.',
+  'protocol.mbus.warning.vifeNotDecoded': 'VIFE uzantısı ham gösteriliyor — bu dalgada çözülmüyor.',
+  'protocol.mbus.warning.unknownMedium': 'Medium dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.mbus.warning.unnamedVif': 'VIF dar ad kümesinde yok — veri yine çözülür, birim adı verilmez.',
+  'protocol.mbus.summary.singleCharacter': 'Tek karakterlik onay (ACK)',
+  'protocol.mbus.summary.shortFrame': 'Short Frame — C/A alanları çözüldü, user data yok',
+  'protocol.mbus.summary.controlFrame': 'Control Frame — C/A/CI alanları çözüldü, user data yok',
+  'protocol.mbus.summary.longFrame': 'Long Frame — C/A/CI ve user data çözüldü',
+  'protocol.mbus.documentation.summary':
+    'M-Bus (EN 13757, kablolu): dört çerçeve sınıfı (Single Character/Short/Control/Long Frame), sum8Checksum ile checksum doğrulaması, C Field (DIR/FCB-ACD/FCV-DFC bit bit + SND_NKE/SND_UD/REQ_UD2/RSP_UD dar ad kümesi), A Field (0/253/254/255 özel adresler) ve CI Field (dar ad kümesi) çözülür. CI=0x72 (Variable Data Respond, Mode 1) yolunda Fixed Data Header (identification/manufacturer/medium…) ve DIF/DIFE/VIF/VIFE/DATA kayıt zinciri (enerji/hacim/kütle/güç/sıcaklık dar VIF kümesiyle ölçeklenmiş mühendislik değerine çevrilir) tam çözülür; diğer CI yolları (Fixed Data Structure dahil) ham gösterilir. Alan adları libmbus (rSCADA) dokümantasyonu ve m-bus.com "The M-Bus: A Documentation" ile çapraz teyitlidir.',
+  'protocol.mbus.example.singleCharacterAck.name': 'Single Character: ACK',
+  'protocol.mbus.example.singleCharacterAck.description':
+    'Tek baytlık onay çerçevesi (0xE5) — SND_NKE/SND_UD/REQ_UD2’nin başarılı alımının onayı.',
+  'protocol.mbus.example.shortFrameReqUd2.name': 'Short Frame: REQ_UD2',
+  'protocol.mbus.example.shortFrameReqUd2.description':
+    'Master→slave veri isteği (Class 2). C=0x5B (calling, FCV=1, REQ_UD2), adres 1, checksum ve stop doğru.',
+  'protocol.mbus.example.controlFrameSndNke.name': 'Control Frame: SND_NKE',
+  'protocol.mbus.example.controlFrameSndNke.description':
+    'Link durumunu sıfırlama (SND_NKE), user data yok (L=3). CI baytı yapısal olarak var ama bu senaryoda tanınmayan bir değer taşıyor — uyarı yolu.',
+  'protocol.mbus.example.longFrameRspUdVariableData.name':
+    'Long Frame: RSP_UD, değişken veri yapısı (3 kayıt)',
+  'protocol.mbus.example.longFrameRspUdVariableData.description':
+    'Kamstrup (KAM) üretici kodlu bir ısı sayacı yanıtı: Fixed Data Header + Energy (123456 Wh), Volume (12565 → 12,565 m³, m-bus.com’un kendi örneğiyle aynı DIF/VIF/veri baytları) ve Flow Temperature (235 → 23,5 °C) kayıtları.',
+  'protocol.mbus.example.checksumMismatch.name': 'Checksum hatası',
+  'protocol.mbus.example.checksumMismatch.description':
+    'REQ_UD2 örneğiyle aynı gövde, checksum baytı kasten 0x00 — checksum-mismatch hata yolu.',
+  'protocol.mbus.example.lengthCopiesMismatch.name': 'L kopyaları uyuşmazlığı',
+  'protocol.mbus.example.lengthCopiesMismatch.description':
+    'SND_NKE örneğiyle aynı gövde, ikinci L kopyası kasten farklı (0x03 → 0x04) — length-mismatch hata yolu, ilk kopya baz alınarak yine de çözülür.',
+  'protocol.mbus.example.unrecognizedCi.name': 'Tanınmayan CI',
+  'protocol.mbus.example.unrecognizedCi.description':
+    'RSP_UD, CI=0x99 dar ad kümesinde yok — user data ham gösterilir, yalnız uyarı basılır (hata değil).',
 } as const;
 
 /**

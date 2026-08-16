@@ -149,4 +149,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iec-60870-5-104', () =>
     import('./industrial/iec104/iec104').then((module) => module.iec104Plugin),
   );
+  // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
+  // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
+  // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;
+  // building-automation'daki M-Bus kaydı alias'tır (kendi pluginId'si YOK).
+  registerOnce(registry, 'm-bus', () =>
+    import('./industrial/mbus/mbus').then((module) => module.mbusPlugin),
+  );
 }

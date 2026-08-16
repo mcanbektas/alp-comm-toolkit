@@ -542,7 +542,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Wired EN 13757 meter bus whose long-frame data records expose energy, volume, flow and temperature values with unit, tariff and storage semantics.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'm-bus',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Meter Browser',

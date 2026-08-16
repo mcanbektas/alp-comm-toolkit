@@ -2329,4 +2329,72 @@ export const en: TranslationDictionary = {
   'protocol.iec104.example.lengthMismatch.name': 'Length mismatch',
   'protocol.iec104.example.lengthMismatch.description':
     'Length=10 promises a 12-byte frame but the buffer is only 6 bytes — a length-mismatch ParseFailure (modbusTcp precedent, recoverable).',
+
+  // --- M-Bus ---
+  'protocol.mbus.error.emptyFrame': 'Buffer is empty — no frame class can be read.',
+  'protocol.mbus.error.unrecognizedFrameClass':
+    'The first byte does not match any of the four frame classes (0xE5/0x10/0x68).',
+  'protocol.mbus.error.frameTooLong': 'Frame length exceeds the configured maximum frame length.',
+  'protocol.mbus.error.aborted': 'Parsing was aborted.',
+  'protocol.mbus.error.shortFrameTruncated': 'Short Frame does not reach the fixed 5-byte length.',
+  'protocol.mbus.error.longFrameHeaderTruncated':
+    'Not enough bytes remain for the Control/Long Frame header (Start+L+L+Start, 4 bytes).',
+  'protocol.mbus.error.lengthCopiesMismatch':
+    "The two copies of the L field disagree — the first copy was used to continue decoding.",
+  'protocol.mbus.error.secondStartInvalid': 'The second start byte is not 0x68.',
+  'protocol.mbus.error.stopByteInvalid': 'The stop byte is not 0x16.',
+  'protocol.mbus.error.checksumMismatch': 'Checksum (8-bit arithmetic sum, mod 256) does not match.',
+  'protocol.mbus.error.bodyTruncated':
+    'The total frame length promised by L exceeds the number of bytes available in the buffer.',
+  'protocol.mbus.error.fixedHeaderTruncated':
+    'Not enough bytes remain for the Fixed Data Header (12 bytes: Identification/Manufacturer/Version/Medium/Access No/Status/Signature).',
+  'protocol.mbus.error.recordTruncated': 'A data record (DIF/DIFE/VIF/VIFE/DATA) was cut off mid-way.',
+  'protocol.mbus.warning.unknownCFunction':
+    'The C Field function code is not in the narrow name set (outside SND_NKE/SND_UD/REQ_UD2/RSP_UD) — shown raw.',
+  'protocol.mbus.warning.unknownCi': 'CI Field is not in the narrow name set — shown raw.',
+  'protocol.mbus.warning.ciDataNotDecoded':
+    'The CI Field was named, but its user data is not decoded in this wave (only the CI=0x72 path is decoded) — shown raw.',
+  'protocol.mbus.warning.trailingBytes': 'There are extra bytes past the frame boundary.',
+  'protocol.mbus.warning.invalidBcd':
+    'BCD nibbles fall outside the 0-9 range — the field could not be decoded, raw bytes are shown instead.',
+  'protocol.mbus.warning.manufacturerSpecificBlock':
+    'DIF=0x0F/0x1F: the remaining data is manufacturer-specific — not decoded in this wave, shown raw.',
+  'protocol.mbus.warning.specialFunctionDif':
+    'A DIF Special Functions code (low nibble 0xF) is not in the recognized subset — the remaining data is shown raw.',
+  'protocol.mbus.warning.unsupportedVifString':
+    'VIF=0x7C: the real unit name follows as an ASCII string — not decoded in this wave, the remaining data is shown raw.',
+  'protocol.mbus.warning.unknownLvarLength':
+    'The LVAR length byte falls in the reserved range (0xFB-0xFF) — the real length is unknowable, the remaining data is shown raw.',
+  'protocol.mbus.warning.vifeNotDecoded': 'The VIFE extension is shown raw — not decoded in this wave.',
+  'protocol.mbus.warning.unknownMedium': 'Medium is not in the narrow name set — shown raw.',
+  'protocol.mbus.warning.unnamedVif':
+    'VIF is not in the narrow name set — the data is still decoded, but no unit name is given.',
+  'protocol.mbus.summary.singleCharacter': 'Single-character acknowledgement (ACK)',
+  'protocol.mbus.summary.shortFrame': 'Short Frame — C/A fields decoded, no user data',
+  'protocol.mbus.summary.controlFrame': 'Control Frame — C/A/CI fields decoded, no user data',
+  'protocol.mbus.summary.longFrame': 'Long Frame — C/A/CI and user data decoded',
+  'protocol.mbus.documentation.summary':
+    'M-Bus (EN 13757, wired): decodes the four frame classes (Single Character/Short/Control/Long Frame), validates the checksum with sum8Checksum, decodes the C Field (DIR/FCB-ACD/FCV-DFC bit by bit plus the SND_NKE/SND_UD/REQ_UD2/RSP_UD narrow name set), the A Field (the special addresses 0/253/254/255) and the CI Field (narrow name set). On the CI=0x72 path (Variable Data Respond, Mode 1) the Fixed Data Header (identification/manufacturer/medium…) and the DIF/DIFE/VIF/VIFE/DATA record chain are fully decoded (energy/volume/mass/power/temperature narrow VIF set turned into a scaled engineering value); every other CI path — including the Fixed Data Structure — is shown raw. Field names are cross-checked against libmbus (rSCADA) documentation and m-bus.com\'s "The M-Bus: A Documentation".',
+  'protocol.mbus.example.singleCharacterAck.name': 'Single Character: ACK',
+  'protocol.mbus.example.singleCharacterAck.description':
+    'A single-byte acknowledgement frame (0xE5) — confirms successful receipt of SND_NKE/SND_UD/REQ_UD2.',
+  'protocol.mbus.example.shortFrameReqUd2.name': 'Short Frame: REQ_UD2',
+  'protocol.mbus.example.shortFrameReqUd2.description':
+    "A master-to-slave data request (Class 2). C=0x5B (calling, FCV=1, REQ_UD2), address 1, checksum and stop both correct.",
+  'protocol.mbus.example.controlFrameSndNke.name': 'Control Frame: SND_NKE',
+  'protocol.mbus.example.controlFrameSndNke.description':
+    'A link-state reset (SND_NKE), no user data (L=3). The CI byte is structurally present but carries an unrecognized value in this scenario — the warning path.',
+  'protocol.mbus.example.longFrameRspUdVariableData.name':
+    'Long Frame: RSP_UD, variable data structure (3 records)',
+  'protocol.mbus.example.longFrameRspUdVariableData.description':
+    'A heat meter response with manufacturer code KAM (Kamstrup): a Fixed Data Header plus Energy (123456 Wh), Volume (12565 → 12.565 m³, the same DIF/VIF/data bytes as m-bus.com\'s own worked example) and Flow Temperature (235 → 23.5°C) records.',
+  'protocol.mbus.example.checksumMismatch.name': 'Checksum error',
+  'protocol.mbus.example.checksumMismatch.description':
+    'Same body as the REQ_UD2 example, checksum byte deliberately set to 0x00 — the checksum-mismatch error path.',
+  'protocol.mbus.example.lengthCopiesMismatch.name': 'Length copies mismatch',
+  'protocol.mbus.example.lengthCopiesMismatch.description':
+    'Same body as the SND_NKE example, second L copy deliberately different (0x03 → 0x04) — the length-mismatch error path; still decoded using the first copy.',
+  'protocol.mbus.example.unrecognizedCi.name': 'Unrecognized CI',
+  'protocol.mbus.example.unrecognizedCi.description':
+    'RSP_UD, CI=0x99 is not in the narrow name set — the user data is shown raw, only a warning is raised (not an error).',
 };
