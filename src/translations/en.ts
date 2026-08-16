@@ -1957,7 +1957,7 @@ export const en: TranslationDictionary = {
   'protocol.ethernet.warning.etherTypeHigherLayer':
     'EtherType names the upper-layer protocol; the payload is decoded on that protocol’s own page (engines do not chain).',
   'protocol.ethernet.warning.unknownEtherType':
-    'The EtherType value is not in the narrow naming set (IPv4/ARP/IPv6); the payload stays raw.',
+    'The EtherType value is not in the narrow naming set (IPv4/ARP/IPv6/EtherCAT); the payload stays raw.',
   'protocol.ethernet.warning.undefinedTypeLengthRange':
     'The value falls in the 1501-1535 range: it is defined as neither EtherType nor an IEEE 802.3 Length — decoding still continues.',
   'protocol.ethernet.warning.tooManyVlanTags':
@@ -2397,4 +2397,73 @@ export const en: TranslationDictionary = {
   'protocol.mbus.example.unrecognizedCi.name': 'Unrecognized CI',
   'protocol.mbus.example.unrecognizedCi.description':
     'RSP_UD, CI=0x99 is not in the narrow name set — the user data is shown raw, only a warning is raised (not an error).',
+
+  // --- EtherCAT ---
+  'protocol.ethercat.error.frameTooShort':
+    'The frame is shorter than the Ethernet header (14 bytes) plus the EtherCAT header (2 bytes).',
+  'protocol.ethercat.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.ethercat.error.aborted': 'Decoding was cancelled.',
+  'protocol.ethercat.error.etherTypeNotEtherCat':
+    'The EtherType is not 0x88A4 — this frame is not EtherCAT; the body was left raw and not decoded.',
+  'protocol.ethercat.error.headerTruncated':
+    'The EtherCAT header (2 bytes) is not complete after the EtherType field.',
+  'protocol.ethercat.error.datagramRegionTruncated':
+    'The datagram region promised by the EtherCAT Length field exceeds the bytes available in the buffer.',
+  'protocol.ethercat.error.datagramHeaderTruncated':
+    'Not enough bytes for a datagram header (10 bytes: Cmd/Idx/Address/Len/IRQ).',
+  'protocol.ethercat.error.datagramBodyTruncated':
+    'The data promised by the datagram Len field plus the Working Counter (2 bytes) does not fit in the region.',
+  'protocol.ethercat.warning.frameReservedBitSet':
+    'The reserved bit (bit 11) of the EtherCAT header is not zero — a conforming frame must keep it zero.',
+  'protocol.ethercat.warning.nonCommandType':
+    'The EtherCAT Type field is not 1 (commands/datagrams); the body was not decoded as a datagram chain and is shown raw.',
+  'protocol.ethercat.warning.unknownCommand':
+    'The command code is not in the cross-verified set (NOP/APRD…FRMW, 0x00-0x0E) — it is left unnamed and the address field stays raw instead of being split.',
+  'protocol.ethercat.warning.datagramReservedBitsSet':
+    'The reserved bits (bits 11-13) of the datagram length word are not zero.',
+  'protocol.ethercat.warning.processDataNeedsConfiguration':
+    'The meaning of the datagram data depends on the slave configuration (PDO mapping / ESC register map); it cannot be derived from a single frame, so it stays raw.',
+  'protocol.ethercat.warning.workingCounterNotVerifiable':
+    'The expected Working Counter value depends on the topology (how many slaves processed the datagram) and cannot be computed from a single frame — the value is shown as is, with no pass/fail claim.',
+  'protocol.ethercat.warning.declaredLengthMismatch':
+    'The EtherCAT Length field disagrees with the number of bytes the datagram chain actually consumed.',
+  'protocol.ethercat.warning.moreFlagWithoutRoom':
+    'The last datagram sets the “More” bit, but there is no room for another datagram in the region — the chain was stopped here.',
+  'protocol.ethercat.warning.datagramLimitReached':
+    'The datagram count reached its upper bound; the chain walk was stopped as an infinite-loop guard.',
+  'protocol.ethercat.warning.paddingNotZero':
+    'The bytes after the datagram region are not zero — Ethernet padding was expected.',
+  'protocol.ethercat.summary.commandFrame':
+    '{datagramCount} datagram(s), first command {firstCommand}',
+  'protocol.ethercat.summary.nonCommandType': 'EtherCAT Type {type} — body raw',
+  'protocol.ethercat.summary.notEtherCat': 'Not EtherCAT (EtherType {etherType})',
+  'protocol.ethercat.documentation.summary':
+    'EtherCAT (ETG.1000 / IEC 61158): the input is a COMPLETE Ethernet frame — DST/SRC MAC, optional VLAN tags and EtherType 0x88A4 are decoded, followed by the little-endian EtherCAT header (11-bit Length, reserved, 4-bit Type); when Type=1 the datagram chain is walked to its end via the “More” bit. Every datagram exposes Cmd (NOP/APRD/APWR/APRW/FPRD/FPWR/FPRW/BRD/BWR/BRW/LRD/LWR/LRW/ARMW/FRMW), Idx, an address split according to the addressing mode (a single 32-bit logical address for the logical commands, ADP + ADO otherwise), the 11-bit Len plus the Reserved/Circulating/More bits, IRQ, and the Working Counter that follows the data. The datagram data stays raw: its meaning depends on the slave configuration. Field layouts are cross-verified against Wireshark’s Beckhoff-authored EtherCAT plugin, the IgH EtherCAT Master and SOEM; codes that could not be confirmed (e.g. 0xFF) are left unnamed.',
+  'protocol.ethercat.example.lrwCyclicProcessData.name': 'LRW: cyclic process data',
+  'protocol.ethercat.example.lrwCyclicProcessData.description':
+    'The most common frame: a single LRW datagram at logical address 0x00010000 carrying 4 bytes of process data, Working Counter 3. The frame is zero-padded to 60 bytes as it would be on the wire — the padding is shown as its own field.',
+  'protocol.ethercat.example.fprdConfiguredAddressRead.name': 'FPRD: configured address read',
+  'protocol.ethercat.example.fprdConfiguredAddressRead.description':
+    'Reads 2 bytes from register 0x0130 of the slave at configured station address 0x03E9. The address field is split into ADP + ADO here (this is where it differs from the logical commands), Working Counter 1.',
+  'protocol.ethercat.example.brdStartupScan.name': 'BRD: startup scan',
+  'protocol.ethercat.example.brdStartupScan.description':
+    'A broadcast read — how the number of slaves is counted at startup. The Working Counter increments for every slave that processed the datagram (3 here), but its expected value cannot be computed without topology knowledge.',
+  'protocol.ethercat.example.multiDatagramChain.name': 'Chain: two datagrams (More=1)',
+  'protocol.ethercat.example.multiDatagramChain.description':
+    'Two datagrams in one frame: the first length word is 0x8002 (Len=2, More=1), the second is an LWR that closes the chain with More=0. The chain walk and two separate Working Counters are visible here.',
+  'protocol.ethercat.example.unknownCommand.name': 'Unconfirmed command',
+  'protocol.ethercat.example.unknownCommand.description':
+    'Command 0xFF does not appear in all three sources — it is left unnamed, and because the address split is unknown too, its 4 bytes stay raw (no guessing). The frame is still valid; only a warning is raised.',
+  'protocol.ethercat.example.nonCommandType.name': 'Type ≠ 1 (Mailbox)',
+  'protocol.ethercat.example.nonCommandType.description':
+    'The EtherCAT Type field is 5 (Mailbox): the body is not a datagram chain, and this engine does not attempt to decode it — it is shown raw with a warning.',
+  'protocol.ethercat.example.etherTypeNotEtherCat.name': 'Wrong EtherType',
+  'protocol.ethercat.example.etherTypeNotEtherCat.description':
+    'Same body as the LRW example, EtherType deliberately set to 0x0800 (IPv4). The MAC fields are still decoded but the body is left alone — decoding datagrams under the wrong EtherType would be silently wrong decoding.',
+  'protocol.ethercat.example.datagramTruncated.name': 'Truncated datagram region',
+  'protocol.ethercat.example.datagramTruncated.description':
+    'The EtherCAT Length promises a 16-byte region but only 6 bytes are on the wire — the truncated-frame error path.',
+  'protocol.ethercat.example.frameTooShort.name': 'Frame too short',
+  'protocol.ethercat.example.frameTooShort.description':
+    '10 bytes: not even the Ethernet header is complete — a ParseFailure (recoverable, the stream may continue).',
 };

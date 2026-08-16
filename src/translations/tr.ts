@@ -1956,7 +1956,7 @@ export const tr = {
   'protocol.ethernet.warning.etherTypeHigherLayer':
     'EtherType üst katman protokolünü adlandırır; payload bu protokolün kendi sayfasında çözülür (motorlar zincir kurmaz).',
   'protocol.ethernet.warning.unknownEtherType':
-    'EtherType değeri dar adlandırma kümesinde (IPv4/ARP/IPv6) yok; payload ham kalır.',
+    'EtherType değeri dar adlandırma kümesinde (IPv4/ARP/IPv6/EtherCAT) yok; payload ham kalır.',
   'protocol.ethernet.warning.undefinedTypeLengthRange':
     'Değer 1501-1535 aralığında: ne EtherType ne IEEE 802.3 Length olarak tanımlı; çözüm yine de sürer.',
   'protocol.ethernet.warning.tooManyVlanTags':
@@ -2397,6 +2397,75 @@ export const tr = {
   'protocol.mbus.example.unrecognizedCi.name': 'Tanınmayan CI',
   'protocol.mbus.example.unrecognizedCi.description':
     'RSP_UD, CI=0x99 dar ad kümesinde yok — user data ham gösterilir, yalnız uyarı basılır (hata değil).',
+
+  // --- EtherCAT ---
+  'protocol.ethercat.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + EtherCAT başlığı (2 bayt) kadar uzun değil.',
+  'protocol.ethercat.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ethercat.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ethercat.error.etherTypeNotEtherCat':
+    'EtherType 0x88A4 değil — bu çerçeve EtherCAT değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.ethercat.error.headerTruncated':
+    'EtherType’tan sonra EtherCAT başlığının (2 bayt) tamamı gelmedi.',
+  'protocol.ethercat.error.datagramRegionTruncated':
+    'EtherCAT Length alanının vaat ettiği datagram bölgesi tampondaki bayt sayısını aşıyor.',
+  'protocol.ethercat.error.datagramHeaderTruncated':
+    'Datagram başlığı (10 bayt: Cmd/Idx/Address/Len/IRQ) için yeterli bayt yok.',
+  'protocol.ethercat.error.datagramBodyTruncated':
+    'Datagram Len alanının vaat ettiği veri + Working Counter (2 bayt) bölgeye sığmıyor.',
+  'protocol.ethercat.warning.frameReservedBitSet':
+    'EtherCAT başlığının reserved biti (bit 11) sıfır değil — uyumlu bir çerçevede sıfır olmalıdır.',
+  'protocol.ethercat.warning.nonCommandType':
+    'EtherCAT Type alanı 1 (komut/datagram) değil; gövde datagram zinciri olarak çözülmedi, ham gösteriliyor.',
+  'protocol.ethercat.warning.unknownCommand':
+    'Komut kodu çapraz teyitli kümede (NOP/APRD…FRMW, 0x00-0x0E) yok — adı verilmez ve adres alanı bölünmeden ham bırakılır.',
+  'protocol.ethercat.warning.datagramReservedBitsSet':
+    'Datagram uzunluk sözcüğünün reserved bitleri (bit 11-13) sıfır değil.',
+  'protocol.ethercat.warning.processDataNeedsConfiguration':
+    'Datagram verisinin anlamı slave konfigürasyonuna (PDO eşlemesi / ESC register haritası) bağlıdır; tek çerçeveden çıkarılamaz, ham gösteriliyor.',
+  'protocol.ethercat.warning.workingCounterNotVerifiable':
+    'Beklenen Working Counter değeri topolojiye bağlıdır (kaç slave datagramı işledi) ve tek çerçeveden hesaplanamaz — değer olduğu gibi gösterilir, doğru/yanlış iddiası basılmaz.',
+  'protocol.ethercat.warning.declaredLengthMismatch':
+    'EtherCAT Length alanı ile datagram zincirinin gerçekte tükettiği bayt sayısı uyuşmuyor.',
+  'protocol.ethercat.warning.moreFlagWithoutRoom':
+    'Son datagramın “More” biti 1 ama bölgede bir datagram daha için yer yok — zincir burada durduruldu.',
+  'protocol.ethercat.warning.datagramLimitReached':
+    'Datagram sayısı üst sınıra ulaştı; zincir yürüyüşü sonsuz döngüye karşı durduruldu.',
+  'protocol.ethercat.warning.paddingNotZero':
+    'Datagram bölgesinden sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.ethercat.summary.commandFrame':
+    '{datagramCount} datagram, ilk komut {firstCommand}',
+  'protocol.ethercat.summary.nonCommandType': 'EtherCAT Type {type} — gövde ham',
+  'protocol.ethercat.summary.notEtherCat': 'EtherCAT değil (EtherType {etherType})',
+  'protocol.ethercat.documentation.summary':
+    'EtherCAT (ETG.1000 / IEC 61158): girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x88A4 çözülür, ardından little-endian EtherCAT başlığı (11-bit Length, reserved, 4-bit Type) ve Type=1 ise datagram zinciri “More” bitiyle sonuna kadar yürünür. Her datagramda Cmd (NOP/APRD/APWR/APRW/FPRD/FPWR/FPRW/BRD/BWR/BRW/LRD/LWR/LRW/ARMW/FRMW), Idx, adresleme kipine göre bölünmüş adres (logical komutlarda tek 32-bit logical address, diğerlerinde ADP + ADO), 11-bit Len + Reserved/Circulating/More bitleri, IRQ ve veriden SONRA gelen Working Counter adlandırılır. Datagram verisi ham kalır: anlamı slave konfigürasyonuna bağlıdır. Alan düzenleri Wireshark’ın Beckhoff imzalı EtherCAT eklentisi, IgH EtherCAT Master ve SOEM ile çapraz teyitlidir; teyit edilemeyen kodlar (ör. 0xFF) adlandırılmaz.',
+  'protocol.ethercat.example.lrwCyclicProcessData.name': 'LRW: döngüsel process data',
+  'protocol.ethercat.example.lrwCyclicProcessData.description':
+    'En yaygın çerçeve: tek LRW datagramı, logical address 0x00010000, 4 bayt process data, Working Counter 3. Çerçeve gerçek telde olduğu gibi 60 bayta sıfırla dolgulanmış — dolgu ayrı alan olarak gösterilir.',
+  'protocol.ethercat.example.fprdConfiguredAddressRead.name': 'FPRD: configured address okuma',
+  'protocol.ethercat.example.fprdConfiguredAddressRead.description':
+    'Configured station address 0x03E9’daki slave’in 0x0130 register’ından 2 bayt okuma. Adres alanı ADP + ADO olarak İKİYE bölünür (logical komutlardan farkı burada görülür), Working Counter 1.',
+  'protocol.ethercat.example.brdStartupScan.name': 'BRD: açılış taraması',
+  'protocol.ethercat.example.brdStartupScan.description':
+    'Broadcast okuma — açılışta kaç slave olduğunu saymanın yolu. Working Counter datagramı işleyen her slave için artar (burada 3), ama beklenen değeri topoloji bilgisi olmadan hesaplanamaz.',
+  'protocol.ethercat.example.multiDatagramChain.name': 'Zincir: iki datagram (More=1)',
+  'protocol.ethercat.example.multiDatagramChain.description':
+    'Tek çerçevede iki datagram: ilkinin uzunluk sözcüğü 0x8002 (Len=2, More=1), ikincisi LWR ve More=0 ile zinciri kapatır. Zincir yürüyüşü ve iki ayrı Working Counter burada görülür.',
+  'protocol.ethercat.example.unknownCommand.name': 'Teyit edilmemiş komut',
+  'protocol.ethercat.example.unknownCommand.description':
+    'Komut 0xFF üç kaynağın hepsinde birden geçmiyor — adlandırılmaz, adresin nasıl bölüneceği de bilinmediği için 4 bayt ham bırakılır (uydurma yasağı). Çerçeve yine de geçerlidir, yalnız uyarı basılır.',
+  'protocol.ethercat.example.nonCommandType.name': 'Type ≠ 1 (Mailbox)',
+  'protocol.ethercat.example.nonCommandType.description':
+    'EtherCAT Type alanı 5 (Mailbox): gövde datagram zinciri değildir, bu motor çözmeye kalkmaz — ham gösterilir ve uyarı basılır.',
+  'protocol.ethercat.example.etherTypeNotEtherCat.name': 'Yanlış EtherType',
+  'protocol.ethercat.example.etherTypeNotEtherCat.description':
+    'LRW örneğiyle aynı gövde, EtherType kasten 0x0800 (IPv4). MAC alanları yine çözülür ama gövdeye dokunulmaz — yanlış EtherType’ta datagram çözmek sessiz-yanlış çözümlemenin ta kendisi olurdu.',
+  'protocol.ethercat.example.datagramTruncated.name': 'Kesik datagram bölgesi',
+  'protocol.ethercat.example.datagramTruncated.description':
+    'EtherCAT Length 16 baytlık bir bölge vaat ediyor ama telde yalnız 6 bayt var — truncated-frame hata yolu.',
+  'protocol.ethercat.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.ethercat.example.frameTooShort.description':
+    '10 bayt: Ethernet başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
 } as const;
 
 /**

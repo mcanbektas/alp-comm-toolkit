@@ -26,7 +26,9 @@ import { computeNamedCrc } from '@/protocol-core/checksums/crcCatalogue';
 import type { ParsedField, ProtocolError } from '@/protocol-core/types';
 
 export const MAC_LENGTH = 6;
-const TYPE_LENGTH_FIELD_LENGTH = 2;
+/** DST/SRC MAC'ten sonraki tip/uzunluk alanının genişliği — 5d (EtherCAT) bu
+ * alanın ofsetini kendi çerçevesinde hesaplarken de kullanır. */
+export const TYPE_LENGTH_FIELD_LENGTH = 2;
 const TCI_LENGTH = 2;
 const TAG_LENGTH = TYPE_LENGTH_FIELD_LENGTH + TCI_LENGTH;
 /** DST(6) + SRC(6) + tip/uzunluk alanı(2) — VLAN tag'siz asgari başlık. */
@@ -69,11 +71,16 @@ export type EthernetPageKind = 'ethernet-ii' | 'ieee-802-3' | 'vlan-802-1q';
 /** Bu depoda dar tutulan EtherType adlandırma kümesi (spec 25410-25416 + 28.1) —
  * yalnız spec'in doğrudan verdiği dört değerden ÜÇÜ burada isimlendirilir (0x8100
  * VLAN branch'inde ayrıca ele alınır, hiçbir zaman "final" EtherType olarak
- * buraya düşmez). */
+ * buraya düşmez).
+ *
+ * 0x88A4 (EtherCAT) faz 10 dalga 5d'de eklendi: bu depoda motoru OLAN her
+ * EtherType burada ADLANDIRILIR ki `WARN_ETHERTYPE_HIGHER_LAYER` ("kendi
+ * sayfasında çöz") yönlendirmesi çalışsın — zincir yine kurulmaz. */
 const ETHER_TYPE_NAMES: ReadonlyMap<number, string> = new Map([
   [0x0800, 'IPv4'],
   [0x0806, 'ARP'],
   [0x86dd, 'IPv6'],
+  [0x88a4, 'EtherCAT'],
 ]);
 
 export type EthernetFrameMetadata = {
@@ -115,7 +122,9 @@ export function peekTypeOrLengthField(data: Uint8Array): number | undefined {
   return readUint16BE(data, MAC_LENGTH * 2);
 }
 
-function formatMac(bytes: Uint8Array): string {
+/** Dışa açık: EtherCAT/GOOSE gibi "çerçevenin KENDİSİ olan" protokoller de aynı
+ * MAC biçimini basmalı — ikinci bir formatlayıcı iki farklı gösterim demektir. */
+export function formatMac(bytes: Uint8Array): string {
   return Array.from(bytes, (byte) =>
     byte.toString(HEX_RADIX).toUpperCase().padStart(HEX_DIGITS_PER_BYTE, '0'),
   ).join(':');
@@ -123,7 +132,7 @@ function formatMac(bytes: Uint8Array): string {
 
 /** Spec "Destination türü" (25378 civarı): Broadcast özel durumu, aksi hâlde
  * I/G bitine (ilk baytın LSB'i) bakılır. Yalnız DESTINATION için istenir. */
-function classifyDestinationMac(bytes: Uint8Array): string {
+export function classifyDestinationMac(bytes: Uint8Array): string {
   const isBroadcast = bytes.length === MAC_LENGTH && bytes.every((byte) => byte === 0xff);
   if (isBroadcast) return 'Broadcast';
   return (byteAt(bytes, 0) & 0x01) === 1 ? 'Multicast' : 'Unicast';
@@ -167,7 +176,7 @@ function buildFcsField(data: Uint8Array, warnings: string[]): ParsedField {
   };
 }
 
-interface TypeLengthOutcome {
+export interface TypeLengthOutcome {
   readonly cursor: number;
   readonly finalValue: number | undefined;
   readonly vlanTagCount: number;
@@ -178,8 +187,12 @@ interface TypeLengthOutcome {
  * DST/SRC MAC'ten SONRAKİ 2 baytlık alanı çözer: EtherType / Length / tanımsız
  * aralık ayrımı ve VLAN TCI döngüsü burada yaşar. `fields`/`warnings`/`errors`
  * mutable out-param'dır (doip.ts'teki `decode*` fonksiyonlarının deseni).
+ *
+ * Dışa açık: EtherCAT (5d) Ethernet çerçevesinin KENDİSİNİ çözer ve VLAN'lı
+ * varyantı da desteklemek zorunda — TPID/TCI yürüyüşünü ikinci kez yazmak iki
+ * ayrı VLAN davranışı demek olurdu.
  */
-function walkTypeLengthChain(
+export function walkTypeLengthChain(
   data: Uint8Array,
   cursor: number,
   fields: ParsedField[],

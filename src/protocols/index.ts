@@ -156,4 +156,10 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'm-bus', () =>
     import('./industrial/mbus/mbus').then((module) => module.mbusPlugin),
   );
+  // EtherCAT — dalga 5d: girdi TAM Ethernet çerçevesi (EtherType 0x88A4), sonra
+  // EtherCAT başlığı + datagram zinciri + Working Counter (bkz. ethercat.ts
+  // dosya başı: bu bir katman zinciri DEĞİL, çerçevenin kendisi).
+  registerOnce(registry, 'ethercat', () =>
+    import('./industrial/ethercat/ethercat').then((module) => module.ethercatPlugin),
+  );
 }

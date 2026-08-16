@@ -265,7 +265,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'On-the-fly Ethernet fieldbus (EtherType 0x88A4) in which one frame carries many datagrams processed by slaves as it passes, tracked by the working counter.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ethercat',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Ethernet Frame',
