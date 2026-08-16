@@ -677,7 +677,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Layered SCADA protocol for electric and water utilities using object groups and variations, event classes, unsolicited responses and internal indication flags.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dnp3',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Data Link',

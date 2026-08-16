@@ -139,4 +139,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'coap', () =>
     import('./network/coap/coap').then((module) => module.coapPlugin),
   );
+  // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
+  // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
+  registerOnce(registry, 'dnp3', () =>
+    import('./industrial/dnp3/dnp3').then((module) => module.dnp3Plugin),
+  );
 }

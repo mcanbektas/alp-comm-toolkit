@@ -2221,6 +2221,60 @@ export const tr = {
   'protocol.coap.example.optionNibbleReserved.name': 'Option nibble’ı marker dışı 15 (hata yolu)',
   'protocol.coap.example.optionNibbleReserved.description':
     'Option baytı 0xF0: delta nibble’ı 15 ama bayt tam 0xFF değil — "message format error".',
+
+  // --- DNP3 ---
+  'protocol.dnp3.error.frameTooShort': 'Çerçeve link başlığı (10 bayt) kadar uzun değil.',
+  'protocol.dnp3.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.dnp3.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dnp3.error.startBytesInvalid':
+    'Start baytları 0x05 0x64 değil — bu bir DNP3 link çerçevesi olmayabilir.',
+  'protocol.dnp3.error.lengthTooSmall':
+    'Length alanı asgari değerin (5) altında; Control+Destination+Source bile sığmaz.',
+  'protocol.dnp3.error.headerCrcMismatch':
+    'Header CRC tutmuyor: alınan ve hesaplanan değer farklı.',
+  'protocol.dnp3.error.blockCrcMismatch':
+    'Gövde bloğunun CRC’si tutmuyor: alınan ve hesaplanan değer farklı.',
+  'protocol.dnp3.error.bodyTruncated':
+    'Length’in vaat ettiği gövde bloğu için yeterli bayt yok.',
+  'protocol.dnp3.error.applicationTruncated':
+    'Application katmanı alanı için yeterli mantıksal bayt yok.',
+  'protocol.dnp3.warning.unknownLinkFunctionCode':
+    'Link function code, PRM’ye göre tanınan dar kümede yok.',
+  'protocol.dnp3.warning.unknownApplicationFunctionCode':
+    'Application function code dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.dnp3.warning.multiSegmentSession':
+    'FIR/FIN tek segmenti işaret etmiyor: bu, çok-segmentli bir application mesajının PARÇASI. Segmentler birleştirilmez (oturum/analyzer işi); kalan bayt ham gösterildi.',
+  'protocol.dnp3.warning.unknownQualifier':
+    'Qualifier’ın range specifier’ı tanınan dar kümede yok — range/count uzunluğu bilinemediği için bundan sonrası ham gösterildi.',
+  'protocol.dnp3.warning.objectDataNeedsVariationDecode':
+    'Object header çözüldü; header sonrası veri (point değerleri) ham gösteriliyor — variation’a göre veri düzeni sonraki faz işi (Karar 6).',
+  'protocol.dnp3.warning.headerSpansBlockBoundary':
+    'Alan, gövde bloklarının arasındaki CRC sınırını aşıyor; motor bu noktadan sonrasını ayırt etmeden ham gösterdi.',
+  'protocol.dnp3.warning.trailingBytes':
+    'Çerçeve, Length’in belirttiği içerikten sonra fazladan bayt taşıyor.',
+  'protocol.dnp3.summary.linkOnly': 'Yalnız link katmanı çerçevesi (user data yok)',
+  'protocol.dnp3.summary.multiSegment': 'Çok-segmentli application mesajının bir parçası',
+  'protocol.dnp3.summary.application': 'DNP3 application katmanı çerçevesi',
+  'protocol.dnp3.documentation.summary':
+    'IEEE 1815 DNP3: link katmanı (start/length/control/destination/source, 16’şar baytlık bloklara ayrılmış CRC16_DNP), transport (FIR/FIN/SEQ — segment birleştirme yok) ve application katmanı (application control, function code, response’ta IIN, tek object header: Group/Variation/Qualifier/Range) çözülür. Object header sonrası veri (point değerleri) ham kalır: variation’a göre veri düzeni sonraki faz işidir (Karar 6). Alan adları opendnp3 dokümantasyonu ve Wireshark DNP3 dissector alan tablosuyla çapraz teyitlidir.',
+  'protocol.dnp3.example.linkOnlyRequestLinkStatus.name': 'Link-only: Request Link Status',
+  'protocol.dnp3.example.linkOnlyRequestLinkStatus.description':
+    'Length=5, user data yok — yalnız link başlığı. Primary function 0x09 Request Link Status.',
+  'protocol.dnp3.example.singleSegmentReadClass0.name': 'Tek segment: Read Class 0',
+  'protocol.dnp3.example.singleSegmentReadClass0.description':
+    'FIR=FIN=1 tek segment; application Read (0x01), Group 60 Var 1 Qualifier 0x06 (Class 0 poll, range/data yok).',
+  'protocol.dnp3.example.responseWithIin.name': 'Response + IIN (Need Time)',
+  'protocol.dnp3.example.responseWithIin.description':
+    'Outstation→master Response (0x81); IIN1 Need Time biti set. Group 1 (Binary Input) Var 2, Qualifier 0x00, tek index; header sonrası 1 bayt ham object data.',
+  'protocol.dnp3.example.multiSegmentFirstSegment.name': 'Çok-segment: ilk parça',
+  'protocol.dnp3.example.multiSegmentFirstSegment.description':
+    'Transport FIR=1, FIN=0 — çok-segmentli bir mesajın ilk parçası. Application katmanı birleştirilmeden ham "Segment Data" olarak gösterilir.',
+  'protocol.dnp3.example.headerCrcMismatch.name': 'Header CRC hatası',
+  'protocol.dnp3.example.headerCrcMismatch.description':
+    'Link-only örnekle aynı header, CRC baytları kasten 00 00 — crc-mismatch hata yolu.',
+  'protocol.dnp3.example.blockCrcMismatch.name': 'Gövde bloğu CRC hatası',
+  'protocol.dnp3.example.blockCrcMismatch.description':
+    'Tek segment örnekle aynı header (header CRC doğru), gövde bloğunun CRC’si kasten 00 00.',
 } as const;
 
 /**

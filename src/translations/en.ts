@@ -2221,4 +2221,58 @@ export const en: TranslationDictionary = {
   'protocol.coap.example.optionNibbleReserved.name': 'Option nibble 15 outside the marker (error path)',
   'protocol.coap.example.optionNibbleReserved.description':
     'Option byte 0xF0: the delta nibble is 15 but the byte is not exactly 0xFF — a "message format error".',
+
+  // --- DNP3 ---
+  'protocol.dnp3.error.frameTooShort': 'Frame is not as long as the link header (10 bytes).',
+  'protocol.dnp3.error.frameTooLong': 'Frame exceeds the allowed maximum length.',
+  'protocol.dnp3.error.aborted': 'Parsing was cancelled.',
+  'protocol.dnp3.error.startBytesInvalid':
+    'Start bytes are not 0x05 0x64 — this may not be a DNP3 link frame.',
+  'protocol.dnp3.error.lengthTooSmall':
+    'Length field is below the minimum (5); Control+Destination+Source alone would not fit.',
+  'protocol.dnp3.error.headerCrcMismatch':
+    'Header CRC does not match: the received and calculated values differ.',
+  'protocol.dnp3.error.blockCrcMismatch':
+    'Body block CRC does not match: the received and calculated values differ.',
+  'protocol.dnp3.error.bodyTruncated':
+    'Not enough bytes remain for the body block that Length promises.',
+  'protocol.dnp3.error.applicationTruncated':
+    'Not enough logical bytes remain for the application-layer field.',
+  'protocol.dnp3.warning.unknownLinkFunctionCode':
+    'Link function code is not in the narrow set recognized for this PRM value.',
+  'protocol.dnp3.warning.unknownApplicationFunctionCode':
+    'Application function code is not in the narrow name set — shown raw.',
+  'protocol.dnp3.warning.multiSegmentSession':
+    'FIR/FIN do not indicate a single segment: this is PART of a multi-segment application message. Segments are not reassembled (session/analyzer work); the remaining bytes are shown raw.',
+  'protocol.dnp3.warning.unknownQualifier':
+    "The qualifier's range specifier is not in the recognized narrow set — since the range/count length cannot be determined, everything after it is shown raw.",
+  'protocol.dnp3.warning.objectDataNeedsVariationDecode':
+    'The object header was decoded; the data after it (point values) is shown raw — decoding the layout per variation is next-phase work (Decision 6).',
+  'protocol.dnp3.warning.headerSpansBlockBoundary':
+    "A field crosses the CRC boundary between body blocks; the engine showed everything from that point on raw rather than guess.",
+  'protocol.dnp3.warning.trailingBytes':
+    'Frame carries extra bytes past the content that Length declares.',
+  'protocol.dnp3.summary.linkOnly': 'Link-layer-only frame (no user data)',
+  'protocol.dnp3.summary.multiSegment': 'Part of a multi-segment application message',
+  'protocol.dnp3.summary.application': 'DNP3 application-layer frame',
+  'protocol.dnp3.documentation.summary':
+    'IEEE 1815 DNP3: decodes the link layer (start/length/control/destination/source, CRC16_DNP over 16-byte blocks), transport (FIR/FIN/SEQ — no segment reassembly) and application layer (application control, function code, IIN on responses, a single object header: Group/Variation/Qualifier/Range). The data after the object header (point values) stays raw: decoding it per variation is next-phase work (Decision 6). Field names are cross-checked against the opendnp3 documentation and the Wireshark DNP3 dissector field table.',
+  'protocol.dnp3.example.linkOnlyRequestLinkStatus.name': 'Link-only: Request Link Status',
+  'protocol.dnp3.example.linkOnlyRequestLinkStatus.description':
+    'Length=5, no user data — link header only. Primary function 0x09 Request Link Status.',
+  'protocol.dnp3.example.singleSegmentReadClass0.name': 'Single segment: Read Class 0',
+  'protocol.dnp3.example.singleSegmentReadClass0.description':
+    'FIR=FIN=1 single segment; application Read (0x01), Group 60 Var 1 Qualifier 0x06 (Class 0 poll, no range/data).',
+  'protocol.dnp3.example.responseWithIin.name': 'Response + IIN (Need Time)',
+  'protocol.dnp3.example.responseWithIin.description':
+    'Outstation→master Response (0x81); IIN1 Need Time bit set. Group 1 (Binary Input) Var 2, Qualifier 0x00, single index; 1 raw object-data byte after the header.',
+  'protocol.dnp3.example.multiSegmentFirstSegment.name': 'Multi-segment: first part',
+  'protocol.dnp3.example.multiSegmentFirstSegment.description':
+    'Transport FIR=1, FIN=0 — the first part of a multi-segment message. The application layer is shown raw as "Segment Data" without reassembly.',
+  'protocol.dnp3.example.headerCrcMismatch.name': 'Header CRC error',
+  'protocol.dnp3.example.headerCrcMismatch.description':
+    'Same header as the link-only example, CRC bytes deliberately zeroed — the crc-mismatch error path.',
+  'protocol.dnp3.example.blockCrcMismatch.name': 'Body block CRC error',
+  'protocol.dnp3.example.blockCrcMismatch.description':
+    'Same header as the single-segment example (header CRC correct), the body block CRC deliberately zeroed.',
 };
