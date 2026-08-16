@@ -2275,6 +2275,60 @@ export const tr = {
   'protocol.dnp3.example.blockCrcMismatch.name': 'Gövde bloğu CRC hatası',
   'protocol.dnp3.example.blockCrcMismatch.description':
     'Tek segment örnekle aynı header (header CRC doğru), gövde bloğunun CRC’si kasten 00 00.',
+
+  // --- IEC 60870-5-104 ---
+  'protocol.iec104.error.frameTooShort': 'Çerçeve APCI (6 bayt) kadar uzun değil.',
+  'protocol.iec104.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.iec104.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.iec104.error.contentLengthTooSmall':
+    'Length alanının vaat ettiği içerik 4 kontrol baytına bile sığmıyor.',
+  'protocol.iec104.error.lengthMismatch':
+    'Length’in vaat ettiği toplam çerçeve uzunluğu tampondaki bayt sayısını aşıyor.',
+  'protocol.iec104.error.startByteInvalid':
+    'Start baytı 0x68 değil — bu bir IEC 60870-5-104 APDU’su olmayabilir.',
+  'protocol.iec104.error.asduTruncated': 'ASDU alanı için yeterli bayt yok.',
+  'protocol.iec104.warning.oversizedLength':
+    'Length, standardın öngördüğü 253 baytlık azami APDU içeriğini aşıyor.',
+  'protocol.iec104.warning.unknownUFormatFunction':
+    'U-format fonksiyon baytı tanınan altı değerden (STARTDT/STOPDT/TESTFR act/con) biri değil.',
+  'protocol.iec104.warning.unknownTypeId':
+    'Type Identification dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.iec104.warning.unknownCauseOfTransmission':
+    'Cause of Transmission dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.iec104.warning.informationElementNeedsTypeDecode':
+    'Information Object Address çözüldü; eleman verisi ham gösteriliyor — tip başına eleman düzeni sonraki faz işi.',
+  'protocol.iec104.warning.multipleObjectsUnknownWidth':
+    'ASDU birden çok Information Object taşıyor ama bu tip için eleman genişliği teyitli değil — nesneler tek tek ayrıştırılamadı, tamamı ham blok olarak gösterildi (yanlış hizalanmış alan basmaktansa).',
+  'protocol.iec104.summary.uFormat': 'U-format kontrol çerçevesi',
+  'protocol.iec104.summary.sFormat': 'S-format onay çerçevesi',
+  'protocol.iec104.summary.iFormat': 'I-format bilgi aktarım çerçevesi',
+  'protocol.iec104.documentation.summary':
+    'IEC 60870-5-104: APCI (start 0x68, length, 4 kontrol baytından I/S/U format ayrımı, I-format’ta 15-bit send/receive sequence numaraları) ve I-format’ta ardından gelen ASDU başlığı (Type Identification, Variable Structure Qualifier/SQ, Cause of Transmission, Common Address, Information Object Address + eleman) çözülür. Yalnız M_SP_NA_1’in SIQ elemanı bit bit çözülür (SPI + BL/SB/NT/IV kalite bitleri); diğer tüm elemanlar ham kalır. Sequence bekleme/oturum takibi (hangi numaranın sırada olduğu) analyzer işidir, bu motora girmez. Alan adları Wireshark IEC-104 dissector’ının alan tablosu, iec104-cheat-sheet ve lib60870 dokümantasyonuyla çapraz teyitlidir.',
+  'protocol.iec104.example.uFormatStartdtAct.name': 'U-format: STARTDT act',
+  'protocol.iec104.example.uFormatStartdtAct.description':
+    'En kısa çerçeve — yalnız APCI, ASDU yok. Kontrol baytı 0x07: STARTDT act.',
+  'protocol.iec104.example.sFormatAck.name': 'S-format: onay N(R)=3',
+  'protocol.iec104.example.sFormatAck.description':
+    'Yalnız Receive Sequence Number taşır (N(R)=3) — I-format çerçevelerin numaralı onayı.',
+  'protocol.iec104.example.iFormatSingleObjectSpontaneous.name':
+    'I-format: tek obje, kendiliğinden (M_SP_NA_1)',
+  'protocol.iec104.example.iFormatSingleObjectSpontaneous.description':
+    'N(S)=0, N(R)=0; ASDU M_SP_NA_1, SQ=0/count=1, COT=Spontaneous, Common Address=1, IOA=1, SIQ=SPI açık ve kalite bitleri temiz.',
+  'protocol.iec104.example.iFormatSequentialObjects.name': 'I-format: SQ=1 ardışık üç obje',
+  'protocol.iec104.example.iFormatSequentialObjects.description':
+    'N(S)=1, N(R)=0; ASDU M_SP_NA_1, SQ=1/count=3, COT=Periodic/cyclic; tek IOA=1’den başlayarak üç ardışık SIQ elemanı (açık/kapalı/açık+IV).',
+  'protocol.iec104.example.iFormatInterrogationCommand.name': 'I-format: genel sorgulama komutu (C_IC_NA_1)',
+  'protocol.iec104.example.iFormatInterrogationCommand.description':
+    'N(S)=2, N(R)=1; ASDU C_IC_NA_1, COT=Activation, IOA=0 (genel sorgulama kuralı); QOI elemanı ham gösterilir.',
+  'protocol.iec104.example.iFormatUnknownTypeId.name': 'I-format: tanınmayan Type ID',
+  'protocol.iec104.example.iFormatUnknownTypeId.description':
+    'Type ID 200 dar ad kümesinde yok — uyarı yolu, çerçeve yine de geçerli sayılır (yalnız uyarı, hata değil).',
+  'protocol.iec104.example.startByteInvalid.name': 'Start baytı hatası',
+  'protocol.iec104.example.startByteInvalid.description':
+    'STARTDT act örneğiyle aynı gövde, start baytı kasten 0x67 — start-delimiter-not-found hata yolu; geri kalan APCI yine de çözülür.',
+  'protocol.iec104.example.lengthMismatch.name': 'Length uyuşmazlığı',
+  'protocol.iec104.example.lengthMismatch.description':
+    'Length=10 → 12 baytlık bir çerçeve vaat eder ama tampon yalnız 6 bayt — length-mismatch ile ParseFailure (modbusTcp emsali, kaydedilebilir).',
 } as const;
 
 /**

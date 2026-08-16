@@ -2275,4 +2275,58 @@ export const en: TranslationDictionary = {
   'protocol.dnp3.example.blockCrcMismatch.name': 'Body block CRC error',
   'protocol.dnp3.example.blockCrcMismatch.description':
     'Same header as the single-segment example (header CRC correct), the body block CRC deliberately zeroed.',
+
+  // --- IEC 60870-5-104 ---
+  'protocol.iec104.error.frameTooShort': 'Frame is not as long as the APCI (6 bytes).',
+  'protocol.iec104.error.frameTooLong': 'Frame length exceeds the configured maximum frame length.',
+  'protocol.iec104.error.aborted': 'Parsing was aborted.',
+  'protocol.iec104.error.contentLengthTooSmall':
+    "The content promised by the Length field does not even fit the 4 control bytes.",
+  'protocol.iec104.error.lengthMismatch':
+    'The total frame length promised by Length exceeds the number of bytes available in the buffer.',
+  'protocol.iec104.error.startByteInvalid':
+    'Start byte is not 0x68 — this may not be an IEC 60870-5-104 APDU.',
+  'protocol.iec104.error.asduTruncated': 'Not enough bytes remain for the ASDU field.',
+  'protocol.iec104.warning.oversizedLength':
+    "Length exceeds the standard's maximum APDU content of 253 bytes.",
+  'protocol.iec104.warning.unknownUFormatFunction':
+    'The U-format function byte is not one of the six recognized values (STARTDT/STOPDT/TESTFR act/con).',
+  'protocol.iec104.warning.unknownTypeId':
+    'Type Identification is not in the narrow name set — shown raw.',
+  'protocol.iec104.warning.unknownCauseOfTransmission':
+    'Cause of Transmission is not in the narrow name set — shown raw.',
+  'protocol.iec104.warning.informationElementNeedsTypeDecode':
+    'The Information Object Address was decoded; the element data is shown raw — decoding the layout per type is next-phase work.',
+  'protocol.iec104.warning.multipleObjectsUnknownWidth':
+    'The ASDU carries multiple Information Objects, but the element width for this type is not cross-verified — the objects could not be walked individually, so all of them are shown as one raw block (rather than printing a misaligned field).',
+  'protocol.iec104.summary.uFormat': 'U-format control frame',
+  'protocol.iec104.summary.sFormat': 'S-format acknowledgement frame',
+  'protocol.iec104.summary.iFormat': 'I-format information transfer frame',
+  'protocol.iec104.documentation.summary':
+    'IEC 60870-5-104: decodes the APCI (start 0x68, length, I/S/U format split from the 4 control bytes, 15-bit send/receive sequence numbers on I-format) and, on I-format, the ASDU header that follows (Type Identification, Variable Structure Qualifier/SQ, Cause of Transmission, Common Address, Information Object Address + element). Only M_SP_NA_1’s SIQ element is decoded bit by bit (SPI + BL/SB/NT/IV quality bits); every other element stays raw. Sequence-number expectation/session tracking (which number is next) is analyzer work and is not attempted here. Field names are cross-checked against the Wireshark IEC-104 dissector field table, the iec104-cheat-sheet and the lib60870 documentation.',
+  'protocol.iec104.example.uFormatStartdtAct.name': 'U-format: STARTDT act',
+  'protocol.iec104.example.uFormatStartdtAct.description':
+    'The shortest frame — APCI only, no ASDU. Control byte 0x07: STARTDT act.',
+  'protocol.iec104.example.sFormatAck.name': 'S-format: acknowledgement N(R)=3',
+  'protocol.iec104.example.sFormatAck.description':
+    'Carries only a Receive Sequence Number (N(R)=3) — the numbered acknowledgement of I-format frames.',
+  'protocol.iec104.example.iFormatSingleObjectSpontaneous.name':
+    'I-format: single object, spontaneous (M_SP_NA_1)',
+  'protocol.iec104.example.iFormatSingleObjectSpontaneous.description':
+    'N(S)=0, N(R)=0; ASDU M_SP_NA_1, SQ=0/count=1, COT=Spontaneous, Common Address=1, IOA=1, SIQ with SPI on and clean quality bits.',
+  'protocol.iec104.example.iFormatSequentialObjects.name': 'I-format: SQ=1, three consecutive objects',
+  'protocol.iec104.example.iFormatSequentialObjects.description':
+    'N(S)=1, N(R)=0; ASDU M_SP_NA_1, SQ=1/count=3, COT=Periodic/cyclic; a single IOA=1 followed by three consecutive SIQ elements (on/off/on+IV).',
+  'protocol.iec104.example.iFormatInterrogationCommand.name': 'I-format: general interrogation command (C_IC_NA_1)',
+  'protocol.iec104.example.iFormatInterrogationCommand.description':
+    'N(S)=2, N(R)=1; ASDU C_IC_NA_1, COT=Activation, IOA=0 (the general-interrogation convention); the QOI element is shown raw.',
+  'protocol.iec104.example.iFormatUnknownTypeId.name': 'I-format: unrecognized Type ID',
+  'protocol.iec104.example.iFormatUnknownTypeId.description':
+    'Type ID 200 is not in the narrow name set — the warning path; the frame is still considered valid (a warning, not an error).',
+  'protocol.iec104.example.startByteInvalid.name': 'Start byte error',
+  'protocol.iec104.example.startByteInvalid.description':
+    'Same body as the STARTDT act example, start byte deliberately set to 0x67 — the start-delimiter-not-found error path; the rest of the APCI still decodes.',
+  'protocol.iec104.example.lengthMismatch.name': 'Length mismatch',
+  'protocol.iec104.example.lengthMismatch.description':
+    'Length=10 promises a 12-byte frame but the buffer is only 6 bytes — a length-mismatch ParseFailure (modbusTcp precedent, recoverable).',
 };

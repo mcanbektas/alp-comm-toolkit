@@ -648,7 +648,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Network profile that moves the 101 ASDU model onto TCP/IP with an APCI carrying I, S and U format frames and tracked send/receive sequence numbers.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'iec-60870-5-104',
           tabs: [
             'overview',
             'live',

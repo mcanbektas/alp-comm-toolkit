@@ -144,4 +144,9 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'dnp3', () =>
     import('./industrial/dnp3/dnp3').then((module) => module.dnp3Plugin),
   );
+  // IEC 60870-5-104 — dalga 5b: APCI (I/S/U format) + ASDU başlığı; ASDU
+  // çekirdeği ayrı modülde (iec104Asdu.ts), ileride 101 paylaşabilsin diye.
+  registerOnce(registry, 'iec-60870-5-104', () =>
+    import('./industrial/iec104/iec104').then((module) => module.iec104Plugin),
+  );
 }
