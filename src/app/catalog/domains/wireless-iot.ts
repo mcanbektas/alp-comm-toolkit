@@ -190,7 +190,8 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'LoRa Alliance LPWAN standard organising devices, gateways and a network server into a star-of-stars topology for metering, agriculture and city-scale sensing.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'lorawan',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'PHYPayload Decoder (MHDR / FHDR / FPort / FRMPayload / MIC)',

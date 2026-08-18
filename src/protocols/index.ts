@@ -244,4 +244,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'ble-advertisement', () =>
     import('./wireless/ble/bleAdvertisement').then((module) => module.bleAdvertisementPlugin),
   );
+  // LoRaWAN — dalga 7b: PHYPayload = MHDR + MACPayload + MIC (bkz. lorawan.ts
+  // dosya başı). Join-Request açık metin (JoinEUI/DevEUI/DevNonce); Join-Accept
+  // MHDR sonrası uçtan uca şifreli → tek ham blok. Data frame FHDR+FPort+
+  // FRMPayload(şifreli); FOpts MAC komutları ham (analyzer işi); MIC mavlink
+  // crcNeedsDialect emsali — asla PASS/FAIL basılmaz. Sürüm çıpası L2 1.0.4
+  // (karar 6): FType 110 (1.1 Rejoin Request) dar adlanır, gövdesi çözülmez.
+  registerOnce(registry, 'lorawan', () =>
+    import('./wireless/lorawan/lorawan').then((module) => module.lorawanPlugin),
+  );
 }

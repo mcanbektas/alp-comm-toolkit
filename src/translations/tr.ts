@@ -2922,6 +2922,51 @@ export const tr = {
   'protocol.bleAdvertisement.example.truncatedAdStructure.description':
     'AD Structure Length=5 bildiriyor ama tamponda yalnız 3 bayt kalan var — truncated-frame basar.',
 
+  // --- LoRaWAN ---
+  'protocol.lorawan.error.frameTooShort': 'Çerçeve en az MHDR(1)+MIC(4)=5 bayt kadar uzun olmalı.',
+  'protocol.lorawan.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.lorawan.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.lorawan.error.joinRequestLength': 'Join-Request tam 23 bayt olmalı (MHDR+JoinEUI+DevEUI+DevNonce+MIC).',
+  'protocol.lorawan.error.fhdrTruncated': 'FHDR için tamponda yeterli bayt yok (DevAddr+FCtrl+FCnt en az 7 bayt ister).',
+  'protocol.lorawan.error.foptsTruncated': 'FOptsLen’in bildirdiği uzunluk için tamponda yeterli bayt yok.',
+  'protocol.lorawan.warning.majorNotR1': 'Major alanı LoRaWAN R1 (00) değil; çözüm yine de sürer.',
+  'protocol.lorawan.warning.frameKindNotDecoded':
+    'Bu FType’ın gövde şeması (Proprietary ya da 1.1’e özgü Rejoin Request) bu dalgada çözülmüyor; ham gösterildi.',
+  'protocol.lorawan.warning.joinAcceptEncrypted':
+    'Join-Accept gövdesi (MIC dahil) uçtan uca şifreli; anahtar olmadan çözülmez, ham gösterildi.',
+  'protocol.lorawan.warning.foptsNotDecoded':
+    'FOpts içindeki MAC komutları bu dalgada çözülmüyor (analyzer işi); ham gösterildi.',
+  'protocol.lorawan.warning.frmPayloadEncrypted': 'FRMPayload şifreli; anahtar olmadan çözülmez, ham gösterildi.',
+  'protocol.lorawan.warning.micNeedsSessionKeys':
+    'MIC var; oturum anahtarları olmadan doğrulanamaz (PASS/FAIL basılmaz).',
+
+  'protocol.lorawan.documentation.summary':
+    'LoRaWAN, PHYPayload’ı çözer: MHDR(1B) + MACPayload + MIC(4B). Join-Request açık metindir (JoinEUI/DevEUI/DevNonce). Join-Accept MHDR sonrası uçtan uca şifrelidir (MIC dahil), ham gösterilir. Data frame’de FHDR (DevAddr/FCtrl/FCnt/FOpts) alan alan çözülür — FCtrl yöne göre farklı bit düzeni taşır; FOpts’taki MAC komutları ham kalır (analyzer işi). FPort=0 uygulama verisi DEĞİL, MAC komutu demektir. FRMPayload her zaman şifreli → ham + işaret. MIC hiçbir zaman doğrulanmaz — "present, cannot verify without session keys" (mavlink crcNeedsDialect emsali). Sürüm çıpası L2 1.0.4 (TS001); FType 110 (1.1 Rejoin Request) dar adlanır, gövdesi bu dalgada çözülmez.',
+  'protocol.lorawan.example.joinRequest.name': 'Join-Request (açık metin)',
+  'protocol.lorawan.example.joinRequest.description':
+    'JoinEUI/DevEUI/DevNonce açıkça çözülür — Join-Request şifreli değildir.',
+  'protocol.lorawan.example.joinAccept.name': 'Join-Accept (şifreli, ham)',
+  'protocol.lorawan.example.joinAccept.description':
+    'MHDR sonrası tüm gövde (MIC dahil) uçtan uca şifreli — anahtar olmadan tek ham blok.',
+  'protocol.lorawan.example.unconfirmedDataUp.name': 'Unconfirmed Data Up — mutlu yol',
+  'protocol.lorawan.example.unconfirmedDataUp.description':
+    'FHDR + FPort + şifreli FRMPayload alan alan çözülür; MIC ham + doğrulanamaz uyarısı.',
+  'protocol.lorawan.example.confirmedDataDownWithFopts.name': 'Confirmed Data Down + FOpts',
+  'protocol.lorawan.example.confirmedDataDownWithFopts.description':
+    'Downlink FCtrl yorumu (RFU/FPending) + FOptsLen=2 — MAC komutları ham gösterilir.',
+  'protocol.lorawan.example.macCommandOnly.name': 'FPort=0 (yalnız MAC komutu)',
+  'protocol.lorawan.example.macCommandOnly.description':
+    'FPort=0 — uygulama verisi DEĞİL, şifreli MAC komutu anlamına gelir.',
+  'protocol.lorawan.example.noApplicationPayload.name': 'FPort/FRMPayload yok (geçerli çerçeve)',
+  'protocol.lorawan.example.noApplicationPayload.description':
+    'FHDR + FOptsLen=0, FPort ve FRMPayload hiç yok — TS001 §4.3’e göre yine de geçerli.',
+  'protocol.lorawan.example.proprietary.name': 'Proprietary (gövde şeması dışı)',
+  'protocol.lorawan.example.proprietary.description':
+    'FType=111 — gövde şeması standartlaştırılmamış, bu dalgada çözülmez, ham gösterilir.',
+  'protocol.lorawan.example.truncatedFhdr.name': 'Eksik FHDR (hata yolu)',
+  'protocol.lorawan.example.truncatedFhdr.description':
+    'MACPayload yalnız 6 bayt — FHDR en az 7 bayt (DevAddr+FCtrl+FCnt) ister, truncated-frame basar.',
+
 } as const;
 
 /**

@@ -2926,4 +2926,52 @@ export const en: TranslationDictionary = {
   'protocol.bleAdvertisement.example.truncatedAdStructure.description':
     'AD Structure declares Length=5 but only 3 bytes remain in the buffer — raises truncated-frame.',
 
+  // --- LoRaWAN ---
+  'protocol.lorawan.error.frameTooShort': 'The frame must be at least MHDR(1)+MIC(4)=5 bytes long.',
+  'protocol.lorawan.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.lorawan.error.aborted': 'Parsing was aborted.',
+  'protocol.lorawan.error.joinRequestLength':
+    'A Join-Request must be exactly 23 bytes (MHDR+JoinEUI+DevEUI+DevNonce+MIC).',
+  'protocol.lorawan.error.fhdrTruncated':
+    'Not enough bytes in the buffer for the FHDR (DevAddr+FCtrl+FCnt requires at least 7 bytes).',
+  'protocol.lorawan.error.foptsTruncated': 'Not enough bytes in the buffer for the declared FOptsLen.',
+  'protocol.lorawan.warning.majorNotR1': 'The Major field is not LoRaWAN R1 (00); parsing continues anyway.',
+  'protocol.lorawan.warning.frameKindNotDecoded':
+    "This FType's payload schema (Proprietary or the 1.1-specific Rejoin Request) is not decoded in this wave; shown raw.",
+  'protocol.lorawan.warning.joinAcceptEncrypted':
+    'The Join-Accept body (including the MIC) is end-to-end encrypted; it cannot be decoded without a key, shown raw.',
+  'protocol.lorawan.warning.foptsNotDecoded':
+    'The MAC commands inside FOpts are not decoded in this wave (analyzer work); shown raw.',
+  'protocol.lorawan.warning.frmPayloadEncrypted':
+    'FRMPayload is encrypted; it cannot be decoded without a key, shown raw.',
+  'protocol.lorawan.warning.micNeedsSessionKeys':
+    'A MIC is present; it cannot be verified without session keys (PASS/FAIL is never shown).',
+
+  'protocol.lorawan.documentation.summary':
+    'LoRaWAN decodes the PHYPayload: MHDR(1B) + MACPayload + MIC(4B). Join-Request is plaintext (JoinEUI/DevEUI/DevNonce). Join-Accept is end-to-end encrypted after the MHDR (including the MIC), shown raw. In a data frame, the FHDR (DevAddr/FCtrl/FCnt/FOpts) is decoded field by field — FCtrl has a different bit layout per direction; the MAC commands inside FOpts stay raw (analyzer work). FPort=0 does NOT mean application data, it means a MAC command. FRMPayload is always encrypted → raw + a flag. The MIC is never verified — "present, cannot verify without session keys" (the mavlink crcNeedsDialect pattern). Version anchor is L2 1.0.4 (TS001); FType 110 (the 1.1 Rejoin Request) is named narrowly, its body is not decoded in this wave.',
+  'protocol.lorawan.example.joinRequest.name': 'Join-Request (plaintext)',
+  'protocol.lorawan.example.joinRequest.description':
+    'JoinEUI/DevEUI/DevNonce are decoded openly — a Join-Request is not encrypted.',
+  'protocol.lorawan.example.joinAccept.name': 'Join-Accept (encrypted, raw)',
+  'protocol.lorawan.example.joinAccept.description':
+    'The entire body after the MHDR (including the MIC) is end-to-end encrypted — a single raw block without a key.',
+  'protocol.lorawan.example.unconfirmedDataUp.name': 'Unconfirmed Data Up — happy path',
+  'protocol.lorawan.example.unconfirmedDataUp.description':
+    'FHDR + FPort + encrypted FRMPayload are decoded field by field; the MIC is shown raw with a cannot-verify warning.',
+  'protocol.lorawan.example.confirmedDataDownWithFopts.name': 'Confirmed Data Down + FOpts',
+  'protocol.lorawan.example.confirmedDataDownWithFopts.description':
+    'Downlink FCtrl interpretation (RFU/FPending) + FOptsLen=2 — the MAC commands are shown raw.',
+  'protocol.lorawan.example.macCommandOnly.name': 'FPort=0 (MAC command only)',
+  'protocol.lorawan.example.macCommandOnly.description':
+    'FPort=0 — does NOT mean application data, it means an encrypted MAC command.',
+  'protocol.lorawan.example.noApplicationPayload.name': 'No FPort/FRMPayload (still a valid frame)',
+  'protocol.lorawan.example.noApplicationPayload.description':
+    'FHDR + FOptsLen=0, with no FPort and no FRMPayload at all — still valid per TS001 §4.3.',
+  'protocol.lorawan.example.proprietary.name': 'Proprietary (out-of-scope body)',
+  'protocol.lorawan.example.proprietary.description':
+    'FType=111 — the body schema is not standardized, not decoded in this wave, shown raw.',
+  'protocol.lorawan.example.truncatedFhdr.name': 'Truncated FHDR (error path)',
+  'protocol.lorawan.example.truncatedFhdr.description':
+    'MACPayload is only 6 bytes — the FHDR requires at least 7 (DevAddr+FCtrl+FCnt), raises truncated-frame.',
+
 };
