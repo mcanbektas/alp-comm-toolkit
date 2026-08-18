@@ -2746,6 +2746,46 @@ export const tr = {
   'protocol.dali.example.unrecognizedLength.name': 'Tanınmayan uzunluk (hata yolu)',
   'protocol.dali.example.unrecognizedLength.description':
     '4 bayt — DALI’nin backward (1), forward (2) ya da DALI-2 device (3) uzunluklarının hiçbirine uymuyor, ParseFailure döner.',
+
+  // --- KNX (faz 10 dalga 6e) ---
+  'protocol.knx.error.frameTooShort':
+    'Tampon, Standard L_Data başlığı ya da NPCI’nin bildirdiği uzunluk için yeterli bayt içermiyor.',
+  'protocol.knx.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.knx.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.knx.error.checksumMismatch':
+    'Hesaplanan (terslenmiş XOR) checksum, çerçevedeki değerle eşleşmiyor.',
+  'protocol.knx.warning.extendedFrameOutOfScope':
+    'Extended frame (Control Field bit7=0) bu dalganın kapsamı dışında — gövde çözülmeden ham gösteriliyor.',
+  'protocol.knx.warning.unrecognizedApci':
+    'APCI değeri dar ad kümesinde (GroupValueRead, GroupValueWrite, GroupValueResponse) yok — ham gösteriliyor.',
+  'protocol.knx.warning.unexpectedReservedBits':
+    'Control Field’ın sabit/reserved bitleri (bit6, bit4, bit1, bit0) beklenen desende değil.',
+  'protocol.knx.summary.namedService': '{apci} — {destination}',
+  'protocol.knx.summary.unrecognizedApci': 'Tanınmayan APCI — {destination}',
+  'protocol.knx.summary.extendedFrame': 'Extended frame (kapsam dışı, ham)',
+  'protocol.knx.documentation.summary':
+    'KNX Standard/ISO 22510 ailesi: TP1 Standard L_Data telegramı — Control Field (Frame Type/Repeat/Priority), Source/Destination Address (Individual `a.b.c` / Group `a/b/c`, AT bitine göre İKİ AYRI gösterim), NPCI (Address Type + Hop Count + Length — Length alanı OFF-BY-ONE: gerçek TPCI/APCI+data bayt sayısı Length+1’dir), TPCI/APCI (dar ad kümesi: GroupValueRead, GroupValueWrite, GroupValueResponse; dışındakiler ham + uyarı) çözülür. Payload DPT (Datapoint Type) bilinmeden HAM kalır — “raw uint16: 100” gibi bir gösterim, mühendislik değeri asla UYDURULMAZ. Checksum terslenmiş (NOT) XOR’dur. Extended frame (Control Field bit7=0) ve KNXnet/IP bu motorun kapsamı dışındadır.',
+  'protocol.knx.example.groupValueWrite.name': 'GroupValueWrite — Group adres (mutlu yol)',
+  'protocol.knx.example.groupValueWrite.description':
+    'Source 1.1.10, Destination 2/1/5 (Group), Priority Low. GroupValueWrite ile inline değer 1 gönderilir — DPT bilinmediği için "Light ON" anlamı UYDURULMAZ, yalnız ham bit gösterilir.',
+  'protocol.knx.example.groupValueRead.name': 'GroupValueRead — payload’suz sorgu',
+  'protocol.knx.example.groupValueRead.description':
+    'Source 1.1.10, Destination 2/1/6 (Group), Priority Alarm. GroupValueRead’in payload’u yoktur.',
+  'protocol.knx.example.groupValueResponse.name': 'GroupValueResponse — 2 baytlık ham değer (00 64)',
+  'protocol.knx.example.groupValueResponse.description':
+    'Source 1.1.10, Destination 3/2/10 (Group), Priority High. Payload appended 2 bayt `00 64` (=100) — katalog yorumunun kendi "raw uint16: 100" örneğiyle birebir aynı bayt çifti.',
+  'protocol.knx.example.individualAddressDestination.name': 'Individual adres hedefli telegram',
+  'protocol.knx.example.individualAddressDestination.description':
+    'Source 1.1.10, Destination 4.2.100 (Individual — AT=0). Priority System. Aynı GroupValueWrite APCI’si Group yerine Individual hedefe gönderilir; gösterim `4.2.100` olur, `X/Y/Z` ile KARIŞMAZ.',
+  'protocol.knx.example.extendedFrame.name': 'Extended frame (uyarı yolu, ham)',
+  'protocol.knx.example.extendedFrame.description':
+    'Control Field bit7=0 — Karar 5 gereği bu dalganın kapsamı dışı. Control Field yine çözülür (Repeat, Priority), gövde ham + "kapsam dışı" uyarısıyla gösterilir; HATA üretilmez.',
+  'protocol.knx.example.unrecognizedApci.name': 'Tanınmayan APCI (uyarı yolu)',
+  'protocol.knx.example.unrecognizedApci.description':
+    'Source 1.1.10, Destination 4/3/20 (Group). APCI kodu 3 (tam APCI tablosunda IndividualAddress_Write ama bu dalganın dar kümesinde YOK) — yalnız ham gösterilir, ad UYDURULMAZ.',
+  'protocol.knx.example.checksumMismatch.name': 'Bozuk checksum (hata yolu)',
+  'protocol.knx.example.checksumMismatch.description':
+    '"GroupValueWrite — Group adres" örneğiyle AYNI çerçeve, yalnız son bayt (checksum) bilerek bozuldu — ParseFailure değil ama çerçeve valid:false ve checksum-mismatch hatası taşır.',
 } as const;
 
 /**

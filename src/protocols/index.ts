@@ -167,6 +167,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // (S) DAPC/Command ayrımını kilitler (bkz. dali.ts dosya başı — Wikipedia +
   // python-dali çapraz teyitli). Checksum yok; dar opcode ad kümesi.
   registerOnce(registry, 'dali', () => import('./building/dali/dali').then((module) => module.daliPlugin));
+  // KNX — dalga 6e: lisanslı KNX Standard/ISO 22510 ailesine geçen ikinci
+  // motor (dali.ts ile aynı disiplin). Girdi TP1 STANDART L_Data telegramı;
+  // Control Field (Frame Type/Repeat/Priority), Source/Destination Address
+  // (Individual `a.b.c` / Group `a/b/c` — AT bitine göre İKİ AYRI formatter),
+  // NPCI (AT+HopCount+Length, Length OFF-BY-ONE), TPCI/APCI (dar ad kümesi:
+  // GroupValueRead/Write/Response) çözülür (bkz. knx.ts dosya başı — Calimero+
+  // XKNX+franckmarini çapraz teyitli). Extended frame (Control Field bit7=0)
+  // Karar 5 gereği kapsam dışı: ham+uyarı. Checksum terslenmiş (NOT) XOR;
+  // `xor8Checksum` üstüne ince tersleme katmanı. Payload DPT'siz HAM kalır.
+  registerOnce(registry, 'knx', () => import('./building/knx/knx').then((module) => module.knxPlugin));
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

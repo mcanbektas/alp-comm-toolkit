@@ -111,7 +111,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'Standardised home and building control bus where devices exchange group telegrams over TP, PL, RF or IP, and values are only decodable once the datapoint type of the group address is known.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'knx',
           tabs: [
             'overview',
             'live',

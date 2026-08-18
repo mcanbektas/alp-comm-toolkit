@@ -2747,4 +2747,44 @@ export const en: TranslationDictionary = {
   'protocol.dali.example.unrecognizedLength.name': 'Unrecognized length (error path)',
   'protocol.dali.example.unrecognizedLength.description':
     "4 bytes — matches none of DALI's backward (1), forward (2) or DALI-2 device (3) lengths, so it returns a ParseFailure.",
+
+  // --- KNX (phase 10 wave 6e) ---
+  'protocol.knx.error.frameTooShort':
+    'Buffer does not contain enough bytes for the Standard L_Data header or the length declared by NPCI.',
+  'protocol.knx.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.knx.error.aborted': 'Parsing was cancelled.',
+  'protocol.knx.error.checksumMismatch':
+    'The calculated (inverted XOR) checksum does not match the value carried in the frame.',
+  'protocol.knx.warning.extendedFrameOutOfScope':
+    'Extended frame (Control Field bit7=0) is out of scope for this wave — the body is shown raw without being decoded.',
+  'protocol.knx.warning.unrecognizedApci':
+    'The APCI value is not in the narrow named set (GroupValueRead, GroupValueWrite, GroupValueResponse) — shown raw.',
+  'protocol.knx.warning.unexpectedReservedBits':
+    "The Control Field's fixed/reserved bits (bit6, bit4, bit1, bit0) are not in the expected pattern.",
+  'protocol.knx.summary.namedService': '{apci} — {destination}',
+  'protocol.knx.summary.unrecognizedApci': 'Unrecognized APCI — {destination}',
+  'protocol.knx.summary.extendedFrame': 'Extended frame (out of scope, raw)',
+  'protocol.knx.documentation.summary':
+    'KNX Standard/ISO 22510 family: a TP1 Standard L_Data telegram — Control Field (Frame Type/Repeat/Priority), Source/Destination Address (Individual `a.b.c` / Group `a/b/c`, shown with TWO SEPARATE formatters depending on the AT bit), NPCI (Address Type + Hop Count + Length — the Length field is OFF-BY-ONE: the actual TPCI/APCI+data byte count is Length+1), TPCI/APCI (a narrow named set: GroupValueRead, GroupValueWrite, GroupValueResponse; anything else is shown raw with a warning). The payload stays RAW without a DPT (Datapoint Type) — shown as e.g. "raw uint16: 100", the engineering value is never invented. The checksum is an inverted (NOT) XOR. Extended frames (Control Field bit7=0) and KNXnet/IP are out of scope for this engine.',
+  'protocol.knx.example.groupValueWrite.name': 'GroupValueWrite — group address (happy path)',
+  'protocol.knx.example.groupValueWrite.description':
+    'Source 1.1.10, Destination 2/1/5 (Group), Priority Low. GroupValueWrite sends an inline value of 1 — since the DPT is unknown, the "Light ON" meaning is never invented, only the raw bit is shown.',
+  'protocol.knx.example.groupValueRead.name': 'GroupValueRead — query without a payload',
+  'protocol.knx.example.groupValueRead.description':
+    'Source 1.1.10, Destination 2/1/6 (Group), Priority Alarm. GroupValueRead carries no payload.',
+  'protocol.knx.example.groupValueResponse.name': 'GroupValueResponse — 2-byte raw value (00 64)',
+  'protocol.knx.example.groupValueResponse.description':
+    'Source 1.1.10, Destination 3/2/10 (Group), Priority High. An appended 2-byte payload `00 64` (=100) — the exact same byte pair as the catalog comment\'s own "raw uint16: 100" example.',
+  'protocol.knx.example.individualAddressDestination.name': 'Telegram addressed to an Individual Address',
+  'protocol.knx.example.individualAddressDestination.description':
+    'Source 1.1.10, Destination 4.2.100 (Individual — AT=0), Priority System. The same GroupValueWrite APCI sent to an Individual instead of a Group destination — the display becomes `4.2.100`, never confused with `X/Y/Z`.',
+  'protocol.knx.example.extendedFrame.name': 'Extended frame (warning path, raw)',
+  'protocol.knx.example.extendedFrame.description':
+    'Control Field bit7=0 — out of scope per Decision 5. The Control Field is still decoded (Repeat, Priority), but the body is shown raw with an "out of scope" warning; no error is raised.',
+  'protocol.knx.example.unrecognizedApci.name': 'Unrecognized APCI (warning path)',
+  'protocol.knx.example.unrecognizedApci.description':
+    "Source 1.1.10, Destination 4/3/20 (Group). APCI code 3 (IndividualAddress_Write in the full APCI table, but NOT in this wave's narrow named set) — shown raw only, no name is invented.",
+  'protocol.knx.example.checksumMismatch.name': 'Corrupted checksum (error path)',
+  'protocol.knx.example.checksumMismatch.description':
+    'The exact same frame as "GroupValueWrite — group address", except the last byte (checksum) was deliberately corrupted — not a ParseFailure, but the frame carries valid:false and a checksum-mismatch error.',
 };
