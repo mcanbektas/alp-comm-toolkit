@@ -2842,4 +2842,47 @@ export const en: TranslationDictionary = {
   'protocol.bacnetMstp.example.unrecognizedFrameType.name': 'Unrecognized Frame Type (warning path)',
   'protocol.bacnetMstp.example.unrecognizedFrameType.description':
     'Frame Type 0xC8 (vendor-proprietary range) is not in the narrow named set — only a warning is raised (both CRCs are correct); Data is shown as a raw block rather than as NPDU/APDU.',
+
+  // --- BACnet/IP (phase 10 wave 6g) ---
+  'protocol.bacnetIp.error.headerTruncated':
+    'The buffer does not contain enough data for the 4-byte BVLC header (Type + Function + Length).',
+  'protocol.bacnetIp.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.bacnetIp.error.aborted': 'Parsing was cancelled.',
+  'protocol.bacnetIp.error.typeInvalid':
+    'The BVLC Type byte is not 0x81 — this was not recognized as a BACnet/IP (Annex J) message.',
+  'protocol.bacnetIp.error.bipAddressTruncated':
+    'Not enough bytes in the buffer for the 6-byte Originating Device B/IP Address field of a Forwarded-NPDU.',
+  'protocol.bacnetIp.warning.lengthMismatch':
+    'The BVLC Length field (the total length, including itself) does not match the actual packet size.',
+  'protocol.bacnetIp.warning.unknownFunction':
+    'The BVLC Function value is not in the narrow named set (BVLC-Result … Original-Broadcast-NPDU) — shown raw.',
+  'protocol.bacnetIp.warning.functionBodyNotDecoded':
+    "This BVLC function's body (including any BBMD/Foreign Device table contents) is not decoded by this engine — shown as a raw block.",
+  'protocol.bacnetIp.summary.noBody': '{function}',
+  'protocol.bacnetIp.summary.apdu': '{function}: {pduType} — {serviceChoice}',
+  'protocol.bacnetIp.summary.networkLayerMessage': '{function}: {messageType}',
+  'protocol.bacnetIp.summary.rawData': '{function} (raw)',
+  'protocol.bacnetIp.documentation.summary':
+    'BACnet/IP (BVLL — BACnet Virtual Link Layer, ANSI/ASHRAE 135 Annex J): decodes the BVLC header (Type=0x81 fixed, Function from a narrow named set, Length — the total length INCLUDING ITSELF). Original-Unicast-NPDU / Original-Broadcast-NPDU / Forwarded-NPDU (AFTER a 6-byte B/IP address) are decoded into an NPDU + APDU HEADER through a shared core (npdu.ts/apdu.ts, SHARED with BACnet MS/TP); tag-based service parameters stay RAW. Other BVLC functions (BVLC-Result, Broadcast Distribution Table/Foreign Device Table reads and writes, Register-Foreign-Device, etc.) are shown only as a NAME plus a RAW body — BBMD/Foreign Device table tracking is out of scope for this engine.',
+  'protocol.bacnetIp.example.originalUnicastNpduReadProperty.name':
+    'Original-Unicast-NPDU — Confirmed-Request / ReadProperty (happy path)',
+  'protocol.bacnetIp.example.originalUnicastNpduReadProperty.description':
+    "BVLC Function 0x0A. NPDU Expecting Reply=1, APDU Confirmed-Request (Invoke ID 1, Service Choice ReadProperty) — the exact same bytes as bacnetmstp.ts's already-tested Data body, proving the shared core also works correctly in a BVLL context.",
+  'protocol.bacnetIp.example.originalBroadcastNpduIAm.name': 'Original-Broadcast-NPDU — Unconfirmed-Request / I-Am',
+  'protocol.bacnetIp.example.originalBroadcastNpduIAm.description':
+    'BVLC Function 0x0B. APDU Unconfirmed-Request (Service Choice I-Am), no Invoke ID — the exact same Data body as bacnetmstp.ts\'s "data-not-expecting-reply-i-am" example.',
+  'protocol.bacnetIp.example.forwardedNpdu.name': 'Forwarded-NPDU — with a B/IP address',
+  'protocol.bacnetIp.example.forwardedNpdu.description':
+    'BVLC Function 0x04. A 6-byte Originating Device B/IP Address (192.168.1.50:47808) comes BEFORE the NPDU — the NPDU only starts at offset 10; the body is the exact same as the "Original-Broadcast-NPDU" example (I-Am).',
+  'protocol.bacnetIp.example.registerForeignDevice.name': 'Register-Foreign-Device (warning path, raw body)',
+  'protocol.bacnetIp.example.registerForeignDevice.description':
+    'BVLC Function 0x05, a 2-byte Time-To-Live (300s) body — in the narrow named set, BUT its body is not decoded by this engine, shown raw with a warning; BBMD/Foreign Device table tracking is NOT performed.',
+  'protocol.bacnetIp.example.bvlcResult.name': 'BVLC-Result (narrow name + raw body)',
+  'protocol.bacnetIp.example.bvlcResult.description': 'BVLC Function 0x00, a 2-byte Result Code body shown raw.',
+  'protocol.bacnetIp.example.lengthMismatch.name': 'Length mismatch (warning path)',
+  'protocol.bacnetIp.example.lengthMismatch.description':
+    'The exact same 13-byte body as "Original-Unicast-NPDU — Confirmed-Request / ReadProperty", except the Length field was deliberately set to 99 — the actual packet size (the UDP datagram) is treated as the only source of truth, so this only raises a WARNING; the frame stays structurally valid:true.',
+  'protocol.bacnetIp.example.invalidType.name': 'Type ≠ 0x81 (error path)',
+  'protocol.bacnetIp.example.invalidType.description':
+    'The exact same body as "Original-Unicast-NPDU — Confirmed-Request / ReadProperty", except the BVLC Type byte is 0x01 instead of 0x81 — this is not recognized as a BACnet/IP message (error), but the remaining fields are still decoded structurally at their fixed offsets.',
 };

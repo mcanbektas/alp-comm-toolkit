@@ -72,7 +72,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'The same BACnet object and service model carried over UDP/IP through the BACnet Virtual Link Layer, used for supervisory BMS backbones and cross-subnet discovery via BBMD and foreign device registration.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'bacnet-ip',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Device Explorer',

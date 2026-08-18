@@ -192,6 +192,19 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'bacnet-mstp', () =>
     import('./building/bacnetmstp/bacnetmstp').then((module) => module.bacnetMstpPlugin),
   );
+  // BACnet/IP — dalga 6g: BVLL (BACnet Virtual Link Layer) başlığı (Type=0x81
+  // sabit + Function dar ad kümesi + Length — KENDİSİNİ DE SAYAN toplam
+  // uzunluk, MBAP'ın tersine) + 6f'nin PAYLAŞILAN NPDU/APDU çekirdeğinin
+  // (bacnet/npdu.ts + apdu.ts) YENİDEN KULLANIMI (bkz. bacnetip.ts dosya başı
+  // — iec104Asdu.ts'nin AYNI ayrı-modül deseni). Original-Unicast/Broadcast-
+  // NPDU ve Forwarded-NPDU (6 baytlık B/IP adresinden SONRA NPDU başlar) bu
+  // çekirdeğe girer; kalan dokuz BVLC fonksiyonu (BVLC-Result, BDT/FDT
+  // read/write, Register-Foreign-Device vb.) yalnız ad + ham gövde —
+  // BBMD/Foreign Device tablo takibi YAPILMAZ (analyzer işi). Dalga 6'nın
+  // KAPANIŞI (6a-6g tamam).
+  registerOnce(registry, 'bacnet-ip', () =>
+    import('./building/bacnetip/bacnetip').then((module) => module.bacnetIpPlugin),
+  );
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

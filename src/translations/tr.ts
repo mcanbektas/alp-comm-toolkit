@@ -2841,6 +2841,50 @@ export const tr = {
   'protocol.bacnetMstp.example.unrecognizedFrameType.name': 'Tanınmayan Frame Type (uyarı yolu)',
   'protocol.bacnetMstp.example.unrecognizedFrameType.description':
     'Frame Type 0xC8 (vendor-proprietary aralığı) dar ad kümesinde yok — yalnız uyarı üretir (CRC’lerin ikisi de doğru), Data NPDU/APDU olarak değil ham blok olarak gösterilir.',
+
+  // --- BACnet/IP (faz 10 dalga 6g) ---
+  'protocol.bacnetIp.error.headerTruncated':
+    'Arabellek, 4 baytlık BVLC başlığı (Type + Function + Length) için yeterli veri içermiyor.',
+  'protocol.bacnetIp.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.bacnetIp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.bacnetIp.error.typeInvalid':
+    'BVLC Type baytı 0x81 değil — bu bir BACnet/IP (Annex J) mesajı olarak tanınmadı.',
+  'protocol.bacnetIp.error.bipAddressTruncated':
+    'Forwarded-NPDU’nun 6 baytlık Originating Device B/IP Address alanı için arabellekte yeterli bayt yok.',
+  'protocol.bacnetIp.warning.lengthMismatch':
+    'BVLC Length alanı (kendisi dahil toplam uzunluk) gerçek paket boyutuyla eşleşmiyor.',
+  'protocol.bacnetIp.warning.unknownFunction':
+    'BVLC Function değeri dar ad kümesinde (BVLC-Result … Original-Broadcast-NPDU) yok — ham gösteriliyor.',
+  'protocol.bacnetIp.warning.functionBodyNotDecoded':
+    'Bu BVLC fonksiyonunun gövdesi (BBMD/Foreign Device tablo içeriği dahil) bu motor tarafından çözülmez — ham blok gösteriliyor.',
+  'protocol.bacnetIp.summary.noBody': '{function}',
+  'protocol.bacnetIp.summary.apdu': '{function}: {pduType} — {serviceChoice}',
+  'protocol.bacnetIp.summary.networkLayerMessage': '{function}: {messageType}',
+  'protocol.bacnetIp.summary.rawData': '{function} (ham)',
+  'protocol.bacnetIp.documentation.summary':
+    'BACnet/IP (BVLL — BACnet Virtual Link Layer, ANSI/ASHRAE 135 Annex J): BVLC başlığı (Type=0x81 sabit, Function dar ad kümesi, Length — KENDİSİNİ DE SAYAN toplam uzunluk) çözülür. Original-Unicast-NPDU / Original-Broadcast-NPDU / Forwarded-NPDU (6 baytlık B/IP adresinden SONRA) paylaşılan bir çekirdekle (npdu.ts/apdu.ts, BACnet MS/TP ile ORTAK) NPDU + APDU BAŞLIĞINA çözülür; tag’li servis parametreleri HAM kalır. Diğer BVLC fonksiyonları (BVLC-Result, Broadcast Distribution Table/Foreign Device Table okuma-yazma, Register-Foreign-Device vb.) yalnız AD + HAM gövde olarak gösterilir — BBMD/Foreign Device tablo takibi bu motorun kapsamı dışındadır.',
+  'protocol.bacnetIp.example.originalUnicastNpduReadProperty.name':
+    'Original-Unicast-NPDU — Confirmed-Request / ReadProperty (mutlu yol)',
+  'protocol.bacnetIp.example.originalUnicastNpduReadProperty.description':
+    'BVLC Function 0x0A. NPDU Expecting Reply=1, APDU Confirmed-Request (Invoke ID 1, Service Choice ReadProperty) — bacnetmstp.ts’nin ZATEN test edilmiş Data gövdesiyle AYNI baytlar, paylaşılan çekirdeğin BVLL bağlamında da doğru çalıştığını kanıtlar.',
+  'protocol.bacnetIp.example.originalBroadcastNpduIAm.name': 'Original-Broadcast-NPDU — Unconfirmed-Request / I-Am',
+  'protocol.bacnetIp.example.originalBroadcastNpduIAm.description':
+    'BVLC Function 0x0B. APDU Unconfirmed-Request (Service Choice I-Am), Invoke ID YOK — bacnetmstp.ts’nin “data-not-expecting-reply-i-am” örneğiyle AYNI Data gövdesi.',
+  'protocol.bacnetIp.example.forwardedNpdu.name': 'Forwarded-NPDU — B/IP adresli',
+  'protocol.bacnetIp.example.forwardedNpdu.description':
+    'BVLC Function 0x04. 6 baytlık Originating Device B/IP Address (192.168.1.50:47808) NPDU’dan ÖNCE gelir — NPDU ancak offset 10’da başlar; gövde “Original-Broadcast-NPDU” örneğiyle AYNI (I-Am).',
+  'protocol.bacnetIp.example.registerForeignDevice.name': 'Register-Foreign-Device (uyarı yolu, ham gövde)',
+  'protocol.bacnetIp.example.registerForeignDevice.description':
+    'BVLC Function 0x05, 2 baytlık Time-To-Live (300 sn) gövdesi — dar ad kümesinde AMA gövdesi bu motor tarafından çözülmez, ham + uyarı gösterilir; BBMD/Foreign Device tablo takibi YAPILMAZ.',
+  'protocol.bacnetIp.example.bvlcResult.name': 'BVLC-Result (dar ad + ham gövde)',
+  'protocol.bacnetIp.example.bvlcResult.description':
+    'BVLC Function 0x00, 2 baytlık Result Code gövdesi ham gösterilir.',
+  'protocol.bacnetIp.example.lengthMismatch.name': 'Length tutarsızlığı (uyarı yolu)',
+  'protocol.bacnetIp.example.lengthMismatch.description':
+    '"Original-Unicast-NPDU — Confirmed-Request / ReadProperty" ile AYNI 13 baytlık gövde, yalnız Length alanı bilerek 99 yazıldı — gerçek paket boyutu (UDP datagramı) TEK doğru kaynak sayılır, yalnız UYARI üretir, çerçeve yapısal olarak valid:true kalır.',
+  'protocol.bacnetIp.example.invalidType.name': 'Type ≠ 0x81 (hata yolu)',
+  'protocol.bacnetIp.example.invalidType.description':
+    '"Original-Unicast-NPDU — Confirmed-Request / ReadProperty" ile AYNI gövde, yalnız BVLC Type baytı 0x81 yerine 0x01 — bu bir BACnet/IP mesajı olarak tanınmaz (hata), ama geri kalan alanlar yine SABİT ofsetlerden yapısal olarak kurulur.',
 } as const;
 
 /**
