@@ -152,6 +152,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'art-net', () =>
     import('./building/artnet/artnet').then((module) => module.artNetPlugin),
   );
+  // sACN — dalga 6c: UDP payload; Root→Framing→DMP katmanları, üçünde
+  // tekrarlanan flags&length deseni (4 bit flags + 12 bit length, bitCursor)
+  // ve dört-yönlü katman-length tutarlılık kontrolü (bkz. sacn.ts dosya
+  // başı). Root Vector = VECTOR_ROOT_E131_DATA olan E1.31 Data Packet tam
+  // çözülür; Synchronization/Universe Discovery Packet (Root Vector =
+  // VECTOR_ROOT_E131_EXTENDED) ad + ham gövde kalır — kamu-kaynaklı üçlünün
+  // (6a-6c) SONUNCUSU.
+  registerOnce(registry, 'sacn', () => import('./building/sacn/sacn').then((module) => module.sacnPlugin));
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

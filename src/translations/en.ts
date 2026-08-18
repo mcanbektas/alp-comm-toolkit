@@ -2647,4 +2647,60 @@ export const en: TranslationDictionary = {
   'protocol.artnet.example.artDmxLengthMismatch.name': 'ArtDmx — inconsistent Length field',
   'protocol.artnet.example.artDmxLengthMismatch.description':
     'The Length field declares 10 bytes but the packet only carries 4 bytes of DMX data — a warning, not an error; the Data field shows the bytes that are actually present.',
+
+  // --- sACN / ANSI E1.31 (wave 6c) ---
+  'protocol.sacn.error.frameTooShort':
+    'Buffer too short — cannot even read the ACN Packet Identifier (16 bytes minimum required).',
+  'protocol.sacn.error.invalidAcnPacketIdentifier':
+    'The ACN Packet Identifier does not match the expected signature — this packet is not sACN (E1.31).',
+  'protocol.sacn.error.bodyTruncated': 'The body does not contain enough bytes for the expected field.',
+  'protocol.sacn.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.sacn.error.aborted': 'Parsing was cancelled.',
+  'protocol.sacn.warning.unexpectedFixedValue':
+    'This field expects one spec-mandated fixed value, but the packet carries a different one.',
+  'protocol.sacn.warning.unexpectedFlagsNibble':
+    'The top 4 bits of the Flags&Length field are not the expected 0x7 pattern.',
+  'protocol.sacn.warning.unrecognizedRootVector':
+    'The Root Layer Vector value is neither VECTOR_ROOT_E131_DATA nor VECTOR_ROOT_E131_EXTENDED.',
+  'protocol.sacn.warning.rootVectorBodyNotDecoded':
+    'The Root Vector points at a Synchronization/Universe Discovery packet — this packet type\'s body is not decoded by this engine.',
+  'protocol.sacn.warning.priorityOutOfRange': 'The Priority value is outside the 0-200 range.',
+  'protocol.sacn.warning.universeOutOfRange':
+    'The Universe value is outside the 1-63999 range (0 and 64000-65535 are reserved).',
+  'protocol.sacn.warning.layerLengthMismatch':
+    'The Root/Framing/DMP Flags&Length and Property Value Count declarations do not all point at the same total frame length.',
+  'protocol.sacn.summary.dataPacket': '{sourceName} — Universe {universe}, Priority {priority}, {slotCount} slots',
+  'protocol.sacn.summary.extendedRootVectorRaw':
+    'Synchronization/Universe Discovery packet — body not decoded (raw)',
+  'protocol.sacn.summary.unrecognizedRootVector': 'Unrecognized Root Vector {rootVector}',
+  'protocol.sacn.summary.invalidAcnPacketIdentifier': 'Invalid ACN Packet Identifier',
+  'protocol.sacn.documentation.summary':
+    'ANSI E1.31 (sACN): streams DMX512-A data over UDP/IP through Root→Framing→DMP layers, identifies every source by its CID, and resolves universe contention with a numeric source priority.',
+  'protocol.sacn.example.dataPacketHappyPath.name': 'E1.31 Data Packet — happy path (a few slots)',
+  'protocol.sacn.example.dataPacketHappyPath.description':
+    "Start Code 0x00 plus the spec's own RGB fixture example: Red 255, Green 128, Blue 0, Dimmer 200 (same display values as dmx512.ts/artnet.ts). Priority 100 (default), Universe 1.",
+  'protocol.sacn.example.dataPacketFull512Universe.name': 'E1.31 Data Packet — full 512-slot universe',
+  'protocol.sacn.example.dataPacketFull512Universe.description':
+    "Start Code plus 512 slots, deterministic fill (slot K value K mod 256) — the total frame matches the spec's own worked example (§5.4 NOTE) exactly: 638 bytes.",
+  'protocol.sacn.example.priorityBoundaryZero.name': 'Priority boundary value — 0',
+  'protocol.sacn.example.priorityBoundaryZero.description':
+    'The Priority field sits at the lower bound of the valid range (0-200) — no warning.',
+  'protocol.sacn.example.priorityBoundaryTwoHundred.name': 'Priority boundary value — 200',
+  'protocol.sacn.example.priorityBoundaryTwoHundred.description':
+    'The Priority field sits at the upper bound of the valid range (0-200, the highest priority) — no warning.',
+  'protocol.sacn.example.optionsStreamTerminated.name': 'Options — Stream_Terminated bit set',
+  'protocol.sacn.example.optionsStreamTerminated.description':
+    'Bit 6 of the Options byte (Stream_Terminated) is 1 — indicates the source has terminated transmission of this universe; Preview_Data and Force_Synchronization stay 0.',
+  'protocol.sacn.example.universeOutOfRange.name': 'Universe out of range (64214, reserved for Discovery)',
+  'protocol.sacn.example.universeOutOfRange.description':
+    'Universe 64214 = E131_DISCOVERY_UNIVERSE (Appendix A) — reserved for the Universe Discovery packet, so it counts as outside the valid range (1-63999) in a Data Packet; a warning, not an error.',
+  'protocol.sacn.example.invalidAcnPacketIdentifier.name': 'Corrupted ACN Packet Identifier (not E1.31)',
+  'protocol.sacn.example.invalidAcnPacketIdentifier.description':
+    "The first signature byte is 0x58 ('X') instead of 0x41 ('A') — the mandatory 12-byte ACN Packet Identifier does not hold, parsing stops right after this field (error path).",
+  'protocol.sacn.example.layerLengthMismatch.name': 'Layer-length mismatch',
+  'protocol.sacn.example.layerLengthMismatch.description':
+    'The DMP Property Value Count declares 10 more than the slot data actually present — the four length declarations (Root/Framing/DMP Flags&Length plus Property Value Count) no longer point at the same total frame; a warning, not an error, and fields are still decoded from the bytes actually present.',
+  'protocol.sacn.example.rootVectorExtendedNotDecoded.name': 'Root Vector EXTENDED — body not decoded',
+  'protocol.sacn.example.rootVectorExtendedNotDecoded.description':
+    "The Root Layer Vector is VECTOR_ROOT_E131_EXTENDED (a Synchronization/Universe Discovery packet) — that packet type's Framing Layer is completely different from the Data Packet's, so the body stays a raw block this round.",
 };

@@ -405,7 +405,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'ANSI E1.31 streaming of DMX512-A data over UDP/IP, identifying every source by its CID and resolving contention on a universe through numeric source priority.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'sacn',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Source/CID',

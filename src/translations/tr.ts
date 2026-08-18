@@ -2647,6 +2647,62 @@ export const tr = {
   'protocol.artnet.example.artDmxLengthMismatch.name': 'ArtDmx — Length alanı tutarsız',
   'protocol.artnet.example.artDmxLengthMismatch.description':
     'Length alanı 10 bayt bildirir ama paket yalnız 4 bayt DMX verisi taşıyor — hata değil uyarı, Data alanı gerçekte mevcut baytları gösterir.',
+
+  // --- sACN / ANSI E1.31 (dalga 6c) ---
+  'protocol.sacn.error.frameTooShort':
+    'Tampon çok kısa — ACN Packet Identifier bile okunamaz (asgari 16 bayt gerekir).',
+  'protocol.sacn.error.invalidAcnPacketIdentifier':
+    'ACN Packet Identifier beklenen imzayla eşleşmiyor — bu paket sACN (E1.31) değil.',
+  'protocol.sacn.error.bodyTruncated': 'Gövde, beklenen alan için yeterli bayt içermiyor.',
+  'protocol.sacn.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.sacn.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.sacn.warning.unexpectedFixedValue':
+    'Bu alan spec’in sabit bir değer beklediği bir alan ama paket farklı bir değer taşıyor.',
+  'protocol.sacn.warning.unexpectedFlagsNibble':
+    'Flags&Length alanının üst 4 biti beklenen 0x7 deseninde değil.',
+  'protocol.sacn.warning.unrecognizedRootVector':
+    'Root Layer Vector değeri VECTOR_ROOT_E131_DATA ya da VECTOR_ROOT_E131_EXTENDED değil.',
+  'protocol.sacn.warning.rootVectorBodyNotDecoded':
+    'Root Vector bir Synchronization/Universe Discovery paketini işaret ediyor — bu paket türünün gövdesi bu motorda çözülmüyor.',
+  'protocol.sacn.warning.priorityOutOfRange': 'Priority değeri 0-200 aralığının dışında.',
+  'protocol.sacn.warning.universeOutOfRange':
+    'Universe değeri 1-63999 aralığının dışında (0 ve 64000-65535 rezerve).',
+  'protocol.sacn.warning.layerLengthMismatch':
+    'Root/Framing/DMP Flags&Length ve Property Value Count beyanları aynı toplam çerçeve uzunluğuna işaret etmiyor.',
+  'protocol.sacn.summary.dataPacket': '{sourceName} — Universe {universe}, Priority {priority}, {slotCount} slot',
+  'protocol.sacn.summary.extendedRootVectorRaw':
+    'Synchronization/Universe Discovery paketi — gövde çözülmedi (ham)',
+  'protocol.sacn.summary.unrecognizedRootVector': 'Tanınmayan Root Vector {rootVector}',
+  'protocol.sacn.summary.invalidAcnPacketIdentifier': 'Geçersiz ACN Packet Identifier',
+  'protocol.sacn.documentation.summary':
+    'ANSI E1.31 (sACN): DMX512-A verisini Root→Framing→DMP katmanlarıyla UDP/IP üzerinden streaming olarak taşıyan protokol; her kaynağı CID’siyle tanımlar, universe çakışmasını sayısal source priority ile çözer.',
+  'protocol.sacn.example.dataPacketHappyPath.name': 'E1.31 Data Packet — mutlu yol (birkaç slot)',
+  'protocol.sacn.example.dataPacketHappyPath.description':
+    'Start Code 0x00 + spec’in kendi RGB fixture örneği: Red 255, Green 128, Blue 0, Dimmer 200 (dmx512.ts/artnet.ts ile aynı gösterim değerleri). Priority 100 (varsayılan), Universe 1.',
+  'protocol.sacn.example.dataPacketFull512Universe.name': 'E1.31 Data Packet — tam 512 slotlu universe',
+  'protocol.sacn.example.dataPacketFull512Universe.description':
+    'Start Code + 512 slot, deterministik dolgu (slot K değeri K mod 256) — toplam çerçeve spec’in kendi doğrulama örneğiyle (§5.4 NOTE) birebir 638 bayttır.',
+  'protocol.sacn.example.priorityBoundaryZero.name': 'Priority sınır değeri — 0',
+  'protocol.sacn.example.priorityBoundaryZero.description':
+    'Priority alanı geçerli aralığın (0-200) alt sınırında — uyarı basmaz.',
+  'protocol.sacn.example.priorityBoundaryTwoHundred.name': 'Priority sınır değeri — 200',
+  'protocol.sacn.example.priorityBoundaryTwoHundred.description':
+    'Priority alanı geçerli aralığın (0-200) üst sınırında (en yüksek öncelik) — uyarı basmaz.',
+  'protocol.sacn.example.optionsStreamTerminated.name': 'Options — Stream_Terminated biti set',
+  'protocol.sacn.example.optionsStreamTerminated.description':
+    'Options baytının bit 6’sı (Stream_Terminated) 1 — kaynağın bu universe’un yayınını sonlandırdığını belirtir; Preview_Data ve Force_Synchronization bitleri 0 kalır.',
+  'protocol.sacn.example.universeOutOfRange.name': 'Universe aralık dışı (64214, Discovery’ye rezerve)',
+  'protocol.sacn.example.universeOutOfRange.description':
+    'Universe 64214 = E131_DISCOVERY_UNIVERSE (Appendix A) — Universe Discovery paketine rezerve, Data Packet’te geçerli aralığın (1-63999) dışında sayılır; hata değil uyarı.',
+  'protocol.sacn.example.invalidAcnPacketIdentifier.name': 'Bozuk ACN Packet Identifier (E1.31 değil)',
+  'protocol.sacn.example.invalidAcnPacketIdentifier.description':
+    'İlk imza baytı 0x41 (\'A\') yerine 0x58 (\'X\') — 12 baytlık zorunlu ACN Packet Identifier tutmuyor, çözümleme bu alandan sonra durur (hata yolu).',
+  'protocol.sacn.example.layerLengthMismatch.name': 'Katman-length tutarsızlığı',
+  'protocol.sacn.example.layerLengthMismatch.description':
+    'DMP Property Value Count gerçek mevcut slot verisinden 10 fazla beyan eder — dört katman uzunluk beyanı (Root/Framing/DMP Flags&Length + Property Value Count) aynı toplam çerçeveye işaret etmez; hata değil uyarı, alanlar gerçek bayttan çözülür.',
+  'protocol.sacn.example.rootVectorExtendedNotDecoded.name': 'Root Vector EXTENDED — gövde çözülmez',
+  'protocol.sacn.example.rootVectorExtendedNotDecoded.description':
+    'Root Layer Vector VECTOR_ROOT_E131_EXTENDED (Synchronization/Universe Discovery Packet) — bu paket türünün Framing Layer’ı Data Packet’inkinden tamamen farklıdır, bu yüzden gövde bu turda ham blok olarak kalır.',
 } as const;
 
 /**
