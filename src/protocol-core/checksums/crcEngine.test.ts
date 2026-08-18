@@ -20,6 +20,11 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   CRC8_SAE_J1850: 0x4bn,
   CRC8_AUTOSAR: 0xdfn,
   CRC8_MAXIM: 0xa1n,
+  // BACnet MS/TP Header CRC-8 — reveng kataloğunda YOK (bu depoya özgü yeni
+  // girdi, crcCatalogue.ts başlığına bak); "123456789" için değer bu motorla
+  // üretildi, ayrıca Annex G test vektörüyle (5 bayt → 0x73/0x8C/residue 0x55)
+  // bağımsızca doğrulandı.
+  CRC8_BACNET_MSTP: 0x89n,
   CRC16_ARC: 0xbb3dn,
   CRC16_MODBUS: 0x4b37n,
   CRC16_CCITT_FALSE: 0x29b1n,

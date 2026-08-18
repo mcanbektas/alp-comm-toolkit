@@ -2787,4 +2787,59 @@ export const en: TranslationDictionary = {
   'protocol.knx.example.checksumMismatch.name': 'Corrupted checksum (error path)',
   'protocol.knx.example.checksumMismatch.description':
     'The exact same frame as "GroupValueWrite — group address", except the last byte (checksum) was deliberately corrupted — not a ParseFailure, but the frame carries valid:false and a checksum-mismatch error.',
+
+  // --- BACnet MS/TP (phase 10 wave 6f) ---
+  'protocol.bacnetMstp.error.frameTooShort':
+    'The buffer does not contain the 8 bytes required for Preamble + Frame Type + MAC addresses + Length + Header CRC.',
+  'protocol.bacnetMstp.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.bacnetMstp.error.aborted': 'Parsing was cancelled.',
+  'protocol.bacnetMstp.error.lengthMismatch':
+    'The buffer does not contain the full Data (and, if present, Data CRC) bytes promised by the Length field.',
+  'protocol.bacnetMstp.error.preambleInvalid': 'Preamble is not 0x55 0xFF — the frame signature was not recognized.',
+  'protocol.bacnetMstp.error.headerCrcMismatch': 'The calculated Header CRC-8 does not match the value carried in the frame.',
+  'protocol.bacnetMstp.error.dataCrcMismatch': 'The calculated Data CRC-16 does not match the value carried in the frame.',
+  'protocol.bacnetMstp.error.npduTruncated': 'Not enough bytes in the buffer for the NPDU fields.',
+  'protocol.bacnetMstp.error.apduTruncated': 'Not enough bytes in the buffer for the APDU fields.',
+  'protocol.bacnetMstp.warning.unknownFrameType':
+    'The Frame Type value is not in the narrow named set (Token, Poll For Master, … Reply Postponed) — shown raw.',
+  'protocol.bacnetMstp.warning.dataNotNpdu':
+    "This Frame Type does not carry NPDU/APDU (Test_Request/Response, reserved, or vendor-proprietary) — Data is shown raw.",
+  'protocol.bacnetMstp.warning.unknownNetworkMessageType':
+    'The Network Layer Message type is not in the narrow named set — shown raw.',
+  'protocol.bacnetMstp.warning.unexpectedNpduVersion': 'The NPDU Version field is not the expected value of 1.',
+  'protocol.bacnetMstp.warning.unknownPduType':
+    'The APDU PDU Type value is not in the narrow named set (Confirmed-Request … Abort) — the remaining bytes are shown raw.',
+  'protocol.bacnetMstp.warning.unknownServiceChoice':
+    'The Service Choice value is not in the narrow named set — shown raw.',
+  'protocol.bacnetMstp.warning.serviceParametersNotDecoded':
+    "Service parameters are carried in BACnet's tag-based encoding; this engine does not decode them, that is tied to the official standard — shown as a raw block.",
+  'protocol.bacnetMstp.summary.noData': '{frameType}',
+  'protocol.bacnetMstp.summary.apdu': '{frameType}: {pduType} — {serviceChoice}',
+  'protocol.bacnetMstp.summary.networkLayerMessage': '{frameType}: {messageType}',
+  'protocol.bacnetMstp.summary.rawData': '{frameType} (raw)',
+  'protocol.bacnetMstp.documentation.summary':
+    'BACnet MS/TP (Master-Slave/Token-Passing) data-link frame: Preamble, Frame Type (a narrow named set), Destination/Source MAC Address (NEVER confused with the BACnet Device Instance), Length, Header CRC-8, and — if Length>0 — Data plus a Data CRC-16. Data is decoded into an NPDU + APDU HEADER (PDU type, Invoke ID, Service Choice name) through a shared core (npdu.ts/apdu.ts) only for the "BACnet Data Expecting Reply" and "BACnet Data Not Expecting Reply" Frame Types; tag-based service parameters stay RAW. Token rotation and error analysis are out of scope for this engine.',
+  'protocol.bacnetMstp.example.token.name': 'Token (Length=0, no Data CRC)',
+  'protocol.bacnetMstp.example.token.description':
+    'A Token frame from MAC 1 to MAC 5. Since Length=0, the Data and Data CRC fields do not exist at all — the frame ends at the Header CRC.',
+  'protocol.bacnetMstp.example.pollForMaster.name': 'Poll For Master (Length=0, a second Frame Type)',
+  'protocol.bacnetMstp.example.pollForMaster.description':
+    'A Poll For Master frame from MAC 5 to MAC 1 — shows that the Length=0 path is not specific to Token, it works the same way for another Frame Type too.',
+  'protocol.bacnetMstp.example.dataExpectingReplyReadProperty.name':
+    'BACnet Data Expecting Reply — Confirmed-Request / ReadProperty',
+  'protocol.bacnetMstp.example.dataExpectingReplyReadProperty.description':
+    'From MAC 1 to MAC 10; NPDU Expecting Reply=1, APDU Confirmed-Request (Invoke ID 1, Service Choice ReadProperty). The 3-byte service parameters are representative only — not decoded by this engine.',
+  'protocol.bacnetMstp.example.dataNotExpectingReplyIAm.name':
+    'BACnet Data Not Expecting Reply — Unconfirmed-Request / I-Am',
+  'protocol.bacnetMstp.example.dataNotExpectingReplyIAm.description':
+    'From MAC 10 to the broadcast MAC (0xFF); APDU Unconfirmed-Request (Service Choice I-Am), no Invoke ID. The 4-byte service parameters are representative only.',
+  'protocol.bacnetMstp.example.badHeaderCrc.name': 'Corrupted Header CRC (error path)',
+  'protocol.bacnetMstp.example.badHeaderCrc.description':
+    'The exact same body as "Token", except the Header CRC byte was deliberately corrupted — not a ParseFailure, but the frame carries valid:false and a crc-mismatch error.',
+  'protocol.bacnetMstp.example.badDataCrc.name': 'Corrupted Data CRC (error path)',
+  'protocol.bacnetMstp.example.badDataCrc.description':
+    'The exact same body as "BACnet Data Not Expecting Reply — Unconfirmed-Request / I-Am", with a CORRECT Header CRC but the last byte of the Data CRC deliberately corrupted — NPDU/APDU are still decoded structurally, only the Data CRC field is valid:false.',
+  'protocol.bacnetMstp.example.unrecognizedFrameType.name': 'Unrecognized Frame Type (warning path)',
+  'protocol.bacnetMstp.example.unrecognizedFrameType.description':
+    'Frame Type 0xC8 (vendor-proprietary range) is not in the narrow named set — only a warning is raised (both CRCs are correct); Data is shown as a raw block rather than as NPDU/APDU.',
 };

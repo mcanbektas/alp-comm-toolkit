@@ -36,7 +36,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'Master-Slave/Token-Passing data-link that carries BACnet objects and services over RS-485 to field-level controllers such as VAV boxes, unitary controllers and VFDs.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'bacnet-mstp',
           // timing: token rotation süresi ölçülebilir bir büyüklük
           // (T_rotation = t_token(n) − t_token(n−1)), jitter ve maksimum ile birlikte.
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],

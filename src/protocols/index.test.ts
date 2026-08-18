@@ -7,6 +7,7 @@ import { registerBuiltInProtocols } from './index';
 const BUILT_IN_IDS = [
   'ais',
   'art-net',
+  'bacnet-mstp',
   'can-2-0a',
   'can-2-0b',
   'can-fd',
@@ -51,6 +52,7 @@ const BUILT_IN_IDS = [
 const EXPECTED_CATEGORY: Record<string, string> = {
   ais: 'marine-navigation',
   'art-net': 'building-automation',
+  'bacnet-mstp': 'building-automation',
   'can-2-0a': 'automotive',
   'can-2-0b': 'automotive',
   'can-fd': 'automotive',

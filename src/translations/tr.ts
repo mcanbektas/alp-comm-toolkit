@@ -2786,6 +2786,61 @@ export const tr = {
   'protocol.knx.example.checksumMismatch.name': 'Bozuk checksum (hata yolu)',
   'protocol.knx.example.checksumMismatch.description':
     '"GroupValueWrite — Group adres" örneğiyle AYNI çerçeve, yalnız son bayt (checksum) bilerek bozuldu — ParseFailure değil ama çerçeve valid:false ve checksum-mismatch hatası taşır.',
+
+  // --- BACnet MS/TP (faz 10 dalga 6f) ---
+  'protocol.bacnetMstp.error.frameTooShort':
+    'Arabellek, Preamble + Frame Type + MAC adresleri + Length + Header CRC için gereken 8 baytı içermiyor.',
+  'protocol.bacnetMstp.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.bacnetMstp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.bacnetMstp.error.lengthMismatch':
+    'Length alanının vaat ettiği Data ve (varsa) Data CRC baytlarının tamamı arabellekte yok.',
+  'protocol.bacnetMstp.error.preambleInvalid': 'Preamble 0x55 0xFF değil — çerçeve imzası tanınmadı.',
+  'protocol.bacnetMstp.error.headerCrcMismatch': 'Hesaplanan Header CRC-8, çerçevedeki değerle eşleşmiyor.',
+  'protocol.bacnetMstp.error.dataCrcMismatch': 'Hesaplanan Data CRC-16, çerçevedeki değerle eşleşmiyor.',
+  'protocol.bacnetMstp.error.npduTruncated': 'NPDU alanları için arabellekte yeterli bayt yok.',
+  'protocol.bacnetMstp.error.apduTruncated': 'APDU alanları için arabellekte yeterli bayt yok.',
+  'protocol.bacnetMstp.warning.unknownFrameType':
+    'Frame Type değeri dar ad kümesinde (Token, Poll For Master, … Reply Postponed) yok — ham gösteriliyor.',
+  'protocol.bacnetMstp.warning.dataNotNpdu':
+    'Bu Frame Type NPDU/APDU taşımaz (Test_Request/Response, rezerve ya da vendor-proprietary) — Data ham gösteriliyor.',
+  'protocol.bacnetMstp.warning.unknownNetworkMessageType':
+    'Network Layer Message tipi dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.bacnetMstp.warning.unexpectedNpduVersion': 'NPDU Version alanı beklenen 1 değerinde değil.',
+  'protocol.bacnetMstp.warning.unknownPduType':
+    'APDU PDU Type değeri dar ad kümesinde (Confirmed-Request … Abort) yok — geri kalan baytlar ham gösteriliyor.',
+  'protocol.bacnetMstp.warning.unknownServiceChoice':
+    'Service Choice değeri dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.bacnetMstp.warning.serviceParametersNotDecoded':
+    'Servis parametreleri tag’li BACnet kodlamasıyla taşınır; bu motor onları çözmez, resmi standarda bağlıdır — ham blok gösteriliyor.',
+  'protocol.bacnetMstp.summary.noData': '{frameType}',
+  'protocol.bacnetMstp.summary.apdu': '{frameType}: {pduType} — {serviceChoice}',
+  'protocol.bacnetMstp.summary.networkLayerMessage': '{frameType}: {messageType}',
+  'protocol.bacnetMstp.summary.rawData': '{frameType} (ham)',
+  'protocol.bacnetMstp.documentation.summary':
+    'BACnet MS/TP (Master-Slave/Token-Passing) veri bağı çerçevesi: Preamble, Frame Type (dar ad kümesi), Destination/Source MAC Address (BACnet Device Instance İLE KARIŞTIRILMAZ), Length, Header CRC-8 ve — Length>0 ise — Data + Data CRC-16 çözülür. Data yalnız "BACnet Data Expecting Reply" ve "BACnet Data Not Expecting Reply" Frame Type’larında paylaşılan bir çekirdekle (npdu.ts/apdu.ts) NPDU + APDU BAŞLIĞINA (PDU type, Invoke ID, Service Choice adı) çözülür; tag’li servis parametreleri HAM kalır. Token dolaşımı/hata analizi bu motorun kapsamı dışındadır.',
+  'protocol.bacnetMstp.example.token.name': 'Token (Length=0, Data CRC yok)',
+  'protocol.bacnetMstp.example.token.description':
+    'MAC 1’den MAC 5’e Token çerçevesi. Length=0 olduğu için Data ve Data CRC alanları hiç yoktur — çerçeve Header CRC’de biter.',
+  'protocol.bacnetMstp.example.pollForMaster.name': 'Poll For Master (Length=0, ikinci Frame Type)',
+  'protocol.bacnetMstp.example.pollForMaster.description':
+    'MAC 5’ten MAC 1’e Poll For Master çerçevesi — Length=0 yolunun yalnız Token’a özgü olmadığını, başka bir Frame Type’ta da aynı şekilde işlediğini gösterir.',
+  'protocol.bacnetMstp.example.dataExpectingReplyReadProperty.name':
+    'BACnet Data Expecting Reply — Confirmed-Request / ReadProperty',
+  'protocol.bacnetMstp.example.dataExpectingReplyReadProperty.description':
+    'MAC 1’den MAC 10’a; NPDU Expecting Reply=1, APDU Confirmed-Request (Invoke ID 1, Service Choice ReadProperty). Servis parametreleri (3 bayt) temsilidir — bu motor tarafından çözülmez.',
+  'protocol.bacnetMstp.example.dataNotExpectingReplyIAm.name':
+    'BACnet Data Not Expecting Reply — Unconfirmed-Request / I-Am',
+  'protocol.bacnetMstp.example.dataNotExpectingReplyIAm.description':
+    'MAC 10’dan broadcast MAC’e (0xFF); APDU Unconfirmed-Request (Service Choice I-Am), Invoke ID YOK. Servis parametreleri (4 bayt) temsilidir.',
+  'protocol.bacnetMstp.example.badHeaderCrc.name': 'Bozuk Header CRC (hata yolu)',
+  'protocol.bacnetMstp.example.badHeaderCrc.description':
+    '"Token" örneğiyle AYNI gövde, yalnız Header CRC baytı bilerek bozuldu — ParseFailure değil ama çerçeve valid:false ve crc-mismatch hatası taşır.',
+  'protocol.bacnetMstp.example.badDataCrc.name': 'Bozuk Data CRC (hata yolu)',
+  'protocol.bacnetMstp.example.badDataCrc.description':
+    '"BACnet Data Not Expecting Reply — Unconfirmed-Request / I-Am" örneğiyle AYNI gövde, Header CRC DOĞRU ama Data CRC’nin son baytı bilerek bozuldu — NPDU/APDU yine yapısal olarak çözülür, yalnız Data CRC alanı valid:false olur.',
+  'protocol.bacnetMstp.example.unrecognizedFrameType.name': 'Tanınmayan Frame Type (uyarı yolu)',
+  'protocol.bacnetMstp.example.unrecognizedFrameType.description':
+    'Frame Type 0xC8 (vendor-proprietary aralığı) dar ad kümesinde yok — yalnız uyarı üretir (CRC’lerin ikisi de doğru), Data NPDU/APDU olarak değil ham blok olarak gösterilir.',
 } as const;
 
 /**

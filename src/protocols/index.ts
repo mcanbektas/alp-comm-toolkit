@@ -177,6 +177,21 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // Karar 5 gereği kapsam dışı: ham+uyarı. Checksum terslenmiş (NOT) XOR;
   // `xor8Checksum` üstüne ince tersleme katmanı. Payload DPT'siz HAM kalır.
   registerOnce(registry, 'knx', () => import('./building/knx/knx').then((module) => module.knxPlugin));
+  // BACnet MS/TP — dalga 6f: lisanslı üçlünün SONUNCUSU + paylaşılan NPDU/APDU
+  // çekirdeği (bkz. building/bacnet/npdu.ts + apdu.ts — iec104Asdu.ts'nin
+  // AYNI ayrı-modül deseni, dalga 6g/bacnet-ip aynı çekirdeği yeniden
+  // kullanacak). Çerçeve: Preamble 55 FF + Frame Type (dar ad kümesi) +
+  // Destination/Source MAC (Device Instance İLE KARIŞTIRILMAZ) + Length +
+  // Header CRC-8 (yeni katalog girdisi `CRC8_BACNET_MSTP`) + koşullu Data +
+  // Data CRC-16 (`CRC16_X25`, Length=0'da hiç YOK). Data yalnız Frame Type 5/6
+  // (BACnet Data Expecting/Not Expecting Reply) iken NPDU/APDU'ya geçirilir;
+  // servis parametreleri HAM tek blok kalır (berReader BACnet tag formatına
+  // uymuyor, bkz. apdu.ts dosya başı). Klasör/dosya adı tireli DEĞİL
+  // (`bacnetmstp` — art-net'in `artnet` emsali); `bacnet-mstp` yalnız
+  // PROTOCOL_ID/katalog id/registry key'de kalır.
+  registerOnce(registry, 'bacnet-mstp', () =>
+    import('./building/bacnetmstp/bacnetmstp').then((module) => module.bacnetMstpPlugin),
+  );
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

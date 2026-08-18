@@ -19,6 +19,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC8_SAE_J1850',
   'CRC8_AUTOSAR',
   'CRC8_MAXIM',
+  'CRC8_BACNET_MSTP',
   'CRC16_ARC',
   'CRC16_MODBUS',
   'CRC16_CCITT_FALSE',
@@ -58,6 +59,32 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     xorout: 0xffn,
   },
   CRC8_MAXIM: { width: 8, poly: 0x31n, init: 0x00n, refin: true, refout: true, xorout: 0x00n },
+  /**
+   * BACnet MS/TP Header CRC-8 (ANSI/ASHRAE 135 Annex G) — resmi metin bu
+   * depoda YOK (brief-faz10-dalga6.md Karar 2). Mevcut dört CRC8 girdisinden
+   * (yukarıda) HİÇBİRİ değil — parametreler İKİ bağımsız kamuya açık
+   * kaynaktan ÇAPRAZ TEYİTLE alındı, KOD KOPYALANMADI:
+   *   1. bacnet-stack (github.com/bacnet-stack/bacnet-stack, MIT): `src/crc.c`
+   *      `CRC_Calc_Header()` aritmetiği ve `src/mstp.c`nin birim testi
+   *      (yorumu "HeaderCRC==0x73, per Annex G example" diyen assert). poly/
+   *      init/refin/refout/xorout bu testin geçmesi için TERS mühendislikle (256 aday
+   *      polinom, hem reflected hem non-reflected model, 400+ rastgele
+   *      deneme) tek bir eşleşme (poly=0x81) bulunarak elde edildi.
+   *   2. Wireshark BACnet MS/TP dissector (github.com/wireshark/wireshark,
+   *      epan/dissectors/packet-mstp.c) — AYNI algoritmayı bağımsızca gömer
+   *      (`crc8` init 0xFF, `crc8=~crc8` finalize) ve gerçek yakalanmış
+   *      trafiği bununla doğrular.
+   * Üçüncü destekleyici kaynak (kod içermez): Steve Karg, "Understanding
+   * BACnet MSTP Encoding" — init=0xFF ve iyi-çerçeve residue'sunun 0x55
+   * olduğunu bağımsızca doğruluyor.
+   * `check` değeri ("123456789") HİÇBİR kaynakta YOK — bu depodaki `crc()`
+   * motorunun kendisiyle üretildi (crcEngine.test.ts `CHECK_VALUES`); Annex G
+   * örneğinin (5 baytlık NPDU header → ham 0x73 / gönderilen 0x8C / residue
+   * 0x55) bu motorla BAĞIMSIZCA yeniden üretilmesiyle ayrıca doğrulandı
+   * (poly/init/xorout parametrelerinin kendisi, katalog dışı ikinci bir
+   * uygulamayla — UBX 3c emsali).
+   */
+  CRC8_BACNET_MSTP: { width: 8, poly: 0x81n, init: 0xffn, refin: true, refout: true, xorout: 0xffn },
   CRC16_ARC: {
     width: 16,
     poly: 0x8005n,
