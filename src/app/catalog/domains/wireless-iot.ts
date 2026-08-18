@@ -101,7 +101,8 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'IEEE 802.15.4 based mesh stack with a clustered application layer (ZCL) widely deployed in smart lighting, sensors and smart home gateways.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'zigbee',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Network Graph (Coordinator / Router / End Device)',

@@ -50,6 +50,7 @@ const BUILT_IN_IDS = [
   'udp',
   'uds',
   'vlan-802-1q',
+  'zigbee',
 ];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
@@ -98,6 +99,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   udp: 'network-ethernet',
   uds: 'automotive',
   'vlan-802-1q': 'network-ethernet',
+  zigbee: 'wireless-iot',
 };
 
 describe('registerBuiltInProtocols', () => {

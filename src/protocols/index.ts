@@ -253,4 +253,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'lorawan', () =>
     import('./wireless/lorawan/lorawan').then((module) => module.lorawanPlugin),
   );
+  // Zigbee — dalga 7c: ÜÇ katman TEK motor (802.15.4 MAC → NWK → APS + dar
+  // ZCL, bkz. zigbee.ts dosya başı). Girdi TAM 802.15.4 çerçevesi (FCF..FCS).
+  // FCS bu dalgada GERÇEKTEN doğrulanır (CRC16_KERMIT, anahtarsız — MIC/
+  // checksum-dialect kuralının istisnası). NWK/APS security=1 → encrypted
+  // ham (öteye inilmez). ZCL yalnız Read Attributes Response/Report
+  // Attributes/Default Response payload'ı çözer; cluster-specific komutlar
+  // ve Cluster/Profile ID isim eşlemesi bu dalgada YOK (karar 5, dar kapsam).
+  registerOnce(registry, 'zigbee', () =>
+    import('./wireless/zigbee/zigbee').then((module) => module.zigbeePlugin),
+  );
 }

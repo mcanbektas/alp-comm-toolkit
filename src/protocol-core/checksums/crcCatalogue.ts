@@ -26,6 +26,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_XMODEM',
   'CRC16_X25',
   'CRC16_DNP',
+  'CRC16_KERMIT',
   'CRC24',
   'CRC24_Q',
   'CRC32',
@@ -132,6 +133,23 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     refin: true,
     refout: true,
     xorout: 0xffffn,
+  },
+  /**
+   * IEEE 802.15.4 FCS (dalga 7c, Zigbee MAC katmanı) — dosya başındaki reveng.
+   * sourceforge.io kataloğunun "CRC-16/KERMIT" (a.k.a. CRC-16/CCITT-TRUE,
+   * V.41-LSB) girdisiyle BİREBİR aynı: poly/init/xorout `CRC16_XMODEM`ın
+   * (aynı poly, aynı init) TERSİ yönde yansıtılmış hâli — `refin`/`refout`
+   * true olması dışında XMODEM'den ayrılır, `CRC16_CCITT_FALSE`/`CRC16_X25`
+   * ile de (farklı init/xorout) KARIŞTIRILMAZ (dosya başı "değerler
+   * UYDURULMAZ" kuralı, brief-faz10-dalga7.md tuzak notu).
+   */
+  CRC16_KERMIT: {
+    width: 16,
+    poly: 0x1021n,
+    init: 0x0000n,
+    refin: true,
+    refout: true,
+    xorout: 0x0000n,
   },
   CRC24: {
     width: 24,

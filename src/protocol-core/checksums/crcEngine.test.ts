@@ -31,6 +31,10 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   CRC16_XMODEM: 0x31c3n,
   CRC16_X25: 0x906en,
   CRC16_DNP: 0xea82n,
+  // IEEE 802.15.4 FCS (dalga 7c) — reveng kataloğunun "CRC-16/KERMIT" girdisi;
+  // bu motorla üretilip reveng'in yayımlı check değeriyle çapraz doğrulandı
+  // (crcCatalogue.ts'teki CRC16_KERMIT girdisinin dosya başı notuna bak).
+  CRC16_KERMIT: 0x2189n,
   CRC24: 0x21cf02n,
   // CRC-24/Q (RTCM SC-104 / ITU-T H.224): CRC24 (OpenPGP) ile AYNI polinom
   // (0x864CFB), yalnız init 0x000000 — bu yüzden check değeri de farklı
@@ -44,7 +48,7 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
 const CHECK_INPUT = new TextEncoder().encode('123456789');
 
 describe('computeNamedCrc — kanonik katalog fixture doğrulaması', () => {
-  // 18 algoritmanın HER BİRİ tek tek doğrulanır: biri bile tutmazsa motorda
+  // Katalogdaki algoritmaların HER BİRİ tek tek doğrulanır: biri bile tutmazsa motorda
   // (özellikle refin/refout ya da width < 8 kaydırma mantığında) hata var demektir.
   it.each(CRC_ALGORITHM_IDS)('"123456789" için %s check değerini üretir', (id) => {
     expect(computeNamedCrc(CHECK_INPUT, id)).toBe(CHECK_VALUES[id]);

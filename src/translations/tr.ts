@@ -2967,6 +2967,57 @@ export const tr = {
   'protocol.lorawan.example.truncatedFhdr.description':
     'MACPayload yalnız 6 bayt — FHDR en az 7 bayt (DevAddr+FCtrl+FCnt) ister, truncated-frame basar.',
 
+  // --- Zigbee ---
+  'protocol.zigbee.error.frameTooShort': 'Çerçeve en az 802.15.4 MAC minimum uzunluğu (FCF+Sequence+FCS) kadar olmalı.',
+  'protocol.zigbee.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.zigbee.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.zigbee.error.fcsMismatch': 'FCS, hesaplanan CRC16/KERMIT değeriyle uyuşmuyor.',
+  'protocol.zigbee.error.macAddressingTruncated': 'MAC adresleme alanları için tamponda yeterli bayt yok.',
+  'protocol.zigbee.error.nwkTruncated': 'NWK başlığı (IEEE adresleri dahil) için tamponda yeterli bayt yok.',
+  'protocol.zigbee.error.apsTruncated': 'APS başlığı için tamponda yeterli bayt yok.',
+  'protocol.zigbee.warning.frameVersionUnsupported':
+    'Frame Version 2003/2006 dışında (2015+); bu dalgada adresleme kuralı desteklenmiyor, alanlar ham bırakıldı.',
+  'protocol.zigbee.warning.nonDataFrame': 'MAC Frame Type Data değil; payload NWK’ya geçirilmedi, ham gösterildi.',
+  'protocol.zigbee.warning.nwkAdvancedAddressing':
+    'Multicast/Source Route alt-çerçevesi bu dalgada çözülmüyor; kalan NWK payload’ı ham gösterildi.',
+  'protocol.zigbee.warning.nwkEncrypted': 'NWK Security etkin; payload şifreli, ham gösterildi (öteye inilmedi).',
+  'protocol.zigbee.warning.nwkNonData': 'NWK Frame Type Data değil; payload APS’e geçirilmedi, ham gösterildi.',
+  'protocol.zigbee.warning.apsOutOfScope':
+    'Group addressing veya Extended Header bu dalgada çözülmüyor; APS payload’ı ham gösterildi.',
+  'protocol.zigbee.warning.apsEncrypted': 'APS Security etkin; payload şifreli, ham gösterildi (öteye inilmedi).',
+  'protocol.zigbee.warning.apsNonData': 'APS Frame Type Data değil; payload ZCL’e geçirilmedi, ham gösterildi.',
+  'protocol.zigbee.warning.zclClusterSpecificNotDecoded':
+    'Cluster-specific komut gövdesi bu dalgada çözülmüyor; ham gösterildi.',
+  'protocol.zigbee.warning.zclGlobalCommandNotDecoded':
+    'Bu global ZCL komutunun gövdesi bu dalgada çözülmüyor; ham gösterildi.',
+  'protocol.zigbee.warning.zclUnknownDataType':
+    'Attribute veri tipi dar kümede yok; uzunluk bilinmediği için zincir burada durdu, kalan ham gösterildi.',
+
+  'protocol.zigbee.documentation.summary':
+    'Zigbee, üç katmanı tek motorda çözer: 802.15.4 MAC (Frame Control, Sequence, adresleme — PAN ID Compression’a göre değişken, FCS CRC16/KERMIT ile GERÇEKTEN doğrulanır) → NWK (Frame Control, Dest/Source Address, Radius, Sequence; Security etkinse payload şifreli ham kalır) → APS (Frame Control, Endpoint’ler, Cluster/Profile ID, Counter; Security etkinse ham kalır) → ZCL (Frame Control, Transaction Sequence Number, Command ID; yalnız Read Attributes Response/Report Attributes/Default Response payload’ı dar bir veri tipi kümesiyle çözülür — cluster-specific komutlar ve Cluster ID’nin isim karşılığı bu dalgada YOK). Yalnız Frame Version 2003/2006 ve yalnız Data frame’ler NWK/APS/ZCL zincirine girer.',
+  'protocol.zigbee.example.temperatureReport.name': 'Temperature Measurement — Report Attributes',
+  'protocol.zigbee.example.temperatureReport.description':
+    'MAC→NWK→APS(Temperature Measurement)→ZCL Report Attributes; raw `29 09` → Int16 2345 (spec örneğinin katman zinciriyle sarmalanmışı).',
+  'protocol.zigbee.example.readAttrResponse.name': 'Read Attributes Response (SUCCESS)',
+  'protocol.zigbee.example.readAttrResponse.description':
+    'AttrID + Status(SUCCESS) + DataType(Int16) + Value alan alan çözülür.',
+  'protocol.zigbee.example.defaultResponse.name': 'Default Response',
+  'protocol.zigbee.example.defaultResponse.description': 'Response to Command ID + Status(SUCCESS) çözülür.',
+  'protocol.zigbee.example.nwkEncrypted.name': 'NWK Security etkin (şifreli, ham)',
+  'protocol.zigbee.example.nwkEncrypted.description':
+    'NWK Security=1 — payload “Encrypted NWK payload” olarak ham gösterilir, APS’e hiç geçilmez.',
+  'protocol.zigbee.example.clusterSpecificCommand.name': 'Cluster-specific komut (dar kapsam dışı)',
+  'protocol.zigbee.example.clusterSpecificCommand.description':
+    'ZCL Frame Type=Cluster-specific — gövde bu dalgada çözülmüyor, ham + uyarı.',
+  'protocol.zigbee.example.macCommandFrame.name': 'MAC Command çerçevesi (NWK’ya geçmez)',
+  'protocol.zigbee.example.macCommandFrame.description':
+    'MAC Frame Type=MAC Command — payload NWK’ya hiç geçirilmez, ham + uyarı.',
+  'protocol.zigbee.example.fcsMismatch.name': 'Bozuk FCS (hata yolu)',
+  'protocol.zigbee.example.fcsMismatch.description': 'Son bayt bozulmuş — FCS FAIL, çerçeve geçersiz.',
+  'protocol.zigbee.example.truncatedMacAddressing.name': 'Eksik MAC adresleme (hata yolu)',
+  'protocol.zigbee.example.truncatedMacAddressing.description':
+    'Header adresleme bitleri adres bekliyor ama tamponda bayt yok — truncated-frame basar.',
+
 } as const;
 
 /**

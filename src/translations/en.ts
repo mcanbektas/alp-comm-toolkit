@@ -2974,4 +2974,59 @@ export const en: TranslationDictionary = {
   'protocol.lorawan.example.truncatedFhdr.description':
     'MACPayload is only 6 bytes — the FHDR requires at least 7 (DevAddr+FCtrl+FCnt), raises truncated-frame.',
 
+  // --- Zigbee ---
+  'protocol.zigbee.error.frameTooShort':
+    'The frame must be at least the 802.15.4 MAC minimum length (FCF+Sequence+FCS).',
+  'protocol.zigbee.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.zigbee.error.aborted': 'Parsing was aborted.',
+  'protocol.zigbee.error.fcsMismatch': 'The FCS does not match the calculated CRC16/KERMIT value.',
+  'protocol.zigbee.error.macAddressingTruncated': 'Not enough bytes in the buffer for the MAC addressing fields.',
+  'protocol.zigbee.error.nwkTruncated': 'Not enough bytes in the buffer for the NWK header (including IEEE addresses).',
+  'protocol.zigbee.error.apsTruncated': 'Not enough bytes in the buffer for the APS header.',
+  'protocol.zigbee.warning.frameVersionUnsupported':
+    'Frame Version is outside 2003/2006 (2015+); the addressing rule is not supported in this wave, fields shown raw.',
+  'protocol.zigbee.warning.nonDataFrame':
+    "The MAC Frame Type isn't Data; the payload was not passed to NWK, shown raw.",
+  'protocol.zigbee.warning.nwkAdvancedAddressing':
+    'The Multicast/Source Route subframe is not decoded in this wave; the remaining NWK payload is shown raw.',
+  'protocol.zigbee.warning.nwkEncrypted': 'NWK Security is enabled; the payload is encrypted, shown raw (not decoded further).',
+  'protocol.zigbee.warning.nwkNonData':
+    "The NWK Frame Type isn't Data; the payload was not passed to APS, shown raw.",
+  'protocol.zigbee.warning.apsOutOfScope':
+    'Group addressing or an Extended Header is not decoded in this wave; the APS payload is shown raw.',
+  'protocol.zigbee.warning.apsEncrypted': 'APS Security is enabled; the payload is encrypted, shown raw (not decoded further).',
+  'protocol.zigbee.warning.apsNonData':
+    "The APS Frame Type isn't Data; the payload was not passed to ZCL, shown raw.",
+  'protocol.zigbee.warning.zclClusterSpecificNotDecoded':
+    'The cluster-specific command body is not decoded in this wave; shown raw.',
+  'protocol.zigbee.warning.zclGlobalCommandNotDecoded':
+    "This global ZCL command's body is not decoded in this wave; shown raw.",
+  'protocol.zigbee.warning.zclUnknownDataType':
+    "The attribute data type isn't in the narrow set; since its length is unknown, the chain stopped here, the rest is shown raw.",
+
+  'protocol.zigbee.documentation.summary':
+    "Zigbee decodes three layers in one engine: 802.15.4 MAC (Frame Control, Sequence, addressing — variable per PAN ID Compression, FCS actually VERIFIED with CRC16/KERMIT) → NWK (Frame Control, Dest/Source Address, Radius, Sequence; if Security is enabled the payload stays encrypted and raw) → APS (Frame Control, Endpoints, Cluster/Profile ID, Counter; stays raw if Security is enabled) → ZCL (Frame Control, Transaction Sequence Number, Command ID; only the Read Attributes Response/Report Attributes/Default Response payload is decoded with a narrow data type set — cluster-specific commands and a name mapping for Cluster ID are NOT in this wave). Only Frame Version 2003/2006 and only Data frames enter the NWK/APS/ZCL chain.",
+  'protocol.zigbee.example.temperatureReport.name': 'Temperature Measurement — Report Attributes',
+  'protocol.zigbee.example.temperatureReport.description':
+    'MAC→NWK→APS(Temperature Measurement)→ZCL Report Attributes; raw `29 09` → Int16 2345 (the spec example wrapped in the layer chain).',
+  'protocol.zigbee.example.readAttrResponse.name': 'Read Attributes Response (SUCCESS)',
+  'protocol.zigbee.example.readAttrResponse.description':
+    'AttrID + Status(SUCCESS) + DataType(Int16) + Value are decoded field by field.',
+  'protocol.zigbee.example.defaultResponse.name': 'Default Response',
+  'protocol.zigbee.example.defaultResponse.description': 'Response to Command ID + Status(SUCCESS) are decoded.',
+  'protocol.zigbee.example.nwkEncrypted.name': 'NWK Security enabled (encrypted, raw)',
+  'protocol.zigbee.example.nwkEncrypted.description':
+    'NWK Security=1 — the payload is shown raw as "Encrypted NWK payload", APS is never reached.',
+  'protocol.zigbee.example.clusterSpecificCommand.name': 'Cluster-specific command (out of scope)',
+  'protocol.zigbee.example.clusterSpecificCommand.description':
+    "ZCL Frame Type=Cluster-specific — the body isn't decoded in this wave, raw + warning.",
+  'protocol.zigbee.example.macCommandFrame.name': "MAC Command frame (doesn't reach NWK)",
+  'protocol.zigbee.example.macCommandFrame.description':
+    'MAC Frame Type=MAC Command — the payload never reaches NWK, raw + warning.',
+  'protocol.zigbee.example.fcsMismatch.name': 'Corrupt FCS (error path)',
+  'protocol.zigbee.example.fcsMismatch.description': 'The last byte is corrupted — FCS FAILs, the frame is invalid.',
+  'protocol.zigbee.example.truncatedMacAddressing.name': 'Truncated MAC addressing (error path)',
+  'protocol.zigbee.example.truncatedMacAddressing.description':
+    'The header addressing bits expect an address but no bytes remain in the buffer — raises truncated-frame.',
+
 };

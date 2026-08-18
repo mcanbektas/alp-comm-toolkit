@@ -69,9 +69,9 @@ describe('CrcCalculatorTool', () => {
     renderTool();
 
     const options = within(screen.getByTestId('crc-algorithm')).getAllByRole('option');
-    // 20 katalog CRC'si (dalga 10/6f'de BACnet MS/TP Header CRC-8 için CRC8_BACNET_MSTP
+    // 21 katalog CRC'si (dalga 10/7c'de IEEE 802.15.4 FCS için CRC16_KERMIT
     // eklendi) + 7 basit toplam + 1 özel.
-    expect(options).toHaveLength(28);
+    expect(options).toHaveLength(29);
   });
 
   it('shows no computed value before any data is entered', () => {
