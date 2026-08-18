@@ -139,6 +139,12 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'coap', () =>
     import('./network/coap/coap').then((module) => module.coapPlugin),
   );
+  // DMX512 — dalga 6a: Start Code + ≤512 slot; `building/` dizinini açan ilk
+  // motor. BREAK/MAB fiziksel sinyaldir, bayt olarak modellenmez (bkz. lin.ts
+  // dosya başı emsali). Checksum yok; 512 slot aşımı hata değil uyarı.
+  registerOnce(registry, 'dmx512', () =>
+    import('./building/dmx512/dmx512').then((module) => module.dmx512Plugin),
+  );
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

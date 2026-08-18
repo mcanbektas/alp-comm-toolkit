@@ -2568,6 +2568,37 @@ export const tr = {
   'protocol.goose.example.frameTooShort.name': 'Çok kısa çerçeve',
   'protocol.goose.example.frameTooShort.description':
     '16 bayt: Ethernet başlığı var ama 8 baytlık GOOSE başlığı tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+
+  // --- DMX512 ---
+  'protocol.dmx512.error.frameTooShort': 'Tampon boş — Start Code baytı bile yok.',
+  'protocol.dmx512.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.dmx512.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dmx512.warning.unrecognizedStartCode':
+    'Start Code, adlandırılan dar kümede (0x00 DMX Level Data, 0x17 Text Packet, 0xCC RDM, 0xCF System Information Packet) yok — ham gösteriliyor.',
+  'protocol.dmx512.warning.slotCountExceedsMaximum':
+    'Slot sayısı ANSI E1.11’in izin verdiği 512 üst sınırını aşıyor — spec dışı, ama çözümlemeye devam edildi.',
+  'protocol.dmx512.summary.frame': 'Start Code {startCode}, {slotCount} slot',
+  'protocol.dmx512.documentation.summary':
+    'ANSI E1.11 (ESTA, DMX512-A): bir DMX universe çerçevesi Start Code (bayt 0) ve en çok 512 slottan (bayt 1..N) oluşur. BREAK ve Mark After Break fiziksel sinyal olaylarıdır, bu motora bayt olarak hiç girmez — girdi START CODE’tan başlar. Start Code yalnız dar bir kümede adlandırılır (0x00 DMX Level Data/standart lighting spec’in kendisinde; 0x17 Text Packet, 0xCC RDM, 0xCF System Information Packet ikincil kaynaktan — spec metni sayısal liste vermiyor); tanınmayan değer ham + uyarıyla gösterilir. Slotlar ham 8-bit değerdir: 16-bit (Coarse/Fine) birleştirme ve fixture personality (kanal anlamı) bu motorda YAPILMAZ — slot anlamı fixture profiline bağlıdır, profilsiz uydurulmaz (definitions sekmesi planned kalır). 512 slotu aşan çerçeve hata değil uyarıdır (spec dışı ama çözülmeye devam edilir). Checksum yoktur; “valid” yalnız yapısal (uzunluk) kontrolden gelir.',
+  'protocol.dmx512.example.standardLightingBasic.name': 'Standart lighting, birkaç slot',
+  'protocol.dmx512.example.standardLightingBasic.description':
+    'Start Code 0x00 (DMX Level Data) + spec’in kendi RGB fixture örneği: Slot1 Red=255, Slot2 Green=128, Slot3 Blue=0, Slot4 Dimmer=200.',
+  'protocol.dmx512.example.full512SlotUniverse.name': 'Tam 512 slotlu universe',
+  'protocol.dmx512.example.full512SlotUniverse.description':
+    'Start Code 0x00 + tam 512 slot — ANSI E1.11’in izin verdiği azami universe boyutu. Alan tablosunda ilk 16 slot ayrı satır, kalan 496 slot tek özet alanda gösterilir.',
+  'protocol.dmx512.example.oversizedSlotCount.name': '512 slot tavanının aşılması',
+  'protocol.dmx512.example.oversizedSlotCount.description':
+    '520 slot — ANSI E1.11’in 512 sınırını aşıyor. Hata değil, yalnız slotCountExceedsMaximum uyarısı basılır; çerçeve yine de sonuna kadar çözülür.',
+  'protocol.dmx512.example.unrecognizedStartCode.name': 'Tanınmayan Start Code',
+  'protocol.dmx512.example.unrecognizedStartCode.description':
+    'Start Code 0x01 — dar ad kümesinde yok. Alan ham gösterilir ve unrecognizedStartCode uyarısı basılır; çerçeve yapısal olarak yine geçerlidir.',
+  'protocol.dmx512.example.recognizedAlternateStartCode.name':
+    'Tanınan alternatif Start Code (0xCC RDM)',
+  'protocol.dmx512.example.recognizedAlternateStartCode.description':
+    'Start Code 0xCC — ikincil kaynaktan adlandırılan RDM (Remote Device Management) alternatif kodu. 0x00 dışındaki start code’ların da adlandığını gösterir.',
+  'protocol.dmx512.example.minimalStartCodeOnly.name': 'Yalnız Start Code (0 slot)',
+  'protocol.dmx512.example.minimalStartCodeOnly.description':
+    '1 baytlık en küçük geçerli çerçeve: yalnız Start Code, hiç slot verisi yok.',
 } as const;
 
 /**

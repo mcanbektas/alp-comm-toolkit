@@ -335,7 +335,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'ANSI E1.11 unidirectional lighting stream that pushes up to 512 eight-bit slots per universe from a console to stage, auditorium and façade fixtures.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dmx512',
           // timing: BREAK ve MAB süreleri, frame duration ve refresh rate
           // doğrudan sinyal zamanlamasından ölçülür.
           tabs: [

@@ -2568,4 +2568,35 @@ export const en: TranslationDictionary = {
   'protocol.goose.example.frameTooShort.name': 'Frame too short',
   'protocol.goose.example.frameTooShort.description':
     '16 bytes: the Ethernet header is present but the 8-byte GOOSE header is incomplete — a ParseFailure (recoverable, the stream may continue).',
+
+  // --- DMX512 ---
+  'protocol.dmx512.error.frameTooShort': 'Buffer is empty — not even a Start Code byte.',
+  'protocol.dmx512.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.dmx512.error.aborted': 'Parsing was cancelled.',
+  'protocol.dmx512.warning.unrecognizedStartCode':
+    'Start Code is not in the narrow named set (0x00 DMX Level Data, 0x17 Text Packet, 0xCC RDM, 0xCF System Information Packet) — shown raw.',
+  'protocol.dmx512.warning.slotCountExceedsMaximum':
+    'Slot count exceeds the 512 ceiling allowed by ANSI E1.11 — out of spec, but decoding continued.',
+  'protocol.dmx512.summary.frame': 'Start Code {startCode}, {slotCount} slots',
+  'protocol.dmx512.documentation.summary':
+    'ANSI E1.11 (ESTA, DMX512-A): a DMX universe frame is a Start Code (byte 0) followed by up to 512 slots (bytes 1..N). BREAK and Mark After Break are physical signalling events and never reach this engine as bytes — the input starts at the START CODE. The Start Code is only named for a narrow set (0x00 DMX Level Data / standard lighting, named by the spec text itself; 0x17 Text Packet, 0xCC RDM, 0xCF System Information Packet from a secondary source — the spec text gives no numeric list); an unrecognized value is shown raw with a warning. Slots are raw 8-bit values: 16-bit (Coarse/Fine) combination and fixture personality (channel meaning) are NOT done by this engine — slot meaning depends on a fixture profile and is never guessed without one (the definitions tab stays planned). A frame with more than 512 slots is a warning, not an error (out of spec but still decoded). There is no checksum; “valid” comes only from structural (length) checks.',
+  'protocol.dmx512.example.standardLightingBasic.name': 'Standard lighting, a few slots',
+  'protocol.dmx512.example.standardLightingBasic.description':
+    'Start Code 0x00 (DMX Level Data) plus the spec’s own RGB fixture example: Slot1 Red=255, Slot2 Green=128, Slot3 Blue=0, Slot4 Dimmer=200.',
+  'protocol.dmx512.example.full512SlotUniverse.name': 'Full 512-slot universe',
+  'protocol.dmx512.example.full512SlotUniverse.description':
+    'Start Code 0x00 plus a full 512 slots — the maximum universe size ANSI E1.11 allows. The field table shows the first 16 slots individually and the remaining 496 in one summary field.',
+  'protocol.dmx512.example.oversizedSlotCount.name': 'Exceeding the 512-slot ceiling',
+  'protocol.dmx512.example.oversizedSlotCount.description':
+    '520 slots — over the ANSI E1.11 limit of 512. Not an error, only a slotCountExceedsMaximum warning; the frame is still decoded to the end.',
+  'protocol.dmx512.example.unrecognizedStartCode.name': 'Unrecognized Start Code',
+  'protocol.dmx512.example.unrecognizedStartCode.description':
+    'Start Code 0x01 — not in the narrow named set. The field is shown raw and an unrecognizedStartCode warning is raised; the frame is still structurally valid.',
+  'protocol.dmx512.example.recognizedAlternateStartCode.name':
+    'Recognized alternate Start Code (0xCC RDM)',
+  'protocol.dmx512.example.recognizedAlternateStartCode.description':
+    'Start Code 0xCC — the RDM (Remote Device Management) alternate code, named from a secondary source. Shows that start codes other than 0x00 can be named too.',
+  'protocol.dmx512.example.minimalStartCodeOnly.name': 'Start Code only (0 slots)',
+  'protocol.dmx512.example.minimalStartCodeOnly.description':
+    'The smallest valid frame at 1 byte: only the Start Code, no slot data at all.',
 };
