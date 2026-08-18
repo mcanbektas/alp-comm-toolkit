@@ -263,4 +263,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'zigbee', () =>
     import('./wireless/zigbee/zigbee').then((module) => module.zigbeePlugin),
   );
+  // Matter — dalga 7d: TLV Tree Decoder. Girdi bağımsız bir TLV blob'udur,
+  // Matter MESAJ çerçevesi DEĞİL (o katman şifreli+oturumlu, anahtar ister —
+  // dalga 5 karar 8). Kodlama PAYLAŞILAN yeni walker'da
+  // (protocol-core/decoding/matterTlv.ts — berReader KULLANILMAZ, Matter TLV
+  // başka bir kodlamadır); burada yalnız yürüyüş politikası (derinlik/eleman
+  // tavanı) ve ağacın ParsedField listesine düzleştirilmesi var. Interaction
+  // Model/Commissioning/Session tools'ları planned bildirimli → 'partial'.
+  registerOnce(registry, 'matter', () =>
+    import('./wireless/matter/matter').then((module) => module.matterPlugin),
+  );
 }

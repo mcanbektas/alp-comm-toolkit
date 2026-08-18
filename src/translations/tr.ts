@@ -3018,6 +3018,58 @@ export const tr = {
   'protocol.zigbee.example.truncatedMacAddressing.description':
     'Header adresleme bitleri adres bekliyor ama tamponda bayt yok — truncated-frame basar.',
 
+  // --- Matter ---
+  'protocol.matter.error.frameEmpty': 'Girdi boş; en az bir TLV elemanı gerekir.',
+  'protocol.matter.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.matter.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.matter.error.truncated': 'Bir TLV elemanının başlığı ya da değeri için tamponda yeterli bayt yok.',
+  'protocol.matter.error.reservedElementType':
+    'Eleman tipi 0x19–0x1F aralığında (spec’te ayrılmış); uzunluğu bilinmediği için yürüyüş durdu.',
+  'protocol.matter.error.taggedEndOfContainer':
+    'End-of-container elemanı tag taşıyor; spec bunu yasaklar (tag control sıfır olmalı).',
+  'protocol.matter.error.valueOverflow': 'Bir elemanın bildirdiği uzunluk tamponun dışına taşıyor.',
+  'protocol.matter.error.lengthUnsupported':
+    'Bildirilen uzunluk 0xFFFFFFFF üstünde; bu boyut indekslenebilir değil.',
+  'protocol.matter.error.unexpectedEndOfContainer':
+    'Açık bir container yokken end-of-container elemanı görüldü.',
+  'protocol.matter.error.unclosedContainer':
+    'Bir container kapanmadan girdi bitti; end-of-container elemanı spec’te ZORUNLUdur.',
+  'protocol.matter.warning.maxDepthReached':
+    'Azami container derinliğine ulaşıldı; daha derindeki elemanlar çözülmedi.',
+  'protocol.matter.warning.maxElementsReached':
+    'Azami eleman sayısına ulaşıldı; kalan elemanlar çözülmedi.',
+  'protocol.matter.warning.implicitProfileUnresolved':
+    'Implicit profile tag: vendor/profile numarası baytlarda YOK, protokol bağlamından gelir — çözülmedi, uydurulmadı.',
+  'protocol.matter.warning.malformedUtf8': 'UTF-8 dizisi bozuk; metin yine de gösterildi.',
+  'protocol.matter.warning.contextTagAtTopLevel': 'En dış seviyede context tag kullanılamaz (spec A.2.2).',
+  'protocol.matter.warning.anonymousTagInStructure': 'Structure üyeleri anonim tag taşıyamaz (spec A.5.1).',
+  'protocol.matter.warning.nonAnonymousTagInArray': 'Array üyeleri anonim tag taşımak zorundadır (spec A.5.2).',
+
+  'protocol.matter.documentation.summary':
+    'Matter TLV Tree Decoder, bağımsız bir TLV blob’unu özyinelemeli olarak yürür: her elemanın kontrol baytı (üst 3 bit tag biçimi, alt 5 bit eleman tipi), tag alanı (anonim / context / common / implicit / fully-qualified) ve tipten türeyen little-endian uzunluk/değer alanı çözülür; container’lar (Structure/Array/List) uzunluk taşımadığı için sonlarını zorunlu end-of-container elemanı belirler. Girdi Matter MESAJ çerçevesi DEĞİLDİR — o katman şifreli ve oturumludur, anahtar ister; buraya o zarfın içinden çıkmış çıplak TLV verilir. Tag kuralı ihlalleri (Array üyesi anonim olmalı, Structure üyesi olamaz) hata değil uyarıdır. Interaction Model, Commissioning ve Session çözümlemesi bu dalgada YOKTUR.',
+  'protocol.matter.example.identifyResponse.name': 'Gerçek Matter mesaj payload’ı (SDK vektörü)',
+  'protocol.matter.example.identifyResponse.description':
+    'connectedhomeip SDK test vektörü: fully-qualified tag’li Structure, içinde context tag’li sayı ve metin üyeleri (seri numarası, "1.4rc5").',
+  'protocol.matter.example.mixedArray.name': 'Karışık tipli Array (iç içe container)',
+  'protocol.matter.example.mixedArray.description':
+    'Spec örneği: [42, −170000, {}, 17.9, "Hello!"] — beş farklı tip, biri boş Structure.',
+  'protocol.matter.example.structureContextTags.name': 'Context tag’li Structure',
+  'protocol.matter.example.structureContextTags.description': 'Spec örneği: {0 = 42, 1 = −17}.',
+  'protocol.matter.example.tagForms.name': 'Fully-qualified tag biçimi',
+  'protocol.matter.example.tagForms.description':
+    'Spec örneği: vendor id + profile number + tag numarası taşıyan Structure ve üyesi.',
+  'protocol.matter.example.listMixedTags.name': 'List — karışık tag biçimleri',
+  'protocol.matter.example.listMixedTags.description':
+    'Spec örneği: List üyeleri anonim ve context tag’i birlikte kullanabilir.',
+  'protocol.matter.example.emptyStructure.name': 'Boş Structure',
+  'protocol.matter.example.emptyStructure.description':
+    'Açılış + zorunlu end-of-container: iki bayt, container aralığının tamamı.',
+  'protocol.matter.example.unclosedContainer.name': 'Kapanmamış container (hata yolu)',
+  'protocol.matter.example.unclosedContainer.description':
+    'Structure örneğinin end-of-container’ı kesilmiş hâli — çıkarımla tamamlanmaz, hata basar.',
+  'protocol.matter.example.truncatedString.name': 'Kesik string gövdesi (hata yolu)',
+  'protocol.matter.example.truncatedString.description':
+    '6 bayt uzunluk bildiriyor ama tamponda 2 bayt var — value-overflow basar.',
 } as const;
 
 /**

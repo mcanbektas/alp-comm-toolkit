@@ -3029,4 +3029,60 @@ export const en: TranslationDictionary = {
   'protocol.zigbee.example.truncatedMacAddressing.description':
     'The header addressing bits expect an address but no bytes remain in the buffer — raises truncated-frame.',
 
+  // --- Matter ---
+  'protocol.matter.error.frameEmpty': 'The input is empty; at least one TLV element is required.',
+  'protocol.matter.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.matter.error.aborted': 'Parsing was aborted.',
+  'protocol.matter.error.truncated':
+    "Not enough bytes in the buffer for a TLV element's header or value.",
+  'protocol.matter.error.reservedElementType':
+    'The element type is in the reserved 0x19–0x1F range; since its length is unknown, the walk stopped.',
+  'protocol.matter.error.taggedEndOfContainer':
+    'The end-of-container element carries a tag; the spec forbids this (tag control must be zero).',
+  'protocol.matter.error.valueOverflow': "An element's declared length runs past the end of the buffer.",
+  'protocol.matter.error.lengthUnsupported':
+    'The declared length is above 0xFFFFFFFF; that size is not indexable.',
+  'protocol.matter.error.unexpectedEndOfContainer':
+    'An end-of-container element appeared with no container open.',
+  'protocol.matter.error.unclosedContainer':
+    'The input ended with a container still open; the end-of-container element is MANDATORY per the spec.',
+  'protocol.matter.warning.maxDepthReached':
+    'The maximum container depth was reached; deeper elements were not decoded.',
+  'protocol.matter.warning.maxElementsReached':
+    'The maximum element count was reached; the remaining elements were not decoded.',
+  'protocol.matter.warning.implicitProfileUnresolved':
+    'Implicit profile tag: the vendor/profile number is NOT in the bytes, it comes from protocol context — left unresolved rather than invented.',
+  'protocol.matter.warning.malformedUtf8': 'The UTF-8 sequence is malformed; the text is shown anyway.',
+  'protocol.matter.warning.contextTagAtTopLevel':
+    'A context tag cannot be used at the top level (spec A.2.2).',
+  'protocol.matter.warning.anonymousTagInStructure':
+    'Structure members cannot carry an anonymous tag (spec A.5.1).',
+  'protocol.matter.warning.nonAnonymousTagInArray':
+    'Array members must carry an anonymous tag (spec A.5.2).',
+
+  'protocol.matter.documentation.summary':
+    'The Matter TLV Tree Decoder walks a standalone TLV blob recursively: for each element it decodes the control octet (upper 3 bits the tag form, lower 5 bits the element type), the tag field (anonymous / context / common / implicit / fully-qualified) and the little-endian length/value field whose width derives from the type; containers (Structure/Array/List) carry no length, so a mandatory end-of-container element marks their end. The input is NOT a Matter MESSAGE frame — that layer is encrypted and session-bound and needs a key; what you paste here is the bare TLV taken out of that envelope. Tag-rule violations (an Array member must be anonymous, a Structure member must not be) are warnings, not errors. Interaction Model, Commissioning and Session analysis are NOT in this wave.',
+  'protocol.matter.example.identifyResponse.name': 'Real Matter message payload (SDK vector)',
+  'protocol.matter.example.identifyResponse.description':
+    'A connectedhomeip SDK test vector: a fully-qualified tagged Structure holding context-tagged number and string members (serial number, "1.4rc5").',
+  'protocol.matter.example.mixedArray.name': 'Mixed-type Array (nested container)',
+  'protocol.matter.example.mixedArray.description':
+    'Spec example: [42, −170000, {}, 17.9, "Hello!"] — five different types, one an empty Structure.',
+  'protocol.matter.example.structureContextTags.name': 'Structure with context tags',
+  'protocol.matter.example.structureContextTags.description': 'Spec example: {0 = 42, 1 = −17}.',
+  'protocol.matter.example.tagForms.name': 'Fully-qualified tag form',
+  'protocol.matter.example.tagForms.description':
+    'Spec example: a Structure and its member carrying vendor id + profile number + tag number.',
+  'protocol.matter.example.listMixedTags.name': 'List — mixed tag forms',
+  'protocol.matter.example.listMixedTags.description':
+    'Spec example: List members may mix anonymous and context tags.',
+  'protocol.matter.example.emptyStructure.name': 'Empty Structure',
+  'protocol.matter.example.emptyStructure.description':
+    'Opening + mandatory end-of-container: two bytes, the whole container range.',
+  'protocol.matter.example.unclosedContainer.name': 'Unclosed container (error path)',
+  'protocol.matter.example.unclosedContainer.description':
+    "The Structure example with its end-of-container cut off — it is not inferred, it raises an error.",
+  'protocol.matter.example.truncatedString.name': 'Truncated string body (error path)',
+  'protocol.matter.example.truncatedString.description':
+    'It declares a 6-byte length but only 2 bytes remain in the buffer — raises value-overflow.',
 };

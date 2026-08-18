@@ -141,7 +141,8 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'IP-based smart home application layer with a clustered data model and interaction model, running over Wi-Fi, Thread or Ethernet across vendor ecosystems.',
           layer: 'application',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'matter',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Node & Fabric Explorer',
