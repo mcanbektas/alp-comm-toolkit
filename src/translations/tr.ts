@@ -2599,6 +2599,54 @@ export const tr = {
   'protocol.dmx512.example.minimalStartCodeOnly.name': 'Yalnız Start Code (0 slot)',
   'protocol.dmx512.example.minimalStartCodeOnly.description':
     '1 baytlık en küçük geçerli çerçeve: yalnız Start Code, hiç slot verisi yok.',
+
+  // --- Art-Net (faz 10 dalga 6b) ---
+  'protocol.artnet.error.headerTooShort': 'Tampon çok kısa — OpCode bile okunamaz (asgari 10 bayt gerekir).',
+  'protocol.artnet.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.artnet.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.artnet.error.invalidSignature':
+    'İlk 8 bayt "Art-Net" imzasıyla eşleşmiyor — bu bir Art-Net paketi değil.',
+  'protocol.artnet.error.headerTruncated': 'ProtVer alanı için yeterli bayt yok.',
+  'protocol.artnet.error.bodyTruncated': 'Gövde, beklenen alan için yeterli bayt içermiyor.',
+  'protocol.artnet.warning.unrecognizedOpcode': 'Table 1’de tanımlı olmayan bir OpCode değeri.',
+  'protocol.artnet.warning.opcodeBodyNotDecoded':
+    'OpCode adı biliniyor ama gövde yapısı bu motorda çözülmedi.',
+  'protocol.artnet.warning.unknownDiagPriority': 'Table 5’te tanımlı olmayan bir DiagPriority değeri.',
+  'protocol.artnet.warning.lengthMismatch':
+    'Length alanı, paketteki gerçek DMX veri baytı sayısıyla eşleşmiyor.',
+  'protocol.artnet.summary.artDmx': 'ArtDmx — Net {net}/SubUni {subUni}, Sequence {sequence}, {length} bayt',
+  'protocol.artnet.summary.artPoll': 'ArtPoll — Flags {flags}, DiagPriority {diagPriority}',
+  'protocol.artnet.summary.artPollReply': 'ArtPollReply — {ip}:{port}',
+  'protocol.artnet.summary.namedOpcodeRawBody': '{opcodeName} — gövde çözülmedi (ham)',
+  'protocol.artnet.summary.unknownOpcode': 'Tanınmayan OpCode {opCode}',
+  'protocol.artnet.summary.invalidSignature': 'Geçersiz Art-Net imzası',
+  'protocol.artnet.summary.headerTruncated': 'Başlık eksik — ProtVer okunamadı.',
+  'protocol.artnet.documentation.summary':
+    'Artistic Licence’ın royalty-free Art-Net 4 protokolü: ortak başlık (ID+OpCode+çoğu pakette ProtVer) ve OpCode’a göre gövde — ArtDmx tam, ArtPoll/ArtPollReply dar alan kümesiyle, geri kalan OpCode’lar yalnız ad+ham gövdeyle çözülür.',
+  'protocol.artnet.example.artDmxHappyPath.name': 'ArtDmx mutlu yol (birkaç kanal)',
+  'protocol.artnet.example.artDmxHappyPath.description':
+    'Sequence=0 (devre dışı), Net=0/SubUni=0, 4 kanallık DMX verisi (Red 255, Green 128, Blue 0, Dimmer 200 — dmx512.ts’in ANSI E1.11 örneğiyle aynı gösterim değerleri). Data[0] doğrudan Kanal 1’dir, ayrı bir start code baytı yoktur.',
+  'protocol.artnet.example.artDmxFull512Universe.name': 'ArtDmx — tam 512 kanallı universe',
+  'protocol.artnet.example.artDmxFull512Universe.description':
+    'Sequence=1, SubUni=1, 512 kanallık deterministik dolgu veri (6a’nın önizleme/özet-alan deseni burada da uygulanır: ilk 16 kanal ayrı alan, kalanı tek özet blokta).',
+  'protocol.artnet.example.artPollBasic.name': 'ArtPoll — Flags + DiagPriority',
+  'protocol.artnet.example.artPollBasic.description':
+    'Flags=0x02 (diagnostics istekli), DiagPriority=0x80 (DpHigh, Table 5). Diğer ArtPoll alanları (TargetPortAddress, EstaMan, Oem…) tek ham blokta.',
+  'protocol.artnet.example.artPollReplyPartial.name': 'ArtPollReply — kısmi alan + ham kalan',
+  'protocol.artnet.example.artPollReplyPartial.description':
+    'IP Address, Port ve PortName adlandırılır; aradaki Node bilgisi baytları ve PortName sonrası (LongName/NodeReport/…) ham blok olarak kalır.',
+  'protocol.artnet.example.artTimeCodeBodyNotDecoded.name': 'ArtTimeCode — OpCode tanınır, gövde ham',
+  'protocol.artnet.example.artTimeCodeBodyNotDecoded.description':
+    'OpCode 0x9700 Table 1’den adlandırılır ama gövde alanları bu motorda çözülmez — "OpCode adı biliniyor, gövde çözülmedi" uyarısı.',
+  'protocol.artnet.example.unknownOpcode.name': 'Tanınmayan OpCode',
+  'protocol.artnet.example.unknownOpcode.description':
+    'Table 1’de bulunmayan 0x1234 OpCode değeri — hem alan hem çerçeve düzeyinde "tanınmayan OpCode" uyarısı.',
+  'protocol.artnet.example.invalidSignature.name': 'Bozuk imza (Art-Net değil)',
+  'protocol.artnet.example.invalidSignature.description':
+    'İlk bayt 0x41 (\'A\') yerine 0x58 (\'X\') — 8 baytlık zorunlu imza tutmuyor, çözümleme ID alanından sonra durur (hata yolu).',
+  'protocol.artnet.example.artDmxLengthMismatch.name': 'ArtDmx — Length alanı tutarsız',
+  'protocol.artnet.example.artDmxLengthMismatch.description':
+    'Length alanı 10 bayt bildirir ama paket yalnız 4 bayt DMX verisi taşıyor — hata değil uyarı, Data alanı gerçekte mevcut baytları gösterir.',
 } as const;
 
 /**

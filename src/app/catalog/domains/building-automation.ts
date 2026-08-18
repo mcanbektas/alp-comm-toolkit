@@ -378,7 +378,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'Royalty-free UDP protocol that carries many DMX512 universes over Ethernet together with node discovery, management and multi-port gateway mapping.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'art-net',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Node Discovery',

@@ -2599,4 +2599,52 @@ export const en: TranslationDictionary = {
   'protocol.dmx512.example.minimalStartCodeOnly.name': 'Start Code only (0 slots)',
   'protocol.dmx512.example.minimalStartCodeOnly.description':
     'The smallest valid frame at 1 byte: only the Start Code, no slot data at all.',
+
+  // --- Art-Net (phase 10 wave 6b) ---
+  'protocol.artnet.error.headerTooShort': 'Buffer too short — cannot even read the OpCode (10 bytes minimum).',
+  'protocol.artnet.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.artnet.error.aborted': 'Parsing was cancelled.',
+  'protocol.artnet.error.invalidSignature':
+    'The first 8 bytes do not match the "Art-Net" signature — this is not an Art-Net packet.',
+  'protocol.artnet.error.headerTruncated': 'Not enough bytes for the ProtVer field.',
+  'protocol.artnet.error.bodyTruncated': 'The body does not contain enough bytes for the expected field.',
+  'protocol.artnet.warning.unrecognizedOpcode': 'An OpCode value not defined in Table 1.',
+  'protocol.artnet.warning.opcodeBodyNotDecoded':
+    'The OpCode name is known but its body structure is not decoded by this engine.',
+  'protocol.artnet.warning.unknownDiagPriority': 'A DiagPriority value not defined in Table 5.',
+  'protocol.artnet.warning.lengthMismatch':
+    'The Length field does not match the number of DMX data bytes actually present in the packet.',
+  'protocol.artnet.summary.artDmx': 'ArtDmx — Net {net}/SubUni {subUni}, Sequence {sequence}, {length} bytes',
+  'protocol.artnet.summary.artPoll': 'ArtPoll — Flags {flags}, DiagPriority {diagPriority}',
+  'protocol.artnet.summary.artPollReply': 'ArtPollReply — {ip}:{port}',
+  'protocol.artnet.summary.namedOpcodeRawBody': '{opcodeName} — body not decoded (raw)',
+  'protocol.artnet.summary.unknownOpcode': 'Unrecognized OpCode {opCode}',
+  'protocol.artnet.summary.invalidSignature': 'Invalid Art-Net signature',
+  'protocol.artnet.summary.headerTruncated': 'Header incomplete — could not read ProtVer.',
+  'protocol.artnet.documentation.summary':
+    "Artistic Licence's royalty-free Art-Net 4 protocol: a common header (ID+OpCode+ProtVer in most packets) followed by a body that branches on OpCode — ArtDmx is fully decoded, ArtPoll/ArtPollReply with a narrow field set, and the remaining OpCodes only by name plus a raw body.",
+  'protocol.artnet.example.artDmxHappyPath.name': 'ArtDmx happy path (a few channels)',
+  'protocol.artnet.example.artDmxHappyPath.description':
+    "Sequence=0 (disabled), Net=0/SubUni=0, 4 channels of DMX data (Red 255, Green 128, Blue 0, Dimmer 200 — the same illustrative values as dmx512.ts's ANSI E1.11 example). Data[0] is directly Channel 1, there is no separate start code byte.",
+  'protocol.artnet.example.artDmxFull512Universe.name': 'ArtDmx — full 512-channel universe',
+  'protocol.artnet.example.artDmxFull512Universe.description':
+    "Sequence=1, SubUni=1, 512 channels of deterministic filler data (6a's preview/summary-field pattern applies here too: the first 16 channels are separate fields, the rest is a single summary block).",
+  'protocol.artnet.example.artPollBasic.name': 'ArtPoll — Flags + DiagPriority',
+  'protocol.artnet.example.artPollBasic.description':
+    'Flags=0x02 (diagnostics requested), DiagPriority=0x80 (DpHigh, Table 5). The remaining ArtPoll fields (TargetPortAddress, EstaMan, Oem…) sit in a single raw block.',
+  'protocol.artnet.example.artPollReplyPartial.name': 'ArtPollReply — partial fields + raw remainder',
+  'protocol.artnet.example.artPollReplyPartial.description':
+    'IP Address, Port and PortName are named; the node-info bytes in between and everything after PortName (LongName/NodeReport/…) stay as raw blocks.',
+  'protocol.artnet.example.artTimeCodeBodyNotDecoded.name': 'ArtTimeCode — OpCode recognized, body raw',
+  'protocol.artnet.example.artTimeCodeBodyNotDecoded.description':
+    'OpCode 0x9700 is named from Table 1 but its body fields are not decoded by this engine — the "OpCode name known, body not decoded" warning.',
+  'protocol.artnet.example.unknownOpcode.name': 'Unrecognized OpCode',
+  'protocol.artnet.example.unknownOpcode.description':
+    'OpCode value 0x1234, which is not in Table 1 — triggers the "unrecognized OpCode" warning at both the field and the frame level.',
+  'protocol.artnet.example.invalidSignature.name': 'Corrupted signature (not Art-Net)',
+  'protocol.artnet.example.invalidSignature.description':
+    "First byte is 0x58 ('X') instead of 0x41 ('A') — the mandatory 8-byte signature does not hold, parsing stops right after the ID field (error path).",
+  'protocol.artnet.example.artDmxLengthMismatch.name': 'ArtDmx — inconsistent Length field',
+  'protocol.artnet.example.artDmxLengthMismatch.description':
+    'The Length field declares 10 bytes but the packet only carries 4 bytes of DMX data — a warning, not an error; the Data field shows the bytes that are actually present.',
 };

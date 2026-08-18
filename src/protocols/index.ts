@@ -145,6 +145,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'dmx512', () =>
     import('./building/dmx512/dmx512').then((module) => module.dmx512Plugin),
   );
+  // Art-Net — dalga 6b: UDP payload (coap.ts girdi emsali); ortak başlık ID+
+  // OpCode(LE)+ProtVer(BE, ArtPollReply'de YOK) + OpCode'a göre dallanan gövde
+  // (bkz. artnet.ts dosya başı). ArtDmx tam, ArtPoll/ArtPollReply dar alan
+  // kümesiyle çözülür, geri kalan OpCode'lar ad+ham gövde.
+  registerOnce(registry, 'art-net', () =>
+    import('./building/artnet/artnet').then((module) => module.artNetPlugin),
+  );
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

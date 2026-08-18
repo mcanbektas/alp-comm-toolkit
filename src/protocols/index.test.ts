@@ -6,6 +6,7 @@ import { registerBuiltInProtocols } from './index';
 /** `registeredProtocolIds()` ALFABETİK döner; liste o sırayla yazılır. */
 const BUILT_IN_IDS = [
   'ais',
+  'art-net',
   'can-2-0a',
   'can-2-0b',
   'can-fd',
@@ -46,6 +47,7 @@ const BUILT_IN_IDS = [
 
 const EXPECTED_CATEGORY: Record<string, string> = {
   ais: 'marine-navigation',
+  'art-net': 'building-automation',
   'can-2-0a': 'automotive',
   'can-2-0b': 'automotive',
   'can-fd': 'automotive',
