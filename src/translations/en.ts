@@ -2703,4 +2703,48 @@ export const en: TranslationDictionary = {
   'protocol.sacn.example.rootVectorExtendedNotDecoded.name': 'Root Vector EXTENDED — body not decoded',
   'protocol.sacn.example.rootVectorExtendedNotDecoded.description':
     "The Root Layer Vector is VECTOR_ROOT_E131_EXTENDED (a Synchronization/Universe Discovery packet) — that packet type's Framing Layer is completely different from the Data Packet's, so the body stays a raw block this round.",
+
+  // --- DALI (faz 10 dalga 6d) ---
+  'protocol.dali.error.frameTooShort': 'Buffer is empty — it does not match any DALI frame length.',
+  'protocol.dali.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.dali.error.aborted': 'Parsing was cancelled.',
+  'protocol.dali.warning.unrecognizedAddressClass':
+    'The Address Byte does not match any of the Individual/Group/Broadcast patterns — shown raw.',
+  'protocol.dali.warning.unrecognizedOpcode':
+    'The opcode is not in the narrow named set (OFF, Go To Scene, Set Fade Time, Store Scene, Query Actual Level, Query Lamp Failure) — shown raw with category only.',
+  'protocol.dali.warning.backwardFrameContextDependent':
+    "Which Query this 8-bit response answers cannot be known from a single frame — interpretation depends on the preceding forward frame.",
+  'protocol.dali.warning.dali2DeviceFramePlanned':
+    'This 3-byte frame may be a DALI-2 24-bit control-device frame — out of scope for this wave, shown raw (planned).',
+  'protocol.dali.summary.backwardFrame': 'Backward frame — response {value}',
+  'protocol.dali.summary.forwardDapc': '{address} — DAPC {command}',
+  'protocol.dali.summary.forwardCommand': '{address} — {command}',
+  'protocol.dali.summary.dali2DeviceFrame': 'DALI-2 device frame (planned)',
+  'protocol.dali.documentation.summary':
+    "IEC 62386 (DALI) family: input is a raw 1-byte (backward), 2-byte (forward) or 3-byte (DALI-2 device frame, planned this wave) byte sequence — the physical layer's Manchester coding never reaches this engine. In a forward frame the Address Byte's upper bits classify it as Individual (0AAAAAAS, 6 bits, 0-63) / Group (100AAAAS, 4 bits, 0-15) / Broadcast (1111111S); the lowest bit (S) decides whether the Data Byte is DAPC (Direct Arc Power, 0-254 plus 255=MASK) or a Command. Commands are named from a narrow set (OFF, Go To Scene, Set Fade Time, Store Scene, Query Actual Level, Query Lamp Failure) plus a Control/Configuration/Query category; opcodes outside the set are shown raw with category only, never a made-up name. A backward frame's 8-bit response cannot be interpreted without context (which Query it answers is unknown to this engine). There is no checksum; \"valid\" comes only from the structural (length) check.",
+  'protocol.dali.example.individualDapc.name': 'Individual address + DAPC (arc power level)',
+  'protocol.dali.example.individualDapc.description':
+    'Individual 5 (Address Byte 0x0A), Data Byte 200 — a Direct Arc Power Control target level (in the 0-254 range).',
+  'protocol.dali.example.individualRecognizedCommandOff.name':
+    'Individual address + recognized command (OFF)',
+  'protocol.dali.example.individualRecognizedCommandOff.description':
+    'Individual 5 (Address Byte 0x0B, S=1), Command OFF (0x00) — the most basic control command in the narrow named set.',
+  'protocol.dali.example.groupCommand.name': 'Group address + command (Go To Scene)',
+  'protocol.dali.example.groupCommand.description':
+    'Group 3 (Address Byte 0x87), Command Go To Scene 7 (0x17) — the scene number is derived with the opcode-0x10 formula.',
+  'protocol.dali.example.broadcastCommand.name': 'Broadcast + command (OFF)',
+  'protocol.dali.example.broadcastCommand.description':
+    'Broadcast (Address Byte 0xFF), Command OFF (0x00) — the classic broadcast frame that turns every device on the bus off at once.',
+  'protocol.dali.example.unrecognizedOpcode.name': 'Unrecognized opcode (warning path)',
+  'protocol.dali.example.unrecognizedOpcode.description':
+    "Individual 10, Command 0x01 (known in DALI as \"UP\", but NOT in this engine's narrow named set) — shown raw with only its category (Control), no name is invented.",
+  'protocol.dali.example.backwardFrameResponse.name': 'Backward frame — 8-bit response',
+  'protocol.dali.example.backwardFrameResponse.description':
+    'A single response byte (0xD2) — which Query it belongs to cannot be known from this one frame, only the raw value plus a context warning are shown.',
+  'protocol.dali.example.dali2DeviceFrame.name': '3-byte DALI-2 device frame (out of scope)',
+  'protocol.dali.example.dali2DeviceFrame.description':
+    'Per Decision 6, the structure of the 24-bit DALI-2 control-device frame is not decoded this wave — all bytes are shown raw with a "planned" warning, no error is raised.',
+  'protocol.dali.example.unrecognizedLength.name': 'Unrecognized length (error path)',
+  'protocol.dali.example.unrecognizedLength.description':
+    "4 bytes — matches none of DALI's backward (1), forward (2) or DALI-2 device (3) lengths, so it returns a ParseFailure.",
 };

@@ -154,7 +154,8 @@ export const buildingAutomationDomain: CatalogDomain = {
           summary:
             'Digital Addressable Lighting Interface bus that drives LED and emergency control gear with control, configuration and query commands, addressed individually, by group or by broadcast.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dali',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Device Explorer',

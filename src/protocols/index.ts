@@ -160,6 +160,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // VECTOR_ROOT_E131_EXTENDED) ad + ham gövde kalır — kamu-kaynaklı üçlünün
   // (6a-6c) SONUNCUSU.
   registerOnce(registry, 'sacn', () => import('./building/sacn/sacn').then((module) => module.sacnPlugin));
+  // DALI — dalga 6d: lisanslı IEC 62386 ailesine geçen ilk motor (6a-6c kamu
+  // kaynaklıydı). Girdi 1 (backward) / 2 (forward) / 3 (DALI-2 device frame,
+  // karar 6 gereği bu dalgada ham+planned) bayt; forward frame'de Address
+  // Byte üst bitlerden Individual/Group/Broadcast'e ayrılır, en düşük bit
+  // (S) DAPC/Command ayrımını kilitler (bkz. dali.ts dosya başı — Wikipedia +
+  // python-dali çapraz teyitli). Checksum yok; dar opcode ad kümesi.
+  registerOnce(registry, 'dali', () => import('./building/dali/dali').then((module) => module.daliPlugin));
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

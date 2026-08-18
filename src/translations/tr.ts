@@ -2703,6 +2703,49 @@ export const tr = {
   'protocol.sacn.example.rootVectorExtendedNotDecoded.name': 'Root Vector EXTENDED — gövde çözülmez',
   'protocol.sacn.example.rootVectorExtendedNotDecoded.description':
     'Root Layer Vector VECTOR_ROOT_E131_EXTENDED (Synchronization/Universe Discovery Packet) — bu paket türünün Framing Layer’ı Data Packet’inkinden tamamen farklıdır, bu yüzden gövde bu turda ham blok olarak kalır.',
+
+  // --- DALI (faz 10 dalga 6d) ---
+  'protocol.dali.error.frameTooShort': 'Tampon boş — hiçbir DALI çerçeve uzunluğuna uymuyor.',
+  'protocol.dali.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.dali.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dali.warning.unrecognizedAddressClass':
+    'Address Byte, Individual/Group/Broadcast kalıplarının hiçbirine uymuyor — ham gösteriliyor.',
+  'protocol.dali.warning.unrecognizedOpcode':
+    'Opcode, dar ad kümesinde (OFF, Go To Scene, Set Fade Time, Store Scene, Query Actual Level, Query Lamp Failure) yok — yalnız kategorisiyle ham gösteriliyor.',
+  'protocol.dali.warning.backwardFrameContextDependent':
+    'Bu 8-bit yanıtın hangi Query’nin cevabı olduğu tek çerçeveden bilinemez — yorum, önceki forward frame bağlamına bağlıdır.',
+  'protocol.dali.warning.dali2DeviceFramePlanned':
+    'Bu 3 baytlık çerçeve DALI-2 24-bit control-device çerçevesi olabilir — bu dalganın kapsamı dışında, ham gösteriliyor (planned).',
+  'protocol.dali.summary.backwardFrame': 'Backward frame — yanıt {value}',
+  'protocol.dali.summary.forwardDapc': '{address} — DAPC {command}',
+  'protocol.dali.summary.forwardCommand': '{address} — {command}',
+  'protocol.dali.summary.dali2DeviceFrame': 'DALI-2 device frame (planned)',
+  'protocol.dali.documentation.summary':
+    'IEC 62386 (DALI) ailesi: girdi 1 (backward), 2 (forward) ya da 3 baytlık (DALI-2 device frame, bu dalgada planned) ham bayt dizisidir — fiziksel katmanın Manchester kodlaması bu motora hiç girmez. Forward frame’de Address Byte üst bitlerden Individual (0AAAAAAS, 6 bit, 0-63) / Group (100AAAAS, 4 bit, 0-15) / Broadcast (1111111S) sınıfına ayrılır; en düşük bit (S) Data Byte’ın DAPC (Direct Arc Power, 0-254 + 255=MASK) mi yoksa Command mı olduğunu belirler. Command dar bir ad kümesiyle adlandırılır (OFF, Go To Scene, Set Fade Time, Store Scene, Query Actual Level, Query Lamp Failure) + Control/Configuration/Query kategorisi; kümenin dışındaki opcode’lar ham + yalnız kategori gösterir, ad uydurulmaz. Backward frame’in 8-bit yanıtı bağlamsız yorumlanamaz (hangi Query’nin cevabı olduğu bu motorda bilinmez). Checksum yoktur; “valid” yalnız yapısal (uzunluk) kontrolden gelir.',
+  'protocol.dali.example.individualDapc.name': 'Individual adres + DAPC (arc power seviyesi)',
+  'protocol.dali.example.individualDapc.description':
+    'Individual 5 (Address Byte 0x0A), Data Byte 200 — Direct Arc Power Control hedef seviyesi (0-254 aralığında).',
+  'protocol.dali.example.individualRecognizedCommandOff.name': 'Individual adres + tanınan komut (OFF)',
+  'protocol.dali.example.individualRecognizedCommandOff.description':
+    'Individual 5 (Address Byte 0x0B, S=1), Command OFF (0x00) — dar ad kümesindeki en temel kontrol komutu.',
+  'protocol.dali.example.groupCommand.name': 'Group adres + komut (Go To Scene)',
+  'protocol.dali.example.groupCommand.description':
+    'Group 3 (Address Byte 0x87), Command Go To Scene 7 (0x17) — sahne numarası opcode-0x10 formülüyle çıkarılır.',
+  'protocol.dali.example.broadcastCommand.name': 'Broadcast + komut (OFF)',
+  'protocol.dali.example.broadcastCommand.description':
+    'Broadcast (Address Byte 0xFF), Command OFF (0x00) — bustaki tüm cihazları aynı anda kapatan klasik yayın çerçevesi.',
+  'protocol.dali.example.unrecognizedOpcode.name': 'Tanınmayan opcode (uyarı yolu)',
+  'protocol.dali.example.unrecognizedOpcode.description':
+    'Individual 10, Command 0x01 (DALI’de "UP" olarak bilinir ama bu motorun dar ad kümesinde YOK) — yalnız kategorisiyle (Control) ham gösterilir, ad uydurulmaz.',
+  'protocol.dali.example.backwardFrameResponse.name': 'Backward frame — 8-bit yanıt',
+  'protocol.dali.example.backwardFrameResponse.description':
+    'Tek baytlık yanıt (0xD2) — hangi Query’ye ait olduğu bu tek çerçeveden bilinemez, yalnız ham değer + bağlam uyarısı gösterilir.',
+  'protocol.dali.example.dali2DeviceFrame.name': '3 baytlık DALI-2 device frame (kapsam dışı)',
+  'protocol.dali.example.dali2DeviceFrame.description':
+    'Karar 6 gereği 24-bit DALI-2 control-device çerçevesinin yapısı bu dalgada çözülmez — tüm baytlar ham + "planned" uyarısıyla gösterilir, hata üretilmez.',
+  'protocol.dali.example.unrecognizedLength.name': 'Tanınmayan uzunluk (hata yolu)',
+  'protocol.dali.example.unrecognizedLength.description':
+    '4 bayt — DALI’nin backward (1), forward (2) ya da DALI-2 device (3) uzunluklarının hiçbirine uymuyor, ParseFailure döner.',
 } as const;
 
 /**
