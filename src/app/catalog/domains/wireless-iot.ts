@@ -39,7 +39,8 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'Connectionless BLE link-layer broadcast carrying discovery, presence and sensor data in AD structures on channels 37/38/39, used by beacons, tags and battery-powered sensors.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ble-advertisement',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Device Scanner',

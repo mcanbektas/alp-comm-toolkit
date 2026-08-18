@@ -235,4 +235,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iec-61850', () =>
     import('./industrial/goose/goose').then((module) => module.goosePlugin),
   );
+  // BLE Advertisement — dalga 7a: `wireless/` dizinini açan ilk motor. Girdi
+  // advertising-channel PDU (Header 2B + AdvA + AD zinciri); Preamble/Access
+  // Address/CRC girdide YOK (sniffer seviyesi, bkz. bleAdvertisement.ts dosya
+  // başı). Yalnız AD taşıyan dört PDU tipi (ADV_IND/NONCONN_IND/SCAN_IND/
+  // SCAN_RSP) AdvA+AD şemasıyla çözülür; diğerleri (ADV_DIRECT_IND/SCAN_REQ/
+  // CONNECT_IND/ADV_EXT_IND) ham + uyarı — farklı payload şeması taşırlar.
+  registerOnce(registry, 'ble-advertisement', () =>
+    import('./wireless/ble/bleAdvertisement').then((module) => module.bleAdvertisementPlugin),
+  );
 }

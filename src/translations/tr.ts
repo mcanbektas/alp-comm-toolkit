@@ -2885,6 +2885,43 @@ export const tr = {
   'protocol.bacnetIp.example.invalidType.name': 'Type ≠ 0x81 (hata yolu)',
   'protocol.bacnetIp.example.invalidType.description':
     '"Original-Unicast-NPDU — Confirmed-Request / ReadProperty" ile AYNI gövde, yalnız BVLC Type baytı 0x81 yerine 0x01 — bu bir BACnet/IP mesajı olarak tanınmaz (hata), ama geri kalan alanlar yine SABİT ofsetlerden yapısal olarak kurulur.',
+
+  // --- BLE Advertisement ---
+  'protocol.bleAdvertisement.error.frameTooShort': 'Çerçeve en az 2 baytlık PDU Header kadar uzun olmalı.',
+  'protocol.bleAdvertisement.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.bleAdvertisement.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.bleAdvertisement.error.payloadTooShort': 'AdvA alanı için payload’da yeterli bayt yok (en az 6 bayt gerekir).',
+  'protocol.bleAdvertisement.error.adLengthZero': 'AD Structure Length alanı 0 — geçersiz, en az AD Type baytını kapsamalı.',
+  'protocol.bleAdvertisement.error.adStructureTruncated':
+    'Bir AD Structure’ın bildirdiği uzunluk için tamponda yeterli bayt yok.',
+  'protocol.bleAdvertisement.warning.unknownPduType': 'PDU Type dar kümede yok; tür adlandırılamadı.',
+  'protocol.bleAdvertisement.warning.lengthMismatch':
+    'Header’daki Length alanı gerçek kalan bayt sayısıyla uyuşmuyor.',
+  'protocol.bleAdvertisement.warning.payloadSchemaNotDecoded':
+    'Bu PDU tipinin payload şeması (AdvA+AD zinciri değil) bu dalgada çözülmüyor; ham gösterildi.',
+  'protocol.bleAdvertisement.warning.unknownAdType': 'AD Type dar kümede yok; ham + tip numarasıyla gösterildi.',
+
+  'protocol.bleAdvertisement.documentation.summary':
+    'BLE Advertisement, advertising-channel PDU’sunu çözer: 2 baytlık Header (PDU Type/RFU/ChSel/TxAdd/RxAdd/Length) + Payload. Yalnız AD taşıyan dört PDU tipinde (ADV_IND/ADV_NONCONN_IND/ADV_SCAN_IND/SCAN_RSP) Payload, AdvA (6 bayt, LE) + AD Structure zinciri (Length|Type|Data) olarak açılır; Length AD Type baytını KAPSAR. Dar bir AD Type kümesi (Flags, Local Name, 16/128-bit Service UUID, Service Data, Manufacturer Specific, Tx Power) semantik çözülür, kalanı ham + tip numarası. Preamble/Access Address/CRC girdide YOK — sniffer/Wireshark seviyesi.',
+  'protocol.bleAdvertisement.example.flags.name': 'Flags (spec örneği)',
+  'protocol.bleAdvertisement.example.flags.description':
+    'AD chain `02 01 06` — Flags = LE General Discoverable Mode + BR/EDR Not Supported.',
+  'protocol.bleAdvertisement.example.manufacturerSpecific.name': 'Manufacturer Specific Data (spec örneği)',
+  'protocol.bleAdvertisement.example.manufacturerSpecific.description':
+    'AD chain `05 FF 4C 00 01 02` — Company ID 0x004C (Apple, Inc.) + 2 baytlık veri.',
+  'protocol.bleAdvertisement.example.completeLocalName.name': 'Complete Local Name (spec örneği)',
+  'protocol.bleAdvertisement.example.completeLocalName.description':
+    'AD chain `09 09 53 65 6E 73 6F 72 30 31` — ASCII "Sensor01".',
+  'protocol.bleAdvertisement.example.multipleAdStructures.name': 'Flags + Local Name (gerçekçi beacon)',
+  'protocol.bleAdvertisement.example.multipleAdStructures.description':
+    'İki AD Structure aynı payload’da art arda — zincir yürüyüşünü kanıtlar.',
+  'protocol.bleAdvertisement.example.unknownPduType.name': 'Bilinmeyen PDU Type (uyarı yolu)',
+  'protocol.bleAdvertisement.example.unknownPduType.description':
+    'PDU Type 0x0F (Reserved) — header adlandırılamaz, uyarı basar; çerçeve yine valid:true kalır.',
+  'protocol.bleAdvertisement.example.truncatedAdStructure.name': 'Eksik AD Structure (hata yolu)',
+  'protocol.bleAdvertisement.example.truncatedAdStructure.description':
+    'AD Structure Length=5 bildiriyor ama tamponda yalnız 3 bayt kalan var — truncated-frame basar.',
+
 } as const;
 
 /**

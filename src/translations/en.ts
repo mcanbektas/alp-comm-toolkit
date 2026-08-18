@@ -2885,4 +2885,45 @@ export const en: TranslationDictionary = {
   'protocol.bacnetIp.example.invalidType.name': 'Type ≠ 0x81 (error path)',
   'protocol.bacnetIp.example.invalidType.description':
     'The exact same body as "Original-Unicast-NPDU — Confirmed-Request / ReadProperty", except the BVLC Type byte is 0x01 instead of 0x81 — this is not recognized as a BACnet/IP message (error), but the remaining fields are still decoded structurally at their fixed offsets.',
+
+  // --- BLE Advertisement ---
+  'protocol.bleAdvertisement.error.frameTooShort': 'The frame must be at least the 2-byte PDU Header long.',
+  'protocol.bleAdvertisement.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.bleAdvertisement.error.aborted': 'Parsing was aborted.',
+  'protocol.bleAdvertisement.error.payloadTooShort':
+    'Not enough bytes in the payload for AdvA (at least 6 bytes required).',
+  'protocol.bleAdvertisement.error.adLengthZero':
+    'AD Structure Length field is 0 — invalid, it must at least cover the AD Type byte.',
+  'protocol.bleAdvertisement.error.adStructureTruncated':
+    'Not enough bytes in the buffer for a declared AD Structure length.',
+  'protocol.bleAdvertisement.warning.unknownPduType':
+    'PDU Type is not in the narrow named set; the type could not be named.',
+  'protocol.bleAdvertisement.warning.lengthMismatch':
+    'The Length field in the header does not match the actual number of remaining bytes.',
+  'protocol.bleAdvertisement.warning.payloadSchemaNotDecoded':
+    "This PDU type's payload schema (not AdvA+AD chain) is not decoded in this wave; shown raw.",
+  'protocol.bleAdvertisement.warning.unknownAdType':
+    'AD Type is not in the narrow named set; shown raw with its type number.',
+
+  'protocol.bleAdvertisement.documentation.summary':
+    'BLE Advertisement decodes the advertising-channel PDU: a 2-byte Header (PDU Type/RFU/ChSel/TxAdd/RxAdd/Length) + Payload. Only for the four AD-bearing PDU types (ADV_IND/ADV_NONCONN_IND/ADV_SCAN_IND/SCAN_RSP) is the Payload opened as AdvA (6 bytes, LE) + an AD Structure chain (Length|Type|Data); Length COVERS the AD Type byte. A narrow AD Type set (Flags, Local Name, 16/128-bit Service UUID, Service Data, Manufacturer Specific, Tx Power) is decoded semantically, the rest stay raw + type number. Preamble/Access Address/CRC are NOT in the input — this is sniffer/Wireshark level.',
+  'protocol.bleAdvertisement.example.flags.name': 'Flags (spec example)',
+  'protocol.bleAdvertisement.example.flags.description':
+    'AD chain `02 01 06` — Flags = LE General Discoverable Mode + BR/EDR Not Supported.',
+  'protocol.bleAdvertisement.example.manufacturerSpecific.name': 'Manufacturer Specific Data (spec example)',
+  'protocol.bleAdvertisement.example.manufacturerSpecific.description':
+    'AD chain `05 FF 4C 00 01 02` — Company ID 0x004C (Apple, Inc.) + 2 bytes of data.',
+  'protocol.bleAdvertisement.example.completeLocalName.name': 'Complete Local Name (spec example)',
+  'protocol.bleAdvertisement.example.completeLocalName.description':
+    'AD chain `09 09 53 65 6E 73 6F 72 30 31` — ASCII "Sensor01".',
+  'protocol.bleAdvertisement.example.multipleAdStructures.name': 'Flags + Local Name (realistic beacon)',
+  'protocol.bleAdvertisement.example.multipleAdStructures.description':
+    'Two AD Structures back to back in the same payload — proves the chain walk.',
+  'protocol.bleAdvertisement.example.unknownPduType.name': 'Unknown PDU Type (warning path)',
+  'protocol.bleAdvertisement.example.unknownPduType.description':
+    'PDU Type 0x0F (Reserved) — the header cannot be named, raises a warning; the frame still stays valid:true.',
+  'protocol.bleAdvertisement.example.truncatedAdStructure.name': 'Truncated AD Structure (error path)',
+  'protocol.bleAdvertisement.example.truncatedAdStructure.description':
+    'AD Structure declares Length=5 but only 3 bytes remain in the buffer — raises truncated-frame.',
+
 };
