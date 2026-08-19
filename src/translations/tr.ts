@@ -2922,6 +2922,44 @@ export const tr = {
   'protocol.bleAdvertisement.example.truncatedAdStructure.description':
     'AD Structure Length=5 bildiriyor ama tamponda yalnız 3 bayt kalan var — truncated-frame basar.',
 
+  // --- BLE GATT ---
+  'protocol.bleGatt.error.frameTooShort': 'Çerçeve en az 1 baytlık Opcode kadar uzun olmalı.',
+  'protocol.bleGatt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.bleGatt.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.bleGatt.error.pduTooShort': 'Bu PDU tipi için tamponda yeterli bayt yok.',
+  'protocol.bleGatt.error.uuidLengthInvalid': 'UUID alanı ne 2 (16-bit) ne 16 (128-bit) bayt uzunluğunda.',
+  'protocol.bleGatt.warning.unknownOpcode': 'Opcode dar kümede yok; PDU şeması çözülemedi, ham gösterildi.',
+  'protocol.bleGatt.warning.pduSchemaNotDecoded':
+    'Bu opcode/format dar kapsam dışı; gövde bu dalgada çözülmüyor, ham gösterildi.',
+  'protocol.bleGatt.warning.unknownErrorCode': 'Error Code dar kümede yok; ham gösterildi.',
+  'protocol.bleGatt.warning.unknownFormat': 'Find Information Response Format alanı 0x01/0x02 dışında; ham gösterildi.',
+  'protocol.bleGatt.warning.invalidEntryLength':
+    'Length alanı bu PDU tipi için asgari girdi uzunluğunun altında; girdi listesi çözülemedi.',
+  'protocol.bleGatt.warning.l2capHeaderDetected':
+    'İlk 4 bayt geçerli bir L2CAP Basic çerçeve başlığı (Length+CID=0x0004) — algılandı ve soyuldu.',
+
+  'protocol.bleGatt.documentation.summary':
+    'BLE GATT, ATT/L2CAP üzerindeki bağlantılı PDU’yu çözer: 1 baytlık Opcode (Method+Command Flag+Authentication Signature Flag) + PDU tipine göre değişen gövde. Onyedi opcode (Error/Exchange MTU/Find Information/Read (By Type/By Group Type)/Write/Write Command/Handle Value Notification-Indication-Confirmation) adlandırılır ve gövdesi çözülür; kalanı ham + uyarı. Girdi çıplak ATT PDU’dur, isteğe bağlı L2CAP Basic çerçeve öneki (Length+CID=0x0004) algılanıp soyulur. Characteristic DEĞERİ şemasızdır — GATT şeması olmadan ham gösterilir.',
+  'protocol.bleGatt.example.handleValueNotification.name': 'Handle Value Notification (Battery Level)',
+  'protocol.bleGatt.example.handleValueNotification.description':
+    'Handle 0x0025 üzerinden gelen Notification — değer %90 (0x5A).',
+  'protocol.bleGatt.example.writeRequestCccdEnable.name': 'Write Request — CCCD Notification Enable',
+  'protocol.bleGatt.example.writeRequestCccdEnable.description':
+    'CCCD (0x2902) handle 0x002B’ye Notification bitini set eden Write Request (0x0001).',
+  'protocol.bleGatt.example.errorResponseInvalidHandle.name': 'Error Response — Invalid Handle',
+  'protocol.bleGatt.example.errorResponseInvalidHandle.description':
+    'Read Request (0x0A) handle 0x0099’a yanıt: Invalid Handle (0x01).',
+  'protocol.bleGatt.example.readByGroupTypeResponsePrimaryServices.name':
+    'Read By Group Type Response — Discover All Primary Services',
+  'protocol.bleGatt.example.readByGroupTypeResponsePrimaryServices.description':
+    'Tek grup: Handle 0x0001..0x0007, Value = Generic Access (0x1800).',
+  'protocol.bleGatt.example.unknownOpcode.name': 'Bilinmeyen Opcode (uyarı yolu)',
+  'protocol.bleGatt.example.unknownOpcode.description':
+    'Find By Type Value Request (0x06) — dar kümenin dışında, gövdesi bu dalgada çözülmez; ham gösterilir.',
+  'protocol.bleGatt.example.truncatedErrorResponse.name': 'Eksik Error Response (hata yolu)',
+  'protocol.bleGatt.example.truncatedErrorResponse.description':
+    'Error Response 5 bayt gerektirir, yalnız 3 bayt var — Error Code eksik, truncated-frame basar.',
+
   // --- LoRaWAN ---
   'protocol.lorawan.error.frameTooShort': 'Çerçeve en az MHDR(1)+MIC(4)=5 bayt kadar uzun olmalı.',
   'protocol.lorawan.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

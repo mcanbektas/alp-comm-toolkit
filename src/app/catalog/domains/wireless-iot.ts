@@ -62,7 +62,8 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'Attribute-based service layer over ATT/L2CAP that exposes BLE device data as readable, writable and notifiable characteristics in wearables, medical devices and industrial sensors.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ble-gatt',
           tabs: [
             'overview',
             'live',

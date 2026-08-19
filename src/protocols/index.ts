@@ -244,6 +244,18 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'ble-advertisement', () =>
     import('./wireless/ble/bleAdvertisement').then((module) => module.bleAdvertisementPlugin),
   );
+  // BLE GATT — dalga 8a: ATT/L2CAP bağlantılı PDU (bkz. bleGatt.ts dosya
+  // başı). Girdi çıplak ATT PDU; opsiyonel L2CAP Basic çerçeve öneki
+  // (Length+CID=0x0004) algılanıp soyulur — tek girdi kutusu Web Bluetooth'un
+  // çıplak değerini de Wireshark dökümünü de yer. Onyedi opcode (karar
+  // dosya başı) adlandırılır ve gövdesi çözülür; Value her zaman şemasız
+  // ham kalır (Custom GATT Schema Import dalga 8d). CCCD bit çözümü
+  // (`decodeCccdValue`) BİLİNÇLİ OLARAK genel Value alanına kablolanmaz —
+  // Handle'ın CCCD olduğunu bilmek GATT keşif geçmişi ister, tek-PDU'luk bu
+  // parser'da o oturum durumu yok.
+  registerOnce(registry, 'ble-gatt', () =>
+    import('./wireless/ble/bleGatt').then((module) => module.bleGattPlugin),
+  );
   // LoRaWAN — dalga 7b: PHYPayload = MHDR + MACPayload + MIC (bkz. lorawan.ts
   // dosya başı). Join-Request açık metin (JoinEUI/DevEUI/DevNonce); Join-Accept
   // MHDR sonrası uçtan uca şifreli → tek ham blok. Data frame FHDR+FPort+

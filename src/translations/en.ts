@@ -2926,6 +2926,44 @@ export const en: TranslationDictionary = {
   'protocol.bleAdvertisement.example.truncatedAdStructure.description':
     'AD Structure declares Length=5 but only 3 bytes remain in the buffer — raises truncated-frame.',
 
+  // --- BLE GATT ---
+  'protocol.bleGatt.error.frameTooShort': 'The frame must be at least the 1-byte Opcode long.',
+  'protocol.bleGatt.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.bleGatt.error.aborted': 'Parsing was aborted.',
+  'protocol.bleGatt.error.pduTooShort': 'Not enough bytes in the buffer for this PDU kind.',
+  'protocol.bleGatt.error.uuidLengthInvalid': 'The UUID field is neither 2 (16-bit) nor 16 (128-bit) bytes long.',
+  'protocol.bleGatt.warning.unknownOpcode': 'Opcode is outside the narrow set; the PDU schema could not be resolved, shown raw.',
+  'protocol.bleGatt.warning.pduSchemaNotDecoded':
+    'This opcode/format is out of narrow scope; the body is not decoded in this wave, shown raw.',
+  'protocol.bleGatt.warning.unknownErrorCode': 'Error Code is outside the narrow set; shown raw.',
+  'protocol.bleGatt.warning.unknownFormat': 'Find Information Response Format is neither 0x01 nor 0x02; shown raw.',
+  'protocol.bleGatt.warning.invalidEntryLength':
+    'The Length field is below the minimum entry size for this PDU kind; the entry list could not be decoded.',
+  'protocol.bleGatt.warning.l2capHeaderDetected':
+    'The first 4 bytes are a valid L2CAP Basic frame header (Length+CID=0x0004) — detected and stripped.',
+
+  'protocol.bleGatt.documentation.summary':
+    'BLE GATT decodes the connection-oriented ATT/L2CAP PDU: a 1-byte Opcode (Method+Command Flag+Authentication Signature Flag) plus a body that varies by PDU kind. Seventeen opcodes (Error/Exchange MTU/Find Information/Read (By Type/By Group Type)/Write/Write Command/Handle Value Notification-Indication-Confirmation) are named and their bodies decoded; the rest stay raw with a warning. Input is a bare ATT PDU, with an optional L2CAP Basic frame prefix (Length+CID=0x0004) detected and stripped. The characteristic VALUE is schema-less — shown raw without a GATT schema.',
+  'protocol.bleGatt.example.handleValueNotification.name': 'Handle Value Notification (Battery Level)',
+  'protocol.bleGatt.example.handleValueNotification.description':
+    'A Notification arriving on handle 0x0025 — value 90% (0x5A).',
+  'protocol.bleGatt.example.writeRequestCccdEnable.name': 'Write Request — CCCD Notification Enable',
+  'protocol.bleGatt.example.writeRequestCccdEnable.description':
+    'A Write Request setting the Notification bit (0x0001) on the CCCD (0x2902) at handle 0x002B.',
+  'protocol.bleGatt.example.errorResponseInvalidHandle.name': 'Error Response — Invalid Handle',
+  'protocol.bleGatt.example.errorResponseInvalidHandle.description':
+    'Response to a Read Request (0x0A) on handle 0x0099: Invalid Handle (0x01).',
+  'protocol.bleGatt.example.readByGroupTypeResponsePrimaryServices.name':
+    'Read By Group Type Response — Discover All Primary Services',
+  'protocol.bleGatt.example.readByGroupTypeResponsePrimaryServices.description':
+    'A single group: Handle 0x0001..0x0007, Value = Generic Access (0x1800).',
+  'protocol.bleGatt.example.unknownOpcode.name': 'Unknown Opcode (warning path)',
+  'protocol.bleGatt.example.unknownOpcode.description':
+    'Find By Type Value Request (0x06) — outside the narrow set, its body is not decoded in this wave; shown raw.',
+  'protocol.bleGatt.example.truncatedErrorResponse.name': 'Truncated Error Response (error path)',
+  'protocol.bleGatt.example.truncatedErrorResponse.description':
+    'Error Response requires 5 bytes, only 3 are present — Error Code is missing, raises truncated-frame.',
+
   // --- LoRaWAN ---
   'protocol.lorawan.error.frameTooShort': 'The frame must be at least MHDR(1)+MIC(4)=5 bytes long.',
   'protocol.lorawan.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
