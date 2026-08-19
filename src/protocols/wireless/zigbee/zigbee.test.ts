@@ -311,6 +311,81 @@ describe('ZCL — dar kapsam', () => {
   });
 });
 
+describe('ZCL — cluster/attribute kütüphanesi (dar küme)', () => {
+  it('bilinen Cluster ID isimlendirilir', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0006 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(frame, 'aps-cluster-id').physicalValue).toBe('On/Off');
+  });
+
+  it('dar küme dışı Cluster ID isimlendirilemez ama hata sayılmaz (valid true kalır)', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x9999 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    const clusterField = fieldById(frame, 'aps-cluster-id');
+    expect(clusterField.physicalValue).toBeUndefined();
+    expect(clusterField.valid).toBe(true);
+    expect(frame.valid).toBe(true);
+  });
+
+  it('Attribute adı cluster’a göre çözülür (On/Off cluster’ında 0x0000 → onOff)', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0006 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(frame, 'zcl-attr-1').name).toBe('Attribute onOff (0x0000)');
+  });
+
+  it('AYNI Attribute ID FARKLI cluster’da FARKLI isme çözülür (0x0000: Basic→zclVersion, On/Off→onOff)', () => {
+    const basicFrame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0000 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(basicFrame, 'zcl-attr-1').name).toBe('Attribute zclVersion (0x0000)');
+
+    const onOffFrame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0006 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(onOffFrame, 'zcl-attr-1').name).toBe('Attribute onOff (0x0000)');
+  });
+
+  it('bilinen cluster’da dar küme dışı Attribute ID hex’e düşer', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0006 }), ...zclReportAttrInt16(0x9999, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(frame, 'zcl-attr-1').name).toBe('Attribute 0x9999');
+  });
+
+  it('dar küme dışı cluster’da attribute her zaman hex kalır (0x0000 On/Off’ta onOff olsa bile)', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x9999 }), ...zclReportAttrInt16(0x0000, 1)]),
+      ),
+    ).frame;
+    expect(fieldById(frame, 'zcl-attr-1').name).toBe('Attribute 0x0000');
+  });
+
+  it('Cluster-specific payload etiketi bilinen cluster adını taşır', () => {
+    const frame = expectSuccess(
+      parseZigbee(
+        zigbeeFrame([...nwkHeaderBytes(), ...apsHeaderBytes({ clusterId: 0x0006 }), 0x01, 3, 0x00, 0xaa, 0xbb]),
+      ),
+    ).frame;
+    expect(fieldById(frame, 'zcl-payload').name).toBe('ZCL Payload (cluster-specific, On/Off)');
+  });
+});
+
 describe('hata yolları', () => {
   it('minimum uzunluktan kısa çerçeve truncated-frame ile reddedilir', () => {
     const result = expectFailure(zigbeeParser.parse(Uint8Array.from([0x41, 0x88])));

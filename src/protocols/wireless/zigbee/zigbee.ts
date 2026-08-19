@@ -30,13 +30,31 @@
  * APS: yalnız Data frame + Unicast/Broadcast delivery + Extended Header YOK
  * durumu tam çözülür (Group addressing/Extended Header dar kapsam dışı, ham+
  * uyarı). Security=1 ise "Encrypted APS payload" (ZCL'e hiç geçilmez).
- * ZCL: APS Cluster/Profile ID YALNIZ tanınır (isim eşleme YOK, dar kapsam —
- * cluster kütüphanesi sonraki iş). Global komutların TÜMÜ isimle tanınır ama
- * yalnız Read Attributes Response(0x01)/Report Attributes(0x0A)/Default
- * Response(0x0B) payload'ı çözülür (karar 5); kalan global komutlar + TÜM
- * cluster-specific komutlar ham+uyarı. Attribute value dar veri tipi kümesi
- * (Boolean/Uint8-32/Int8-32/Enum8-16/Single/Octet+Character String) — bilinmeyen
- * tipte uzunluk belirsizleştiği için zincir orada durur (ham kalan + uyarı).
+ * ZCL: APS Cluster ID + Read Attributes Response/Report Attributes'taki
+ * Attribute ID'ler dar bir cluster/attribute kütüphanesiyle adlandırılır
+ * (dalga 8'in "karar 5" borcu — bkz. CLUSTER/ATTRIBUTE KÜTÜPHANESİ aşağıda).
+ * Global komutların TÜMÜ isimle tanınır ama yalnız Read Attributes
+ * Response(0x01)/Report Attributes(0x0A)/Default Response(0x0B) payload'ı
+ * çözülür (karar 5); kalan global komutlar + TÜM cluster-specific komutlar
+ * hâlâ ham+uyarı (yalnız etiket cluster adını taşır, gövde çözülmez).
+ * Attribute value dar veri tipi kümesi (Boolean/Uint8-32/Int8-32/Enum8-16/
+ * Single/Octet+Character String) — bilinmeyen tipte uzunluk belirsizleştiği
+ * için zincir orada durur (ham kalan + uyarı).
+ *
+ * ── CLUSTER/ATTRIBUTE KÜTÜPHANESİ (dalga 8, dar küme) ───────────────────────
+ * TAM ZCL kütüphanesi (CSA'nın yüzlerce cluster'ı) DEĞİL — Home Automation'da
+ * en yaygın 18 cluster (Zigbee2MQTT/deCONZ'un da öncelikli desteklediği aile).
+ * Kaynak: zigbee-herdsman `src/zspec/zcl/definition/cluster.ts` (Apache-2.0)
+ * + Wireshark `packet-zbee-zcl-*.c` (`ZBEE_ZCL_ATTR_ID_*` sabitleri) çapraz
+ * doğrulaması (2026-08-19). Level Control/Door Lock/IAS Zone'da birkaç
+ * attribute (`ZCL_CLUSTERS` içinde "tek kaynak" yorumlu) YALNIZ herdsman'da
+ * var — o üç cluster'ın Wireshark dissector'ü spec'in tamamını kapsamıyor;
+ * satırlar gerçek (herdsman'dan), yalnız ikinci çapraz kaynağı yok. Dar küme
+ * dışı Cluster/Attribute ID'ler hata DEĞİL: `valid: true` kalır, yalnız
+ * `physicalValue` boş — açık/seyrek bir ID uzayında "bilmediğim cluster" hep
+ * beklenen durumdur (bleAdvertisement.ts'in bilinmeyen Company ID'yi ham hex'e
+ * düşürüp uyarı basmaması emsali, MAC Frame Type'ın kapalı 3-bit enum'undan
+ * FARKLI bir sınıf).
  *
  * ── BİT SIRASI: 802.15.4/NWK/APS/ZCL HEPSİ LSB-FIRST, LITTLE-ENDIAN ────────
  * "All multiple octet fields... least significant octet first, each octet...
@@ -271,6 +289,271 @@ const ZCL_DATA_TYPES: ReadonlyMap<number, ZclDataTypeInfo> = new Map([
   [0x39, { name: 'Single Precision Float', kind: 'single', fixedLength: 4 }],
   [0x41, { name: 'Octet String', kind: 'octet-string' }],
   [0x42, { name: 'Character String', kind: 'char-string' }],
+]);
+
+interface ZclAttributeInfo {
+  readonly name: string;
+}
+
+interface ZclClusterInfo {
+  readonly name: string;
+  readonly attributes: ReadonlyMap<number, ZclAttributeInfo>;
+}
+
+/** Dar cluster/attribute kütüphanesi (dosya başı CLUSTER/ATTRIBUTE KÜTÜPHANESİ) — Wireshark + zigbee-herdsman çapraz doğrulaması. */
+const ZCL_CLUSTERS: ReadonlyMap<number, ZclClusterInfo> = new Map([
+  [
+    0x0000,
+    {
+      name: 'Basic',
+      attributes: new Map([
+        [0x0000, { name: 'zclVersion' }],
+        [0x0001, { name: 'appVersion' }],
+        [0x0003, { name: 'hwVersion' }],
+        [0x0004, { name: 'manufacturerName' }],
+        [0x0005, { name: 'modelId' }],
+        [0x0006, { name: 'dateCode' }],
+        [0x0007, { name: 'powerSource' }],
+        [0x4000, { name: 'swBuildId' }],
+      ]),
+    },
+  ],
+  [
+    0x0001,
+    {
+      name: 'Power Configuration',
+      attributes: new Map([
+        [0x0000, { name: 'mainsVoltage' }],
+        [0x0001, { name: 'mainsFrequency' }],
+        [0x0010, { name: 'mainsAlarmMask' }],
+        [0x0020, { name: 'batteryVoltage' }],
+        [0x0021, { name: 'batteryPercentageRemaining' }],
+        [0x0030, { name: 'batteryManufacturer' }],
+        [0x0031, { name: 'batterySize' }],
+        [0x0033, { name: 'batteryQuantity' }],
+        [0x0034, { name: 'batteryRatedVoltage' }],
+        [0x0035, { name: 'batteryAlarmMask' }],
+      ]),
+    },
+  ],
+  [0x0003, { name: 'Identify', attributes: new Map([[0x0000, { name: 'identifyTime' }]]) }],
+  [0x0004, { name: 'Groups', attributes: new Map([[0x0000, { name: 'nameSupport' }]]) }],
+  [
+    0x0005,
+    {
+      name: 'Scenes',
+      attributes: new Map([
+        [0x0000, { name: 'count' }],
+        [0x0001, { name: 'currentScene' }],
+        [0x0002, { name: 'currentGroup' }],
+        [0x0003, { name: 'sceneValid' }],
+        [0x0004, { name: 'nameSupport' }],
+        [0x0005, { name: 'lastCfgBy' }],
+      ]),
+    },
+  ],
+  [
+    0x0006,
+    {
+      name: 'On/Off',
+      attributes: new Map([
+        [0x0000, { name: 'onOff' }],
+        [0x4000, { name: 'globalSceneCtrl' }],
+        [0x4001, { name: 'onTime' }],
+        [0x4002, { name: 'offWaitTime' }],
+        [0x4003, { name: 'startUpOnOff' }],
+      ]),
+    },
+  ],
+  [
+    0x0008,
+    {
+      name: 'Level Control',
+      attributes: new Map([
+        [0x0000, { name: 'currentLevel' }],
+        [0x0001, { name: 'remainingTime' }],
+        [0x0002, { name: 'minLevel' }], // tek kaynak (herdsman) — dosya başı
+        [0x0003, { name: 'maxLevel' }], // tek kaynak (herdsman) — dosya başı
+        [0x000f, { name: 'options' }], // tek kaynak (herdsman) — dosya başı
+        [0x0010, { name: 'onOffTransitionTime' }],
+        [0x0011, { name: 'onLevel' }],
+        [0x4000, { name: 'startUpCurrentLevel' }],
+      ]),
+    },
+  ],
+  [
+    0x0101,
+    {
+      name: 'Door Lock',
+      attributes: new Map([
+        [0x0000, { name: 'lockState' }],
+        [0x0001, { name: 'lockType' }],
+        [0x0002, { name: 'actuatorEnabled' }],
+        [0x0003, { name: 'doorState' }],
+        [0x0012, { name: 'numOfPinUsersSupported' }], // tek kaynak (herdsman) — dosya başı
+        [0x0017, { name: 'maxPinLen' }], // tek kaynak (herdsman) — dosya başı
+        [0x0021, { name: 'language' }], // tek kaynak (herdsman) — dosya başı
+        [0x0023, { name: 'autoRelockTime' }], // tek kaynak (herdsman) — dosya başı
+        [0x0024, { name: 'soundVolume' }], // tek kaynak (herdsman) — dosya başı
+      ]),
+    },
+  ],
+  [
+    0x0201,
+    {
+      name: 'Thermostat',
+      attributes: new Map([
+        [0x0000, { name: 'localTemp' }],
+        [0x0007, { name: 'pICoolingDemand' }],
+        [0x0008, { name: 'pIHeatingDemand' }],
+        [0x0010, { name: 'localTemperatureCalibration' }],
+        [0x0011, { name: 'occupiedCoolingSetpoint' }],
+        [0x0012, { name: 'occupiedHeatingSetpoint' }],
+        [0x001b, { name: 'ctrlSeqeOfOper' }],
+        [0x001c, { name: 'systemMode' }],
+        [0x001e, { name: 'runningMode' }],
+        [0x0029, { name: 'runningState' }],
+      ]),
+    },
+  ],
+  [
+    0x0300,
+    {
+      name: 'Color Control',
+      attributes: new Map([
+        [0x0000, { name: 'currentHue' }],
+        [0x0001, { name: 'currentSaturation' }],
+        [0x0003, { name: 'currentX' }],
+        [0x0004, { name: 'currentY' }],
+        [0x0007, { name: 'colorTemperature' }],
+        [0x0008, { name: 'colorMode' }],
+        [0x400a, { name: 'colorCapabilities' }],
+        [0x400b, { name: 'colorTempPhysicalMin' }],
+        [0x400c, { name: 'colorTempPhysicalMax' }],
+      ]),
+    },
+  ],
+  [
+    0x0400,
+    {
+      name: 'Illuminance Measurement',
+      attributes: new Map([
+        [0x0000, { name: 'measuredValue' }],
+        [0x0001, { name: 'minMeasuredValue' }],
+        [0x0002, { name: 'maxMeasuredValue' }],
+        [0x0003, { name: 'tolerance' }],
+        [0x0004, { name: 'lightSensorType' }],
+      ]),
+    },
+  ],
+  [
+    0x0402,
+    {
+      name: 'Temperature Measurement',
+      attributes: new Map([
+        [0x0000, { name: 'measuredValue' }],
+        [0x0001, { name: 'minMeasuredValue' }],
+        [0x0002, { name: 'maxMeasuredValue' }],
+        [0x0003, { name: 'tolerance' }],
+      ]),
+    },
+  ],
+  [
+    0x0403,
+    {
+      name: 'Pressure Measurement',
+      attributes: new Map([
+        [0x0000, { name: 'measuredValue' }],
+        [0x0001, { name: 'minMeasuredValue' }],
+        [0x0002, { name: 'maxMeasuredValue' }],
+        [0x0003, { name: 'tolerance' }],
+        [0x0010, { name: 'scaledValue' }],
+        [0x0011, { name: 'minScaledValue' }],
+        [0x0012, { name: 'maxScaledValue' }],
+        [0x0013, { name: 'scaledTolerance' }],
+        [0x0014, { name: 'scale' }],
+      ]),
+    },
+  ],
+  [
+    0x0405,
+    {
+      name: 'Relative Humidity Measurement',
+      attributes: new Map([
+        [0x0000, { name: 'measuredValue' }],
+        [0x0001, { name: 'minMeasuredValue' }],
+        [0x0002, { name: 'maxMeasuredValue' }],
+        [0x0003, { name: 'tolerance' }],
+      ]),
+    },
+  ],
+  [
+    0x0406,
+    {
+      name: 'Occupancy Sensing',
+      attributes: new Map([
+        [0x0000, { name: 'occupancy' }],
+        [0x0001, { name: 'occupancySensorType' }],
+        [0x0002, { name: 'occupancySensorTypeBitmap' }],
+        [0x0010, { name: 'pirOToUDelay' }],
+        [0x0011, { name: 'pirUToODelay' }],
+        [0x0012, { name: 'pirUToOThreshold' }],
+        [0x0020, { name: 'ultrasonicOToUDelay' }],
+        [0x0021, { name: 'ultrasonicUToODelay' }],
+        [0x0022, { name: 'ultrasonicUToOThreshold' }],
+      ]),
+    },
+  ],
+  [
+    0x0500,
+    {
+      name: 'IAS Zone',
+      attributes: new Map([
+        [0x0000, { name: 'zoneState' }],
+        [0x0001, { name: 'zoneType' }],
+        [0x0002, { name: 'zoneStatus' }],
+        [0x0010, { name: 'iasCieAddr' }],
+        [0x0011, { name: 'zoneId' }], // tek kaynak (herdsman) — dosya başı
+        [0x0012, { name: 'numZoneSensitivityLevelsSupported' }], // tek kaynak (herdsman) — dosya başı
+        [0x0013, { name: 'currentZoneSensitivityLevel' }], // tek kaynak (herdsman) — dosya başı
+      ]),
+    },
+  ],
+  [
+    0x0b04,
+    {
+      name: 'Electrical Measurement',
+      attributes: new Map([
+        [0x0000, { name: 'measurementType' }],
+        [0x0505, { name: 'rmsVoltage' }],
+        [0x0508, { name: 'rmsCurrent' }],
+        [0x050b, { name: 'activePower' }],
+        [0x050f, { name: 'apparentPower' }],
+        [0x0510, { name: 'powerFactor' }],
+        [0x0600, { name: 'acVoltageMultiplier' }],
+        [0x0601, { name: 'acVoltageDivisor' }],
+        [0x0602, { name: 'acCurrentMultiplier' }],
+        [0x0603, { name: 'acCurrentDivisor' }],
+      ]),
+    },
+  ],
+  [
+    0x0702,
+    {
+      name: 'Metering',
+      attributes: new Map([
+        [0x0000, { name: 'currentSummDelivered' }],
+        [0x0001, { name: 'currentSummReceived' }],
+        [0x0006, { name: 'powerFactor' }],
+        [0x0200, { name: 'status' }],
+        [0x0300, { name: 'unitOfMeasure' }],
+        [0x0301, { name: 'multiplier' }],
+        [0x0302, { name: 'divisor' }],
+        [0x0306, { name: 'meteringDeviceType' }],
+        [0x0400, { name: 'instantaneousDemand' }],
+      ]),
+    },
+  ],
 ]);
 
 // ───────────────────────── hata/uyarı anahtarları ─────────────────────────
@@ -768,7 +1051,7 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
             apsCursor += APS_ENDPOINT_LENGTH;
 
             clusterId = readUint16Le(data, apsCursor);
-            fields.push({ id: 'aps-cluster-id', name: 'Cluster ID', offset: apsCursor, length: APS_CLUSTER_ID_LENGTH, rawBytes: data.slice(apsCursor, apsCursor + APS_CLUSTER_ID_LENGTH), rawValue: toHex(clusterId, 2), valid: true, warnings: [] });
+            fields.push({ id: 'aps-cluster-id', name: 'Cluster ID', offset: apsCursor, length: APS_CLUSTER_ID_LENGTH, rawBytes: data.slice(apsCursor, apsCursor + APS_CLUSTER_ID_LENGTH), rawValue: toHex(clusterId, 2), physicalValue: ZCL_CLUSTERS.get(clusterId)?.name, valid: true, warnings: [] });
             apsCursor += APS_CLUSTER_ID_LENGTH;
 
             const profileId = readUint16Le(data, apsCursor);
@@ -832,7 +1115,18 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
 
             if (zclFrameType === ZCL_FRAME_TYPE_CLUSTER_SPECIFIC) {
               if (zclPayloadRest.length > 0) {
-                fields.push({ id: 'zcl-payload', name: 'ZCL Payload (cluster-specific)', offset: zclCursor, length: zclPayloadRest.length, rawBytes: zclPayloadRest, unit: 'B', valid: true, warnings: [WARN_ZCL_CLUSTER_SPECIFIC_NOT_DECODED] });
+                // Gövde hâlâ çözülmez (dosya başı) — yalnız etiket, bilinen cluster'da, adını taşır.
+                const clusterName = clusterId === undefined ? undefined : ZCL_CLUSTERS.get(clusterId)?.name;
+                fields.push({
+                  id: 'zcl-payload',
+                  name: clusterName === undefined ? 'ZCL Payload (cluster-specific)' : `ZCL Payload (cluster-specific, ${clusterName})`,
+                  offset: zclCursor,
+                  length: zclPayloadRest.length,
+                  rawBytes: zclPayloadRest,
+                  unit: 'B',
+                  valid: true,
+                  warnings: [WARN_ZCL_CLUSTER_SPECIFIC_NOT_DECODED],
+                });
                 warnings.push(toProtocolWarning(WARN_ZCL_CLUSTER_SPECIFIC_NOT_DECODED));
               }
             } else if (commandId === ZCL_CMD_DEFAULT_RESP) {
@@ -841,10 +1135,14 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
                 fields.push({ id: 'zcl-status', name: 'Status', offset: zclCursor + 1, length: 1, rawBytes: data.slice(zclCursor + 1, zclCursor + 2), rawValue: byteAt(data, zclCursor + 1), physicalValue: byteAt(data, zclCursor + 1) === ZCL_STATUS_SUCCESS ? 'SUCCESS' : undefined, valid: true, warnings: [] });
               }
             } else if (commandId === ZCL_CMD_READ_ATTR_RESP || commandId === ZCL_CMD_REPORT_ATTR) {
+              // Attribute isimleri CLUSTER'A GÖRE değişir (dosya başı) — kütüphane bir kez, cluster'a göre alınır.
+              const clusterAttributes = clusterId === undefined ? undefined : ZCL_CLUSTERS.get(clusterId)?.attributes;
               let recordCursor = zclCursor;
               let recordIndex = 0;
               while (recordCursor < zclEnd) {
                 const attrId = readUint16Le(data, recordCursor);
+                const attrName = clusterAttributes?.get(attrId)?.name;
+                const attrLabel = attrName === undefined ? toHex(attrId, 2) : `${attrName} (${toHex(attrId, 2)})`;
                 let status: number | undefined;
                 let valueOffset = recordCursor + 2;
                 if (commandId === ZCL_CMD_READ_ATTR_RESP) {
@@ -859,7 +1157,7 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
                   const dataType = byteAt(data, valueOffset);
                   const typeInfo = ZCL_DATA_TYPES.get(dataType);
                   if (typeInfo === undefined) {
-                    fields.push({ id: `zcl-attr-${String(recordIndex)}`, name: `Attribute ${toHex(attrId, 2)}`, offset: recordCursor, length: valueOffset + 1 - recordCursor, rawBytes: data.slice(recordCursor, valueOffset + 1), rawValue: toHex(attrId, 2), valid: true, warnings: [WARN_ZCL_UNKNOWN_DATA_TYPE] });
+                    fields.push({ id: `zcl-attr-${String(recordIndex)}`, name: `Attribute ${attrLabel}`, offset: recordCursor, length: valueOffset + 1 - recordCursor, rawBytes: data.slice(recordCursor, valueOffset + 1), rawValue: toHex(attrId, 2), valid: true, warnings: [WARN_ZCL_UNKNOWN_DATA_TYPE] });
                     warnings.push(toProtocolWarning(WARN_ZCL_UNKNOWN_DATA_TYPE));
                     const trailing = data.slice(valueOffset + 1, zclEnd);
                     if (trailing.length > 0) {
@@ -877,7 +1175,7 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
                 recordIndex += 1;
                 fields.push({
                   id: `zcl-attr-${String(recordIndex)}`,
-                  name: `Attribute ${toHex(attrId, 2)}`,
+                  name: `Attribute ${attrLabel}`,
                   offset: recordCursor,
                   length: recordLength,
                   rawBytes: data.slice(recordCursor, recordCursor + recordLength),

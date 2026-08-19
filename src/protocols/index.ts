@@ -270,8 +270,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // FCS bu dalgada GERÇEKTEN doğrulanır (CRC16_KERMIT, anahtarsız — MIC/
   // checksum-dialect kuralının istisnası). NWK/APS security=1 → encrypted
   // ham (öteye inilmez). ZCL yalnız Read Attributes Response/Report
-  // Attributes/Default Response payload'ı çözer; cluster-specific komutlar
-  // ve Cluster/Profile ID isim eşlemesi bu dalgada YOK (karar 5, dar kapsam).
+  // Attributes/Default Response payload'ı çözer; cluster-specific komutların
+  // GÖVDESİ hâlâ ham+uyarı (karar 5, dar kapsam). Dalga 8: Cluster ID +
+  // Attribute ID isim eşlemesi eklendi — Home Automation'ın en yaygın 18
+  // cluster'ı (zigbee-herdsman + Wireshark çapraz doğrulaması, bkz. zigbee.ts
+  // CLUSTER/ATTRIBUTE KÜTÜPHANESİ); TAM ZCL kütüphanesi DEĞİL.
   registerOnce(registry, 'zigbee', () =>
     import('./wireless/zigbee/zigbee').then((module) => module.zigbeePlugin),
   );
