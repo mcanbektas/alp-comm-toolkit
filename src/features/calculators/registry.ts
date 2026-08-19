@@ -56,6 +56,11 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'spi-timing', category: 'timing', nameKey: 'calc.spiTiming.name', summaryKey: 'calc.spiTiming.summary' },
   { id: 'i2c-timing', category: 'timing', nameKey: 'calc.i2cTiming.name', summaryKey: 'calc.i2cTiming.summary' },
   { id: 'pmbus-linear', category: 'timing', nameKey: 'calc.pmbusLinear.name', summaryKey: 'calc.pmbusLinear.summary' },
+  // LoRa PHY: katalogdaki `wireless-iot/lora-lpwan/lora` kaydı çerçeve ÇÖZMEZ,
+  // hesap makinesidir (`tabs` içinde `decode` yok) — motoru bu yüzden protokol
+  // eklentisi olarak değil, buradaki zamanlama araçlarının yanında yaşar.
+  { id: 'lora-airtime', category: 'timing', nameKey: 'calc.loraAirtime.name', summaryKey: 'calc.loraAirtime.summary' },
+  { id: 'lora-link-budget', category: 'timing', nameKey: 'calc.loraLinkBudget.name', summaryKey: 'calc.loraLinkBudget.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

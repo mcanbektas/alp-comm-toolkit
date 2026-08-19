@@ -11,6 +11,11 @@ Bu brief 8b'den **bağımsız** iki aileyi kapsar: `lora` (katalogda ayrı bir k
 LoRaWAN'dan farklı — PHY hesap makinesi) ve beş kayıtlık bir AT-komut ailesi
 (`hayes-command-set`, `at-commands`, `lte-modem-at`, `nb-iot`, `gnss-modem`).
 
+**9a TAMAM.** Karar 1 ve karar 2 uygulandı. Ne yazıldığı ve keşif turunun hangi
+öncülünün yanlış çıktığı aşağıda: bkz. "9a — ne yapıldı" ve düzeltilmiş §2.
+Kalan iş 9b-9e; onlar için karar 3/4/5 hâlâ cevapsız. Yeni bir karar doğdu
+(karar 6, hesap sekmelerinin protokol sayfasına bağlanması).
+
 ## Durum — keşif turunda doğrulananlar
 
 Bu bölümdeki her satır bu depoda okunarak ya da resmi/açık kaynaktan doğrulanarak
@@ -38,12 +43,29 @@ Analyzer*, *Link Budget & Margin Calculator*, *Battery/Energy Estimator*. Dosya
 başı kod yorumu (`wireless-iot.ts:174-175`) bunu doğruluyor: *"Airtime / Time on
 Air hesabı bu kaydın asıl işi."*
 
-**Bu depoda `calculators` altyapısı zaten CANLI**, blokaj değil: `obd.ts:364`
+~~**Bu depoda `calculators` altyapısı zaten CANLI**, blokaj değil: `obd.ts:364`
 (`calculators: CALCULATORS`) + `src/features/calculators/` (registry.ts, types.ts,
-tools/) dolu. `protocol-core/types.ts`'teki `CalculatorDefinition`'ın "hesap
-motorları Faz 5'te gelecek" notu ESKİ bir durumu anlatıyor — `docs/plan-fazlar.md:44`:
-*"Faz 5-8 bitti."* `lora` bu emsali (obd.ts) izler, `parser` gerekmeyebilir (ya da
-minik bir PHY header ayrıştırıcıyla birlikte gelebilir — karar 1).
+tools/) dolu.~~
+
+**DÜZELTME (9a uygulanırken çıktı — bu öncül YANLIŞTI.)** Tek bir "calculators
+altyapısı" yok, İKİ AYRI şey var ve biri motor taşımıyor:
+
+1. `ProtocolPlugin.calculators: CalculatorDefinition[]` — **metadata-only**.
+   `protocol-core/types.ts:218-224` tipin tamamıdır: `id`, `name`, `description`,
+   `unit?`. Girdi tipi yok, `compute` yok, sonuç tipi yok. Tip yorumundaki "hesap
+   motorları Faz 5'te gelecek, burada sadece şekil sabitleniyor" notu ESKİ DEĞİL,
+   hâlâ geçerli. Depoda `plugin.calculators` alanını okuyan TEK yer bir test
+   satırıdır (`obd.test.ts:170`); sıfır UI bileşeni okur. Yani obd.ts'in deseni
+   izlenirse ekranda **hiçbir şey çıkmaz**.
+2. `src/features/calculators/` — asıl CANLI olan bu: `CALCULATOR_TOOLS` kaydı,
+   `/calculators/:toolId` rotası, `CalculatorPage.tsx`teki `TOOL_RENDERERS`
+   eşlemesi ve `tools/` altındaki gerçek React araçları (`timingTools.tsx`,
+   `numericTools.tsx`, `CrcCalculatorTool.tsx`). Protokol eklentisiyle HİÇ
+   bağlantısı yok — `pluginId` de protokol id'si de okumaz.
+
+Motor da bu ikinci sistemin emsalini izler: UART/RS-485/SPI/I²C/PMBus zamanlama
+motorlarının hepsi `protocol-core/timing/` altındadır ve hepsi protokole
+özgüdür. LoRa PHY de oraya yazıldı. `parser` gerekmiyor (karar 1).
 
 ### 3. LoRa ToA formülü — İKİ RESMİ KAYNAK ÇATIŞIYOR, güncel olan tercih edilmeli
 
@@ -156,7 +178,7 @@ satır-yönelimli ASCII'dir (`\r\n` ile kendi kendini sınırlar) — tıpkı h�
 
 | Yol | Durum | pluginId/aliasOf | Bu dalgada |
 |---|---|---|---|
-| `wireless-iot/lora-lpwan/lora` | planned | yok/yok | **ready**, calculator |
+| `wireless-iot/lora-lpwan/lora` | ~~planned~~ **partial** | yok/yok (bilinçli) | **TAMAM** — motor `protocol-core/timing/lora.ts`, araçlar `/calculators` altında; eklenti YAZILMADI, gerekçe 9a bölümünde |
 | `interfaces-framing/framing-stream-protocols/hayes-command-set` | planned | yok/yok | karar 1'e bağlı |
 | `interfaces-framing/framing-stream-protocols/at-commands` | planned | yok/yok | **ready**, motor |
 | `wireless-iot/cellular-iot/lte-modem-at` | planned | yok/yok | karar 4'e bağlı |
@@ -166,24 +188,71 @@ satır-yönelimli ASCII'dir (`\r\n` ile kendi kendini sınırlar) — tıpkı h�
 ## BEKÇİ BORCU — YOK
 
 Altı kayıt da zaten katalogda; yalnız `status`/`pluginId` işlenecek. 8/54/172
-dokunulmaz. Registry 48 (dalga 8 sonrası) → en fazla 54 (altısı da yazılırsa).
+dokunulmaz. Registry 48 (dalga 8 sonrası) → en fazla **53**: `lora` eklenti
+YAZILMADI (karar 1'in sonucu), yalnız beş AT kaydı registry'ye girebilir.
+9a sonrası registry hâlâ 48. Katalog sayıları da 9a'da değişmedi.
 
 ## Kapsam bölmesi
 
-### 9a — LoRa PHY hesap makinesi (bağımsız, hemen başlanabilir)
+### 9a — LoRa PHY hesap makinesi — **TAMAM**
 
-1. `src/features/calculators/` desenini izleyerek ToA/Airtime/Symbol-Time/Bit-Rate/
-   Link-Budget hesaplarını yaz — `obd.ts`'in `calculators: CALCULATORS` deseni emsal.
-2. Payload sembol sayısı formülünde **güncel Semtech Rev.7'yi** kullan (karar 2).
-3. Fixture: TTN/ChirpStack'in yayınladığı bilinen ToA değerleri (ör. SF7/BW125/
-   CR4-5, 20 bayt payload → ~61.7 ms) ile bağımsız doğrula — spec worked example
-   yoksa iki bağımsız hesaplayıcı (kendi + `avbentem`'in kendi test paketindeki
-   sayılar) çapraz kontrol.
-4. `decode`/`parser` gerekip gerekmediği karar 1.
-5. Katalog: `status: 'ready'`. `pluginId` gerekip gerekmediği de karar 1'e bağlı
-   (yalnız `calculators` taşıyan bir `ProtocolPlugin` hâlâ `pluginId` iddia
-   edebilir mi — `DecodePanel`'in `pluginId` zorunlu kıldığı yer var mı kontrol
-   edilmeli, `decode` sekmesi olmadığı için bu soru gerçek).
+Ne yazıldı:
+
+| Dosya | İçerik |
+|---|---|
+| `src/protocol-core/timing/lora.ts` (yeni) | Motor: `calculateLoraSymbolTiming`, `calculateLoraTimeOnAir`, `calculateLoraAirtime`, `estimateLoraSensitivity`, `calculateLoraLinkBudget` |
+| `src/protocol-core/timing/lora.test.ts` (yeni) | 26 test — doğrulanmış fixture'lar, CRC açık/kapalı ayırt edici çifti dahil |
+| `src/protocol-core/timing/index.ts` | `export * from './lora'` |
+| `src/features/calculators/tools/loraTools.tsx` (yeni) | `LoraAirtimeTool`, `LoraLinkBudgetTool` |
+| `src/features/calculators/tools/shared.tsx` (yeni) | `StatTable`/`ErrorNotice`/`formatSeconds`/`SectionSwitch` — `timingTools.tsx`ten çıkarıldı, kopyalanmadı |
+| `src/features/calculators/registry.ts` | `lora-airtime`, `lora-link-budget` (kategori `timing`) |
+| `src/pages/CalculatorPage.tsx` | İki `TOOL_RENDERERS` girdisi |
+| `src/translations/tr.ts` + `en.ts` | 58 anahtar |
+| `src/app/catalog/domains/wireless-iot.ts` | `lora.status`: `planned` → `partial` (gerekçe dosyada yorumda) |
+| `e2e/lora-calculator.spec.ts` (yeni) | 4 test — gerçek tarayıcıda varsayılan girdi, karar 2'nin ekranda görünmesi dahil |
+
+Doğrulama: `npm run typecheck` temiz · `npm test` 2938/2938 · yeni e2e 4/4 ·
+ekran gerçekten açıldı (iki araç da ekran görüntüsüyle bakıldı).
+
+**Fixture'lar** (hepsi `lora.test.ts`te, elle doğrulanmış ara adımlarla):
+
+| Girdi | Sonuç |
+|---|---|
+| SF7/BW125 | Ts = 1.024 ms, Rs = 976.5625 sym/s |
+| SF7/BW125/CR4-5, PL=10, preamble 8, CRC açık, explicit | 41.216 ms (yayınlanmış TTN/avbentem değeri) |
+| aynısı PL=20 | **56.576 ms** |
+| aynısı PL=20, CRC KAPALI | **51.456 ms** ← karar 2'yi ayırt eden çift |
+| aynısı PL=25 | 61.696 ms |
+| SF12, PL=50, LDRO açık ↔ kapalı | 2301.952 ms ↔ 2138.112 ms |
+| SF7/BW125/CR4-5 ham bit hızı | 5468.75 bit/s (datasheet DR5) |
+
+> **Brief'in kendi sayısı düzeltildi.** Yukarıda "SF7/BW125/CR4-5, 20 bayt payload
+> → ~61.7 ms" yazıyordu; 61.696 ms **PL=25**'in karşılığıdır, PL=20 için doğru
+> değer 56.576 ms'dir. 61.7 muhtemelen uygulama payload'ına LoRaWAN başlığı
+> eklenmiş bir sayıydı ama 13 baytlık LoRaWAN yükü de tutmuyor (PL=33 → 71.936 ms).
+> PHY seviyesinde tek anlamlı girdi `PL`'dir; araç da onu ister.
+
+**Karar 1 nasıl uygulandı ve bir adım ötesi.** "Yalnız hesap, `decode` yok,
+`pluginId` YOK" aynen uygulandı. Düzeltilmiş §2'nin sonucu olarak bir adım daha
+gerekti: `ProtocolPlugin` da yazılmadı. Gerekçe — `pluginId` olmayınca
+`ProtocolPage` eklentiyi hiç yüklemez (`pluginBinding.resolvePluginId` katalog
+alanını okur, registry'ye bakmaz), `plugin.calculators` da metadata-only; geriye
+yalnız zorunlu `exampleFrames` alanını doldurmak için **uydurulmuş örnek çerçeve**
+kalırdı. Çerçeve çözmeyen bir kayda sahte örnek çerçeve yazmak, katalogdaki
+"örneksiz sayfa kullanıcıya hiçbir şey vaat etmez" kuralının tersine çalışırdı.
+
+**Katalog `ready` değil `partial` yapıldı — bilinçli sapma.** Brief `ready`
+diyordu. Motor gerçekten var ve koşuyor, ama `/comm/wireless-iot/lora-lpwan/lora`
+sayfası hâlâ "planlandı" bildirimi basıyor: `ProtocolPage` yalnız `decode`
+sekmesinde eklenti yükler, `timing`/`data`/`diagnostics` sekmelerinin eklentiye
+bakan bir yolu yok (bu, `ProtocolPage.test.tsx:73-79`te Modbus RTU üzerinden
+KASITLI davranış olarak sınanıyor). `ready` demek ekranda yalan olurdu. Bağlantı
+karar 6'ya taşındı.
+
+**Yapılmayanlar** (katalog `tools` listesinde var, 9a kapsamında değildi):
+`RSSI / SNR Scatter` canlı/kaydedilmiş ölçüm ister — veri kaynağı yok.
+`Battery / Energy Estimator` brief'in 9a madde 1 listesinde geçmiyordu; ToA
+üstüne oturur, ucuzdur, ayrı bir turda eklenebilir.
 
 ### 9b — AT komut çekirdeği: `at-commands` (jenerik motor)
 
@@ -226,7 +295,10 @@ dokunulmaz. Registry 48 (dalga 8 sonrası) → en fazla 54 (altısı da yazılı
 
 ## Verilmesi gereken kararlar (dalga başında sor, kendiliğinden seçme)
 
-### Karar 1 — `lora` yalnız hesap mı, hesap+mini-decode mi?
+Durum: **1 ve 2 uygulandı** (9a). **3, 4, 5 hâlâ cevapsız** — 9b'yi bunlar bloklar.
+**6 yeni** (9a'da doğdu), bağımsız.
+
+### Karar 1 — `lora` yalnız hesap mı, hesap+mini-decode mi? — **UYGULANDI (9a)**
 
 `tabs` listesinde `decode` yok — bu KASITLI mı (katalog yazarı PHY header'ı
 ayrıştırmayı hiç düşünmedi) yoksa hesap makinesinin PHY Parameter Set'i
@@ -237,7 +309,12 @@ kararı veriyor — girdi elle form, `calculators` yeter. `ProtocolPlugin.parser
 opsiyonel (`protocol-core/types.ts`), `DecodePanel`'in `pluginId` zorunlu kılıp
 kılmadığını 9a başında hızlıca doğrula (küçük bir kontrol, karar değil).
 
-### Karar 2 — ToA formülünde CRC terimi: sabit mi, parametrik mi?
+> **Sonuç:** öneri uygulandı; "küçük kontrol" büyük çıktı. `pluginId`'yi zorunlu
+> kılan tek yer `ProtocolPage.tsx:380` — ve o satır yalnız `decode` sekmesini
+> yönetiyor. Hesap sekmelerinin eklentiye bakan bir yolu HİÇ yok. Bunun sonucu
+> olarak `ProtocolPlugin` de yazılmadı (gerekçe: "9a — ne yapıldı").
+
+### Karar 2 — ToA formülünde CRC terimi: sabit mi, parametrik mi? — **UYGULANDI (9a)**
 
 `avbentem`/2013-AN1200.13 sabit `+16` kullanıyor (CRC hep açık varsayılıyor);
 güncel Semtech Rev.7 parametrik `16·CRC` veriyor.
@@ -247,6 +324,13 @@ Inspector (explicit / implicit, CRC, LDRO)"* aracı zaten CRC'yi KULLANICI
 SEÇENEĞİ olarak vaat ediyor — sabit varsayım bu vaadi karşılamaz. Test
 fixture'ında CRC açık/kapalı İKİ ayrı örnek gerekir (yalnız "hep açık" durumunu
 sınamak `avbentem` ile farkı asla ortaya çıkarmaz).
+
+> **Sonuç:** parametrik uygulandı (`lora.ts`, `16 * crcTerm`). İki fixture da
+> yazıldı: PL=20'de CRC açık 56.576 ms, kapalı 51.456 ms. Fark ekranda da
+> sınanıyor (`e2e/lora-calculator.spec.ts`, kullanıcı onay kutusunu kapatıyor).
+> İki kaynağın farkı hem dosya başı yorumunda hem de onay kutusunun altındaki
+> kullanıcıya görünen açıklamada yazılı — "avbentem farklı sonuç veriyor"
+> tuzağı ikisiyle de kapatıldı.
 
 ### Karar 3 — AT motoru hangi dizine gider?
 
@@ -286,12 +370,39 @@ ayıklama) — `aliasOf` "ikinci parser yazma, birebir aynı motor" demektir
 (CLAUDE.md), burada aynı değil. `gnss-modem/nmea-0183` emsali zaten `related`
 kullanıyor, `aliasOf` değil — tutarlı.
 
+### Karar 6 — Hesap sekmeleri protokol sayfasına nasıl bağlanacak? (9a'da DOĞDU, cevapsız)
+
+Bugün `ProtocolPage` yalnız `decode` sekmesinde eklenti yükler; `timing`, `data`,
+`diagnostics` sekmeleri katalogdaki `tools` **metin listesini** anahtar kelimeyle
+süzüp basar, üstüne "planlandı" bildirimi koyar. Bu kasıtlıdır ve sınanır
+(`ProtocolPage.test.tsx:73-79`, tamamen `ready` olan Modbus RTU üzerinden).
+
+Sonuç: LoRa hesap makinesi `/calculators` altında ÇALIŞIYOR ama LoRa protokol
+sayfasından ne görünüyor ne de bağlantısı var. Aynı durum ileride hesap taşıyan
+her kayıt için tekrarlanacak.
+
+Seçenekler:
+
+- **(a) Bırak.** Hesaplar `/calculators`ta yaşar, protokol sayfası "planlandı"
+  der. En ucuz, ama katalogdaki `tools` vaadi (`Time on Air Calculator` vb.)
+  o sayfada karşılıksız kalır.
+- **(b) Bağlantı ver.** Katalog kaydına hesap aracı id'si taşıyan bir alan
+  eklenir (ör. `calculatorIds?: readonly string[]`), protokol sayfası ilgili
+  sekmede "bu araca git" bağlantısı basar. Küçük, geri dönüşü kolay; sayfa hâlâ
+  hesabı İÇİNDE göstermez.
+- **(c) Gömme.** `ProtocolPage`e hesap paneli mount eden yeni bir dal eklenir
+  (`TOOL_RENDERERS`ın protokol tarafındaki karşılığı). En doğrusu ama 172 kaydı
+  ilgilendiren bir sözleşme ve mevcut testi değiştirir.
+
+**Öneri: (b).** `ready`'nin ne demek olduğunu bozmadan vaadi karşılar ve (c)'yi
+ileride engellemez. (c) kendi dalgasını hak eder — karar 4'ün "stateful dashboard
+UI katmanında yaşar" sonucuyla aynı yere bakıyor, ikisi birlikte tasarlanmalı.
+
 ## Tuzaklar
 
-- **CRC terimi (karar 2)**: `avbentem`'i TEK kaynak sayıp sabit `+16` yazma —
-  güncel datasheet'le çapraz kontrol ZORUNLU, dosya başında ikisinin FARKI
-  açıkça yazılmalı (gelecekte biri "avbentem farklı sonuç veriyor" diye hata
-  sanabilir).
+- ~~**CRC terimi (karar 2)**~~ **KAPATILDI (9a)**: parametrik yazıldı, fark
+  `lora.ts` dosya başında + kullanıcıya görünen onay kutusu açıklamasında + iki
+  ayrı fixture'da belgeli.
 - **AT satır sonu**: bazı modemler `\r\n`, bazıları yalnız `\r` kullanır (V.250
   `S3`/`S4` registerları bunu SEÇİLEBİLİR yapar) — sabit `\r\n` varsayımı sessiz-
   yanlış çerçeveleme üretir.
@@ -316,13 +427,25 @@ kullanıyor, `aliasOf` değil — tutarlı.
 - Her alt dalga kendi commit'i: `feat: … (Faz 10, dalga 9a/9b/…)`.
 - 9a en ucuz/en izole — kararsız kalınırsa ilk ondan başla.
 - 9b→9c→9d/9e sırası ZORUNLU (bağımlılık zinciri), paralel başlanamaz.
+- **Hesap aracı yazarken emsal `obd.ts` DEĞİL**, `src/features/calculators/`tir
+  (düzeltilmiş §2). Motor `protocol-core/` altına, React aracı `tools/` altına,
+  kayıt `registry.ts` + `CalculatorPage.tsx` ikilisine gider — `registry.test.ts`
+  bu ikiliyi iki yönlü bekçiler, unutulan taraf testte düşer.
+
+## Bilinen kırık (9a'dan ÖNCE de kırıktı)
+
+`e2e/lorawan-decode.spec.ts:110` "Confirmed Data Down + FOpts" düşüyor:
+`fieldRow(page, 'fopts')` görünmüyor. 9a'nın hiçbir dosyasıyla ilgisi yok —
+`git stash` ile HEAD'de de aynı şekilde düştüğü doğrulandı. Dalga 8'in FOpts
+işinden kalmış. Kalan 414 e2e testi geçiyor.
 
 ## Öneri
 
-**9a'yı hemen başlat** — 8b'nin karar 1'inden VE bu brief'in kendi kararlarının
-çoğundan bağımsız, yalnız karar 1/2 (küçük, düşük riskli) gerekir. Sonnet ·
-medium (emsal var — obd.ts — tarif net).
+~~**9a'yı hemen başlat**~~ — **bitti** (yukarı bkz.). Gerçekleşen: keşif turunun
+"calculators altyapısı canlı" öncülü yanlış çıktığı için iş tarif edilenden geniş
+oldu (motor + React aracı + kayıt + i18n + e2e), ama hiçbiri mimari karar
+gerektirmedi. Karar 6 bunun artığıdır ve 9a'yı bloklamadı.
 
-**9b-9e için karar 1-5'i yanıtla, sonra başla.** Karar 3 (dizin) ve karar 4
+**9b-9e için karar 3/4/5'i yanıtla, sonra başla.** Karar 3 (dizin) ve karar 4
 (stateful/saf gerilimi) mimari niteliğinde — Opus · high. 9b bitmeden 9c/9d/9e'ye
-girilmez.
+girilmez. Karar 6 bağımsızdır, kendi turunda ele alınabilir.

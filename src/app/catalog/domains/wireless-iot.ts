@@ -173,7 +173,17 @@ export const wirelessIotDomain: CatalogDomain = {
           layer: 'physical',
           // Airtime / Time on Air hesabı bu kaydın asıl işi — 'timing' sekmesi
           // olmadan LoRa sayfası anlamsız kalır (taksonomi 8.3, Semtech ToA).
-          status: 'planned',
+          //
+          // `partial`, `ready` DEĞİL ve `pluginId` YOK — ikisi de bilinçli (Faz 10
+          // dalga 9a, karar 1). Hesap motoru YAZILDI (`protocol-core/timing/lora.ts`:
+          // sembol süresi, ToA, bit hızı, duty cycle, link bütçesi) ve `/calculators`
+          // altında iki araç olarak KOŞUYOR (`lora-airtime`, `lora-link-budget`).
+          // Ama bu SAYFA hâlâ "planlandı" bildirimi basar: `ProtocolPage` yalnız
+          // `decode` sekmesinde eklenti yükler (`pluginBinding.resolvePluginId` →
+          // `DecodePanel`), hesap sekmelerinin eklenti bakan bir yolu yoktur.
+          // `ready` demek ekranda yalan olurdu. Sayfaya hesap paneli bağlamak yeni
+          // bir karar (brief dalga 9, karar 6) — 172 kaydın tamamını ilgilendirir.
+          status: 'partial',
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'PHY Parameter Set (Frequency / Bandwidth / Spreading Factor / Coding Rate)',
