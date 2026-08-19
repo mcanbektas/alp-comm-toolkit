@@ -107,13 +107,40 @@ test('Unconfirmed Data Up: FHDR alan alan çözülür, MIC asla PASS/FAIL basmaz
   await expectNoRawTranslationKeys(page);
 });
 
-test('Confirmed Data Down + FOpts: downlink FCtrl yorumlanır, FOpts ham kalır', async ({ page }) => {
+/**
+ * Bu iki test dalga 8'de (`ea02949`, FOpts MAC komut borcu) DEĞİŞEN davranışı
+ * sınar. Öncesinde tek bir ham `fopts` alanı + "çözülmedi" uyarısı basılıyordu;
+ * artık zincir CID CID çözülüyor ve ham kalan YALNIZ bilinmeyen CID'den sonra
+ * çıkıyor. Eski test dalga 8'de güncellenmemiş, kırmızı kalmıştı — `e2e/`
+ * `tsconfig.json`ın `include`ında olmadığı için ölü çeviri anahtarı
+ * (`warning.foptsNotDecoded`) derlemede de yakalanmamıştı.
+ */
+test('Confirmed Data Down + FOpts: downlink FCtrl yorumlanır, MAC komutu çözülür', async ({ page }) => {
   await openDecodePanel(page);
   await selectExample(page, 'confirmed-data-down-with-fopts');
 
   await expect(fieldRow(page, 'f-pending')).toBeVisible();
-  await expect(fieldRow(page, 'fopts')).toBeVisible();
-  await expect(fieldWarning(page, 'fopts')).toContainText(tr['protocol.lorawan.warning.foptsNotDecoded']);
+  // Sayısal ham değerler panelde `0x<hex> (<ondalık>)` biçiminde basılır.
+  await expect(fieldRow(page, 'fopts-len').getByTestId('decode-field-raw')).toHaveText('0x2 (2)');
+  // FOpts = 04 03 → DutyCycleReq(CID 0x04) + MaxDCycle=3.
+  await expect(fieldRow(page, 'mac-command-1')).toContainText('DutyCycleReq');
+  await expect(fieldRow(page, 'mac-command-1-max-dcycle').getByTestId('decode-field-raw')).toHaveText('0x3 (3)');
+  await expectNoRawTranslationKeys(page);
+});
+
+test('Bilinmeyen CID: zincir durur, kalan FOpts ham+uyarılı kalır', async ({ page }) => {
+  await openDecodePanel(page);
+  await selectExample(page, 'mac-commands-unknown-cid');
+
+  // Bilinmeyen CID'in gövde uzunluğu bilinmez — zincir orada durmalı, kalanı
+  // uydurulmuş bir şemayla çözmeye çalışmamalı.
+  await expect(fieldRow(page, 'mac-command-1')).toContainText('Unknown CID');
+  await expect(fieldWarning(page, 'mac-command-1')).toContainText(
+    tr['protocol.lorawan.warning.unknownMacCommandCid'],
+  );
+  await expect(fieldWarning(page, 'mac-command-1-remainder')).toContainText(
+    tr['protocol.lorawan.warning.foptsRemainderNotDecoded'],
+  );
   await expectNoRawTranslationKeys(page);
 });
 

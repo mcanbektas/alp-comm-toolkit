@@ -432,12 +432,27 @@ UI katmanında yaşar" sonucuyla aynı yere bakıyor, ikisi birlikte tasarlanmal
   kayıt `registry.ts` + `CalculatorPage.tsx` ikilisine gider — `registry.test.ts`
   bu ikiliyi iki yönlü bekçiler, unutulan taraf testte düşer.
 
-## Bilinen kırık (9a'dan ÖNCE de kırıktı)
+## ~~Bilinen kırık~~ — KAPATILDI (9a sonrası ayrı tur)
 
-`e2e/lorawan-decode.spec.ts:110` "Confirmed Data Down + FOpts" düşüyor:
-`fieldRow(page, 'fopts')` görünmüyor. 9a'nın hiçbir dosyasıyla ilgisi yok —
-`git stash` ile HEAD'de de aynı şekilde düştüğü doğrulandı. Dalga 8'in FOpts
-işinden kalmış. Kalan 414 e2e testi geçiyor.
+`e2e/lorawan-decode.spec.ts:110` "Confirmed Data Down + FOpts" düşüyordu:
+`fieldRow(page, 'fopts')` görünmüyordu. 9a'nın hiçbir dosyasıyla ilgisi yoktu —
+`git stash` ile HEAD'de de aynı şekilde düştüğü doğrulanmıştı.
+
+**Teşhis: kod değil, test bayattı.** Dalga 8 (`ea02949`, FOpts MAC komut borcu)
+tek ham `fopts` alanını kaldırıp zinciri CID CID çözmeye başladı; test hâlâ
+dalga 7b davranışını bekliyordu. Beklediği uyarı anahtarı
+(`protocol.lorawan.warning.foptsNotDecoded`) da sözlükten kalkmıştı.
+
+**Kök sebep ayrıca kapatıldı:** `e2e/` `tsconfig.json`ın `include`ında yoktu, bu
+yüzden ölü çeviri anahtarı `npm run typecheck`te de görünmüyordu. `e2e` ve
+`playwright.config.ts` derlemeye alındı; tsc temiz kaldı ve bekçinin gerçekten
+ısırdığı ölü anahtarla sınandı (TS2551). Aynı sınıf hata bir daha e2e'de sessiz
+kalmaz.
+
+Test iki teste bölündü: biri MAC komutunun çözüldüğünü (DutyCycleReq +
+MaxDCycle=3), diğeri bilinmeyen CID'den sonra kalanın hâlâ ham+uyarılı kaldığını
+sınıyor — ikincisi eski testin asıl niyetini, hâlâ doğru olduğu yerde koruyor.
+Tüm e2e paketi 416/416 yeşil.
 
 ## Öneri
 

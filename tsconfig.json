@@ -25,5 +25,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "vitest.setup.ts"]
+  // `e2e` ve `playwright.config.ts` de derlemeye dahil: dışarıda kaldıkları sürece
+  // bir e2e testi ölü bir çeviri anahtarına (`tr['...']`) ya da kalkmış bir dışa
+  // aktarıma başvurduğunda `npm run typecheck` sessiz kalıyordu — dalga 8'de
+  // güncellenmeyen LoRaWAN FOpts testi tam bu yüzden kırmızı kaldı.
+  "include": ["src", "e2e", "vite.config.ts", "vitest.setup.ts", "playwright.config.ts"]
 }
