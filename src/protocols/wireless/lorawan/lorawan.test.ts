@@ -49,6 +49,10 @@ function joinRequestFrame(): Uint8Array {
   ]);
 }
 
+function le24(value: number): number[] {
+  return [value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff];
+}
+
 function dataFrame(
   fType: number,
   options: {
@@ -206,12 +210,115 @@ describe('Data frame — FHDR', () => {
     expect(hasField(frame, 'class-b')).toBe(false);
   });
 
-  it('FOpts MAC komutlarını ham + uyarıyla gösterir (çözmez)', () => {
+});
+
+describe('FOpts MAC komutları', () => {
+  it('gövdesiz iki komutu ardışık çözer (LinkCheckReq + DutyCycleAns, uplink)', () => {
     const frame = expectSuccess(
-      parseLoRaWAN(dataFrame(0b010, { fctrl: 0b0000_0010, fopts: [0x02, 0x03] })),
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 2, fopts: [0x02, 0x04] })),
     ).frame;
-    expect(fieldById(frame, 'fopts').rawBytes).toEqual(Uint8Array.from([0x02, 0x03]));
-    expect(warningCodes(frame)).toContain('protocol.lorawan.warning.foptsNotDecoded');
+    expect(fieldById(frame, 'mac-command-1').name).toContain('LinkCheckReq');
+    expect(fieldById(frame, 'mac-command-1').length).toBe(1);
+    expect(fieldById(frame, 'mac-command-2').name).toContain('DutyCycleAns');
+    expect(fieldById(frame, 'mac-command-2').offset).toBe(fieldById(frame, 'mac-command-1').offset + 1);
+    expect(frame.valid).toBe(true);
+  });
+
+  it('LinkADRReq (downlink) DataRate/TXPower/ChMask/ChMaskCntl/NbTrans bit alanlarını çözer', () => {
+    // DataRate=5,TXPower=3 → 0x53. ChMask=0x0003 (ch0+ch1). ChMaskCntl=0,NbTrans=2 → 0x02.
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b011, { fctrl: 5, fopts: [0x03, 0x53, 0x03, 0x00, 0x02] })),
+    ).frame;
+    expect(fieldById(frame, 'mac-command-1').name).toContain('LinkADRReq');
+    expect(fieldById(frame, 'mac-command-1-data-rate').rawValue).toBe(5);
+    expect(fieldById(frame, 'mac-command-1-tx-power').rawValue).toBe(3);
+    expect(fieldById(frame, 'mac-command-1-ch-mask').rawValue).toBe('0x0003');
+    expect(fieldById(frame, 'mac-command-1-ch-mask-cntl').rawValue).toBe(0);
+    expect(fieldById(frame, 'mac-command-1-nb-trans').rawValue).toBe(2);
+  });
+
+  it('LinkADRAns (uplink) üç ACK bitini ayrıştırır', () => {
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 2, fopts: [0x03, 0b0000_0111] })),
+    ).frame;
+    expect(fieldById(frame, 'mac-command-1-channel-mask-ack').physicalValue).toBe('Acknowledged');
+    expect(fieldById(frame, 'mac-command-1-data-rate-ack').physicalValue).toBe('Acknowledged');
+    expect(fieldById(frame, 'mac-command-1-power-ack').physicalValue).toBe('Acknowledged');
+  });
+
+  it('DevStatusAns Margin’ı 6-bit iki’nin tümleyeni olarak çözer (pozitif ve negatif)', () => {
+    const positive = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 3, fopts: [0x06, 100, 10] })),
+    ).frame;
+    expect(fieldById(positive, 'mac-command-1-battery').rawValue).toBe(100);
+    expect(fieldById(positive, 'mac-command-1-margin').rawValue).toBe(10);
+
+    const negative = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 3, fopts: [0x06, 50, 40] })),
+    ).frame;
+    expect(fieldById(negative, 'mac-command-1-margin').rawValue).toBe(-24);
+  });
+
+  it('Battery 0/255 sınır değerlerini adlandırır', () => {
+    const external = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 3, fopts: [0x06, 0, 0] })),
+    ).frame;
+    expect(fieldById(external, 'mac-command-1-battery').physicalValue).toBe('External power');
+
+    const unmeasurable = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 3, fopts: [0x06, 255, 0] })),
+    ).frame;
+    expect(fieldById(unmeasurable, 'mac-command-1-battery').physicalValue).toBe('Cannot measure');
+  });
+
+  it('RXParamSetupReq Frequency’i 100 Hz biriminden Hz’e çevirir (LE 24-bit)', () => {
+    // RX1DROffset=2,RX2DataRate=9 → byte0=0x29. Freq birimi 8_681_000 → 868_100_000 Hz.
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b011, { fctrl: 5, fopts: [0x05, 0x29, ...le24(8_681_000)] })),
+    ).frame;
+    expect(fieldById(frame, 'mac-command-1-rx1-dr-offset').rawValue).toBe(2);
+    expect(fieldById(frame, 'mac-command-1-rx2-data-rate').rawValue).toBe(9);
+    expect(fieldById(frame, 'mac-command-1-frequency').rawValue).toBe(868_100_000);
+    expect(fieldById(frame, 'mac-command-1-frequency').unit).toBe('Hz');
+  });
+
+  it('aynı FOpts zincirinde iki farklı komutun aynı adlı alanları ÇAKIŞMAZ (NewChannelReq + DlChannelReq)', () => {
+    const newChannel = [0x07, 3, ...le24(8_681_000), 0x50]; // ChIndex=3, Freq, MaxDR=5,MinDR=0
+    const dlChannel = [0x0a, 4, ...le24(8_695_250)]; // ChIndex=4, Freq
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b011, { fctrl: newChannel.length + dlChannel.length, fopts: [...newChannel, ...dlChannel] })),
+    ).frame;
+
+    expect(fieldById(frame, 'mac-command-1-ch-index').rawValue).toBe(3);
+    expect(fieldById(frame, 'mac-command-1-frequency').rawValue).toBe(868_100_000);
+    expect(fieldById(frame, 'mac-command-1-max-dr').rawValue).toBe(5);
+    expect(fieldById(frame, 'mac-command-1-min-dr').rawValue).toBe(0);
+
+    expect(fieldById(frame, 'mac-command-2-ch-index').rawValue).toBe(4);
+    expect(fieldById(frame, 'mac-command-2-frequency').rawValue).toBe(869_525_000);
+  });
+
+  it('dar küme dışı (1.1’e özgü) CID tanınmaz, kalan FOpts ham + uyarıyla gösterilir', () => {
+    // CID 0x0B = RekeyInd (LoRaWAN 1.1) — sürüm çıpası L2 1.0.4 dışında (dosya başı).
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b010, { fctrl: 3, fopts: [0x0b, 0xaa, 0xbb] })),
+    ).frame;
+    const cidField = fieldById(frame, 'mac-command-1');
+    expect(cidField.valid).toBe(false);
+    expect(cidField.rawBytes).toEqual(Uint8Array.from([0x0b]));
+    expect(warningCodes(frame)).toContain('protocol.lorawan.warning.unknownMacCommandCid');
+    expect(fieldById(frame, 'mac-command-1-remainder').rawBytes).toEqual(Uint8Array.from([0xaa, 0xbb]));
+    expect(warningCodes(frame)).toContain('protocol.lorawan.warning.foptsRemainderNotDecoded');
+    expect(frame.valid).toBe(true);
+  });
+
+  it('tanınan ama tampon yetersiz komut truncated-frame basar (bilinmeyen-CID’in uyarı katmanından farklı)', () => {
+    // DutyCycleReq (downlink) 1 bayt gövde ister, FOpts’ta yalnız CID var.
+    const frame = expectSuccess(
+      parseLoRaWAN(dataFrame(0b011, { fctrl: 1, fopts: [0x04] })),
+    ).frame;
+    expect(frame.valid).toBe(false);
+    expect(frame.errors.map((error) => error.code)).toContain('truncated-frame');
   });
 });
 

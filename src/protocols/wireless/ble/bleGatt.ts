@@ -715,7 +715,7 @@ function parseBleGattFrame(data: Uint8Array, options: BleGattParseOptions): Pars
     length: 1,
     rawBytes: attPdu.slice(0, 1),
     rawValue: commandFlag,
-    physicalValue: commandFlag === 1 ? 'Command (yanıt beklenmez)' : 'Request/Response (yanıt beklenir)',
+    physicalValue: commandFlag === 1 ? 'Command (no response expected)' : 'Request/Response (response expected)',
     valid: true,
     warnings: [],
   });
@@ -726,7 +726,7 @@ function parseBleGattFrame(data: Uint8Array, options: BleGattParseOptions): Pars
     length: 1,
     rawBytes: attPdu.slice(0, 1),
     rawValue: authSigFlag,
-    physicalValue: authSigFlag === 1 ? 'İmzalı (12 baytlık imza payload sonuna eklenir)' : 'İmzasız',
+    physicalValue: authSigFlag === 1 ? 'Signed (12-byte signature appended to payload)' : 'Unsigned',
     valid: true,
     warnings: [],
   });

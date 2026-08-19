@@ -2967,19 +2967,23 @@ export const tr = {
   'protocol.lorawan.error.joinRequestLength': 'Join-Request tam 23 bayt olmalı (MHDR+JoinEUI+DevEUI+DevNonce+MIC).',
   'protocol.lorawan.error.fhdrTruncated': 'FHDR için tamponda yeterli bayt yok (DevAddr+FCtrl+FCnt en az 7 bayt ister).',
   'protocol.lorawan.error.foptsTruncated': 'FOptsLen’in bildirdiği uzunluk için tamponda yeterli bayt yok.',
+  'protocol.lorawan.error.macCommandTruncated':
+    'MAC komutu tanınıyor ama gövdesi için FOpts tamponunda yeterli bayt yok.',
   'protocol.lorawan.warning.majorNotR1': 'Major alanı LoRaWAN R1 (00) değil; çözüm yine de sürer.',
   'protocol.lorawan.warning.frameKindNotDecoded':
     'Bu FType’ın gövde şeması (Proprietary ya da 1.1’e özgü Rejoin Request) bu dalgada çözülmüyor; ham gösterildi.',
   'protocol.lorawan.warning.joinAcceptEncrypted':
     'Join-Accept gövdesi (MIC dahil) uçtan uca şifreli; anahtar olmadan çözülmez, ham gösterildi.',
-  'protocol.lorawan.warning.foptsNotDecoded':
-    'FOpts içindeki MAC komutları bu dalgada çözülmüyor (analyzer işi); ham gösterildi.',
+  'protocol.lorawan.warning.unknownMacCommandCid':
+    'CID dar kümede yok (TS001-1.0.4 çekirdeği dışında, ör. 1.1’e özgü) — gövde uzunluğu bilinmiyor, tanınamadı.',
+  'protocol.lorawan.warning.foptsRemainderNotDecoded':
+    'Bilinmeyen CID’den sonraki FOpts baytlarının sınırı belirlenemedi; ham gösterildi.',
   'protocol.lorawan.warning.frmPayloadEncrypted': 'FRMPayload şifreli; anahtar olmadan çözülmez, ham gösterildi.',
   'protocol.lorawan.warning.micNeedsSessionKeys':
     'MIC var; oturum anahtarları olmadan doğrulanamaz (PASS/FAIL basılmaz).',
 
   'protocol.lorawan.documentation.summary':
-    'LoRaWAN, PHYPayload’ı çözer: MHDR(1B) + MACPayload + MIC(4B). Join-Request açık metindir (JoinEUI/DevEUI/DevNonce). Join-Accept MHDR sonrası uçtan uca şifrelidir (MIC dahil), ham gösterilir. Data frame’de FHDR (DevAddr/FCtrl/FCnt/FOpts) alan alan çözülür — FCtrl yöne göre farklı bit düzeni taşır; FOpts’taki MAC komutları ham kalır (analyzer işi). FPort=0 uygulama verisi DEĞİL, MAC komutu demektir. FRMPayload her zaman şifreli → ham + işaret. MIC hiçbir zaman doğrulanmaz — "present, cannot verify without session keys" (mavlink crcNeedsDialect emsali). Sürüm çıpası L2 1.0.4 (TS001); FType 110 (1.1 Rejoin Request) dar adlanır, gövdesi bu dalgada çözülmez.',
+    'LoRaWAN, PHYPayload’ı çözer: MHDR(1B) + MACPayload + MIC(4B). Join-Request açık metindir (JoinEUI/DevEUI/DevNonce). Join-Accept MHDR sonrası uçtan uca şifrelidir (MIC dahil), ham gösterilir. Data frame’de FHDR (DevAddr/FCtrl/FCnt/FOpts) alan alan çözülür — FCtrl yöne göre farklı bit düzeni taşır; FOpts’taki MAC komutları CID(1B)+gövde zinciri olarak çözülür (LinkCheck/LinkADR/DutyCycle/RXParamSetup/DevStatus/NewChannel/RXTimingSetup/TxParamSetup/DlChannel/DeviceTime — TS001-1.0.4’ün tamamı), 1.1’e özgü CID’ler dar kümenin dışında kalır. FPort=0 uygulama verisi DEĞİL, MAC komutu demektir. FRMPayload her zaman şifreli → ham + işaret. MIC hiçbir zaman doğrulanmaz — "present, cannot verify without session keys" (mavlink crcNeedsDialect emsali). Sürüm çıpası L2 1.0.4 (TS001); FType 110 (1.1 Rejoin Request) dar adlanır, gövdesi bu dalgada çözülmez.',
   'protocol.lorawan.example.joinRequest.name': 'Join-Request (açık metin)',
   'protocol.lorawan.example.joinRequest.description':
     'JoinEUI/DevEUI/DevNonce açıkça çözülür — Join-Request şifreli değildir.',
@@ -2991,7 +2995,16 @@ export const tr = {
     'FHDR + FPort + şifreli FRMPayload alan alan çözülür; MIC ham + doğrulanamaz uyarısı.',
   'protocol.lorawan.example.confirmedDataDownWithFopts.name': 'Confirmed Data Down + FOpts',
   'protocol.lorawan.example.confirmedDataDownWithFopts.description':
-    'Downlink FCtrl yorumu (RFU/FPending) + FOptsLen=2 — MAC komutları ham gösterilir.',
+    'Downlink FCtrl yorumu (RFU/FPending) + FOptsLen=2 — DutyCycleReq çözülür.',
+  'protocol.lorawan.example.macCommandsLinkCheckReq.name': 'FOpts — LinkCheckReq (gövdesiz)',
+  'protocol.lorawan.example.macCommandsLinkCheckReq.description':
+    'Uplink, tek MAC komutu: LinkCheckReq (CID 0x02) — cihazın bağlantı kalitesi isteği, gövdesiz.',
+  'protocol.lorawan.example.macCommandsLinkAdrReq.name': 'FOpts — LinkADRReq (bit alanları)',
+  'protocol.lorawan.example.macCommandsLinkAdrReq.description':
+    'Downlink LinkADRReq (CID 0x03): DataRate/TXPower/ChMask/ChMaskCntl/NbTrans bit alanları çözülür.',
+  'protocol.lorawan.example.macCommandsUnknownCid.name': 'FOpts — dar küme dışı CID (uyarı yolu)',
+  'protocol.lorawan.example.macCommandsUnknownCid.description':
+    'CID 0x0B (RekeyInd, LoRaWAN 1.1) sürüm çıpası dışında — tanınamaz, kalan FOpts ham gösterilir.',
   'protocol.lorawan.example.macCommandOnly.name': 'FPort=0 (yalnız MAC komutu)',
   'protocol.lorawan.example.macCommandOnly.description':
     'FPort=0 — uygulama verisi DEĞİL, şifreli MAC komutu anlamına gelir.',

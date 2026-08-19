@@ -2973,20 +2973,24 @@ export const en: TranslationDictionary = {
   'protocol.lorawan.error.fhdrTruncated':
     'Not enough bytes in the buffer for the FHDR (DevAddr+FCtrl+FCnt requires at least 7 bytes).',
   'protocol.lorawan.error.foptsTruncated': 'Not enough bytes in the buffer for the declared FOptsLen.',
+  'protocol.lorawan.error.macCommandTruncated':
+    'The MAC command is recognized but there are not enough bytes in the FOpts buffer for its body.',
   'protocol.lorawan.warning.majorNotR1': 'The Major field is not LoRaWAN R1 (00); parsing continues anyway.',
   'protocol.lorawan.warning.frameKindNotDecoded':
     "This FType's payload schema (Proprietary or the 1.1-specific Rejoin Request) is not decoded in this wave; shown raw.",
   'protocol.lorawan.warning.joinAcceptEncrypted':
     'The Join-Accept body (including the MIC) is end-to-end encrypted; it cannot be decoded without a key, shown raw.',
-  'protocol.lorawan.warning.foptsNotDecoded':
-    'The MAC commands inside FOpts are not decoded in this wave (analyzer work); shown raw.',
+  'protocol.lorawan.warning.unknownMacCommandCid':
+    'CID is outside the narrow set (beyond the TS001-1.0.4 core, e.g. 1.1-specific) — its body length is unknown, could not be recognized.',
+  'protocol.lorawan.warning.foptsRemainderNotDecoded':
+    'The boundary of the FOpts bytes after the unknown CID could not be determined; shown raw.',
   'protocol.lorawan.warning.frmPayloadEncrypted':
     'FRMPayload is encrypted; it cannot be decoded without a key, shown raw.',
   'protocol.lorawan.warning.micNeedsSessionKeys':
     'A MIC is present; it cannot be verified without session keys (PASS/FAIL is never shown).',
 
   'protocol.lorawan.documentation.summary':
-    'LoRaWAN decodes the PHYPayload: MHDR(1B) + MACPayload + MIC(4B). Join-Request is plaintext (JoinEUI/DevEUI/DevNonce). Join-Accept is end-to-end encrypted after the MHDR (including the MIC), shown raw. In a data frame, the FHDR (DevAddr/FCtrl/FCnt/FOpts) is decoded field by field — FCtrl has a different bit layout per direction; the MAC commands inside FOpts stay raw (analyzer work). FPort=0 does NOT mean application data, it means a MAC command. FRMPayload is always encrypted → raw + a flag. The MIC is never verified — "present, cannot verify without session keys" (the mavlink crcNeedsDialect pattern). Version anchor is L2 1.0.4 (TS001); FType 110 (the 1.1 Rejoin Request) is named narrowly, its body is not decoded in this wave.',
+    'LoRaWAN decodes the PHYPayload: MHDR(1B) + MACPayload + MIC(4B). Join-Request is plaintext (JoinEUI/DevEUI/DevNonce). Join-Accept is end-to-end encrypted after the MHDR (including the MIC), shown raw. In a data frame, the FHDR (DevAddr/FCtrl/FCnt/FOpts) is decoded field by field — FCtrl has a different bit layout per direction; the MAC commands inside FOpts are decoded as a CID(1B)+body chain (LinkCheck/LinkADR/DutyCycle/RXParamSetup/DevStatus/NewChannel/RXTimingSetup/TxParamSetup/DlChannel/DeviceTime — the whole of TS001-1.0.4), with 1.1-specific CIDs staying outside the narrow set. FPort=0 does NOT mean application data, it means a MAC command. FRMPayload is always encrypted → raw + a flag. The MIC is never verified — "present, cannot verify without session keys" (the mavlink crcNeedsDialect pattern). Version anchor is L2 1.0.4 (TS001); FType 110 (the 1.1 Rejoin Request) is named narrowly, its body is not decoded in this wave.',
   'protocol.lorawan.example.joinRequest.name': 'Join-Request (plaintext)',
   'protocol.lorawan.example.joinRequest.description':
     'JoinEUI/DevEUI/DevNonce are decoded openly — a Join-Request is not encrypted.',
@@ -2998,7 +3002,16 @@ export const en: TranslationDictionary = {
     'FHDR + FPort + encrypted FRMPayload are decoded field by field; the MIC is shown raw with a cannot-verify warning.',
   'protocol.lorawan.example.confirmedDataDownWithFopts.name': 'Confirmed Data Down + FOpts',
   'protocol.lorawan.example.confirmedDataDownWithFopts.description':
-    'Downlink FCtrl interpretation (RFU/FPending) + FOptsLen=2 — the MAC commands are shown raw.',
+    'Downlink FCtrl interpretation (RFU/FPending) + FOptsLen=2 — DutyCycleReq is decoded.',
+  'protocol.lorawan.example.macCommandsLinkCheckReq.name': 'FOpts — LinkCheckReq (bodyless)',
+  'protocol.lorawan.example.macCommandsLinkCheckReq.description':
+    "Uplink, a single MAC command: LinkCheckReq (CID 0x02) — the device's link-quality request, no body.",
+  'protocol.lorawan.example.macCommandsLinkAdrReq.name': 'FOpts — LinkADRReq (bit fields)',
+  'protocol.lorawan.example.macCommandsLinkAdrReq.description':
+    'Downlink LinkADRReq (CID 0x03): DataRate/TXPower/ChMask/ChMaskCntl/NbTrans bit fields are decoded.',
+  'protocol.lorawan.example.macCommandsUnknownCid.name': 'FOpts — CID outside the narrow set (warning path)',
+  'protocol.lorawan.example.macCommandsUnknownCid.description':
+    'CID 0x0B (RekeyInd, LoRaWAN 1.1) is outside the version anchor — cannot be recognized, the rest of FOpts is shown raw.',
   'protocol.lorawan.example.macCommandOnly.name': 'FPort=0 (MAC command only)',
   'protocol.lorawan.example.macCommandOnly.description':
     'FPort=0 — does NOT mean application data, it means an encrypted MAC command.',
