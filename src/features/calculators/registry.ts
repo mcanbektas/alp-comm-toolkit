@@ -61,6 +61,7 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   // eklentisi olarak değil, buradaki zamanlama araçlarının yanında yaşar.
   { id: 'lora-airtime', category: 'timing', nameKey: 'calc.loraAirtime.name', summaryKey: 'calc.loraAirtime.summary' },
   { id: 'lora-link-budget', category: 'timing', nameKey: 'calc.loraLinkBudget.name', summaryKey: 'calc.loraLinkBudget.summary' },
+  { id: 'lora-battery', category: 'timing', nameKey: 'calc.loraBattery.name', summaryKey: 'calc.loraBattery.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

@@ -203,7 +203,7 @@ Ne yazıldı:
 | `src/protocol-core/timing/lora.ts` (yeni) | Motor: `calculateLoraSymbolTiming`, `calculateLoraTimeOnAir`, `calculateLoraAirtime`, `estimateLoraSensitivity`, `calculateLoraLinkBudget` |
 | `src/protocol-core/timing/lora.test.ts` (yeni) | 26 test — doğrulanmış fixture'lar, CRC açık/kapalı ayırt edici çifti dahil |
 | `src/protocol-core/timing/index.ts` | `export * from './lora'` |
-| `src/features/calculators/tools/loraTools.tsx` (yeni) | `LoraAirtimeTool`, `LoraLinkBudgetTool` |
+| `src/features/calculators/tools/loraTools.tsx` (yeni) | `LoraAirtimeTool`, `LoraLinkBudgetTool`, `LoraBatteryTool` |
 | `src/features/calculators/tools/shared.tsx` (yeni) | `StatTable`/`ErrorNotice`/`formatSeconds`/`SectionSwitch` — `timingTools.tsx`ten çıkarıldı, kopyalanmadı |
 | `src/features/calculators/registry.ts` | `lora-airtime`, `lora-link-budget` (kategori `timing`) |
 | `src/pages/CalculatorPage.tsx` | İki `TOOL_RENDERERS` girdisi |
@@ -251,8 +251,19 @@ karar 6'ya taşındı.
 
 **Yapılmayanlar** (katalog `tools` listesinde var, 9a kapsamında değildi):
 `RSSI / SNR Scatter` canlı/kaydedilmiş ölçüm ister — veri kaynağı yok.
-`Battery / Energy Estimator` brief'in 9a madde 1 listesinde geçmiyordu; ToA
-üstüne oturur, ucuzdur, ayrı bir turda eklenebilir.
+
+~~`Battery / Energy Estimator`~~ **eklendi** (9a sonrası ayrı tur): motor
+`calculateLoraEnergyBudget` (`lora.ts`), araç `lora-battery`, 9 test + 2 e2e.
+Girdisi PHY seti değil doğrudan **Time on Air** — enerji modelinin gerçekten
+bağlı olduğu tek zaman terimi odur; PHY'yi ikinci kez sormak formu 18 alana
+çıkarırdı, bunun yerine `lora-airtime` aracına bağlantı verildi.
+
+Modelin en yanıltıcı terimi **kendiliğinden boşalma**: örnek düğümde (SF7,
+saatte bir mesaj, 2 µA uyku, 2400 mAh) günlük 0.0657 mAh ile gönderim yükünü
+(0.0548 mAh) GEÇİYOR. Terimi sıfır bırakmak 31.2 yılı 51.2 yıl gösteriyor —
+bu yüzden motorda varsayılanı 0 (kendiliğinden kimya varsaymaz), formda 1
+öneriliyor ve fark hem birim testinde hem ekranda sınanıyor. Sonuç tablosunda
+"boşta kalan payı" da var: yüksekse gönderim sıklığını azaltmak ömrü uzatmaz.
 
 ### 9b — AT komut çekirdeği: `at-commands` (jenerik motor)
 

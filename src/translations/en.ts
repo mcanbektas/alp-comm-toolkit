@@ -306,6 +306,38 @@ export const en: TranslationDictionary = {
   'calc.field.loraMeasuredMargin': 'Measured margin',
   'calc.field.loraFreeSpaceRangeHint':
     'The range uses the FREE-SPACE model: no obstacles, diffraction or terrain. Real deployments see a path loss exponent of 2.7-4 rather than 2 — this figure is an upper bound, not a field range.',
+  'calc.field.loraDutyProfileSection': 'Radio and processing profile',
+  'calc.field.loraTimeOnAirHint':
+    'Time on Air is the only timing term the energy model depends on, so the PHY parameters are not asked again here. The tool that produces ToA:',
+  'calc.field.loraTimeOnAirMs': 'Time on Air (ms)',
+  'calc.field.loraTransmitCurrent': 'Transmit current (mA)',
+  'calc.field.loraReceiveCurrent': 'Receive current (mA)',
+  'calc.field.loraReceiveWindowMs': 'Total receive window (ms)',
+  'calc.field.loraActiveCurrent': 'Active current — MCU/sensor (mA)',
+  'calc.field.loraActiveMs': 'Active duration (ms)',
+  'calc.field.loraSleepCurrent': 'Sleep current (µA)',
+  'calc.field.loraMessagesPerDay': 'Messages per day',
+  'calc.field.loraBatterySection': 'Battery',
+  'calc.field.loraBatteryCapacity': 'Battery capacity (mAh)',
+  'calc.field.loraDerating': 'Unusable capacity share (%)',
+  'calc.field.loraSelfDischarge': 'Self-discharge (%/year)',
+  'calc.field.loraTransmitCharge': 'Transmit charge (per message)',
+  'calc.field.loraReceiveCharge': 'Receive charge (per message)',
+  'calc.field.loraActiveCharge': 'Active processing charge (per message)',
+  'calc.field.loraChargePerMessage': 'Total charge per message',
+  'calc.field.loraDailyActiveCharge': 'Daily transmission charge',
+  'calc.field.loraDailySleepCharge': 'Daily sleep charge',
+  'calc.field.loraDailySelfDischarge': 'Daily self-discharge',
+  'calc.field.loraDailyCharge': 'Total daily charge',
+  'calc.field.loraAverageCurrent': 'Average current',
+  'calc.field.loraIdleShare': 'Idle share (sleep + self-discharge)',
+  'calc.field.loraUsableCapacity': 'Usable capacity',
+  'calc.field.loraBatteryLifeDays': 'Estimated battery life',
+  'calc.field.loraBatteryLifeYears': 'Estimated battery life (years)',
+  'calc.field.loraUnitDays': 'days',
+  'calc.field.loraUnitYears': 'years',
+  'calc.field.loraBatteryModelHint':
+    'The model is three constant-current windows + continuous sleep + self-discharge. Not included: temperature effects, voltage droop under the transmit pulse (often the real limit on high internal resistance chemistries such as Li-SOCl2), radio ramp-up, and a shelf-life ceiling. If the idle share is high, transmitting less often will not extend life — look at sleep current and battery chemistry instead.',
 
   // --- Calculators — tool name/summary (spec §12 FULL LIST + §13 + §11) ---
   'calc.hexToAscii.name': 'HEX to ASCII',
@@ -377,6 +409,9 @@ export const en: TranslationDictionary = {
   'calc.loraAirtime.name': 'LoRa Time on Air / airtime',
   'calc.loraAirtime.summary':
     'Computes symbol time, Time on Air, bit rate and duty cycle budget from the PHY parameter set (Semtech SX1276 datasheet Rev.7).',
+  'calc.loraBattery.name': 'LoRa battery / energy estimate',
+  'calc.loraBattery.summary':
+    'Derives per-message charge, daily consumption and estimated battery life from Time on Air and the node current profile.',
   'calc.loraLinkBudget.name': 'LoRa link budget',
   'calc.loraLinkBudget.summary':
     'Estimates receiver sensitivity from SF/BW, then reports maximum path loss, free-space range and measured margin.',

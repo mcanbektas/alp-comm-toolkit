@@ -275,6 +275,160 @@ export function calculateLoraAirtime(input: LoraAirtimeInput): LoraAirtimeResult
   return result;
 }
 
+export interface LoraEnergyInput {
+  /** Tek gönderimin havada geçirdiği süre — `calculateLoraTimeOnAir` çıktısı. */
+  timeOnAirSeconds: number;
+  transmitCurrentMilliamps: number;
+  receiveCurrentMilliamps: number;
+  /** Class A'da RX1+RX2 pencerelerinin TOPLAM dinleme süresi. */
+  receiveWindowSeconds: number;
+  /** Radyo dışındaki uyanık tüketim (MCU, sensör okuma). */
+  activeCurrentMilliamps: number;
+  activeSeconds: number;
+  sleepCurrentMicroamps: number;
+  messagesPerDay: number;
+  batteryCapacityMilliampHours: number;
+  /**
+   * Kullanılamayan kapasite payı, yüzde: kesme gerilimi, düşük sıcaklık, üretim
+   * toleransı. Verilmezse 0 — motor kendiliğinden bir kimya varsaymaz.
+   */
+  deratingPercent?: number;
+  /**
+   * Kendiliğinden boşalma, yıllık yüzde. Verilmezse 0. Düşük duty cycle'lı bir
+   * düğümde bu terim gönderim yükünü RAHATLIKLA geçer — sıfır bırakmak ömrü
+   * kat kat abartır, bu yüzden ayrı ve görünür bir girdidir.
+   */
+  selfDischargePercentPerYear?: number;
+}
+
+export interface LoraEnergyResult {
+  /** Gönderim başına yükler, µAh. */
+  transmitChargeMicroampHours: number;
+  receiveChargeMicroampHours: number;
+  activeChargeMicroampHours: number;
+  chargePerMessageMicroampHours: number;
+  dailyActiveChargeMilliampHours: number;
+  dailySleepChargeMilliampHours: number;
+  dailySelfDischargeMilliampHours: number;
+  dailyChargeMilliampHours: number;
+  averageCurrentMicroamps: number;
+  usableCapacityMilliampHours: number;
+  /** Uykunun + kendiliğinden boşalmanın toplam içindeki payı — tasarımın nereye bakacağını söyler. */
+  idleSharePercent: number;
+  /** Günlük tüketim sıfırsa üretilmez (ömür tanımsızdır, sonsuz değil). */
+  batteryLifeDays?: number;
+  batteryLifeYears?: number;
+}
+
+/** Artık yılı da kapsayan ortalama — yıllık kendiliğinden boşalmayı güne indirger. */
+const DAYS_PER_YEAR = 365.25;
+
+/** mA × saniye → µAh. 1 mA·s = 1/3.6 µAh. */
+function milliampSecondsToMicroampHours(currentMilliamps: number, seconds: number): number {
+  return (currentMilliamps * seconds) / 3.6;
+}
+
+/**
+ * Pil/enerji tahmini (katalog: "Battery / Energy Estimator").
+ *
+ * Model bilinçli olarak DÜZ: sabit akımlı üç pencere (gönderim, alım, uyanık
+ * işlem) + sürekli uyku + kendiliğenden boşalma. İçermedikleri, sonucu okurken
+ * bilinmesi gerekenler:
+ *   - Sıcaklık etkisi ve darbe akımı altında gerilim çökmesi YOK. Li-SOCl2 gibi
+ *     yüksek iç dirençli kimyalarda gerçek sınır çoğu zaman kapasite değil,
+ *     TX darbesinde kesme gerilimine düşmektir.
+ *   - Radyo rampası (PLL kilidi, PA ısınması) ToA'ya dahil değildir; gerçek
+ *     gönderim penceresi ToA'dan birkaç ms uzundur.
+ *   - Raf ömrü tavanı YOK: model 40 yıl da diyebilir, hiçbir pil o kadar durmaz.
+ */
+export function calculateLoraEnergyBudget(input: LoraEnergyInput): LoraEnergyResult {
+  const nonNegative: ReadonlyArray<readonly [string, number]> = [
+    ['timeOnAirSeconds', input.timeOnAirSeconds],
+    ['transmitCurrentMilliamps', input.transmitCurrentMilliamps],
+    ['receiveCurrentMilliamps', input.receiveCurrentMilliamps],
+    ['receiveWindowSeconds', input.receiveWindowSeconds],
+    ['activeCurrentMilliamps', input.activeCurrentMilliamps],
+    ['activeSeconds', input.activeSeconds],
+    ['sleepCurrentMicroamps', input.sleepCurrentMicroamps],
+    ['messagesPerDay', input.messagesPerDay],
+  ];
+  for (const [name, value] of nonNegative) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new RangeError(`${name} negatif olmayan sonlu bir sayı olmalı`);
+    }
+  }
+  if (!(input.batteryCapacityMilliampHours > 0)) {
+    throw new RangeError('batteryCapacityMilliampHours pozitif olmalı');
+  }
+
+  const deratingPercent = input.deratingPercent ?? 0;
+  if (deratingPercent < 0 || deratingPercent >= 100) {
+    throw new RangeError('deratingPercent 0 ile 100 arasında olmalı (100 hariç)');
+  }
+
+  const selfDischargePercentPerYear = input.selfDischargePercentPerYear ?? 0;
+  if (selfDischargePercentPerYear < 0 || selfDischargePercentPerYear > 100) {
+    throw new RangeError('selfDischargePercentPerYear 0 ile 100 arasında olmalı');
+  }
+
+  const transmitChargeMicroampHours = milliampSecondsToMicroampHours(
+    input.transmitCurrentMilliamps,
+    input.timeOnAirSeconds,
+  );
+  const receiveChargeMicroampHours = milliampSecondsToMicroampHours(
+    input.receiveCurrentMilliamps,
+    input.receiveWindowSeconds,
+  );
+  const activeChargeMicroampHours = milliampSecondsToMicroampHours(
+    input.activeCurrentMilliamps,
+    input.activeSeconds,
+  );
+  const chargePerMessageMicroampHours =
+    transmitChargeMicroampHours + receiveChargeMicroampHours + activeChargeMicroampHours;
+
+  const dailyActiveChargeMilliampHours =
+    (chargePerMessageMicroampHours * input.messagesPerDay) / 1000;
+  // Uyku akımı sürekli akar; gönderim pencerelerinin uykudan düştüğü pay bu
+  // ölçekte gürültüdür (saniyeler vs. 24 saat) ve KASTEN düşülmez.
+  const dailySleepChargeMilliampHours = (input.sleepCurrentMicroamps * 24) / 1000;
+  // Kendiliğinden boşalma kalan kapasiteyle orantılıdır; burada NOMİNAL kapasite
+  // üzerinden sabit alınır — üstten sınır verir, ömrü abartmaz.
+  const dailySelfDischargeMilliampHours =
+    (input.batteryCapacityMilliampHours * (selfDischargePercentPerYear / 100)) / DAYS_PER_YEAR;
+
+  const dailyChargeMilliampHours =
+    dailyActiveChargeMilliampHours + dailySleepChargeMilliampHours + dailySelfDischargeMilliampHours;
+  const usableCapacityMilliampHours =
+    input.batteryCapacityMilliampHours * (1 - deratingPercent / 100);
+
+  const result: LoraEnergyResult = {
+    transmitChargeMicroampHours,
+    receiveChargeMicroampHours,
+    activeChargeMicroampHours,
+    chargePerMessageMicroampHours,
+    dailyActiveChargeMilliampHours,
+    dailySleepChargeMilliampHours,
+    dailySelfDischargeMilliampHours,
+    dailyChargeMilliampHours,
+    averageCurrentMicroamps: (dailyChargeMilliampHours * 1000) / 24,
+    usableCapacityMilliampHours,
+    idleSharePercent:
+      dailyChargeMilliampHours === 0
+        ? 0
+        : ((dailySleepChargeMilliampHours + dailySelfDischargeMilliampHours) /
+            dailyChargeMilliampHours) *
+          100,
+  };
+
+  if (dailyChargeMilliampHours > 0) {
+    const batteryLifeDays = usableCapacityMilliampHours / dailyChargeMilliampHours;
+    result.batteryLifeDays = batteryLifeDays;
+    result.batteryLifeYears = batteryLifeDays / DAYS_PER_YEAR;
+  }
+
+  return result;
+}
+
 export interface LoraSensitivityInput {
   spreadingFactor: number;
   bandwidthHz: number;

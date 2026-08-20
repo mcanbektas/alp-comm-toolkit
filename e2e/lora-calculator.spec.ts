@@ -46,9 +46,39 @@ test('LoRa link bütçesi aracı duyarlılık tahminini ve yol kaybını basar',
   await expect(page.getByText('142.03 dB', { exact: true })).toBeVisible();
 });
 
-test('hesap araçları listesinde iki LoRa kaydı gezinilebilir', async ({ page }) => {
+test('LoRa pil tahmini varsayılan profilde ömür ve boşta payı basar', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
+
+  await page.goto('/comm/calculators/lora-battery');
+
+  // ToA=56.576 ms, TX 44 mA → 44 × 0.056576 / 3.6 = 0.691 µAh.
+  await expect(page.getByText('0.691 µAh', { exact: true })).toBeVisible();
+  // 2 µA × 24 h = 0.048 mAh; %1/yıl × 2400 mAh = 24/365.25 = 0.0657 mAh.
+  await expect(page.getByText('0.0480 mAh', { exact: true })).toBeVisible();
+  await expect(page.getByText('0.0657 mAh', { exact: true })).toBeVisible();
+  await expect(page.getByText('31.20 yıl', { exact: true })).toBeVisible();
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
+test('kendiliğinden boşalma sıfırlanınca tahmini ömür belirgin uzar', async ({ page }) => {
+  await page.goto('/comm/calculators/lora-battery');
+
+  await expect(page.getByText('31.20 yıl', { exact: true })).toBeVisible();
+  await page.getByLabel(/Kendiliğinden boşalma/i).fill('0');
+  // Terimi atlamak bu düğümde ömrü 31 yıldan 51 yıla çıkarır — modelin en
+  // yanıltıcı terimi olduğu için ekranda da sınanıyor.
+  await expect(page.getByText('51.15 yıl', { exact: true })).toBeVisible();
+});
+
+test('hesap araçları listesinde üç LoRa kaydı gezinilebilir', async ({ page }) => {
   await page.goto('/comm/calculators');
 
   await expect(page.getByRole('link', { name: /LoRa Time on Air/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /LoRa link bütçesi/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /LoRa pil \/ enerji tahmini/i })).toBeVisible();
 });

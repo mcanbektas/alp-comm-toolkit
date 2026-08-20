@@ -308,6 +308,38 @@ export const tr = {
   'calc.field.loraMeasuredMargin': 'Ölçülen marj',
   'calc.field.loraFreeSpaceRangeHint':
     'Menzil SERBEST UZAY modelidir: engel, kırınım ve arazi yok. Gerçek dağıtımda yol kaybı üssü 2 değil 2.7-4 arasıdır — bu sayı üst sınırdır, saha menzili değil.',
+  'calc.field.loraDutyProfileSection': 'Radyo ve işlem profili',
+  'calc.field.loraTimeOnAirHint':
+    'Enerji modelinin bağlı olduğu tek zaman terimi Time on Air’dır; PHY parametreleri burada ikinci kez sorulmaz. ToA’yı üreten araç:',
+  'calc.field.loraTimeOnAirMs': 'Time on Air (ms)',
+  'calc.field.loraTransmitCurrent': 'Gönderim akımı (mA)',
+  'calc.field.loraReceiveCurrent': 'Alım akımı (mA)',
+  'calc.field.loraReceiveWindowMs': 'Alım penceresi toplamı (ms)',
+  'calc.field.loraActiveCurrent': 'Uyanık akım — MCU/sensör (mA)',
+  'calc.field.loraActiveMs': 'Uyanık kalma süresi (ms)',
+  'calc.field.loraSleepCurrent': 'Uyku akımı (µA)',
+  'calc.field.loraMessagesPerDay': 'Günlük mesaj sayısı',
+  'calc.field.loraBatterySection': 'Pil',
+  'calc.field.loraBatteryCapacity': 'Pil kapasitesi (mAh)',
+  'calc.field.loraDerating': 'Kullanılamayan kapasite payı (%)',
+  'calc.field.loraSelfDischarge': 'Kendiliğinden boşalma (%/yıl)',
+  'calc.field.loraTransmitCharge': 'Gönderim yükü (mesaj başına)',
+  'calc.field.loraReceiveCharge': 'Alım yükü (mesaj başına)',
+  'calc.field.loraActiveCharge': 'Uyanık işlem yükü (mesaj başına)',
+  'calc.field.loraChargePerMessage': 'Mesaj başına toplam yük',
+  'calc.field.loraDailyActiveCharge': 'Günlük gönderim yükü',
+  'calc.field.loraDailySleepCharge': 'Günlük uyku yükü',
+  'calc.field.loraDailySelfDischarge': 'Günlük kendiliğinden boşalma',
+  'calc.field.loraDailyCharge': 'Günlük toplam yük',
+  'calc.field.loraAverageCurrent': 'Ortalama akım',
+  'calc.field.loraIdleShare': 'Boşta kalan payı (uyku + boşalma)',
+  'calc.field.loraUsableCapacity': 'Kullanılabilir kapasite',
+  'calc.field.loraBatteryLifeDays': 'Tahmini pil ömrü',
+  'calc.field.loraBatteryLifeYears': 'Tahmini pil ömrü (yıl)',
+  'calc.field.loraUnitDays': 'gün',
+  'calc.field.loraUnitYears': 'yıl',
+  'calc.field.loraBatteryModelHint':
+    'Model sabit akımlı üç pencere + sürekli uyku + kendiliğinden boşalmadır. İçermedikleri: sıcaklık etkisi, gönderim darbesinde gerilim çökmesi (Li-SOCl2 gibi yüksek iç dirençli kimyalarda gerçek sınır çoğu zaman budur), radyo rampası ve raf ömrü tavanı. Boşta kalan payı yüksekse gönderim sıklığını azaltmak ömrü uzatmaz — uyku akımına ve pil kimyasına bakın.',
 
   // --- Hesap araçları — araç adı/özeti (spec §12 TAM LİSTE + §13 + §11) ---
   'calc.hexToAscii.name': 'HEX → ASCII',
@@ -379,6 +411,9 @@ export const tr = {
   'calc.loraAirtime.name': 'LoRa Time on Air / airtime',
   'calc.loraAirtime.summary':
     'PHY parametre setinden sembol süresini, Time on Air’ı, bit hızını ve duty cycle bütçesini hesaplar (Semtech SX1276 datasheet Rev.7).',
+  'calc.loraBattery.name': 'LoRa pil / enerji tahmini',
+  'calc.loraBattery.summary':
+    'Time on Air ve düğüm akım profilinden mesaj başına yükü, günlük tüketimi ve tahmini pil ömrünü çıkarır.',
   'calc.loraLinkBudget.name': 'LoRa link bütçesi',
   'calc.loraLinkBudget.summary':
     'SF/BW’den alıcı duyarlılığını tahmin eder, azami yol kaybını, serbest uzay menzilini ve ölçülen marjı verir.',

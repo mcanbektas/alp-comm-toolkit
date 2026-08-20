@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { CheckboxField, NumberField, SelectField } from '@/components/forms';
 import {
   calculateLoraAirtime,
+  calculateLoraEnergyBudget,
   calculateLoraLinkBudget,
   calculateLoraTimeOnAir,
   estimateLoraSensitivity,
@@ -250,6 +252,193 @@ export function LoraAirtimeTool(): ReactElement {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Pil/enerji tahmini. Girdisi PHY parametreleri DEĞİL, doğrudan Time on Air —
+ * enerji modelinin gerçekten bağlı olduğu tek zaman terimi odur. PHY setini
+ * burada ikinci kez sormak formu on sekiz alana çıkarırdı; ToA'yı üreten araca
+ * bağlantı veriliyor.
+ */
+export function LoraBatteryTool(): ReactElement {
+  const { t } = useTranslation();
+  const [timeOnAirMs, setTimeOnAirMs] = useState('56.576');
+  const [transmitCurrentMilliamps, setTransmitCurrentMilliamps] = useState('44');
+  const [receiveCurrentMilliamps, setReceiveCurrentMilliamps] = useState('11.5');
+  const [receiveWindowMs, setReceiveWindowMs] = useState('150');
+  const [activeCurrentMilliamps, setActiveCurrentMilliamps] = useState('8');
+  const [activeMs, setActiveMs] = useState('500');
+  const [sleepCurrentMicroamps, setSleepCurrentMicroamps] = useState('2');
+  const [messagesPerDay, setMessagesPerDay] = useState('24');
+  const [batteryCapacityMilliampHours, setBatteryCapacityMilliampHours] = useState('2400');
+  const [deratingPercent, setDeratingPercent] = useState('20');
+  const [selfDischargePercentPerYear, setSelfDischargePercentPerYear] = useState('1');
+
+  const energy = useMemo(() => {
+    try {
+      return calculateLoraEnergyBudget({
+        timeOnAirSeconds: Number(timeOnAirMs) / 1000,
+        transmitCurrentMilliamps: Number(transmitCurrentMilliamps),
+        receiveCurrentMilliamps: Number(receiveCurrentMilliamps),
+        receiveWindowSeconds: Number(receiveWindowMs) / 1000,
+        activeCurrentMilliamps: Number(activeCurrentMilliamps),
+        activeSeconds: Number(activeMs) / 1000,
+        sleepCurrentMicroamps: Number(sleepCurrentMicroamps),
+        messagesPerDay: Number(messagesPerDay),
+        batteryCapacityMilliampHours: Number(batteryCapacityMilliampHours),
+        deratingPercent: Number(deratingPercent),
+        selfDischargePercentPerYear: Number(selfDischargePercentPerYear),
+      });
+    } catch {
+      return null;
+    }
+  }, [
+    timeOnAirMs,
+    transmitCurrentMilliamps,
+    receiveCurrentMilliamps,
+    receiveWindowMs,
+    activeCurrentMilliamps,
+    activeMs,
+    sleepCurrentMicroamps,
+    messagesPerDay,
+    batteryCapacityMilliampHours,
+    deratingPercent,
+    selfDischargePercentPerYear,
+  ]);
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
+          {t('calc.field.loraDutyProfileSection')}
+        </h2>
+        <p className="text-xs text-muted">
+          {t('calc.field.loraTimeOnAirHint')}{' '}
+          <Link
+            to="/calculators/lora-airtime"
+            className="rounded-token-sm px-0.5 text-accent-strong underline focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            {t('calc.loraAirtime.name')}
+          </Link>
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <NumberField
+            id="calc-lora-toa"
+            label={t('calc.field.loraTimeOnAirMs')}
+            value={timeOnAirMs}
+            onChange={setTimeOnAirMs}
+          />
+          <NumberField
+            id="calc-lora-txcurrent"
+            label={t('calc.field.loraTransmitCurrent')}
+            value={transmitCurrentMilliamps}
+            onChange={setTransmitCurrentMilliamps}
+          />
+          <NumberField
+            id="calc-lora-messages"
+            label={t('calc.field.loraMessagesPerDay')}
+            value={messagesPerDay}
+            onChange={setMessagesPerDay}
+          />
+          <NumberField
+            id="calc-lora-rxcurrent"
+            label={t('calc.field.loraReceiveCurrent')}
+            value={receiveCurrentMilliamps}
+            onChange={setReceiveCurrentMilliamps}
+          />
+          <NumberField
+            id="calc-lora-rxwindow"
+            label={t('calc.field.loraReceiveWindowMs')}
+            value={receiveWindowMs}
+            onChange={setReceiveWindowMs}
+          />
+          <NumberField
+            id="calc-lora-sleepcurrent"
+            label={t('calc.field.loraSleepCurrent')}
+            value={sleepCurrentMicroamps}
+            onChange={setSleepCurrentMicroamps}
+          />
+          <NumberField
+            id="calc-lora-activecurrent"
+            label={t('calc.field.loraActiveCurrent')}
+            value={activeCurrentMilliamps}
+            onChange={setActiveCurrentMilliamps}
+          />
+          <NumberField
+            id="calc-lora-activems"
+            label={t('calc.field.loraActiveMs')}
+            value={activeMs}
+            onChange={setActiveMs}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
+          {t('calc.field.loraBatterySection')}
+        </h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <NumberField
+            id="calc-lora-capacity"
+            label={t('calc.field.loraBatteryCapacity')}
+            value={batteryCapacityMilliampHours}
+            onChange={setBatteryCapacityMilliampHours}
+          />
+          <NumberField
+            id="calc-lora-derating"
+            label={t('calc.field.loraDerating')}
+            value={deratingPercent}
+            onChange={setDeratingPercent}
+          />
+          <NumberField
+            id="calc-lora-selfdischarge"
+            label={t('calc.field.loraSelfDischarge')}
+            value={selfDischargePercentPerYear}
+            onChange={setSelfDischargePercentPerYear}
+          />
+        </div>
+      </div>
+
+      {energy === null ? (
+        <ErrorNotice message={t('calc.error.invalidInput')} />
+      ) : (
+        <>
+          <StatTable
+            rows={[
+              [t('calc.field.loraTransmitCharge'), `${energy.transmitChargeMicroampHours.toFixed(3)} µAh`],
+              [t('calc.field.loraReceiveCharge'), `${energy.receiveChargeMicroampHours.toFixed(3)} µAh`],
+              [t('calc.field.loraActiveCharge'), `${energy.activeChargeMicroampHours.toFixed(3)} µAh`],
+              [t('calc.field.loraChargePerMessage'), `${energy.chargePerMessageMicroampHours.toFixed(3)} µAh`],
+              [t('calc.field.loraDailyActiveCharge'), `${energy.dailyActiveChargeMilliampHours.toFixed(4)} mAh`],
+              [t('calc.field.loraDailySleepCharge'), `${energy.dailySleepChargeMilliampHours.toFixed(4)} mAh`],
+              [t('calc.field.loraDailySelfDischarge'), `${energy.dailySelfDischargeMilliampHours.toFixed(4)} mAh`],
+              [t('calc.field.loraDailyCharge'), `${energy.dailyChargeMilliampHours.toFixed(4)} mAh`],
+              [t('calc.field.loraAverageCurrent'), `${energy.averageCurrentMicroamps.toFixed(2)} µA`],
+              [t('calc.field.loraIdleShare'), `${energy.idleSharePercent.toFixed(1)} %`],
+              [t('calc.field.loraUsableCapacity'), `${energy.usableCapacityMilliampHours.toFixed(1)} mAh`],
+              ...(energy.batteryLifeDays === undefined
+                ? []
+                : ([
+                    [
+                      t('calc.field.loraBatteryLifeDays'),
+                      `${energy.batteryLifeDays.toFixed(0)} ${t('calc.field.loraUnitDays')}`,
+                    ],
+                  ] as const)),
+              ...(energy.batteryLifeYears === undefined
+                ? []
+                : ([
+                    [
+                      t('calc.field.loraBatteryLifeYears'),
+                      `${energy.batteryLifeYears.toFixed(2)} ${t('calc.field.loraUnitYears')}`,
+                    ],
+                  ] as const)),
+            ]}
+          />
+          <p className="text-xs text-muted">{t('calc.field.loraBatteryModelHint')}</p>
+        </>
+      )}
     </div>
   );
 }

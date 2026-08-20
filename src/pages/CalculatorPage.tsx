@@ -18,7 +18,7 @@ import {
   SignedUnsignedTool,
   UnixTimestampTool,
 } from '@/features/calculators/tools/numericTools';
-import { LoraAirtimeTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
+import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
 import { BytesEncodingTool, HexAsciiTool, HexBinaryTool, UrlEncodingTool, Utf8ByteViewerTool } from '@/features/calculators/tools/textBytesTools';
 import { I2cTimingTool, PmbusLinearTool, Rs485TimingTool, SpiTimingTool, UartTimingTool } from '@/features/calculators/tools/timingTools';
 import { NotFoundPage } from './NotFoundPage';
@@ -65,6 +65,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'pmbus-linear': () => <PmbusLinearTool />,
   'lora-airtime': () => <LoraAirtimeTool />,
   'lora-link-budget': () => <LoraLinkBudgetTool />,
+  'lora-battery': () => <LoraBatteryTool />,
   'crc-calculator': () => <CrcCalculatorTool />,
   'checksum-finder': () => <ChecksumFinderTool />,
 };

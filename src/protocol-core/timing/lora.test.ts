@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
   calculateLoraAirtime,
+  calculateLoraEnergyBudget,
   calculateLoraLinkBudget,
   calculateLoraSymbolTiming,
   calculateLoraTimeOnAir,
   estimateLoraSensitivity,
 } from './lora';
-import type { LoraTimeOnAirInput } from './lora';
+import type { LoraEnergyInput, LoraTimeOnAirInput } from './lora';
 
 /** EU868 LoRaWAN varsayılanı: BW 125 kHz, CR 4/5, 8 sembol preamble, explicit header, CRC açık. */
 const BASE: LoraTimeOnAirInput = {
@@ -213,6 +214,137 @@ describe('calculateLoraAirtime — duty cycle', () => {
     expect(() =>
       calculateLoraAirtime({ timeOnAirSeconds: 0.05, dutyCyclePercent: 1, packetsPerHour: -1 }),
     ).toThrow(RangeError);
+  });
+});
+
+/**
+ * SX1276 sınıfı bir düğüm: 14 dBm gönderim (44 mA), Class A iki alım penceresi,
+ * yarım saniyelik MCU uyanıklığı, 2 µA uyku, saatte bir mesaj, 2400 mAh Li-SOCl2.
+ * ToA yukarıdaki SF7/BW125/PL=20 fixture'ının ta kendisi.
+ */
+const BASE_ENERGY: LoraEnergyInput = {
+  timeOnAirSeconds: 0.056576,
+  transmitCurrentMilliamps: 44,
+  receiveCurrentMilliamps: 11.5,
+  receiveWindowSeconds: 0.15,
+  activeCurrentMilliamps: 8,
+  activeSeconds: 0.5,
+  sleepCurrentMicroamps: 2,
+  messagesPerDay: 24,
+  batteryCapacityMilliampHours: 2400,
+  deratingPercent: 20,
+  selfDischargePercentPerYear: 1,
+};
+
+describe('calculateLoraEnergyBudget', () => {
+  it('gönderim başına yükü üç pencereye ayırır ve toplar', () => {
+    // Elle doğrulama: 1 mA·s = 1/3.6 µAh.
+    //   TX  = 44 × 0.056576 / 3.6 = 0.691484 µAh
+    //   RX  = 11.5 × 0.15    / 3.6 = 0.479167 µAh
+    //   MCU = 8 × 0.5        / 3.6 = 1.111111 µAh
+    const result = calculateLoraEnergyBudget(BASE_ENERGY);
+
+    expect(result.transmitChargeMicroampHours).toBeCloseTo(0.691484, 6);
+    expect(result.receiveChargeMicroampHours).toBeCloseTo(0.479167, 6);
+    expect(result.activeChargeMicroampHours).toBeCloseTo(1.111111, 6);
+    expect(result.chargePerMessageMicroampHours).toBeCloseTo(2.281762, 6);
+  });
+
+  it('günlük yükü üçe ayırır: gönderim, uyku, kendiliğinden boşalma', () => {
+    const result = calculateLoraEnergyBudget(BASE_ENERGY);
+
+    // Gönderim başına yük bir önceki testte 2.281762 µAh olarak elle sabitlendi;
+    // burada yalnız günlük ölçeğe taşındığı sınanır (µAh → mAh, × mesaj sayısı).
+    expect(result.dailyActiveChargeMilliampHours).toBeCloseTo(
+      (result.chargePerMessageMicroampHours * 24) / 1000,
+      12,
+    );
+    expect(result.dailyActiveChargeMilliampHours).toBeCloseTo(0.0547623, 7);
+    // Uyku akımı sürekli akar: 2 µA × 24 h = 48 µAh = 0.048 mAh.
+    expect(result.dailySleepChargeMilliampHours).toBeCloseTo(0.048, 12);
+    // %1/yıl × 2400 mAh = 24 mAh/yıl, güne bölünür.
+    expect(result.dailySelfDischargeMilliampHours).toBeCloseTo(24 / 365.25, 12);
+    expect(result.dailyChargeMilliampHours).toBeCloseTo(
+      result.dailyActiveChargeMilliampHours +
+        result.dailySleepChargeMilliampHours +
+        result.dailySelfDischargeMilliampHours,
+      12,
+    );
+  });
+
+  it('derating kullanılabilir kapasiteyi kırpar, ömrü ondan hesaplar', () => {
+    const result = calculateLoraEnergyBudget(BASE_ENERGY);
+
+    expect(result.usableCapacityMilliampHours).toBeCloseTo(1920, 9);
+    if (result.batteryLifeDays === undefined) throw new Error('ömür üretilmedi');
+    expect(result.batteryLifeDays).toBeCloseTo(1920 / result.dailyChargeMilliampHours, 6);
+    expect(result.batteryLifeYears).toBeCloseTo(result.batteryLifeDays / 365.25, 9);
+    expect(result.batteryLifeYears).toBeCloseTo(31.2, 1);
+  });
+
+  it('kendiliğinden boşalmayı sıfır bırakmak ömrü KAT KAT abartır', () => {
+    // Bu düğümde gönderim yükü günlük 0.055 mAh; kendiliğinden boşalma 0.066 mAh
+    // — yani DAHA BÜYÜK. Terimi atlamak 31 yılı 51 yıl gösterir.
+    const withSelfDischarge = calculateLoraEnergyBudget(BASE_ENERGY);
+    const without = calculateLoraEnergyBudget({
+      ...BASE_ENERGY,
+      selfDischargePercentPerYear: 0,
+    });
+
+    expect(withSelfDischarge.batteryLifeYears).toBeCloseTo(31.2, 1);
+    expect(without.batteryLifeYears).toBeCloseTo(51.2, 1);
+    expect(withSelfDischarge.dailySelfDischargeMilliampHours).toBeGreaterThan(
+      withSelfDischarge.dailyActiveChargeMilliampHours,
+    );
+  });
+
+  it('boşta kalan payı gönderim yükünün baskın olup olmadığını gösterir', () => {
+    const lowRate = calculateLoraEnergyBudget(BASE_ENERGY);
+    // Saatte bir yerine dakikada bir: gönderim yükü artık baskın.
+    const highRate = calculateLoraEnergyBudget({ ...BASE_ENERGY, messagesPerDay: 1440 });
+
+    expect(lowRate.idleSharePercent).toBeGreaterThan(50);
+    expect(highRate.idleSharePercent).toBeLessThan(10);
+  });
+
+  it('ortalama akım günlük yükün 24 saate yayılmışıdır', () => {
+    const result = calculateLoraEnergyBudget(BASE_ENERGY);
+
+    expect(result.averageCurrentMicroamps).toBeCloseTo(
+      (result.dailyChargeMilliampHours * 1000) / 24,
+      9,
+    );
+  });
+
+  it('opsiyonel terimler verilmezse motor kendiliğinden kimya varsaymaz', () => {
+    const { deratingPercent: _d, selfDischargePercentPerYear: _s, ...bare } = BASE_ENERGY;
+    const result = calculateLoraEnergyBudget(bare);
+
+    expect(result.dailySelfDischargeMilliampHours).toBe(0);
+    expect(result.usableCapacityMilliampHours).toBeCloseTo(2400, 9);
+  });
+
+  it('günlük tüketim sıfırsa ömür ÜRETİLMEZ (tanımsız, sonsuz değil)', () => {
+    const result = calculateLoraEnergyBudget({
+      ...BASE_ENERGY,
+      sleepCurrentMicroamps: 0,
+      messagesPerDay: 0,
+      selfDischargePercentPerYear: 0,
+    });
+
+    expect(result.dailyChargeMilliampHours).toBe(0);
+    expect(result.batteryLifeDays).toBeUndefined();
+    expect(result.batteryLifeYears).toBeUndefined();
+    expect(result.idleSharePercent).toBe(0);
+  });
+
+  it('geçersiz akım, kapasite, derating ve boşalma değerlerinde RangeError fırlatır', () => {
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, transmitCurrentMilliamps: -1 })).toThrow(RangeError);
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, messagesPerDay: -1 })).toThrow(RangeError);
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, timeOnAirSeconds: Number.NaN })).toThrow(RangeError);
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, batteryCapacityMilliampHours: 0 })).toThrow(RangeError);
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, deratingPercent: 100 })).toThrow(RangeError);
+    expect(() => calculateLoraEnergyBudget({ ...BASE_ENERGY, selfDischargePercentPerYear: 101 })).toThrow(RangeError);
   });
 });
 
