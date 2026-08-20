@@ -1832,6 +1832,34 @@ export const en: TranslationDictionary = {
   'protocol.nbIot.example.finalOk.description':
     'A final result code carried over verbatim from lte-modem-at/at-commands — stays consistent on this page too.',
 
+  // --- GNSS Modem (on top of lte-modem-at + nmea-0183: QGPSGNMEA handoff + narrow QGPSLOC decode) ---
+  'protocol.gnssModem.documentation.summary':
+    'GNSS-over-AT interpretation layer on top of lte-modem-at and nmea-0183: the raw NMEA sentence inside an AT+QGPSGNMEA response is handed off to the nmea-0183 engine (not re-implemented), AT+QGPSLOC is decoded with a narrow field set (fix/lat/lon/alt/sat/hdop).',
+  'protocol.gnssModem.warning.fixTypeUnrecognized':
+    'This value is not defined in Quectel’s AT+QGPSLOC table (only 2=2D, 3=3D are documented) — the fix type was not invented.',
+  'protocol.gnssModem.warning.qgpslocCoordinateUnrecognized':
+    'Matches neither expected shape (letter-suffixed ddmm.mmmm or signed decimal degrees) — not converted to decimal degrees, the raw value is carried.',
+  'protocol.gnssModem.warning.embeddedNmeaUnparseable':
+    'The text inside the AT+QGPSGNMEA response could not be parsed as an NMEA sentence — the AT-layer fields are still shown.',
+  'protocol.gnssModem.example.qgpslocTwoDFix.name': 'Position fix, 2D (QGPSLOC)',
+  'protocol.gnssModem.example.qgpslocTwoDFix.description':
+    'The Quectel manual’s own example — latitude/longitude convert to decimal degrees, HDOP/altitude/satellite count to numbers.',
+  'protocol.gnssModem.example.qgpslocUnrecognizedFix.name': 'Unrecognized fix type (QGPSLOC, fix=1)',
+  'protocol.gnssModem.example.qgpslocUnrecognizedFix.description':
+    'Same fixture with <fix>=1 — Quectel’s own table only documents 2/3, a warning is raised.',
+  'protocol.gnssModem.example.qgpsgnmeaGga.name': 'GGA sentence (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaGga.description':
+    'Quectel’s own <nmeasrc> example — the embedded GGA sentence is fully decoded by the nmea-0183 engine.',
+  'protocol.gnssModem.example.qgpsgnmeaRmc.name': 'RMC sentence (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaRmc.description':
+    'nmea-0183’s own verified RMC fixture — shows a different sentence type taking the same path.',
+  'protocol.gnssModem.example.qgpsgnmeaMalformed.name': 'Malformed embedded sentence (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaMalformed.description':
+    'The content is not an NMEA sentence — no position field is produced, the AT-layer fields still show.',
+  'protocol.gnssModem.example.finalOk.name': 'OK',
+  'protocol.gnssModem.example.finalOk.description':
+    'A final result code carried over verbatim from lte-modem-at/at-commands — stays consistent on this page too.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header is incomplete: at least 8 bytes are required (version, inverse version, payload type, payload length).',

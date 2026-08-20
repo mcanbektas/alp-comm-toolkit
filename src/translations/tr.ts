@@ -1834,6 +1834,34 @@ export const tr = {
   'protocol.nbIot.example.finalOk.description':
     'lte-modem-at/at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
 
+  // --- GNSS Modem (lte-modem-at + nmea-0183 üstünde: QGPSGNMEA devri + QGPSLOC dar decode) ---
+  'protocol.gnssModem.documentation.summary':
+    'lte-modem-at ve nmea-0183 üstünde GNSS-üzerinden-AT yorumlama katmanı: AT+QGPSGNMEA yanıtındaki ham NMEA cümlesi nmea-0183 motoruna devredilir (motor tekrar yazılmaz), AT+QGPSLOC dar bir alan kümesiyle (fix/lat/lon/alt/sat/hdop) çözülür.',
+  'protocol.gnssModem.warning.fixTypeUnrecognized':
+    'Bu değer Quectel’in AT+QGPSLOC tablosunda tanımlı değil (yalnız 2=2D, 3=3D belgeli) — konumlama modu uydurulmadı.',
+  'protocol.gnssModem.warning.qgpslocCoordinateUnrecognized':
+    'Beklenen iki biçimden (harf sonekli ddmm.mmmm ya da imzalı ondalık derece) hiçbirine uymuyor — ondalık dereceye çevrilmedi, ham değer taşınır.',
+  'protocol.gnssModem.warning.embeddedNmeaUnparseable':
+    'AT+QGPSGNMEA yanıtının içindeki metin bir NMEA cümlesi olarak çözülemedi — AT katmanı alanları yine de gösterilir.',
+  'protocol.gnssModem.example.qgpslocTwoDFix.name': 'Konum bilgisi, 2D fix (QGPSLOC)',
+  'protocol.gnssModem.example.qgpslocTwoDFix.description':
+    'Quectel kılavuzunun kendi örneği — enlem/boylam ondalık dereceye, HDOP/rakım/uydu sayısı sayıya çevrilir.',
+  'protocol.gnssModem.example.qgpslocUnrecognizedFix.name': 'Tanınmayan konumlama modu (QGPSLOC, fix=1)',
+  'protocol.gnssModem.example.qgpslocUnrecognizedFix.description':
+    'Aynı fixture, <fix>=1 — Quectel’in kendi tablosu yalnız 2/3 tanımlıyor, uyarı basılır.',
+  'protocol.gnssModem.example.qgpsgnmeaGga.name': 'GGA cümlesi (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaGga.description':
+    'Quectel’in <nmeasrc> örneği — gömülü GGA cümlesi nmea-0183 motoruyla tam olarak çözülür.',
+  'protocol.gnssModem.example.qgpsgnmeaRmc.name': 'RMC cümlesi (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaRmc.description':
+    'nmea-0183’ün kendi doğrulanmış RMC fixture’ı — farklı cümle tipinin de aynı yoldan geçtiğini gösterir.',
+  'protocol.gnssModem.example.qgpsgnmeaMalformed.name': 'Bozuk gömülü cümle (QGPSGNMEA)',
+  'protocol.gnssModem.example.qgpsgnmeaMalformed.description':
+    'İçerik bir NMEA cümlesi değil — pozisyon alanı üretilmez, AT katmanı alanları yine de görünür.',
+  'protocol.gnssModem.example.finalOk.name': 'OK',
+  'protocol.gnssModem.example.finalOk.description':
+    'lte-modem-at/at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header eksik: en az 8 bayt gerekir (version, inverse version, payload type, payload length).',

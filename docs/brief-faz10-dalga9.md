@@ -14,10 +14,11 @@ LoRaWAN'dan farklı — PHY hesap makinesi) ve beş kayıtlık bir AT-komut aile
 **9a TAMAM.** Karar 1 ve karar 2 uygulandı. Ne yazıldığı ve keşif turunun hangi
 öncülünün yanlış çıktığı aşağıda: bkz. "9a — ne yapıldı" ve düzeltilmiş §2.
 
-**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı, 9c'nin
-tamamı VE 9d'nin tamamı TAMAM** — bkz. "9b — ne yapıldı", "9c — ne yapıldı" ve
-"9d — ne yapıldı". `hayes-command-set` bu turda YAZILMADI, kendi küçük kararını
-bekliyor (aşağıda ayrıca işaretli). 9e hâlâ önde, 9c/9d'ye bağlı.
+**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı, 9c/9d/9e'nin
+tamamı TAMAM** — bkz. "9b — ne yapıldı", "9c — ne yapıldı", "9d — ne yapıldı"
+ve "9e — ne yapıldı". Beş kayıtlık AT-komut zinciri (`hayes-command-set`
+hariç) TAMAMLANDI. `hayes-command-set` (madde 7) BAĞIMSIZ, hâlâ kendi küçük
+kararını bekliyor — zincire bağlı değil, istenirse ayrı alınır.
 
 ## Durum — keşif turunda doğrulananlar
 
@@ -186,16 +187,17 @@ satır-yönelimli ASCII'dir (`\r\n` ile kendi kendini sınırlar) — tıpkı h�
 | `interfaces-framing/framing-stream-protocols/at-commands` | ~~planned~~ **ready** | `at-commands` | **TAMAM** |
 | `wireless-iot/cellular-iot/lte-modem-at` | ~~planned~~ **ready** | `lte-modem-at` | **TAMAM** — motor `protocols/wireless/cellular/lteModemAt.ts` |
 | `wireless-iot/cellular-iot/nb-iot` | ~~planned~~ **ready** | `nb-iot` | **TAMAM** — motor `protocols/wireless/cellular/nbIot.ts` |
-| `wireless-iot/cellular-iot/gnss-modem` | planned | yok/yok | 9e, lte-modem-at + nmea-0183'e bağlı |
+| `wireless-iot/cellular-iot/gnss-modem` | ~~planned~~ **ready** | `gnss-modem` | **TAMAM** — motor `protocols/wireless/cellular/gnssModem.ts` |
 
 ## BEKÇİ BORCU — YOK
 
 Altı kayıt da zaten katalogda; yalnız `status`/`pluginId` işlenecek. 8/54/172
 dokunulmaz. Registry 48 (dalga 8 sonrası) → 9b'de **49** (`at-commands`) →
-9c'de **50** (`lte-modem-at`) → 9d'de **51** (`nb-iot`). `lora` eklenti hiç
-YAZILMADI (karar 1'in sonucu), `hayes-command-set` hâlâ yazılmadı — en fazla
-**52** kalabilir (gnss-modem, 9e). Katalog sayıları (8/54/172) 9a/9b/9c/9d'nin
-hiçbirinde değişmedi.
+9c'de **50** (`lte-modem-at`) → 9d'de **51** (`nb-iot`) → 9e'de **52**
+(`gnss-modem`). `lora` eklenti hiç YAZILMADI (karar 1'in sonucu),
+`hayes-command-set` hâlâ yazılmadı — registry burada KALICI OLARAK 52'de
+duruyor, `hayes-command-set` kendi kararını alıp yazılırsa 53 olur. Katalog
+sayıları (8/54/172) 9a/9b/9c/9d/9e'nin hiçbirinde değişmedi.
 
 ## Kapsam bölmesi
 
@@ -458,14 +460,73 @@ başına iki kez çalıştırınca 9/9 yeşil, benim değişikliklerimle ilgisi 
 bilinen sınıf bir gecikme) · ekran gerçekten açıldı (`npm run dev`, PSM
 etkin/deactivated ve AcT=9/AcT≠9 karşıtları taze tarayıcıda görüntülendi).
 
-### 9e — `gnss-modem` (9c + nmea-0183'e bağlı)
+### 9e — `gnss-modem` (9c + nmea-0183'e bağlı) — **TAMAM**
 
-12. `AT+QGPSGNMEA` yanıtının içindeki ham NMEA cümlesini `nmea-0183` motoruna
-    devret (motor TEKRAR YAZILMAZ, katalog yorumu zaten bunu söylüyor).
-    `AT+QGPSLOC` gibi önceden-ayrıştırılmış yanıtlar ayrı, dar bir alan kümesiyle
-    çözülür (fix/lat/lon/alt/sat/hdop).
-13. TTFF Calculator, Fix Loss Detector — bunlar da stateful/timeline araçlar,
-    karar 4'ün kapsamı.
+Ne yazıldı: `src/protocols/wireless/cellular/gnssModem.ts` (+ `.test.ts`, 16
+test). `lte-modem-at`i (AT katmanı) VE `nmea-0183`ü (gömülü cümle) BİRLİKTE
+çağırır — 9d'nin kurduğu "üstteki motoru içeriden çağır" şablonunun bu kez
+İKİ motora bağımlı hâli (karar 5). Katalog: `planned` → `ready`,
+`pluginId: 'gnss-modem'`, `EXPECTED_CATEGORY: wireless-iot`; `tabs`'ta
+`decode` ZATEN vardı (9d'nin aksine, burada tab eklemek gerekmedi). Registry
+51 → **52** — beş kayıtlık AT-komut zincirinin (`hayes-command-set` hariç)
+TAMAMI artık kayıtlı.
+
+12. `AT+QGPSGNMEA` → `nmea-0183`ye devir — **madde 12 TAMAM, motor TEKRAR
+    YAZILMADI.** `+QGPSGNMEA: $GPGGA,...,*77` satırının `parameters` alanı
+    (Quectel EC25&EC21 GNSS AT Commands Manual V1.1 §3.2'nin kendi
+    `<nmeasrc>` örneği) `splitParameterTokens`le VİRGÜLE BÖLÜNMEZ — cümlenin
+    kendi virgülleri AT parametre ayracı sanılırdı, ilk token'dan sonrasını
+    sessizce keserdi. Bunun yerine `parameters` alanının HAM BAYTLARI
+    doğrudan `nmea0183Parser`e verilir; dönen alanlar `rebaseField`le DIŞ
+    `data` tamponundaki gerçek ofsetine kaydırılır (`tokenField`in
+    `paramsOffset + token.offset` deseninin, bu kez BAŞKA BİR PARSER'IN tüm
+    çıktısına uygulanmış hâli — 9c/9d'de görülmemiş YENİ bir teknik, gerçek
+    tarayıcıda HEX vurgulamayla doğrulandı, aşağı bkz.). Bozuk checksum gibi
+    iç motorun kendi teşhisi de AYNEN taşınır — motor tekrar yazılmadığı
+    gibi, motorun teşhisi de tekrar üretilmez. Cümle TİPİ (GGA/RMC/GSA/GSV/
+    VTG/GNS — Quectel'in kendi test-komutu listesi) hiç FARK ETMİYOR,
+    `nmea0183Parser` zaten hepsini tek biçimde çözüyor (GGA VE RMC ikisi de
+    fixture'landı). Gömülü metin bir NMEA cümlesi olarak hiç ÇÖZÜLEMEZSE
+    dış çerçeve BİLİNÇLİ OLARAK geçersiz sayılır (`frame.valid: false`,
+    checksum uyuşmazlığından daha ciddi bir sınıf) ama AT-katmanı alanları
+    (kind/prefix/parameters) SİLİNMEZ — kısmi çözüm gösterilir (spec §47).
+13. `AT+QGPSLOC` — **madde 12'nin ikinci yarısı TAMAM, "dar" kapsam BİREBİR
+    UYGULANDI.** `+QGPSLOC: <UTC>,<latitude>,<longitude>,<hdop>,<altitude>,
+    <fix>,<cog>,<spkm>,<spkn>,<date>,<nsat>` (Quectel §3.1, doğrudan PDF'ten
+    doğrulandı) — brief'in kendi "dar bir alan kümesiyle çözülür
+    (fix/lat/lon/alt/sat/hdop)" sınırı harfiyen uygulandı, `UTC`/`cog`/
+    `spkm`/`spkn`/`date` HİÇ ÜRETİLMEZ (CGDCONT'un tail-parametre
+    disipliniyle aynı sınıf, burada gerisi EMİLMEZ bile). `<latitude>`/
+    `<longitude>` Quectel'e özgü TEK-token+hemisfer-harfi biçiminde
+    (`3150.7223N`) gelir — NMEA'nin kendi iki-tokenli `lat,N` biçiminden
+    FARKLI. `AT+QGPSLOC=<mode>` biçimi de DEĞİŞTİRİR (0/1: harf sonekli,
+    2: zaten imzalı ondalık derece) ama parser SAF kalmak zorunda (karar 4)
+    — çözüm TOKENİN KENDİSİNDEN biçim sezmek (harf sonekli mi değil mi),
+    dışarıdan `<mode>` durumu GEREKMEZ. ddmm.mmmm→ondalık formülü
+    `nmeaSentences.ts`teki `convertCoordinate`in AYNISI (48.1173/
+    11.516666... fixture'ıyla çapraz doğrulandı) — export edilmediği için
+    (lte-modem-at'in kendi tablolarını yerel tutması emsali) yerel bir kopya
+    yazıldı. `<fix>` yalnız Quectel'in belgelediği 2/3 (2D/3D) tanır, başka
+    değer (ör. 1) mod UYDURULMAZ, uyarı basılır.
+
+**Verilmeyen** (brief'in kendi madde 13'ünde zaten "stateful/timeline
+araçlar, karar 4'ün kapsamı" diye işaretli kısım): TTFF Calculator, Fix Loss
+Detector, GNSS+Cellular Correlation Timeline, Position Dashboard'un React
+UI'ı, GNSS Control Commands (power/update rate/constellation) — hepsi
+`lte-modem-at`in Cellular Initialization Dashboard'uyla AYNI SINIF iş, kendi
+turlarını bekliyor.
+
+Doğrulama: `npm run typecheck` temiz · `npm test` 3071/3071 (16 yeni) ·
+`e2e/gnss-modem-decode.spec.ts` (yeni) 7/7 · tüm e2e paketi 452/452 (bu
+turda flake YOK) · ekran gerçekten açıldı (`npm run dev`, QGPSLOC/QGPSGNMEA-
+GGA/QGPSGNMEA-bozuk üç örnek taze tarayıcıda görüntülendi — rebase edilen
+`checksum` alanının HEX vurgusu satırın doğru yerinde, elle doğrulandı).
+
+**Beş kayıtlık AT-komut zinciri (`hayes-command-set → at-commands →
+lte-modem-at → {nb-iot, gnss-modem}`) TAMAMLANDI** — `hayes-command-set`
+hariç dördü de `ready`, registry 47 (dalga 7 sonrası) → 52. Brief'in dosya
+başındaki "beş kayıt bir bağımlılık zinciri" şeması (bölüm 5) artık
+tamamen koda karşılık geliyor.
 
 ## Verilmesi gereken kararlar (dalga başında sor, kendiliğinden seçme)
 
@@ -697,17 +758,25 @@ yanlıştı, düzeltildi, Tuzaklar bölümüne bkz.) + eDRX (yalnız NB-S1)
 zamanlayıcı çözümü yazıldı; `decode` sekmesi karar 5'in doğal sonucu olarak
 (kullanıcıya sorulmadan, gerekçeli) açıldı. Registry 50 → 51.
 
-Sıradaki iş **9e: `gnss-modem`** (9c + nmea-0183'e bağlı) — `AT+QGPSGNMEA`
-yanıtının içindeki ham NMEA cümlesini `nmea-0183` motoruna devretme (motor
-TEKRAR YAZILMAZ), `AT+QGPSLOC` gibi önceden-ayrıştırılmış yanıtlar için dar
-bir alan kümesi. 9d'nin kurduğu "üstteki plugin'i içeriden çağır" şablonu
-(bu kez İKİ ayrı motora bağımlı: `lte-modem-at` + `nmea-0183`) doğrudan
-emsal — brief'in "gnss-modem/nmea-0183" atfı artık gerçek bir kod emsaline
-(9d) dayanıyor, yalnız planlanan bir örüntü değil. **Karar 6,
-`hayes-command-set` (madde 7) ve Cellular Initialization Dashboard'ın UI'ı
-hâlâ bağımsız** — zinciri bozmadan araya alınabilir.
+~~Sıradaki iş **9e: `gnss-modem`**~~ — **bitti** (yukarı bkz. "9e — ne
+yapıldı"). `AT+QGPSGNMEA`nın gömülü NMEA cümlesi `nmea-0183` motoruna
+devredildi (motor TEKRAR YAZILMADI, `rebaseField` ile HEX ofsetleri DIŞ AT
+satırına doğru kaydırıldı — gerçek tarayıcıda doğrulandı), `AT+QGPSLOC` dar
+bir alan kümesiyle (fix/lat/lon/alt/sat/hdop) çözüldü. Registry 51 → 52.
 
-Model önerisi: 9e Sonnet · high (tarif net, emsal artık İKİ kez kanıtlı —
-9c'nin at-commands çağırması + 9d'nin lte-modem-at çağırması). Karar 6 ve UI
-turları Sonnet · medium. hayes-command-set turu Sonnet · medium (dar, iki
-seçenekten biri).
+**Beş kayıtlık AT-komut zinciri (`hayes-command-set → at-commands →
+lte-modem-at → {nb-iot, gnss-modem}`) TAMAMEN BİTTİ** — bu dalganın asıl
+omurgası kapandı. Geriye yalnız BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı
+değil, hangi sırayla alınacağı önemsiz:
+
+- **Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
+  (`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.
+- **`hayes-command-set`** (madde 7) — ortak AT motorunu (`atCommandsParser`)
+  içeriden mi çağıracak yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci
+  bir `ProtocolPlugin` mi olacak, dar bir karar bekliyor.
+- **Cellular Initialization Dashboard'ın UI'ı** — motor (9c'de) hazır, karar
+  6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
+  bağlama"), birlikte tasarlanabilir.
+
+Model önerisi: üçü de Sonnet · medium (dar kapsam, tek karar ya da hazır
+motora UI bağlama — mimari fork yok).

@@ -310,4 +310,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'nb-iot', () =>
     import('./wireless/cellular/nbIot').then((module) => module.nbIotPlugin),
   );
+  // GNSS Modem — Faz 10 dalga 9e: lte-modem-at VE nmea-0183'ün ÜSTÜNDE
+  // (karar 5, aliasOf DEĞİL) — AT+QGPSGNMEA'nın gömülü ham NMEA cümlesi
+  // nmea-0183 motoruna DEVREDİLİR (motor tekrar yazılmaz), AT+QGPSLOC dar
+  // bir alan kümesiyle (fix/lat/lon/alt/sat/hdop) çözülür.
+  registerOnce(registry, 'gnss-modem', () =>
+    import('./wireless/cellular/gnssModem').then((module) => module.gnssModemPlugin),
+  );
 }

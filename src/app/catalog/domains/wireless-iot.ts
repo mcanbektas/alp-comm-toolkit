@@ -454,7 +454,19 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'GNSS receiver embedded in a cellular module, driven by vendor AT commands and read back as NMEA plus vendor URCs in asset tracking and telematics devices.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 9e: AT+QGPSGNMEA yanıtının içindeki ham NMEA
+          // cümlesi nmea-0183 motoruna DEVREDİLDİ (motor tekrar yazılmadı —
+          // bu yorumun kendi sözü tutuldu), AT+QGPSLOC dar bir alan
+          // kümesiyle çözüldü (fix/lat/lon/alt/sat/hdop — src/protocols/
+          // wireless/cellular/gnssModem.ts). `tabs`'ta `decode` zaten
+          // vardı, dokunulmadı. GNSS Control Commands (power/update rate/
+          // constellation), tam vendor URC sözlüğü, Position Dashboard
+          // UI'ı, TTFF Calculator, Fix Loss Detector ve GNSS+Cellular
+          // Correlation Timeline bu dalgada YOK — hepsi stateful/timeline
+          // araçlar, lte-modem-at'in Cellular Initialization Dashboard'uyla
+          // aynı sınıf iş (karar 4), kendi turlarını bekliyor.
+          status: 'ready',
+          pluginId: 'gnss-modem',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'GNSS Control Commands (power, position, fix status, update rate, constellation, assistance data)',
