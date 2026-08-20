@@ -14,10 +14,10 @@ LoRaWAN'dan farklı — PHY hesap makinesi) ve beş kayıtlık bir AT-komut aile
 **9a TAMAM.** Karar 1 ve karar 2 uygulandı. Ne yazıldığı ve keşif turunun hangi
 öncülünün yanlış çıktığı aşağıda: bkz. "9a — ne yapıldı" ve düzeltilmiş §2.
 
-**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı ve 9c'nin
-tamamı TAMAM** — bkz. "9b — ne yapıldı" ve "9c — ne yapıldı". `hayes-command-set`
-bu turda YAZILMADI, kendi küçük kararını bekliyor (aşağıda ayrıca işaretli).
-9d/9e hâlâ önde, 9c'ye bağlı.
+**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı, 9c'nin
+tamamı VE 9d'nin tamamı TAMAM** — bkz. "9b — ne yapıldı", "9c — ne yapıldı" ve
+"9d — ne yapıldı". `hayes-command-set` bu turda YAZILMADI, kendi küçük kararını
+bekliyor (aşağıda ayrıca işaretli). 9e hâlâ önde, 9c/9d'ye bağlı.
 
 ## Durum — keşif turunda doğrulananlar
 
@@ -185,16 +185,16 @@ satır-yönelimli ASCII'dir (`\r\n` ile kendi kendini sınırlar) — tıpkı h�
 | `interfaces-framing/framing-stream-protocols/hayes-command-set` | planned | yok/yok | madde 7'ye bağlı (henüz yazılmadı) |
 | `interfaces-framing/framing-stream-protocols/at-commands` | ~~planned~~ **ready** | `at-commands` | **TAMAM** |
 | `wireless-iot/cellular-iot/lte-modem-at` | ~~planned~~ **ready** | `lte-modem-at` | **TAMAM** — motor `protocols/wireless/cellular/lteModemAt.ts` |
-| `wireless-iot/cellular-iot/nb-iot` | planned | yok/yok | 9d, lte-modem-at'e bağlı |
+| `wireless-iot/cellular-iot/nb-iot` | ~~planned~~ **ready** | `nb-iot` | **TAMAM** — motor `protocols/wireless/cellular/nbIot.ts` |
 | `wireless-iot/cellular-iot/gnss-modem` | planned | yok/yok | 9e, lte-modem-at + nmea-0183'e bağlı |
 
 ## BEKÇİ BORCU — YOK
 
 Altı kayıt da zaten katalogda; yalnız `status`/`pluginId` işlenecek. 8/54/172
 dokunulmaz. Registry 48 (dalga 8 sonrası) → 9b'de **49** (`at-commands`) →
-9c'de **50** (`lte-modem-at`). `lora` eklenti hiç YAZILMADI (karar 1'in
-sonucu), `hayes-command-set` hâlâ yazılmadı — en fazla **52** kalabilir
-(nb-iot + gnss-modem, 9d/9e). Katalog sayıları (8/54/172) 9a/9b/9c'nin
+9c'de **50** (`lte-modem-at`) → 9d'de **51** (`nb-iot`). `lora` eklenti hiç
+YAZILMADI (karar 1'in sonucu), `hayes-command-set` hâlâ yazılmadı — en fazla
+**52** kalabilir (gnss-modem, 9e). Katalog sayıları (8/54/172) 9a/9b/9c/9d'nin
 hiçbirinde değişmedi.
 
 ## Kapsam bölmesi
@@ -387,12 +387,76 @@ tarayıcıda sınandı (LAC `1A2D`→6701, hücre kimliği `0001A2B3`→107187, 
 `+08`→2 saat hepsi ekranda doğrulandı) · ekran görüntüsüyle bakıldı (CSQ,
 CREG, CCLK, CGSN-bare).
 
-### 9d — `nb-iot` (9c'ye bağlı)
+### 9d — `nb-iot` (9c'ye bağlı) — **TAMAM**
 
-11. `lte-modem-at`'in ayrıştırdığı CEREG/CSQ/vendor URC'lerinden NB-IoT'ye özgü
-    görünüm (AcT=9 tespiti, PSM/eDRX zamanlayıcı çıkarımı). Muhtemelen `aliasOf`
-    DEĞİL (gnss-modem/nmea-0183 emsali: yorumlama katmanı, motor paylaşımı) —
-    ama bu da karar (karar 5).
+Ne yazıldı: `src/protocols/wireless/cellular/nbIot.ts` (+ `.test.ts`, 22
+test). `lte-modem-at`in `atCommandsParser`ini DEĞİL, `lteModemAtParser`ini
+çağırır — karar 5'in "içeriden çağırır" ifadesinin birebir karşılığı, İKİ
+KATMAN derin bileşim (`nb-iot → lte-modem-at → at-commands`). Katalog:
+`planned` → `ready`, `pluginId: 'nb-iot'`, `EXPECTED_CATEGORY: wireless-iot`.
+Registry 50 → **51**.
+
+11. AcT=9 tespiti VE PSM/eDRX zamanlayıcı çıkarımı — **madde 11 TAMAM.**
+
+    **AcT=9 tespiti**: CREG/CEREG/COPS'un `lte-modem-at` tarafından ZATEN
+    çözülmüş `access-technology` alanı üstüne bir eşleşme etiketi ekler
+    (`nb-iot-access-technology-match`) — yeniden ayrıştırma YOK. AcT=9 ise
+    uyarısız "NB-IoT (E-UTRAN NB-S1 mode)"; değilse "NB-IoT değil (AcT=n)" +
+    uyarı.
+
+    **PSM (`AT+CPSMS?`)**: `lte-modem-at`in madde 8 komut kümesinde bu komut
+    YOKTU, burada eklendi. **Brief'in kendi Tuzaklar notu ("GPRS Timer 2/3,
+    §10.5.7.4a") DÜZELTİLDİ** — araştırma turu (ETSI TS 127 007 V18.7.0
+    doğrudan PDF + Quectel BG96/BC66 + SIMCom SIM7022 çapraz doğrulama)
+    T3324 (Active-Time) ve T3412-extended (Periodic-TAU) için AYRI iki tablo
+    olduğunu gösterdi: T3324 → **GPRS Timer 2** (TS 24.008 Table 10.5.163,
+    yalnız dört birim: 2sn/1dk/decihour/deactivated), T3412-ext → **GPRS
+    Timer 3** (Table 10.5.163a, yedi birim: 10dk/1sa/10sa/2sn/30sn/1dk/
+    **320sa**/deactivated). İkisini TEK tabloya bağlamak sessiz-yanlış saniye
+    üretirdi — BG96 kılavuzunun kendi örneği (`"00000100"`→40dk T3412,
+    `"00001111"`→30sn T3324) iki tabloyu da bağımsız doğruluyor, fixture
+    olarak aynen kullanıldı (gerçek tarayıcıda da doğrulandı, aşağı bkz.).
+    Rezerve birim kodu (Timer 2'de 011-110) CREG/CEREG `reject_cause`
+    disipliniyle aynı: saniye UYDURULMAZ, uyarı basılır.
+
+    **eDRX (`AT+CEDRXS?` / `+CEDRXP` / `AT+CEDRXRDP`)**: döngü tablosu (TS
+    24.008 Table 10.5.5.32) yalnız **NB-S1 modu** (`AcT_type=5`) için
+    doğrulandı (Quectel BC26 + u-blox SARA-N2/N3 çapraz teyitli, 10 kod).
+    WB-S1 (`AcT_type=4`, LTE-M) FARKLI bir tablo kullanır ve BİLEREK
+    yazılmadı — o modda gelen bir değer saniyeye çevrilmez, ayrı uyarı
+    taşır. Paging Time Window bağımsız doğrulanmadı, ham dize kalır (aynı
+    disiplin). `+CEDRXP` (URC) ve `AT+CEDRXRDP` (okuma) AYNI dört parametre
+    şeklini paylaştığı için TEK çözücüye dispatch edilir.
+
+12. **`decode` sekmesi açıldı — bilinçli, karar 5'in doğal sonucu, kullanıcıya
+    SORULMADI.** Katalogdaki `nb-iot` kaydının `tabs`'ında `decode` YOKTU
+    (yalnız `overview/timing/data/diagnostics/examples`) — bu motor tam
+    olarak decode-zamanı bir zenginleştirme olduğundan, eklemeden `ready` +
+    `pluginId` yazmak 9a'nın "ready sayfada yalan olmasın" dersini çiğnerdi
+    (`ProtocolPage.tsx`in `pluginId`i yalnız `decode` sekmesinde okuduğu
+    doğrulandı). `live`/`build` EKLENMEDİ — yeni bir canlı bağlantı ya da
+    komut gönderme yeteneği yok. Bu, brief'in "verilmesi gereken kararlar"
+    listesinde YOKTU — karar 5 + 9a emsalinin zorunlu sonucu olarak
+    kendiliğinden uygulandı, kod yorumunda ve burada açıkça işaretli.
+13. Katalogun vaat ettiği STATEFUL panolar (Connection State Machine,
+    Registration Analyzer, Power Save Analyzer, Socket/Connection Timeline)
+    bu dalgada YOK — `lte-modem-at`in Cellular Initialization Dashboard'uyla
+    AYNI SINIF iş (karar 4: parser saf kalır, biriktirme UI katmanında),
+    kendi turunu bekliyor. `timing`/`data`/`diagnostics` sekmeleri hâlâ
+    `tools` metin listesiyle "planlandı" gösterir.
+
+**Bekçi güncellemesi (unutulmuş olsaydı testte yakalanırdı, yakalandı):**
+`src/protocols/index.test.ts`teki `BUILT_IN_IDS`/`EXPECTED_CATEGORY`
+listelerine `nb-iot` eklenmemişti — ilk test turu 2 testte bunu yakaladı,
+düzeltildi.
+
+Doğrulama: `npm run typecheck` temiz · `npm test` 3055/3055 (22 yeni) ·
+`e2e/nb-iot-decode.spec.ts` (yeni) 9/9 · tüm e2e paketi 445/445 (bir turda
+`lte-modem-at-decode.spec.ts`ten TEK bir izole flake görüldü — dosyayı tek
+başına iki kez çalıştırınca 9/9 yeşil, benim değişikliklerimle ilgisi yok,
+5 paralel worker'ın aynı önizleme sunucusuna birden yüklenmesinden kaynaklı
+bilinen sınıf bir gecikme) · ekran gerçekten açıldı (`npm run dev`, PSM
+etkin/deactivated ve AcT=9/AcT≠9 karşıtları taze tarayıcıda görüntülendi).
 
 ### 9e — `gnss-modem` (9c + nmea-0183'e bağlı)
 
@@ -554,9 +618,17 @@ UI katmanında yaşar" sonucuyla aynı yere bakıyor, ikisi birlikte tasarlanmal
   işaretliyor, `interfaces-framing.ts:903-904`).
 - **IMSI/IMEI/ICCID**: bu değerler KULLANICI VERİSİ sayılır (CLAUDE.md "kullanıcı
   verisi yerelde kalır") — export maskesi 9c'nin ADI GEÇEN özelliği, atlanamaz.
-- **PSM/eDRX zamanlayıcıları**: TS 27.007 kodlu (ör. `T3324`/`T3412` GPRS
+- ~~**PSM/eDRX zamanlayıcıları**: TS 27.007 kodlu (ör. `T3324`/`T3412` GPRS
   Timer 2/3 formatında, 3 bit birim + 5 bit değer) — ham sayıyı doğrudan
-  saniyeye çevirmek YANLIŞ, birim tablosunu (TS 24.008 §10.5.7.4a) doğrula.
+  saniyeye çevirmek YANLIŞ, birim tablosunu (TS 24.008 §10.5.7.4a) doğrula.~~
+  **DÜZELTİLDİ (9d) — bu not kendisi yanlıştı.** T3324 ve T3412-extended AYRI
+  tablolar kullanıyor: T3324 → GPRS Timer 2 (TS 24.008 Table 10.5.163, dört
+  birim), T3412-ext → GPRS Timer 3 (Table 10.5.163a, yedi birim, en büyüğü
+  320 saat). Tek clause'a (`§10.5.7.4a`) bağlamak bu ikisini karıştırırdı —
+  ETSI TS 127 007 V18.7.0 + üç bağımsız vendor kılavuzu (BG96/BC66/SIM7022)
+  çapraz doğrulandı, detay "9d — ne yapıldı"da. eDRX döngü tablosu (Table
+  10.5.5.32) yalnız NB-S1 modunda (AcT_type=5) doğrulandı, WB-S1 BİLEREK
+  yazılmadı.
 - **`related` zincirini `aliasOf` sanma**: bu dalganın EN BÜYÜK risk — beş
   kayıt birbirine `related` ile bağlı ama HİÇBİRİ `aliasOf` değil; birini
   yanlışlıkla alias sayıp "zaten çalışıyor" deme (dalga 8'in MQTT/CoAP
@@ -619,19 +691,23 @@ değil — bağlamak 172 protokolün tamamını ilgilendiren bir sözleşme değ
 olurdu). Cellular Initialization Dashboard'ın motoru hazır, React UI yok —
 karar 6'yla aynı sınıf iş, kendi turunu bekliyor.
 
-Sıradaki iş **9d: `nb-iot`** (`lte-modem-at`'e bağlı) — CEREG/CSQ/vendor
-URC'lerinden NB-IoT'ye özgü görünüm (AcT=9 tespiti, PSM/eDRX zamanlayıcı
-çıkarımı). Karar 5 zaten verildi: `aliasOf` DEĞİL, ayrı `pluginId` + iç çağrı.
+~~Sıradaki iş **9d: `nb-iot`**~~ — **bitti** (yukarı bkz. "9d — ne yapıldı").
+AcT=9 tespiti + PSM (T3412/T3324, GPRS Timer 3/2 — brief'in kendi notu
+yanlıştı, düzeltildi, Tuzaklar bölümüne bkz.) + eDRX (yalnız NB-S1)
+zamanlayıcı çözümü yazıldı; `decode` sekmesi karar 5'in doğal sonucu olarak
+(kullanıcıya sorulmadan, gerekçeli) açıldı. Registry 50 → 51.
 
-9d bitmeden 9e'ye girilmez (nb-iot bağımsız görünüyor olabilir ama brief
-sırayı böyle koymuş — 9c'nin çıktısını gördükten sonra değişmedi). **Karar 6
-hâlâ bağımsız** ve kendi turu var. **`hayes-command-set` (madde 7) de
-bağımsız** — 9d'den önce, sonra ya da paralel alınabilir, zinciri bozmaz.
-**Cellular Initialization Dashboard'ın UI'ı da bağımsız üçüncü bir iş** —
-motoru hazır, karar 6'yla birlikte tasarlanmalı (ikisi de "hesap/dashboard
-sekmesini protokol sayfasına bağlama" sorusuna bakıyor).
+Sıradaki iş **9e: `gnss-modem`** (9c + nmea-0183'e bağlı) — `AT+QGPSGNMEA`
+yanıtının içindeki ham NMEA cümlesini `nmea-0183` motoruna devretme (motor
+TEKRAR YAZILMAZ), `AT+QGPSLOC` gibi önceden-ayrıştırılmış yanıtlar için dar
+bir alan kümesi. 9d'nin kurduğu "üstteki plugin'i içeriden çağır" şablonu
+(bu kez İKİ ayrı motora bağımlı: `lte-modem-at` + `nmea-0183`) doğrudan
+emsal — brief'in "gnss-modem/nmea-0183" atfı artık gerçek bir kod emsaline
+(9d) dayanıyor, yalnız planlanan bir örüntü değil. **Karar 6,
+`hayes-command-set` (madde 7) ve Cellular Initialization Dashboard'ın UI'ı
+hâlâ bağımsız** — zinciri bozmadan araya alınabilir.
 
-Model önerisi: 9d Sonnet · high (tarif net, emsal var — gnss-modem/nmea-0183
-zaten aynı "yorumlama katmanı, motor paylaşımı" desenini planlıyor). Karar 6
-ve UI turları Sonnet · medium. hayes-command-set turu Sonnet · medium (dar,
-iki seçenekten biri).
+Model önerisi: 9e Sonnet · high (tarif net, emsal artık İKİ kez kanıtlı —
+9c'nin at-commands çağırması + 9d'nin lte-modem-at çağırması). Karar 6 ve UI
+turları Sonnet · medium. hayes-command-set turu Sonnet · medium (dar, iki
+seçenekten biri).

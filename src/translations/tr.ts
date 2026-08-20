@@ -1792,6 +1792,48 @@ export const tr = {
   'protocol.lteModemAt.example.finalOk.description':
     'at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
 
+  // --- NB-IoT (lte-modem-at üstünde: AcT=9 tespiti + PSM/eDRX zamanlayıcı) ---
+  'protocol.nbIot.documentation.summary':
+    'lte-modem-at üstünde NB-IoT yorumlama katmanı: AcT=9 tespiti, PSM (AT+CPSMS, T3412/T3324) ve eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, yalnız NB-S1 modu) zamanlayıcı çözümü.',
+  'protocol.nbIot.warning.accessTechnologyNotNbIot':
+    'Erişim teknolojisi AcT=9 (E-UTRAN NB-S1 mode) DEĞİL — bu satır NB-IoT bağlamını göstermiyor olabilir.',
+  'protocol.nbIot.warning.timerMalformed':
+    'Sekiz haneli ikili dize bekleniyordu, değer bu biçime uymuyor — birim/değer ayrıştırılamadı, ham bırakıldı.',
+  'protocol.nbIot.warning.timerUnitReserved':
+    'Bu birim kodu TS 24.008 tablosunda tanımlı değil (rezerve) — saniyeye çevrilmedi, ham değer taşınır.',
+  'protocol.nbIot.warning.edrxMalformed':
+    'Dört haneli ikili dize bekleniyordu, değer bu biçime uymuyor — döngü uzunluğu ayrıştırılamadı, ham bırakıldı.',
+  'protocol.nbIot.warning.edrxCodeReserved':
+    'Bu eDRX kodu TS 24.008 tablosunda tanımlı değil (rezerve) — saniyeye çevrilmedi, ham değer taşınır.',
+  'protocol.nbIot.warning.edrxNotNbS1':
+    'Bu değer NB-S1 modu (AcT_type=5) dışında bir erişim teknolojisi için geldi — o modun eDRX tablosu bu motorda doğrulanmadı, saniyeye çevrilmedi.',
+  'protocol.nbIot.example.ceregNbIot.name': 'NB-IoT kayıt durumu (CEREG, AcT=9)',
+  'protocol.nbIot.example.ceregNbIot.description':
+    'Erişim teknolojisi E-UTRAN (NB-S1 mode) — NB-IoT eşleşmesi doğrulanır, uyarı taşımaz.',
+  'protocol.nbIot.example.ceregNotNbIot.name': 'NB-IoT olmayan kayıt durumu (CEREG, AcT=7)',
+  'protocol.nbIot.example.ceregNotNbIot.description':
+    'Aynı CEREG yanıtı ama AcT=7 (düz E-UTRAN) — eşleşme alanı "NB-IoT değil" uyarısı taşır.',
+  'protocol.nbIot.example.cpsmsEnabled.name': 'PSM etkin (CPSMS, T3412=40dk, T3324=30sn)',
+  'protocol.nbIot.example.cpsmsEnabled.description':
+    'Quectel BG96 kılavuzunun kendi örneği — periyodik TAU ve aktif zamanlayıcı FARKLI birim tablolarından (GPRS Timer 3 / GPRS Timer 2) saniyeye çevrilir.',
+  'protocol.nbIot.example.cpsmsDeactivated.name': 'PSM zamanlayıcıları devre dışı (CPSMS)',
+  'protocol.nbIot.example.cpsmsDeactivated.description':
+    'Birim biti 111 — her iki zamanlayıcı da "deactivated", saniye üretilmez.',
+  'protocol.nbIot.example.cedrxsNbS1.name': 'eDRX döngüsü (CEDRXS, NB-S1)',
+  'protocol.nbIot.example.cedrxsNbS1.description': 'AcT_type=5 (NB-S1) — döngü kodu 40.96 saniyeye çevrilir.',
+  'protocol.nbIot.example.cedrxsWbS1Unsupported.name': 'eDRX döngüsü (CEDRXS, WB-S1 — çözülmedi)',
+  'protocol.nbIot.example.cedrxsWbS1Unsupported.description':
+    'AcT_type=4 (WB-S1/LTE-M) — bu motorda doğrulanmış tablo yok, ham değer + uyarı.',
+  'protocol.nbIot.example.cedrxrdpFull.name': 'eDRX dinamik parametreleri (CEDRXRDP)',
+  'protocol.nbIot.example.cedrxrdpFull.description':
+    'u-blox SARA-N2/N3 kılavuzunun kendi örneği — istenen ve atanan döngü çözülür, Paging Time Window ham kalır (doğrulanmadı).',
+  'protocol.nbIot.example.cedrxpUrc.name': 'eDRX parametreleri (CEDRXP URC)',
+  'protocol.nbIot.example.cedrxpUrc.description':
+    'CEDRXRDP ile aynı dört alanı taşıyan istemsiz sonuç kodu — aynı çözücüyü kullanır.',
+  'protocol.nbIot.example.finalOk.name': 'OK',
+  'protocol.nbIot.example.finalOk.description':
+    'lte-modem-at/at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header eksik: en az 8 bayt gerekir (version, inverse version, payload type, payload length).',

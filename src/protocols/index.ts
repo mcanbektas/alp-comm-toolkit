@@ -302,4 +302,12 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'lte-modem-at', () =>
     import('./wireless/cellular/lteModemAt').then((module) => module.lteModemAtPlugin),
   );
+  // NB-IoT — Faz 10 dalga 9d: `lte-modem-at`in ÜSTÜNDE (karar 5, aliasOf
+  // DEĞİL) — AcT=9 tespiti (CREG/CEREG/COPS'un ortak access-technology
+  // alanı üstüne) + PSM (AT+CPSMS, T3412/T3324, GPRS Timer 3/2 — FARKLI
+  // tablolar) + eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, yalnız NB-S1 modu)
+  // zamanlayıcı çözümü.
+  registerOnce(registry, 'nb-iot', () =>
+    import('./wireless/cellular/nbIot').then((module) => module.nbIotPlugin),
+  );
 }

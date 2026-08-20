@@ -1790,6 +1790,48 @@ export const en: TranslationDictionary = {
   'protocol.lteModemAt.example.finalOk.description':
     'A final result code carried over verbatim from at-commands — stays consistent on this page too.',
 
+  // --- NB-IoT (on top of lte-modem-at: AcT=9 detection + PSM/eDRX timers) ---
+  'protocol.nbIot.documentation.summary':
+    'NB-IoT interpretation layer on top of lte-modem-at: AcT=9 detection, PSM (AT+CPSMS, T3412/T3324) and eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, NB-S1 mode only) timer decoding.',
+  'protocol.nbIot.warning.accessTechnologyNotNbIot':
+    'Access technology is NOT AcT=9 (E-UTRAN NB-S1 mode) — this line may not reflect an NB-IoT context.',
+  'protocol.nbIot.warning.timerMalformed':
+    'An 8-digit binary string was expected, the value does not match that shape — unit/value could not be parsed, left raw.',
+  'protocol.nbIot.warning.timerUnitReserved':
+    'This unit code is not defined in the TS 24.008 table (reserved) — not converted to seconds, the raw value is carried.',
+  'protocol.nbIot.warning.edrxMalformed':
+    'A 4-digit binary string was expected, the value does not match that shape — cycle length could not be parsed, left raw.',
+  'protocol.nbIot.warning.edrxCodeReserved':
+    'This eDRX code is not defined in the TS 24.008 table (reserved) — not converted to seconds, the raw value is carried.',
+  'protocol.nbIot.warning.edrxNotNbS1':
+    'This value arrived for an access technology other than NB-S1 mode (AcT_type=5) — that mode’s eDRX table is not verified in this engine, not converted to seconds.',
+  'protocol.nbIot.example.ceregNbIot.name': 'NB-IoT registration status (CEREG, AcT=9)',
+  'protocol.nbIot.example.ceregNbIot.description':
+    'Access technology is E-UTRAN (NB-S1 mode) — the NB-IoT match is confirmed, no warning.',
+  'protocol.nbIot.example.ceregNotNbIot.name': 'Non-NB-IoT registration status (CEREG, AcT=7)',
+  'protocol.nbIot.example.ceregNotNbIot.description':
+    'Same CEREG response but AcT=7 (plain E-UTRAN) — the match field carries a "not NB-IoT" warning.',
+  'protocol.nbIot.example.cpsmsEnabled.name': 'PSM enabled (CPSMS, T3412=40min, T3324=30s)',
+  'protocol.nbIot.example.cpsmsEnabled.description':
+    'The Quectel BG96 manual’s own example — periodic TAU and active timer are converted to seconds from DIFFERENT unit tables (GPRS Timer 3 / GPRS Timer 2).',
+  'protocol.nbIot.example.cpsmsDeactivated.name': 'PSM timers deactivated (CPSMS)',
+  'protocol.nbIot.example.cpsmsDeactivated.description':
+    'Unit bits are 111 — both timers read "deactivated", no seconds value is produced.',
+  'protocol.nbIot.example.cedrxsNbS1.name': 'eDRX cycle (CEDRXS, NB-S1)',
+  'protocol.nbIot.example.cedrxsNbS1.description': 'AcT_type=5 (NB-S1) — the cycle code converts to 40.96 seconds.',
+  'protocol.nbIot.example.cedrxsWbS1Unsupported.name': 'eDRX cycle (CEDRXS, WB-S1 — not decoded)',
+  'protocol.nbIot.example.cedrxsWbS1Unsupported.description':
+    'AcT_type=4 (WB-S1/LTE-M) — no verified table for this mode in this engine, raw value plus warning.',
+  'protocol.nbIot.example.cedrxrdpFull.name': 'eDRX dynamic parameters (CEDRXRDP)',
+  'protocol.nbIot.example.cedrxrdpFull.description':
+    'The u-blox SARA-N2/N3 manual’s own example — requested and assigned cycle are decoded, Paging Time Window stays raw (not verified).',
+  'protocol.nbIot.example.cedrxpUrc.name': 'eDRX parameters (CEDRXP URC)',
+  'protocol.nbIot.example.cedrxpUrc.description':
+    'An unsolicited result code carrying the same four fields as CEDRXRDP — uses the same decoder.',
+  'protocol.nbIot.example.finalOk.name': 'OK',
+  'protocol.nbIot.example.finalOk.description':
+    'A final result code carried over verbatim from lte-modem-at/at-commands — stays consistent on this page too.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header is incomplete: at least 8 bytes are required (version, inverse version, payload type, payload length).',

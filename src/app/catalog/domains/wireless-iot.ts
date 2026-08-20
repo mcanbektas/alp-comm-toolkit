@@ -384,8 +384,19 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             '3GPP narrowband cellular IoT access analysed from modem logs — registration, signal quality and power-save behaviour of metering, tracking and remote sensor devices.',
           layer: 'multi-layer',
-          status: 'planned',
-          tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          // Faz 10 dalga 9d: `lte-modem-at`in ÜSTÜNDE AcT=9 tespiti + PSM
+          // (AT+CPSMS, T3412/T3324) + eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, yalnız
+          // NB-S1) çözüldü (src/protocols/wireless/cellular/nbIot.ts) — bu
+          // yüzden `decode` sekmesi açıldı (karar 5'in doğal sonucu, motor
+          // decode-zamanı bir zenginleştirme). Connection State Machine/
+          // Registration Analyzer/Power Save Analyzer/Socket-Connection
+          // Timeline gibi STATEFUL panolar bu dalgada YOK — `lte-modem-at`in
+          // Cellular Initialization Dashboard'uyla aynı sınıf iş (karar 4),
+          // kendi turunu bekliyor; `timing`/`data`/`diagnostics` hâlâ `tools`
+          // metin listesiyle "planlandı" gösterir.
+          status: 'ready',
+          pluginId: 'nb-iot',
+          tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Connection State Machine (POWER OFF → SIM READY → REGISTERED → PDN ACTIVE → SOCKET OPEN)',
             'Registration Analyzer (registered / searching / denied / roaming, tracking area)',
