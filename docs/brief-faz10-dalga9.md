@@ -753,6 +753,153 @@ Doğrulama: `npm run typecheck` temiz, `npm test` 3075/3075, `npm run test:e2e`
 üç bağlantı görünüyor, `diagnostics` sekmesinde yok, tıklanınca gerçek
 `/comm/calculators/lora-airtime` sayfasına gidiyor, konsol hatasız.
 
+## hayes-command-set — spec araştırması (madde 7, uygulama öncesi, 2026-08-20)
+
+Mimari karar VERİLDİ (yukarı bkz. "9b madde 7"), ama UYGULAMADAN ÖNCE üç
+paralel araştırma turu yapıldı — V.250'nin temel sözdizimi, S-register'lar
+ve `+++`/result-code mekanizması hâlâ hiç araştırılmamıştı. Kaynak: ITU-T
+V.250 (07/2003) resmi PDF'i doğrudan indirilip `pdftotext` ile okundu
+(`ctx_fetch_and_index`'in gömülü PDF çıkarımı dördü de bozuk metin verdi —
+ders: bir sonraki dalga aynı sorunu yaşarsa doğrudan indirip yerel araçla
+oku). Dört satıcı kılavuzu çapraz doğrulandı: Quectel EC25&EC21, SIMCom
+SIM800 + SIM7500/7600, u-blox SARA-R4/N4, Telit ME310G1 ailesi.
+
+**Beklenmedik büyük bulgu: `+++`, S2, S12 V.250'de HİÇ TANIMLI DEĞİL.**
+Standardın kendi metni (§3.1.2, §5.8.1 madde 11) online komut moduna dönüşü
+"a mechanism defined in 6.2.9 [DTR/`&D`] **or by other manufacturer-defined
+means**" diye satıcıya bırakıyor; kaçış karakteri/guard-time bu "manufacturer-
+defined" tarafta. Katalog kaydının "Escape Sequence Guard-Time Analyzer"
+vaadi bu yüzden spec'in değil, SATICI SÖZLEŞMESİNİN uygulaması olacak —
+hangi satıcıyı temel alacağımız aşağıda küçük bir açık uç (dalganın
+mimarisini etkilemiyor, yalnız veri seçimi).
+
+**1) Temel sözdizimi (§5.3 / §5.3.1).** `<komut>[<sayı>]`: tek harf (ya da
+`&`+harf) + opsiyonel ondalık sayı; baştaki sıfırlar yok sayılır, sayı
+yoksa 0 varsayılır. **D ve S bu grameri BOZAR**, kendi sözdizimleri var
+(aşağıda). Zincirleme GERÇEK ve standart — `ATZE0V1` geçerli (Z, E0, V1
+peş peşe, ayraçsız) — TEK istisna satırın kalanını yutan komutlar (V.250'nin
+kendi örneği: A). Genişletilmiş sözdizimi (`AT+NAME`, zaten `at-commands`'ta)
+zincirlemek için NOKTALI VİRGÜL ister (§5.4.5.1) — ayrı parser gerekmesinin
+yapısal gerekçesi bu, iki sözdizimi farklı ayraç kuralına sahip.
+
+Satıcı notu: dördü de hâlâ "V.25ter" diyor, "V.250" değil (1998'de yeniden
+adlandırıldı) — Telit 2023 kılavuzunda bile. TIA/EIA-602 V.250'nin eski adı
+DEĞİL, ayrı bir yardımcı standart (bu ayrım daha önce burada yanlış
+varsayılmıştı, düzeltildi).
+
+**2) ATD (§6.3.1, çıkarım — başlık birebir alınamadı ama konum güçlü
+kanıtlı).** `D[<dial-string>][;]` — D'den SONRAKİ HER ŞEY `;` ya da satır
+sonuna kadar dial-string'tir, KOMUT ZİNCİRİ DEĞİL. `;` soneki = sinyal ver,
+komut moduna DÖN (sesli arama semantiği, V.250 metninden birebir). Geçerli
+karakterler (§6.3.15→§6.3.1.8 çapraz referansı): `0-9 A-D # * + , " T P W
+@ ! ;`. `ATDT`/`ATDP`: ne "iki zincirli komut" ne "tek mnemonic" — D + T
+ya da P ile BAŞLAYAN dial-string. T=ton/P=puls atamasının birincil kaynak
+cümlesi bu turda doğrulanamadı (endüstri-evrensel ama flagged, uydurulmadı).
+**Satıcı sapması:** u-blox P'yi "duraklat" diye YENİDEN TANIMLIYOR (AT&T
+sertifikasyonu gerekçeli) — Hayes/V.250 geleneğinin TERSİ. Hücresel
+satıcıların çoğu (u-blox, SIMCom) T/P/W/@/virgülü zaten YOK SAYIYOR
+(fiziksel telefon hattı yok).
+
+**3) ATA (§6.3.5, başlık birebir doğrulandı).** Parametresiz, satırın
+kalanını YUTAR — V.250'nin KENDİ verdiği örnek bu (§5.3.1: "e.g., A").
+
+**4) ATH (§6.3.6, çıkarım).** Opsiyonel sayısal parametre — yalnız `H0`
+(kapat) HERHANGİ bir kaynakta belgeli bulundu. **`H1`="off-hook" HİÇBİR
+yerde doğrulanamadı — uygulamada varsayılmasın, yazılmasın.** SIMCom
+sapması: `ATH`, `AT+CVHU=0` ayarlanmadıkça YOK SAYILIR (yalnız `OK` döner,
+hiçbir şey yapmaz).
+
+**5) ATZ (§6.1.1, çıkarım).** V.250'nin KENDİSİ sayısal parametreyi
+"optional and manufacturer-specific" diyor — 0/1=profil indeksi SPEC
+DEĞİL, satıcı geleneği (Telit doğrulandı: değerler 0,1; parametre yoksa
+`ATZ0` gibi davranır; aktif çağrı sonlanır).
+
+**6) S-register erişimi (§5.3.2 "S-parameters").** Temel sözdiziminin
+İÇİNDE ama tek-operatörlü istisna — `Sn?` (oku) / `Sn=[değer]` (yaz).
+Yanıt HER ZAMAN üç haneli sıfır dolgulu ondalık (`013`) — dört satıcıda da
+doğrulandı. Bilinmeyen parametre numarası → `ERROR`.
+
+**7) V.250'nin GERÇEKTEN tanımladığı S-register kümesi — yalnız SEKİZ**
+(Ek I Tablo I.2): S0, S3, S4, S5, S6, S7, S8, S10. (S5 bu turda ayrıntılı
+araştırılmadı, uygulama turunda ayrıca doğrulanmalı.)
+
+- **S0** — auto-answer ring sayısı (§6.3.8): 0–255, varsayılan 0. Satıcılar
+  arası ÇELİŞKİ yok.
+- **S3** — satır sonu karakteri (§6.2.1): 0–127, varsayılan 13 (CR) — V.250'nin
+  "Mandatory" dediği TEK varsayılan (diğerleri "Recommended"). Çelişki yok.
+- **S4** — yanıt biçimlendirme karakteri (§6.2.2): 0–127, varsayılan 10 (LF).
+  Çelişki yok.
+- **S6** — kör arama öncesi bekleme (§6.3.9): 2–10 sn, varsayılan 2. SIM800
+  aralığı 0–999 diyor (aynı varsayılanla) — küçük bir çelişki.
+- **S7** — bağlantı tamamlama zaman aşımı (§6.3.10): 1–255 sn, **V.250
+  varsayılan VERMİYOR**. Quectel 0 (kendi tablosunda "disabled" diye
+  YENİDEN TANIMLIYOR, V.250'nin hiç vermediği bir anlam), SIM800 60,
+  SIM7500/7600 50 (AYNI SATICININ iki modem ailesi bile uyuşmuyor), u-blox
+  60. Dört farklı değer, standardın bilerek boş bıraktığı bir alanda.
+- **S8** — virgül duraklama süresi (§6.3.11): 0–255 (0=duraklama yok),
+  varsayılan 2. Çelişki yok.
+- **S10** — otomatik kapatma gecikmesi (§6.3.12): 1–254 (0,1 sn birimi),
+  **V.250 varsayılan VERMİYOR**. Quectel 15, SIM800 15, SIM7500/7600 14,
+  u-blox 1 (~15× sapma, üstelik "komutun bu modülde etkisi yok" diyor).
+
+**S2 (kaçış karakteri) ve S12 (guard time) V.250'de YOK, YALNIZ u-blox
+belgeliyor:** S2 varsayılan 43 (`+`), aralık 1–255, 127'nin üstü kaçışı
+kapatır. S12 "elli birim = 1 saniye, varsayılan 50" — bu birim/varsayılan
+İDDİASI YALNIZ u-blox'tan geliyor (§10.19/§15.19); Quectel/SIM800/SIM7500-
+7600 bu registerı hiç belgelemiyor (`+++` davranışsal olarak çalışıyor ama
+guard-time DEĞERİ o kılavuzlardan doğrulanamıyor).
+
+**8) `+++` mekanizması — TAMAMEN satıcı-tanımlı, üç parçalı** (Telit/u-blox
+neredeyse birebir aynı ifade, SIMCom eşdeğer prose): (a) ilk `+`ten ÖNCE
+guard time KADAR sessizlik (minimum eşik), (b) üç `+` arasındaki boşluk
+guard time'DAN AZ (maksimum eşik — S12 burada ASİMETRİK kullanılıyor), (c)
+üçüncü `+`ten SONRA guard time KADAR sessizlik (minimum eşik). Yalnız üç
+`+` aramanın YETMEMESİNİN gerekçesi satıcı metninde birebir: veri
+akışındaki gerçek `+++`i (bir URL, encoded payload) yanlış pozitiften
+ayırmak — tam da `at-commands.ts` dosya başı yorumunun zaten işaretlediği
+tuzak.
+
+**Satıcı sapmaları:** Quectel S12'yi register olarak HİÇ açığa çıkarmıyor,
+sabit "1 saniye" diye DÜZYAZIYLA yazıyor (yapılandırılamaz + belgesiz).
+u-blox'ta İKİ farklı kaçış var: `+++` (M-HEX/"direct" veri çağrısı, S12
+zamanlamalı) vs `~+++` (PPP çağrısı, tilde önekli, ZAMANLAMASIZ — PPP
+çerçevesine gömülü, ham hatta sezilmiyor).
+
+**9) Result code sayısal/verbose (Tablo 1/V.250, §5.7.1).** **Repodaki
+`atCommands.ts:87` yorumu kaynağı "§6.3.1" diye veriyor — bu YANLIŞ**
+(§6.3.1 aslında Dial komutu), uygulama turunda düzeltilmeli. Gerçek
+eşleme: `OK`=0, `CONNECT`=1, `RING`=2, `NO CARRIER`=3, `ERROR`=4, [5 =
+V.250'nin kendi ifadesiyle "manufacturer-specific", `CONNECT <text>`
+için], `NO DIALTONE`=6, `BUSY`=7, `NO ANSWER`=8. Çerçeveleme ayrı (§6.2.6
+Tablo 3): sayısal `<kod><cr>`, verbose `<cr><lf><kod><cr><lf>`.
+
+Satıcı uzantıları ÜÇ FARKLI küme, aynı sekiz temelin üstünde: Quectel hiç
+uzatmıyor; Telit 5=CONNECT 1200 + 10/11/12/15/23 hız-özel kodlar (kendi
+eski "SELINT 0,1" moduna sınırlı); SIMCom 9=PROCEEDING (diğer üçünde YOK).
+Hiçbiri çözülmedi, üçü de not edildi — 9c'nin BER/AcT/CGDCONT satıcı
+çelişkileriyle aynı disiplin.
+
+**Kritik uygulama notu — `atCommandsParser` bugün NUMERİK result code
+formunu HİÇ tanımıyor.** `BARE_FINAL_RESULT_CODES` (`atCommands.ts:88-96`)
+yalnız verbose sözcükleri taşıyor (`OK`, `ERROR`, `RING`, `NO CARRIER`,
+`NO DIALTONE`, `NO ANSWER`, `BUSY`), `CONNECT_PATTERN` regex'i de öyle.
+Salt rakamlı bir satır (`"0"`, `"4"`) hiçbir dala uymaz, `kind: 'text'`
+genel çöp kutusuna düşer (`atCommands.ts:404-407`). **"Result Code
+Mapper" aracı yalnız bir lookup tablosu değil, at-commands'a (ya da
+hayes-command-set'in kendi enrichFrame'ine) YENİ sınıflandırma mantığı da
+gerektiriyor.**
+
+**Uygulama turu için açık kalan küçük sorular (mimari DEĞİL, veri
+seçimi):** guard-time varsayımı için hangi satıcı temel alınacak — muhtemelen
+u-blox (yalnız o belgeliyor, `lte-modem-at`'in de zaten çapraz doğruladığı
+satıcı ailelerinden biriyle örtüşüyor). S5'in tam anlamı doğrulanmalı
+(bu turda araştırılmadı). `H1`/off-hook YAZILMASIN (kaynak yok). ATT/ATP'nin
+bağımsız komut mu yoksa yalnız dial-string modifiers mi olduğu birincil
+kaynaktan doğrulanmalı (şu an yalnız ikincil kaynak var). Numerik result
+code sınıflandırmasının `at-commands.ts`'e mi (jenerik, tüm AT lehçelerine
+fayda sağlar) yoksa `hayesCommandSet.ts`'e mi (dar, yalnız bu dalganın
+sorumluluğu) gideceği küçük bir yerleşim kararı.
+
 ## Tuzaklar
 
 - ~~**CRC terimi (karar 2)**~~ **KAPATILDI (9a)**: parametrik yazıldı, fark
