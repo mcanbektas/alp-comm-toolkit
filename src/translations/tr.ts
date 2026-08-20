@@ -1737,6 +1737,63 @@ export const tr = {
   'protocol.atCommands.example.bannerText.description':
     'Bilinen hiçbir kalıba uymayan üretici/banner metni — hata sayılmaz.',
 
+  // --- Hayes Command Set (V.250 temel sözdizimi, at-commands'ın üstünde) ---
+  'protocol.hayesCommandSet.documentation.summary':
+    'Hayes’in orijinal TEMEL komut sözdizimi (ATD/ATA/ATH/ATZ, S-register’lar, +++ kaçış) — at-commands’ın üstünde. Numerik result code (ATV0) burada değil, at-commands’ta (tüm AT lehçelerine ortak).',
+  'protocol.hayesCommandSet.warning.hookParameterUndocumented':
+    'ATH parametresi 0 değil — "off-hook" (H1) hiçbir kaynakta doğrulanamadı, anlamı varsayılmaz.',
+  'protocol.hayesCommandSet.warning.resetParameterVendorSpecific':
+    'ATZ parametresinin anlamı (profil indeksi) V.250’de tanımlı değil — spec’in kendi ifadesiyle "manufacturer-specific".',
+  'protocol.hayesCommandSet.warning.dialStringUnknownChar':
+    'Dial-string V.250’nin izin verdiği karakter kümesinin (0-9 A-D # * + , " T P W @ !) dışında karakter içeriyor.',
+  'protocol.hayesCommandSet.warning.sRegisterVendorOnly':
+    'Bu S-register V.250’de tanımlı değil — yalnız u-blox belgeliyor.',
+  'protocol.hayesCommandSet.warning.sRegisterValueOutOfRange':
+    'Yazılan değer bu register için belgelenen aralığın dışında.',
+  'protocol.hayesCommandSet.warning.unparsedBasicSyntax':
+    'Temel sözdizimi kalıplarının hiçbirine uymayan artık metin — ayrıştırılmadı, ham bırakıldı.',
+  'protocol.hayesCommandSet.warning.sRegisterResponseAmbiguous':
+    'Üç haneli sıfır dolgulu yanıt S-register okuması OLABİLİR ama oturum bağlamı olmadan kesin denemez.',
+  'protocol.hayesCommandSet.example.chainedResetEchoVerbose.name': 'Zincirlenmiş temel komutlar',
+  'protocol.hayesCommandSet.example.chainedResetEchoVerbose.description':
+    'Z, E0, V1 ayraçsız peş peşe — V.250’nin standart zincirleme kuralı.',
+  'protocol.hayesCommandSet.example.dialWithReturn.name': 'Dial + komut moduna dönüş',
+  'protocol.hayesCommandSet.example.dialWithReturn.description':
+    '";" ile biten dial-string komut moduna döner, ardından H0 (kapat) zincire devam eder.',
+  'protocol.hayesCommandSet.example.dialTonePrefixNoReturn.name': 'Ton önekli dial (";" yok)',
+  'protocol.hayesCommandSet.example.dialTonePrefixNoReturn.description':
+    '"T" öneki opak metin olarak taşınır — ton/puls anlamı bu turda doğrulanmadı, ";" olmadığı için dial-string satırın sonuna kadar sürer.',
+  'protocol.hayesCommandSet.example.answer.name': 'Cevap ver (A)',
+  'protocol.hayesCommandSet.example.answer.description':
+    'Parametresiz, satırın kalanını yutan V.250’nin kendi örneği.',
+  'protocol.hayesCommandSet.example.hookHangUp.name': 'Hattı kapat (H0)',
+  'protocol.hayesCommandSet.example.hookHangUp.description':
+    'Yalnız H0 tüm kaynaklarda belgeli — "hang up".',
+  'protocol.hayesCommandSet.example.hookUndocumentedParam.name': 'Belgesiz H parametresi (H1)',
+  'protocol.hayesCommandSet.example.hookUndocumentedParam.description':
+    '"Off-hook" anlamı hiçbir kaynakta doğrulanamadı — yapı çözülür, anlam uydurulmaz.',
+  'protocol.hayesCommandSet.example.sRegisterWriteKnown.name': 'Bilinen register yazma (S0)',
+  'protocol.hayesCommandSet.example.sRegisterWriteKnown.description':
+    'Auto-answer ring sayısı — V.250 §6.3.8, aralık 0-255.',
+  'protocol.hayesCommandSet.example.sRegisterReadKnown.name': 'Bilinen register okuma (S3?)',
+  'protocol.hayesCommandSet.example.sRegisterReadKnown.description':
+    'Satır sonu karakteri sorgusu — yanıt üç haneli sıfır dolgulu gelir.',
+  'protocol.hayesCommandSet.example.sRegisterWriteVendorOnly.name': 'Satıcı-özel register (S12)',
+  'protocol.hayesCommandSet.example.sRegisterWriteVendorOnly.description':
+    'Guard time, yalnız u-blox belgeliyor — 1 birim = 20ms, burada milisaniyeye çevrilir.',
+  'protocol.hayesCommandSet.example.sRegisterWriteOutOfRange.name': 'Aralık dışı değer (S0=300)',
+  'protocol.hayesCommandSet.example.sRegisterWriteOutOfRange.description':
+    'S0’ın belgelenen aralığı 0-255 — 300 bu aralığın dışında, uyarı üretir.',
+  'protocol.hayesCommandSet.example.sRegisterWriteUnverified.name': 'Doğrulanmamış register (S5)',
+  'protocol.hayesCommandSet.example.sRegisterWriteUnverified.description':
+    'V.250 S5’i sayar ama bu turun araştırması anlamını doğrulamadı — yapı çözülür, isim uydurulmaz.',
+  'protocol.hayesCommandSet.example.sRegisterResponseCandidate.name': 'S-register yanıtı (aday)',
+  'protocol.hayesCommandSet.example.sRegisterResponseCandidate.description':
+    'Üç haneli sıfır dolgulu bare metin — oturum bağlamı olmadan kesin S-register yanıtı denemez.',
+  'protocol.hayesCommandSet.example.numericResultCode.name': 'Sayısal result code (ATV0)',
+  'protocol.hayesCommandSet.example.numericResultCode.description':
+    'at-commands’ın numerik result code desteğinden miras — hayes hiçbir ek kod yazmadan devralır.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

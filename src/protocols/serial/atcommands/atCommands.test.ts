@@ -168,6 +168,55 @@ describe('parseAtCommandLine — final result code', () => {
   });
 });
 
+describe('parseAtCommandLine — final result code (numeric, ATV0)', () => {
+  it.each([
+    ['0', 'OK'],
+    ['1', 'CONNECT'],
+    ['2', 'RING'],
+    ['3', 'NO CARRIER'],
+    ['4', 'ERROR'],
+    ['6', 'NO DIALTONE'],
+    ['7', 'BUSY'],
+    ['8', 'NO ANSWER'],
+  ])('sayısal "%s" final-result-code sayılır, physicalValue "%s" olur', (code, word) => {
+    const frame = expectSuccess(parseAtCommandLine(ascii(`${code}\r\n`))).frame;
+
+    expect(fieldById(frame, 'kind').rawValue).toBe('final-result-code');
+    expect(fieldById(frame, 'result-code').rawValue).toBe(Number(code));
+    expect(fieldById(frame, 'result-code').physicalValue).toBe(word);
+  });
+
+  it('5 (manufacturer-specific, V.250\'nin kendi ifadesi) yapı olarak çözülür ama sözcük uydurulmaz', () => {
+    const frame = expectSuccess(parseAtCommandLine(ascii('5\r\n'))).frame;
+
+    expect(fieldById(frame, 'kind').rawValue).toBe('final-result-code');
+    expect(fieldById(frame, 'result-code').rawValue).toBe(5);
+    expect(fieldById(frame, 'result-code').physicalValue).toBeUndefined();
+  });
+
+  it('bilinmeyen satıcı uzantısı (ör. 42) final-result-code sayılır, physicalValue üretmez', () => {
+    const frame = expectSuccess(parseAtCommandLine(ascii('42\r\n'))).frame;
+
+    expect(fieldById(frame, 'kind').rawValue).toBe('final-result-code');
+    expect(fieldById(frame, 'result-code').rawValue).toBe(42);
+    expect(fieldById(frame, 'result-code').physicalValue).toBeUndefined();
+  });
+
+  it('sıfır dolgulu üç hane (ör. "013") result code SAYILMAZ — S-register yanıt biçimiyle KARIŞTIRILMAZ', () => {
+    // V.250 §5.3.2: Sn? yanıtı her zaman üç haneli sıfır dolgulu ondalıktır.
+    // Numeric result code hiç dolgu taşımaz — ayrım burada dolguya göre.
+    const frame = expectSuccess(parseAtCommandLine(ascii('013\r\n'))).frame;
+
+    expect(fieldById(frame, 'kind').rawValue).toBe('text');
+  });
+
+  it('tek "0" sıfırı da dolgulu "00" ile karıştırmaz — "00" text kalır', () => {
+    const frame = expectSuccess(parseAtCommandLine(ascii('00\r\n'))).frame;
+
+    expect(fieldById(frame, 'kind').rawValue).toBe('text');
+  });
+});
+
 describe('parseAtCommandLine — prompt ve serbest metin', () => {
   it('`>` veri girişi promptunu ayrı bir kind olarak işaretler', () => {
     const frame = expectSuccess(parseAtCommandLine(ascii('>'))).frame;

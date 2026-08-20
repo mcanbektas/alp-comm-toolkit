@@ -289,11 +289,20 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
     import('./wireless/matter/matter').then((module) => module.matterPlugin),
   );
   // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
-  // çerçeveleme (komut/yanıt ayrımı, URC, final result code). hayes-command-set
-  // bu motoru NASIL kullanacağı kararı bekliyor (brief 9b madde 7), bu dalgada
-  // yazılmadı.
+  // çerçeveleme (komut/yanıt ayrımı, URC, final result code sözel VE sayısal
+  // — ATV0 numeric mode dalga 9 madde 7'de eklendi, tüm AT lehçelerine
+  // fayda sağlasın diye burada, hayes-command-set'e özel değil).
   registerOnce(registry, 'at-commands', () =>
     import('./serial/atcommands/atCommands').then((module) => module.atCommandsPlugin),
+  );
+  // Hayes Command Set — Faz 10 dalga 9 madde 7: V.250 TEMEL sözdizimi
+  // (ATD/ATA/ATH/ATZ, S-register okuma/yazma, sayısal result code — at-commands
+  // ÜSTÜNDE, ikinci bir plugin, motor TEKRAR YAZILMADI). "+++" guard-time
+  // analizi ve command/data mode izleyicisi motor-hazır (`detectEscapeSequence`/
+  // `createHayesModeTracker`), UI'a BAĞLANMADI — Cellular Initialization
+  // Dashboard'la aynı sınıf iş, kendi turunu bekliyor.
+  registerOnce(registry, 'hayes-command-set', () =>
+    import('./serial/atcommands/hayesCommandSet').then((module) => module.hayesCommandSetPlugin),
   );
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın

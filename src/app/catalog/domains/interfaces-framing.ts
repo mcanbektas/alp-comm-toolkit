@@ -943,10 +943,21 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'The original ATtention command vocabulary — ATD, ATA, ATH, ATZ, S-registers and the guard-timed +++ escape that separates command mode from online data mode.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 9 madde 7: V.250 temel sözdizimi yazıldı
+          // (src/protocols/serial/atcommands/hayesCommandSet.ts) — at-commands'ın
+          // ÜSTÜNDE, motoru NASIL kullanacağı kararı "içeriden çağır +
+          // zenginleştir" olarak verildi (CAN 2.0A/2.0B'nin iki-plugin emsali
+          // DEĞİL). "+++" tespiti üç artı aramak DEĞİLDİR: guard-time olmadan
+          // veri içindeki literal "+++" yanlış pozitif üretir —
+          // `detectEscapeSequence` bunu üç eşikle (öncesi/arası/sonrası
+          // sessizlik) doğru sınar, ama KAYITLI bir akışı analiz eder, canlı
+          // modem sürücüsü değildir. Command/Data Mode State View motoru da
+          // (`createHayesModeTracker`) hazır — ikisi de UI'a BAĞLANMADI,
+          // Cellular Initialization Dashboard'la aynı sınıf iş (karar 4),
+          // kendi turunu bekliyor.
+          status: 'ready',
+          pluginId: 'hayes-command-set',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
-          // "+++" tespiti üç artı aramak DEĞİLDİR: guard-time olmadan veri
-          // içindeki literal "+++" yanlış pozitif üretir.
           tools: [
             'Basic Command Decoder',
             'Dial Command Parser',
@@ -956,6 +967,7 @@ export const interfacesFramingDomain: CatalogDomain = {
             'Escape Sequence Guard-Time Analyzer',
             'Echo / Verbose Detection',
           ],
+          related: ['interfaces-framing/framing-stream-protocols/at-commands'],
         },
       ],
     },

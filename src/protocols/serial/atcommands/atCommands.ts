@@ -84,7 +84,7 @@ export type AtLineKind = 'command' | 'information' | 'final-result-code' | 'prom
 
 export type AtCommandAction = 'execute' | 'read' | 'test' | 'set';
 
-/** V.250 §6.3.1 ortak sözcük dağarcığı — sabit metin, parametre taşımaz. */
+/** V.250 §5.7.1 (Tablo 1) ortak sözcük dağarcığı — sabit metin, parametre taşımaz. */
 const BARE_FINAL_RESULT_CODES = new Set([
   'OK',
   'ERROR',
@@ -94,6 +94,32 @@ const BARE_FINAL_RESULT_CODES = new Set([
   'NO ANSWER',
   'BUSY',
 ]);
+
+/**
+ * V.250 §5.7.1 (Tablo 1) — ATV0 (numeric mode) aynı result code'ları sıfır
+ * dolgusuz küçük tamsayı olarak basar (§6.2.6 Tablo 3: sayısal `<kod><cr>`,
+ * verbose `<cr><lf><kod><cr><lf>` — çerçeveleme farkı bu dosyada zaten
+ * satır-sonu arındırmasıyla eriyor, ayrıca ele alınmaz). 5 KASITLI OLARAK
+ * YOK: spec'in kendi ifadesiyle "manufacturer-specific" (`CONNECT <text>`
+ * için ayrılmış), evrensel bir sözcüğe bağlanmaz.
+ */
+const NUMERIC_RESULT_CODES: Readonly<Record<number, string>> = {
+  0: 'OK',
+  1: 'CONNECT',
+  2: 'RING',
+  3: 'NO CARRIER',
+  4: 'ERROR',
+  6: 'NO DIALTONE',
+  7: 'BUSY',
+  8: 'NO ANSWER',
+};
+/**
+ * Sıfır dolgusuz `0`-`99`: `"0".."9"`, `"10".."99"`. Sıfır dolgulu üç haneli
+ * metin (`"013"` gibi) BİLEREK dışarıda bırakılır — o, hayes-command-set'in
+ * S-register OKUMA yanıtı biçimidir (V.250 §5.3.2, her zaman üç hane), farklı
+ * bir sözleşme; ayrım burada dolgu varlığına göre yapılıyor.
+ */
+const NUMERIC_RESULT_CODE_PATTERN = /^(0|[1-9]\d?)$/;
 
 /** TS 27.007 §9.2: `AT+CMEE=1` sayısal, `=2` metin — ikisi de aynı sözdizimi. */
 const CME_ERROR_PATTERN = /^\+CME ERROR: ?(.+)$/;
@@ -211,6 +237,30 @@ function decodeLine(data: Uint8Array, line: string): DecodedLine {
           length: data.length,
           rawBytes: data,
           rawValue: line,
+          valid: true,
+          warnings: [],
+        },
+      ],
+      warnings: [],
+    };
+  }
+
+  const numericResultMatch = NUMERIC_RESULT_CODE_PATTERN.exec(line);
+  if (numericResultMatch !== null) {
+    const code = Number(numericResultMatch[1]);
+    return {
+      fields: [
+        kindField(data, 'final-result-code'),
+        {
+          id: 'result-code',
+          name: 'Final Result Code',
+          offset: 0,
+          length: data.length,
+          rawBytes: data,
+          rawValue: code,
+          // Bilinmeyen sayı (satıcı uzantısı, ör. Telit'in 10-23'ü) hâlâ
+          // final-result-code sayılır — yapı çözülür, sözcük UYDURULMAZ.
+          ...(NUMERIC_RESULT_CODES[code] === undefined ? {} : { physicalValue: NUMERIC_RESULT_CODES[code] }),
           valid: true,
           warnings: [],
         },

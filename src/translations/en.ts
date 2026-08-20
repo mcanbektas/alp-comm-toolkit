@@ -1735,6 +1735,63 @@ export const en: TranslationDictionary = {
   'protocol.atCommands.example.bannerText.description':
     'Manufacturer/banner text that matches no known pattern — not treated as an error.',
 
+  // --- Hayes Command Set (V.250 basic syntax, layered on top of at-commands) ---
+  'protocol.hayesCommandSet.documentation.summary':
+    'Hayes’s original BASIC command syntax (ATD/ATA/ATH/ATZ, S-registers, +++ escape) — layered on top of at-commands. Numeric result codes (ATV0) live in at-commands instead, shared across every AT dialect.',
+  'protocol.hayesCommandSet.warning.hookParameterUndocumented':
+    'ATH parameter is not 0 — "off-hook" (H1) could not be confirmed in any source, its meaning is not assumed.',
+  'protocol.hayesCommandSet.warning.resetParameterVendorSpecific':
+    'The meaning of the ATZ parameter (profile index) is not defined by V.250 — the spec’s own wording calls it "manufacturer-specific".',
+  'protocol.hayesCommandSet.warning.dialStringUnknownChar':
+    'The dial string contains a character outside V.250’s allowed set (0-9 A-D # * + , " T P W @ !).',
+  'protocol.hayesCommandSet.warning.sRegisterVendorOnly':
+    'This S-register is not defined by V.250 — only u-blox documents it.',
+  'protocol.hayesCommandSet.warning.sRegisterValueOutOfRange':
+    'The written value falls outside the documented range for this register.',
+  'protocol.hayesCommandSet.warning.unparsedBasicSyntax':
+    'Trailing text that matches none of the basic-syntax patterns — left unparsed, raw.',
+  'protocol.hayesCommandSet.warning.sRegisterResponseAmbiguous':
+    'A three-digit zero-padded response COULD be an S-register read, but cannot be confirmed without session context.',
+  'protocol.hayesCommandSet.example.chainedResetEchoVerbose.name': 'Chained basic commands',
+  'protocol.hayesCommandSet.example.chainedResetEchoVerbose.description':
+    'Z, E0, V1 back-to-back with no separator — V.250’s standard chaining rule.',
+  'protocol.hayesCommandSet.example.dialWithReturn.name': 'Dial + return to command mode',
+  'protocol.hayesCommandSet.example.dialWithReturn.description':
+    'A dial string ending in ";" returns to command mode, then H0 (hang up) continues the chain.',
+  'protocol.hayesCommandSet.example.dialTonePrefixNoReturn.name': 'Tone-prefixed dial (no ";")',
+  'protocol.hayesCommandSet.example.dialTonePrefixNoReturn.description':
+    'The "T" prefix is carried as opaque text — its tone/pulse meaning was not confirmed this round. With no ";", the dial string runs to the end of the line.',
+  'protocol.hayesCommandSet.example.answer.name': 'Answer (A)',
+  'protocol.hayesCommandSet.example.answer.description':
+    'Parameterless, swallows the rest of the line — V.250’s own example.',
+  'protocol.hayesCommandSet.example.hookHangUp.name': 'Hang up (H0)',
+  'protocol.hayesCommandSet.example.hookHangUp.description':
+    'Only H0 is documented across every source — "hang up".',
+  'protocol.hayesCommandSet.example.hookUndocumentedParam.name': 'Undocumented H parameter (H1)',
+  'protocol.hayesCommandSet.example.hookUndocumentedParam.description':
+    'The "off-hook" meaning could not be confirmed in any source — structure is decoded, meaning is not invented.',
+  'protocol.hayesCommandSet.example.sRegisterWriteKnown.name': 'Known register write (S0)',
+  'protocol.hayesCommandSet.example.sRegisterWriteKnown.description':
+    'Auto-answer ring count — V.250 §6.3.8, range 0-255.',
+  'protocol.hayesCommandSet.example.sRegisterReadKnown.name': 'Known register read (S3?)',
+  'protocol.hayesCommandSet.example.sRegisterReadKnown.description':
+    'Line termination character query — the response comes back three digits, zero-padded.',
+  'protocol.hayesCommandSet.example.sRegisterWriteVendorOnly.name': 'Vendor-only register (S12)',
+  'protocol.hayesCommandSet.example.sRegisterWriteVendorOnly.description':
+    'Guard time, documented only by u-blox — 1 unit = 20ms, converted to milliseconds here.',
+  'protocol.hayesCommandSet.example.sRegisterWriteOutOfRange.name': 'Out-of-range value (S0=300)',
+  'protocol.hayesCommandSet.example.sRegisterWriteOutOfRange.description':
+    'S0’s documented range is 0-255 — 300 falls outside it, producing a warning.',
+  'protocol.hayesCommandSet.example.sRegisterWriteUnverified.name': 'Unverified register (S5)',
+  'protocol.hayesCommandSet.example.sRegisterWriteUnverified.description':
+    'V.250 counts S5 among its registers, but this round’s research did not confirm its meaning — structure is decoded, no name is invented.',
+  'protocol.hayesCommandSet.example.sRegisterResponseCandidate.name': 'S-register response (candidate)',
+  'protocol.hayesCommandSet.example.sRegisterResponseCandidate.description':
+    'A bare three-digit zero-padded line — cannot be confirmed as an S-register response without session context.',
+  'protocol.hayesCommandSet.example.numericResultCode.name': 'Numeric result code (ATV0)',
+  'protocol.hayesCommandSet.example.numericResultCode.description':
+    'Inherited from at-commands’ numeric result code support — hayes gains it without writing any extra code.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',
