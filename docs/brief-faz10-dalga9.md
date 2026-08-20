@@ -766,8 +766,7 @@ bir alan kümesiyle (fix/lat/lon/alt/sat/hdop) çözüldü. Registry 51 → 52.
 
 **Beş kayıtlık AT-komut zinciri (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}`) TAMAMEN BİTTİ** — bu dalganın asıl
-omurgası kapandı. Geriye yalnız BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı
-değil, hangi sırayla alınacağı önemsiz:
+omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı değil:
 
 - **Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
   (`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.
@@ -778,5 +777,17 @@ değil, hangi sırayla alınacağı önemsiz:
   6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
   bağlama"), birlikte tasarlanabilir.
 
-Model önerisi: üçü de Sonnet · medium (dar kapsam, tek karar ya da hazır
-motora UI bağlama — mimari fork yok).
+**Sıradaki iş olarak Karar 6 öneriliyor (2026-08-20, kullanıcıya soruldu,
+tercih istendi).** Gerekçe: üçünün İÇİNDE en dar sınırlı olan bu —
+`calculatorIds?: readonly string[]` alanı + `lora`nın üç id'si + `ProtocolPage`
+bağlantı satırı + `catalog.test.ts` iki yönlü bekçi, hepsi kararda ZATEN
+YAZILI, açık uç yok. `hayes-command-set` önce dar bir karar (motoru nasıl
+çağıracağı) ister — bu da küçük ama fresh bir oturumun ilk turunda "işe
+başlamadan önce soru" demek. Dashboard UI'ı üçünden en genişi (React
+bileşeni + Cellular Initialization Dashboard'ı nereye/nasıl mount edeceği
+tasarım gerektiriyor, karar 6'yla "aynı sınıf" olsa da karar 6 kadar dar
+değil). Karar 6 bittikten sonra kalan iki iş hâlâ bağımsız, sıraları
+önemsiz.
+
+Model önerisi: Karar 6 Sonnet · medium (dar kapsam, karar zaten yazılı).
+`hayes-command-set` ve Dashboard UI turları da Sonnet · medium.
