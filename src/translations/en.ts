@@ -60,6 +60,7 @@ export const en: TranslationDictionary = {
   'protocol.layer': 'Layer',
   'protocol.status': 'Status',
   'protocol.tools': 'Tools',
+  'protocol.relatedCalculators': 'Related calculators',
   'protocol.related': 'Related protocols',
   'protocol.definitions': 'Definition files',
   'protocol.aliasNotice':

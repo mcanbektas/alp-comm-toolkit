@@ -9,6 +9,7 @@ import { useUiStore } from '@/app/store/uiStore';
 import { ByteViewer } from '@/components/byte-viewer';
 import type { ByteRegion, SeriesColorIndex } from '@/components/byte-viewer';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { findCalculator } from '@/features/calculators';
 import { resolvePluginId, resolveStatus } from '@/protocols/pluginBinding';
 import type { TranslationKey } from '@/translations';
 import { ProtocolBadges } from './FamilyPage';
@@ -235,6 +236,7 @@ export function ProtocolPage(): ReactElement {
   const panelId = `tabpanel-${activeTab}`;
   const activeTabId = `tab-${activeTab}`;
   const visibleTools = selectToolsForTab(protocol.tools, activeTab);
+  const calculatorIds = protocol.calculatorIds ?? [];
   // Alias kayıtları kanonik kayda inilerek çözülür; `null` = motoru yok.
   const decodePluginId = resolvePluginId(protocol);
   // Rozet de aynı zincirden gelir: alias sayfası çalışan bir çözümleyicinin
@@ -411,6 +413,32 @@ export function ProtocolPage(): ReactElement {
                           {region.name}
                         </li>
                       ))}
+                    </ul>
+                  </div>
+                )}
+
+                {activeTab === 'timing' && calculatorIds.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
+                      {t('protocol.relatedCalculators')}
+                    </h2>
+                    <ul className="flex flex-wrap gap-1.5">
+                      {calculatorIds.map((calculatorId) => {
+                        const tool = findCalculator(calculatorId);
+                        // Ölü id catalog.test.ts'te yakalanır; burada sessizce
+                        // atlanır ki bozuk bir veri satırı tüm sekmeyi götürmesin.
+                        if (tool === undefined) return null;
+                        return (
+                          <li key={calculatorId}>
+                            <Link
+                              to={`/calculators/${calculatorId}`}
+                              className="block rounded-token-sm border border-line bg-raised px-2 py-1 text-xs text-text hover:text-accent focus-visible:ring-2 focus-visible:ring-accent"
+                            >
+                              {t(tool.nameKey)}
+                            </Link>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}

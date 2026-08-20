@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DOMAIN_IDS, allEntries, catalog, catalogCounts, findEntry, searchCatalog } from '@/app/catalog';
+import { findCalculator } from '@/features/calculators';
 import { PROTOCOL_CATEGORIES } from '@/protocol-core';
 
 /**
@@ -52,6 +53,16 @@ describe('catalog references', () => {
     for (const entry of allEntries()) {
       for (const relatedPath of entry.protocol.related ?? []) {
         expect(findEntry(relatedPath), `${entry.path} → ${relatedPath}`).toBeDefined();
+      }
+    }
+  });
+
+  it('resolves every calculatorIds entry to a known calculator tool', () => {
+    // Ölü id `ProtocolPage`de sessizce 404'e düşer (findCalculator undefined
+    // döner, bağlantı atlanır) — bu bekçi olmadan hiç yakalanmaz.
+    for (const entry of allEntries()) {
+      for (const calculatorId of entry.protocol.calculatorIds ?? []) {
+        expect(findCalculator(calculatorId), `${entry.path} → ${calculatorId}`).toBeDefined();
       }
     }
   });

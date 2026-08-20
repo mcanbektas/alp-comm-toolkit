@@ -177,12 +177,12 @@ export const wirelessIotDomain: CatalogDomain = {
           // `partial`, `ready` DEĞİL ve `pluginId` YOK — ikisi de bilinçli (Faz 10
           // dalga 9a, karar 1). Hesap motoru YAZILDI (`protocol-core/timing/lora.ts`:
           // sembol süresi, ToA, bit hızı, duty cycle, link bütçesi) ve `/calculators`
-          // altında iki araç olarak KOŞUYOR (`lora-airtime`, `lora-link-budget`).
-          // Ama bu SAYFA hâlâ "planlandı" bildirimi basar: `ProtocolPage` yalnız
-          // `decode` sekmesinde eklenti yükler (`pluginBinding.resolvePluginId` →
-          // `DecodePanel`), hesap sekmelerinin eklenti bakan bir yolu yoktur.
-          // `ready` demek ekranda yalan olurdu. Sayfaya hesap paneli bağlamak yeni
-          // bir karar (brief dalga 9, karar 6) — 172 kaydın tamamını ilgilendirir.
+          // altında üç araç olarak KOŞUYOR (`lora-airtime`, `lora-link-budget`,
+          // `lora-battery` — bkz. `calculatorIds`). `ProtocolPage` bu sayfanın
+          // `timing` sekmesinde onlara BAĞLANTI basar (brief dalga 9, karar 6,
+          // VERİLDİ: b); hesabı sayfanın İÇİNE gömmez, `ready` demek o zaman da
+          // yalan olurdu. Gömme (seçenek c) ayrı bir dalga, karar 4'ün stateful
+          // dashboard'ıyla birlikte tasarlanacak.
           status: 'partial',
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
@@ -196,6 +196,7 @@ export const wirelessIotDomain: CatalogDomain = {
             'Link Budget & Margin Calculator (theoretical estimate)',
             'Battery / Energy Estimator',
           ],
+          calculatorIds: ['lora-airtime', 'lora-link-budget', 'lora-battery'],
         },
         {
           id: 'lorawan',

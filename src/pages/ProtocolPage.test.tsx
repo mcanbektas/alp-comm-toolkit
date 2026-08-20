@@ -78,3 +78,35 @@ describe('ProtocolPage decode tab', () => {
     expect(screen.queryByTestId('byte-viewer')).not.toBeInTheDocument();
   });
 });
+
+/** `calculatorIds` taşıyan tek kayıt (karar 6, VERİLDİ: b). */
+const CALCULATOR_LINKED_PATH = 'wireless-iot/lora-lpwan/lora';
+
+describe('ProtocolPage calculator links', () => {
+  it('links to the tools in calculatorIds from the timing tab', () => {
+    renderAt(`/${CALCULATOR_LINKED_PATH}?tab=timing`);
+
+    expect(screen.getByText(translations.tr['protocol.relatedCalculators'])).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: translations.tr['calc.loraAirtime.name'] }),
+    ).toHaveAttribute('href', '/calculators/lora-airtime');
+    expect(
+      screen.getByRole('link', { name: translations.tr['calc.loraLinkBudget.name'] }),
+    ).toHaveAttribute('href', '/calculators/lora-link-budget');
+    expect(
+      screen.getByRole('link', { name: translations.tr['calc.loraBattery.name'] }),
+    ).toHaveAttribute('href', '/calculators/lora-battery');
+  });
+
+  it('keeps other tabs free of calculator links', () => {
+    renderAt(`/${CALCULATOR_LINKED_PATH}?tab=diagnostics`);
+
+    expect(screen.queryByText(translations.tr['protocol.relatedCalculators'])).not.toBeInTheDocument();
+  });
+
+  it('shows no calculator links for a protocol without calculatorIds', () => {
+    renderAt(`/${PLUGGED_PATH}?tab=timing`);
+
+    expect(screen.queryByText(translations.tr['protocol.relatedCalculators'])).not.toBeInTheDocument();
+  });
+});

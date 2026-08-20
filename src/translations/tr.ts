@@ -62,6 +62,7 @@ export const tr = {
   'protocol.layer': 'Katman',
   'protocol.status': 'Durum',
   'protocol.tools': 'Araçlar',
+  'protocol.relatedCalculators': 'İlgili hesap araçları',
   'protocol.related': 'İlgili protokoller',
   'protocol.definitions': 'Tanım dosyaları',
   'protocol.aliasNotice':

@@ -665,6 +665,34 @@ UI katmanında yaşar" sonucuyla aynı yere bakıyor, ikisi birlikte tasarlanmal
 >
 > Kendi turu var, 9b-9e zincirinden bağımsız; sırayı bozmadan araya alınabilir.
 
+**UYGULANDI (2026-08-20).** `CatalogProtocol`e `calculatorIds?: readonly
+string[]` eklendi (`app/catalog/types.ts`), `lora` kaydı
+`['lora-airtime', 'lora-link-budget', 'lora-battery']` taşıyor
+(`app/catalog/domains/wireless-iot.ts`). `ProtocolPage` yalnız **`timing`
+sekmesinde** bağlantı listesi basıyor — `related` bloğuyla aynı
+`<li><Link></li>` deseni, ad `findCalculator` ile çözülüyor
+(`pages/ProtocolPage.tsx`). Bilinçli dar seçim: sekme eşlemesi genel bir
+`CalculatorCategory → WorkspaceTab` tablosu değil, sabit `activeTab ===
+'timing'` kontrolü — lora'nın üç aracı da zaten `timing` kategorisinde ve
+kaydın kendi yorumu bunu doğruluyor ("'timing' sekmesi olmadan LoRa sayfası
+anlamsız kalır"). **Tuzak, ileride:** `checksum`/`conversion` kategorili bir
+`calculatorIds` girdisi taşıyan bir protokol gelirse bu bağlantı hiçbir
+sekmede GÖRÜNMEZ (yalnız `timing` dinleniyor) — o zaman genelleştirmek
+gerekir, bu dalgada YAPILMADI (kapsam dışı, yalnız lora vardı).
+
+Bekçiler: `catalog.test.ts`e `'resolves every calculatorIds entry to a known
+calculator tool'` eklendi (`related`/`aliasOf` testleriyle aynı desen).
+`ProtocolPage.test.tsx:73-79` DOKUNULMADI, değişmeden yeşil. Yeni üç test
+eklendi (`timing`te üç bağlantı + doğru `href`, `diagnostics`te bağlantı YOK,
+`calculatorIds`i olmayan protokolde bağlantı YOK). `calc.loraAirtime.name`
+gibi anahtarlar zaten vardı; yalnız `protocol.relatedCalculators` yeni
+(`translations/tr.ts` + `en.ts`).
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3075/3075, `npm run test:e2e`
+452/452. Tarayıcıda elle açıldı (`/comm/wireless-iot/lora-lpwan/lora?tab=timing`):
+üç bağlantı görünüyor, `diagnostics` sekmesinde yok, tıklanınca gerçek
+`/comm/calculators/lora-airtime` sayfasına gidiyor, konsol hatasız.
+
 ## Tuzaklar
 
 - ~~**CRC terimi (karar 2)**~~ **KAPATILDI (9a)**: parametrik yazıldı, fark
@@ -768,8 +796,9 @@ bir alan kümesiyle (fix/lat/lon/alt/sat/hdop) çözüldü. Registry 51 → 52.
 lte-modem-at → {nb-iot, gnss-modem}`) TAMAMEN BİTTİ** — bu dalganın asıl
 omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı değil:
 
-- **Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
-  (`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.
+~~**Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
+(`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.~~
+**bitti** (yukarı bkz. "UYGULANDI (2026-08-20)").
 - **`hayes-command-set`** (madde 7) — ortak AT motorunu (`atCommandsParser`)
   içeriden mi çağıracak yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci
   bir `ProtocolPlugin` mi olacak, dar bir karar bekliyor.
@@ -777,17 +806,10 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
   6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
   bağlama"), birlikte tasarlanabilir.
 
-**Sıradaki iş olarak Karar 6 öneriliyor (2026-08-20, kullanıcıya soruldu,
-tercih istendi).** Gerekçe: üçünün İÇİNDE en dar sınırlı olan bu —
-`calculatorIds?: readonly string[]` alanı + `lora`nın üç id'si + `ProtocolPage`
-bağlantı satırı + `catalog.test.ts` iki yönlü bekçi, hepsi kararda ZATEN
-YAZILI, açık uç yok. `hayes-command-set` önce dar bir karar (motoru nasıl
-çağıracağı) ister — bu da küçük ama fresh bir oturumun ilk turunda "işe
-başlamadan önce soru" demek. Dashboard UI'ı üçünden en genişi (React
-bileşeni + Cellular Initialization Dashboard'ı nereye/nasıl mount edeceği
-tasarım gerektiriyor, karar 6'yla "aynı sınıf" olsa da karar 6 kadar dar
-değil). Karar 6 bittikten sonra kalan iki iş hâlâ bağımsız, sıraları
-önemsiz.
+~~Sıradaki iş olarak Karar 6 öneriliyor~~ — **bitti**. Geriye BAĞIMSIZ iki iş
+kaldı, sıraları önemsiz: `hayes-command-set` (madde 7, dar bir karar bekliyor
+— motoru içeriden mi çağıracak yoksa ikinci `ProtocolPlugin` mi) ve Cellular
+Initialization Dashboard'ın React UI'ı (motor hazır, karar 6'yla aynı sınıf
+iş). İkisi de kendi turunu bekliyor.
 
-Model önerisi: Karar 6 Sonnet · medium (dar kapsam, karar zaten yazılı).
-`hayes-command-set` ve Dashboard UI turları da Sonnet · medium.
+Model önerisi: ikisi de Sonnet · medium.

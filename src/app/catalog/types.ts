@@ -102,6 +102,13 @@ export interface CatalogProtocol {
   aliasOf?: string;
   /** Plugin registry anahtarı. Motor yazıldığında doldurulur. */
   pluginId?: string;
+  /**
+   * Bu protokolle ilişkili hesap makinesi id'leri (`CALCULATOR_TOOLS`ın `id`
+   * alanı, `@/features/calculators`). `ProtocolPage` ilgili sekmede bu
+   * araçlara bağlantı basar; hesabı sayfanın İÇİNE gömmez (brief dalga 9
+   * karar 6, seçenek b — gömme (c) ayrı bir dalganın işi).
+   */
+  calculatorIds?: readonly string[];
 }
 
 export interface CatalogFamily {
