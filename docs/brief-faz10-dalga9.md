@@ -13,8 +13,10 @@ LoRaWAN'dan farklı — PHY hesap makinesi) ve beş kayıtlık bir AT-komut aile
 
 **9a TAMAM.** Karar 1 ve karar 2 uygulandı. Ne yazıldığı ve keşif turunun hangi
 öncülünün yanlış çıktığı aşağıda: bkz. "9a — ne yapıldı" ve düzeltilmiş §2.
-Kalan iş 9b-9e; onlar için karar 3/4/5 hâlâ cevapsız. Yeni bir karar doğdu
-(karar 6, hesap sekmelerinin protokol sayfasına bağlanması).
+
+**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı TAMAM** —
+bkz. "9b — ne yapıldı". `hayes-command-set` bu turda YAZILMADI, kendi küçük
+kararını bekliyor (aşağıda ayrıca işaretli). 9c/9d/9e hâlâ önde.
 
 ## Durum — keşif turunda doğrulananlar
 
@@ -265,14 +267,48 @@ bu yüzden motorda varsayılanı 0 (kendiliğinden kimya varsaymaz), formda 1
 öneriliyor ve fark hem birim testinde hem ekranda sınanıyor. Sonuç tablosunda
 "boşta kalan payı" da var: yüksekse gönderim sıklığını azaltmak ömrü uzatmaz.
 
-### 9b — AT komut çekirdeği: `at-commands` (jenerik motor)
+### 9b — AT komut çekirdeği: `at-commands` (jenerik motor) — **TAMAM (yalnız madde 6)**
 
-6. `src/protocols/interfaces/atcommands/` (ya da uygun dizin — `src/protocols/`
-   alt dizin listesinde "cellular" yok, `serial`/`interfaces` en yakını, karar 3)
-   içinde jenerik çerçeveleme: komut/yanıt ayrımı, URC akışı, final result code
-   (`OK`/`ERROR`/`+CME ERROR: <n>`/`+CMS ERROR: <n>`), `Command Parser State
-   Machine` (IDLE→COMMAND_SENT→WAIT_RESPONSE→FINAL_RESULT).
-7. `hayes-command-set`in bu motoru nasıl kullandığı karar 1.
+6. ~~`src/protocols/interfaces/atcommands/`~~ **`src/protocols/serial/atcommands/atCommands.ts`**
+   (karar 3 uygulandı) — jenerik çerçeveleme: komut/yanıt ayrımı, URC akışı,
+   final result code (`OK`/`ERROR`/`CONNECT`/`+CME ERROR: <n>`/`+CMS ERROR: <n>`),
+   `Command Parser State Machine` (IDLE→COMMAND_SENT→WAIT_RESPONSE→FINAL_RESULT).
+
+   Ne yazıldığı:
+
+   | Parça | İçerik |
+   |---|---|
+   | `atCommandsParser: ProtocolParser` | TEK satırı SAF çözer (karar 4'ün gerektirdiği gibi) — sınıflandırma: `command`/`information`/`final-result-code`/`prompt`/`text` |
+   | `createAtLineExtractor(terminator?)` | Akıştan satır kesen `FrameExtractor`; **varsayılan `\r\n`, SABİT DEĞİL** — brief tuzağı (V.250 S3/S4) burada kapatıldı |
+   | `createAtCommandSession()` | IDLE→COMMAND_SENT→WAIT_RESPONSE→FINAL_RESULT durum makinesi + URC ayrımı — `atCommandsParser`in DIŞINDA, `createStreamBuffer` ile aynı desen (kapanışlı fabrika, karar 4'ü bozmadan) |
+   | 15 `ExampleFrame` | beş `AtLineKind` değerinin tamamını, `ATE0` echo-baskılama dahil |
+   | `atCommands.test.ts` | 47 test |
+   | `e2e/at-commands-decode.spec.ts` (yeni) | 9 test — gerçek tarayıcıda HEX ofset/vurgulama doğrulaması dahil |
+
+   Katalog: `at-commands` `planned` → **`ready`**, `pluginId: 'at-commands'`.
+   `EXPECTED_CATEGORY`: `interfaces-framing`. Registry 48 → **49**.
+
+   **Kasıtlı sınır — CME/CMS kod anlamı YOK.** `+CME ERROR: 10` yapısal olarak
+   çözülür (numeric mi verbose mu, kodun kendisi) ama 10'un "SIM not inserted"
+   demek olduğu bir tabloya bağlanmaz — TS 27.007 Annex'in ~250 kodluk tablosu
+   bu dalganın kapsamı dışında (obd.ts'in PID tablosu uyarısıyla aynı gerekçe).
+   Hem birim testinde hem e2e'de "bu metin HİÇBİR yerde görünmemeli" diye
+   negatif sınandı.
+
+   **Kasıtlı sınır — yalnız genişletilmiş sözdizimi.** `AT+NAME` ayrıştırılır
+   (`command-name`/`action`/`parameters`); temel sözdizimi (`ATD`, `ATZ`) hâlâ
+   `kind: 'command'` sayılır ama gövdesi ham kalır — bu, madde 7'nin işi.
+
+7. **`hayes-command-set`in bu motoru nasıl kullanacağı — hâlâ AÇIK, bugün
+   YAZILMADI.** Brief'in bu maddedeki "karar 1" atfı bu dalganın kendi karar
+   listesindeki (1-6) hiçbirine karşılık gelmiyor — muhtemelen erken bir
+   taslaktan kalma referans. Kullanıcıya sorulmadı, dolayısıyla KENDİLİĞİNDEN
+   karar verilmedi; yalnız madde 6 (at-commands, sınırları net) uygulandı.
+   `hayes-command-set` katalog kaydı hâlâ `planned`, `pluginId` yok,
+   dokunulmadı. Küçük ve dar bir karar gerekiyor — örnek çerçeve: ortak
+   motoru (`atCommandsParser`/`createAtLineExtractor`) İÇERİDEN çağırıp
+   üstüne ATD/ATA/ATH/ATZ/S-register/`+++` sözlüğünü mü koyar, yoksa CAN
+   2.0A/2.0B emsali gibi AYNI dosyada ikinci bir `ProtocolPlugin` mi olur.
 
 ### 9c — `lte-modem-at` (hücresel sözlük, 9b'ye bağlı)
 
@@ -504,19 +540,24 @@ Tüm e2e paketi 416/416 yeşil.
 oldu (motor + React aracı + kayıt + i18n + e2e), ama hiçbiri mimari karar
 gerektirmedi. Karar 6 bunun artığıdır ve 9a'yı bloklamadı.
 
-**9b-9e'nin önünde engel kalmadı** — karar 3/4/5 verildi (2026-08-20). Sıradaki
-iş **9b: `at-commands` jenerik motoru**, `src/protocols/serial/atcommands/`
-altına. Jenerik çerçeveleme: komut/yanıt ayrımı, URC akışı, final result code
-(`OK`/`ERROR`/`+CME ERROR: <n>`/`+CMS ERROR: <n>`), komut durum makinesi
-(IDLE→COMMAND_SENT→WAIT_RESPONSE→FINAL_RESULT). `hayes-command-set` bu motorun
-üstüne kendi sözlüğünü koyar (ATD/ATA/ATH/ATZ, S-register, `+++` guard-time).
+~~**9b-9e'nin önünde engel kalmadı**~~ — **9b'nin `at-commands` kısmı bitti**
+(yukarı bkz. "9b — ne yapıldı"). `hayes-command-set` (madde 7) kasıtlı olarak
+YAZILMADI — brief'teki "karar 1" atfı bu dalganın 1-6 karar listesindeki
+hiçbirine karşılık gelmiyor (muhtemelen eski taslak artığı), kullanıcıya
+sorulmadan kendiliğinden karar verilmedi. Küçük, dar bir soru: ortak motoru
+İÇERİDEN mi çağırır, yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci bir
+`ProtocolPlugin` mi olur.
 
-Tuzaklar hatırlatma: satır sonu `\r\n` SABİT VARSAYILMAZ (V.250 S3/S4
-seçilebilir kılıyor); `+++` yalnız üç `+` aranarak bulunmaz, guard-time
-penceresi ZORUNLU.
+Sıradaki iş **9c: `lte-modem-at`** (hücresel sözlük) — `at-commands`in
+üstüne TS 27.007 komut veritabanı (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/
+CGSN/CCLK/CPIN), IMEI/IMSI/ICCID export maskesi, Cellular Initialization
+Dashboard (karar 4 gereği: parser saf kalır, dashboard feature katmanında).
 
-9b bitmeden 9c/9d/9e'ye girilmez. **Karar 6 bağımsız** ve kendi turu var —
-9b'den önce ya da sonra alınabilir, zinciri bozmaz.
+9c bitmeden 9d/9e'ye girilmez. **Karar 6 hâlâ bağımsız** ve kendi turu var.
+**`hayes-command-set` (madde 7) de bağımsız** — 9c'den önce, sonra ya da
+paralel alınabilir, zinciri bozmaz (yalnız kendi küçük kararını gerektirir).
 
-Model önerisi: 9b Sonnet · high (tarif net, emsal var, mimari karar kalmadı).
-Karar 6 turu Sonnet · medium (dar, bekçileri yazılı).
+Model önerisi: 9c Sonnet · high (tarif net — dar komut kümesi, fixture'lar
+brief'te hazır — ama Cellular Dashboard'ın stateful/saf sınırını doğru
+çizmek dikkat ister). Karar 6 turu Sonnet · medium. hayes-command-set turu
+Sonnet · medium (dar, iki seçenekten biri).

@@ -1682,6 +1682,60 @@ export const tr = {
   'protocol.obd.example.unknownMode.description':
     'Mod tabloda yok: alan geçersiz işaretlenir, çerçeve yine gösterilir.',
 
+  // --- AT Commands (ITU-T V.250 / 3GPP TS 27.007, jenerik motor) ---
+  'protocol.atCommands.documentation.summary':
+    'ITU-T V.250 ve 3GPP TS 27.007 metin komut ailesi için jenerik çerçeveleme: komut/yanıt ayrımı, URC akışı, final result code. Hücresel sözlük (CSQ/COPS/CREG…) bu motorda YOK, lte-modem-at’te.',
+  'protocol.atCommands.error.emptyLine': 'Boş satır çözülemez.',
+  'protocol.atCommands.error.frameTooLong': 'Satır izin verilen azami uzunluğu aşıyor.',
+  'protocol.atCommands.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.atCommands.warning.mixedCasePrefix':
+    'AT öneki karışık büyük/küçük harf ("At"/"aT") — V.250 yalnız "AT" ya da "at" tanır, çoğu modem yine de kabul eder.',
+  'protocol.atCommands.example.commandExecute.name': 'Execute komutu',
+  'protocol.atCommands.example.commandExecute.description':
+    'Parametresiz genişletilmiş komut — sinyal kalitesini sorar.',
+  'protocol.atCommands.example.commandRead.name': 'Read komutu (?)',
+  'protocol.atCommands.example.commandRead.description':
+    'Ağ kayıt durumunu okur; `?` sonu okuma eylemidir.',
+  'protocol.atCommands.example.commandTest.name': 'Test komutu (=?)',
+  'protocol.atCommands.example.commandTest.description':
+    'Desteklenen parametre kümesini sorar; `=?` sonu test eylemidir.',
+  'protocol.atCommands.example.commandSet.name': 'Set komutu (=<params>)',
+  'protocol.atCommands.example.commandSet.description':
+    'SMS metin modunu açar; `=1` parametresi ayrı bir alanda taşınır.',
+  'protocol.atCommands.example.commandBare.name': 'Çıplak AT',
+  'protocol.atCommands.example.commandBare.description':
+    'Bağlantı kontrolü — komut adı/eylemi yok, yalnız `command` sınıfı.',
+  'protocol.atCommands.example.commandMixedCase.name': 'Karışık harf önek',
+  'protocol.atCommands.example.commandMixedCase.description':
+    '"At" öneki geçerli kalır ama uyarı üretir — V.250 yalnız "AT"/"at" tanır.',
+  'protocol.atCommands.example.informationResponse.name': 'Bilgi yanıtı',
+  'protocol.atCommands.example.informationResponse.description':
+    '`+NAME: params` biçimi — hangi komuta ait olduğu oturum bağlamı ister.',
+  'protocol.atCommands.example.finalResultOk.name': 'OK',
+  'protocol.atCommands.example.finalResultOk.description':
+    'V.250 §6.3.1 çıplak final result code — komut başarıyla tamamlandı.',
+  'protocol.atCommands.example.finalResultError.name': 'ERROR',
+  'protocol.atCommands.example.finalResultError.description':
+    'V.250 §6.3.1 çıplak final result code — komut reddedildi.',
+  'protocol.atCommands.example.finalResultCmeNumeric.name': '+CME ERROR (sayısal)',
+  'protocol.atCommands.example.finalResultCmeNumeric.description':
+    'AT+CMEE=1 modunda sayısal hata kodu — kodun ANLAMI çözülmez, yalnız yapısı.',
+  'protocol.atCommands.example.finalResultCmeVerbose.name': '+CME ERROR (metin)',
+  'protocol.atCommands.example.finalResultCmeVerbose.description':
+    'AT+CMEE=2 modunda metin hata açıklaması — aynı sözdizimi, farklı gösterim.',
+  'protocol.atCommands.example.finalResultCms.name': '+CMS ERROR',
+  'protocol.atCommands.example.finalResultCms.description':
+    'SMS/mesajlaşmaya özgü hata kodu ailesi — CME’den ayrı alan adıyla taşınır.',
+  'protocol.atCommands.example.connectWithRate.name': 'CONNECT (hızla)',
+  'protocol.atCommands.example.connectWithRate.description':
+    'Bağlantı hızı sayısal bir alt-alana ayrıştırılır (bit/s birimiyle).',
+  'protocol.atCommands.example.prompt.name': 'Veri girişi promptu (>)',
+  'protocol.atCommands.example.prompt.description':
+    'AT+CMGS gibi komutlardan sonra gelen veri girişi bekleme işareti.',
+  'protocol.atCommands.example.bannerText.name': 'Serbest metin (banner)',
+  'protocol.atCommands.example.bannerText.description':
+    'Bilinen hiçbir kalıba uymayan üretici/banner metni — hata sayılmaz.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header eksik: en az 8 bayt gerekir (version, inverse version, payload type, payload length).',

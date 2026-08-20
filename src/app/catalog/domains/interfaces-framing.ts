@@ -909,7 +909,13 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'ITU-T V.250 and 3GPP TS 27.007 text command set for modems and cellular modules, where unsolicited result codes must be kept on a separate channel from command responses.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 9b: jenerik çerçeveleme motoru yazıldı
+          // (src/protocols/serial/atcommands/atCommands.ts) — komut/yanıt
+          // ayrımı, URC, final result code (OK/ERROR/+CME ERROR/+CMS ERROR).
+          // hayes-command-set BU sayfada değil, kendi (planned) kaydında —
+          // motoru nasıl kullanacağı ayrı bir karar (brief 9b madde 7).
+          status: 'ready',
+          pluginId: 'at-commands',
           tabs: [
             'overview',
             'live',

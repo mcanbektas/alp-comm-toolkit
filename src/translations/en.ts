@@ -1680,6 +1680,60 @@ export const en: TranslationDictionary = {
   'protocol.obd.example.unknownMode.description':
     'The mode is not in the table: the field is marked invalid but the frame is still shown.',
 
+  // --- AT Commands (ITU-T V.250 / 3GPP TS 27.007, generic engine) ---
+  'protocol.atCommands.documentation.summary':
+    'Generic framing for the ITU-T V.250 / 3GPP TS 27.007 text command family: command/response separation, URC stream, final result codes. The cellular vocabulary (CSQ/COPS/CREG…) is NOT here, it lives in lte-modem-at.',
+  'protocol.atCommands.error.emptyLine': 'An empty line cannot be parsed.',
+  'protocol.atCommands.error.frameTooLong': 'The line exceeds the allowed maximum length.',
+  'protocol.atCommands.error.aborted': 'Parsing was aborted.',
+  'protocol.atCommands.warning.mixedCasePrefix':
+    'The AT prefix has mixed case ("At"/"aT") — V.250 only recognizes "AT" or "at", though most modems accept it anyway.',
+  'protocol.atCommands.example.commandExecute.name': 'Execute command',
+  'protocol.atCommands.example.commandExecute.description':
+    'A parameterless extended command — queries signal quality.',
+  'protocol.atCommands.example.commandRead.name': 'Read command (?)',
+  'protocol.atCommands.example.commandRead.description':
+    'Reads network registration status; a trailing `?` is the read action.',
+  'protocol.atCommands.example.commandTest.name': 'Test command (=?)',
+  'protocol.atCommands.example.commandTest.description':
+    'Queries the supported parameter set; a trailing `=?` is the test action.',
+  'protocol.atCommands.example.commandSet.name': 'Set command (=<params>)',
+  'protocol.atCommands.example.commandSet.description':
+    'Switches SMS text mode on; the `=1` parameter is carried in its own field.',
+  'protocol.atCommands.example.commandBare.name': 'Bare AT',
+  'protocol.atCommands.example.commandBare.description':
+    'A connectivity check — no command name/action, just the `command` kind.',
+  'protocol.atCommands.example.commandMixedCase.name': 'Mixed-case prefix',
+  'protocol.atCommands.example.commandMixedCase.description':
+    'The "At" prefix stays valid but raises a warning — V.250 only recognizes "AT"/"at".',
+  'protocol.atCommands.example.informationResponse.name': 'Information response',
+  'protocol.atCommands.example.informationResponse.description':
+    'The `+NAME: params` shape — which command it belongs to needs session context.',
+  'protocol.atCommands.example.finalResultOk.name': 'OK',
+  'protocol.atCommands.example.finalResultOk.description':
+    'A bare V.250 §6.3.1 final result code — the command completed successfully.',
+  'protocol.atCommands.example.finalResultError.name': 'ERROR',
+  'protocol.atCommands.example.finalResultError.description':
+    'A bare V.250 §6.3.1 final result code — the command was rejected.',
+  'protocol.atCommands.example.finalResultCmeNumeric.name': '+CME ERROR (numeric)',
+  'protocol.atCommands.example.finalResultCmeNumeric.description':
+    'A numeric error code under AT+CMEE=1 — the MEANING of the code is not decoded, only its structure.',
+  'protocol.atCommands.example.finalResultCmeVerbose.name': '+CME ERROR (verbose)',
+  'protocol.atCommands.example.finalResultCmeVerbose.description':
+    'A text error description under AT+CMEE=2 — same syntax, different rendering.',
+  'protocol.atCommands.example.finalResultCms.name': '+CMS ERROR',
+  'protocol.atCommands.example.finalResultCms.description':
+    'The messaging/SMS-specific error code family — carried under its own field name, separate from CME.',
+  'protocol.atCommands.example.connectWithRate.name': 'CONNECT (with rate)',
+  'protocol.atCommands.example.connectWithRate.description':
+    'The connection rate is split into its own numeric sub-field (bit/s unit).',
+  'protocol.atCommands.example.prompt.name': 'Data entry prompt (>)',
+  'protocol.atCommands.example.prompt.description':
+    'The data-entry wait marker that follows commands such as AT+CMGS.',
+  'protocol.atCommands.example.bannerText.name': 'Free text (banner)',
+  'protocol.atCommands.example.bannerText.description':
+    'Manufacturer/banner text that matches no known pattern — not treated as an error.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header is incomplete: at least 8 bytes are required (version, inverse version, payload type, payload length).',

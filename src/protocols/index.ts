@@ -288,4 +288,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'matter', () =>
     import('./wireless/matter/matter').then((module) => module.matterPlugin),
   );
+  // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
+  // çerçeveleme (komut/yanıt ayrımı, URC, final result code). hayes-command-set
+  // bu motoru NASIL kullanacağı kararı bekliyor (brief 9b madde 7), bu dalgada
+  // yazılmadı.
+  registerOnce(registry, 'at-commands', () =>
+    import('./serial/atcommands/atCommands').then((module) => module.atCommandsPlugin),
+  );
 }
