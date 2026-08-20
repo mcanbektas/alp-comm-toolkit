@@ -1791,6 +1791,20 @@ export const en: TranslationDictionary = {
   'protocol.lteModemAt.example.finalOk.description':
     'A final result code carried over verbatim from at-commands — stays consistent on this page too.',
 
+  // --- Cellular Initialization Dashboard (same class of work as Karar 6, wave 9) ---
+  'cellularDashboard.heading': 'Cellular Initialization Dashboard',
+  'cellularDashboard.sessionInput.label': 'AT session (multi-line — command and response lines)',
+  'cellularDashboard.linesProcessed': '{count} lines recognized',
+  'cellularDashboard.empty': 'No recognizable cellular status field came out of the input.',
+  'cellularDashboard.field.imei': 'IMEI',
+  'cellularDashboard.field.numericIdentifierCandidate': 'Numeric identifier (IMSI/IMEI ambiguous)',
+  'cellularDashboard.field.simStatus': 'SIM status',
+  'cellularDashboard.field.operatorName': 'Operator',
+  'cellularDashboard.field.operatorSelectionMode': 'Operator selection mode',
+  'cellularDashboard.field.accessTechnology': 'Access technology (RAT)',
+  'cellularDashboard.field.registrationStatus': 'Registration status',
+  'cellularDashboard.field.pdpAddress': 'PDP / IP address',
+
   // --- NB-IoT (on top of lte-modem-at: AcT=9 detection + PSM/eDRX timers) ---
   'protocol.nbIot.documentation.summary':
     'NB-IoT interpretation layer on top of lte-modem-at: AcT=9 detection, PSM (AT+CPSMS, T3412/T3324) and eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, NB-S1 mode only) timer decoding.',

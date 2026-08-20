@@ -89,6 +89,15 @@ const EdsPanel = lazy(async () => {
 });
 
 /**
+ * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
+ * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
+ */
+const CellularInitializationDashboard = lazy(async () => {
+  const module = await import('@/features/cellular-dashboard/CellularInitializationDashboard');
+  return { default: module.CellularInitializationDashboard };
+});
+
+/**
  * Tanım biçimi → panel eşlemesi. Dalga 1c'den ÖNCE bu tek satırlık bir
  * `showsDbcPanel` boolean'ıydı; ikinci biçim (EDS) eklenince üçlü ternary'yi
  * büyütmek yerine seçici bir yapıya çevrildi — üçüncü bir biçim geldiğinde
@@ -386,6 +395,10 @@ export function ProtocolPage(): ReactElement {
             ) : DefinitionPanel !== undefined ? (
               <Suspense fallback={<DecodeFallback />}>
                 <DefinitionPanel />
+              </Suspense>
+            ) : activeTab === 'data' && protocol.pluginId === 'lte-modem-at' ? (
+              <Suspense fallback={<DecodeFallback />}>
+                <CellularInitializationDashboard />
               </Suspense>
             ) : (
               <>

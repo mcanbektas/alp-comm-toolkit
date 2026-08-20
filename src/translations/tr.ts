@@ -1793,6 +1793,20 @@ export const tr = {
   'protocol.lteModemAt.example.finalOk.description':
     'at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
 
+  // --- Cellular Initialization Dashboard (karar 6'yla aynı sınıf iş, dalga 9) ---
+  'cellularDashboard.heading': 'Cellular Initialization Dashboard',
+  'cellularDashboard.sessionInput.label': 'AT oturumu (çok satırlı — komut ve yanıt satırları)',
+  'cellularDashboard.linesProcessed': '{count} satır tanındı',
+  'cellularDashboard.empty': 'Girdiden tanınan bir hücresel durum alanı çıkmadı.',
+  'cellularDashboard.field.imei': 'IMEI',
+  'cellularDashboard.field.numericIdentifierCandidate': 'Sayısal kimlik (IMSI/IMEI belirsiz)',
+  'cellularDashboard.field.simStatus': 'SIM durumu',
+  'cellularDashboard.field.operatorName': 'Operatör',
+  'cellularDashboard.field.operatorSelectionMode': 'Operatör seçim modu',
+  'cellularDashboard.field.accessTechnology': 'Erişim teknolojisi (RAT)',
+  'cellularDashboard.field.registrationStatus': 'Kayıt durumu',
+  'cellularDashboard.field.pdpAddress': 'PDP / IP adresi',
+
   // --- NB-IoT (lte-modem-at üstünde: AcT=9 tespiti + PSM/eDRX zamanlayıcı) ---
   'protocol.nbIot.documentation.summary':
     'lte-modem-at üstünde NB-IoT yorumlama katmanı: AcT=9 tespiti, PSM (AT+CPSMS, T3412/T3324) ve eDRX (AT+CEDRXS/CEDRXRDP/CEDRXP, yalnız NB-S1 modu) zamanlayıcı çözümü.',

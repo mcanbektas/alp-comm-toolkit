@@ -110,3 +110,30 @@ describe('ProtocolPage calculator links', () => {
     expect(screen.queryByText(translations.tr['protocol.relatedCalculators'])).not.toBeInTheDocument();
   });
 });
+
+/** Dashboard'un tek kullanıcısı (Faz 10 dalga 9, karar 6'yla aynı sınıf iş). */
+const CELLULAR_DASHBOARD_PATH = 'wireless-iot/cellular-iot/lte-modem-at';
+
+describe('ProtocolPage cellular initialization dashboard', () => {
+  it('mounts the dashboard and drops the planned notice on the data tab', async () => {
+    renderAt(`/${CELLULAR_DASHBOARD_PATH}?tab=data`);
+
+    expect(await screen.findByTestId('cellular-dashboard')).toBeInTheDocument();
+    expect(screen.getByTestId('cellular-dashboard-summary')).toBeInTheDocument();
+    expect(screen.queryByText(translations.tr['protocol.plannedNotice'])).not.toBeInTheDocument();
+  });
+
+  it('leaves other tabs of the same protocol on the planned path', () => {
+    renderAt(`/${CELLULAR_DASHBOARD_PATH}?tab=diagnostics`);
+
+    expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
+    expect(screen.queryByTestId('cellular-dashboard')).not.toBeInTheDocument();
+  });
+
+  it('shows no dashboard on the data tab of a different plugged protocol', () => {
+    renderAt(`/${PLUGGED_PATH}?tab=data`);
+
+    expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
+    expect(screen.queryByTestId('cellular-dashboard')).not.toBeInTheDocument();
+  });
+});

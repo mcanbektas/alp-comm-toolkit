@@ -419,10 +419,14 @@ export const wirelessIotDomain: CatalogDomain = {
           // Faz 10 dalga 9c: TS 27.007 komut veritabanı yazıldı
           // (src/protocols/wireless/cellular/lteModemAt.ts) — CSQ/COPS/CREG/
           // CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN, at-commands'ın üstünde.
-          // "AT Console"/"Boot Timeline" (Web Serial UI) ve Dashboard'ın React
-          // katmanı bu dalgada YOK — motor (`createCellularInitializationState`)
-          // hazır, UI kendi turunu hak ediyor (karar 6'nın hesap sekmesi
-          // bağlantısıyla aynı sınıf iş).
+          // Cellular Initialization Dashboard'ın React katmanı `data`
+          // sekmesine bağlandı (karar 6'yla aynı sınıf iş, kendi turu —
+          // `features/cellular-dashboard/`): yapıştırılan çok satırlı AT
+          // oturumu `createCellularInitializationState`e beslenir, IMEI/SIM/
+          // operatör/RAT/kayıt/PDP alanları gösterilir — model/firmware/bant
+          // hâlâ YOK (kaynak komutları madde 8'in kümesinde değil). "AT
+          // Console" (Web Serial, canlı bağlantı) ve "Boot Timeline" ayrı,
+          // daha geniş bir iş — bu dalgada YAPILMADI.
           status: 'ready',
           pluginId: 'lte-modem-at',
           tabs: [

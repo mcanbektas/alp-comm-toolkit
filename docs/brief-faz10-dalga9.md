@@ -370,18 +370,61 @@ prefiksi bilinen bir komut adına denk gelen çerçeveleri zenginleştirir.
    kapsamının çok ötesinde. ICCID/telefon numarası maskelemesi de YOK — kaynak
    komutları (AT+CCID/AT+QCCID, AT+CNUM) madde 8'in listesinde değil.
 10. `Cellular Initialization Dashboard` — **motor yazıldı
-    (`createCellularInitializationState`), React UI YOK.** Karar 4 uygulandı:
-    `features/live-monitor/monitorIngestor.ts`teki `MonitorIngestor` ile AYNI
-    desen — React'ten bağımsız, kapanışlı, saf durum biriktirici,
-    `lteModemAtParser`in ürettiği `ParsedFrame`leri tüketir, `at-commands`
-    oturum makinesini (echo/URC ayrımı) hiç bilmez. UI katmanı karar 6'nın
-    hesap sekmesi bağlantısıyla aynı sınıf iş, kendi turunu hak ediyor.
+    (`createCellularInitializationState`), React UI da BAĞLANDI (2026-08-20,
+    aşağıda "UYGULANDI").** Karar 4 uygulandı: `features/live-monitor/
+    monitorIngestor.ts`teki `MonitorIngestor` ile AYNI desen — React'ten
+    bağımsız, kapanışlı, saf durum biriktirici, `lteModemAtParser`in ürettiği
+    `ParsedFrame`leri tüketir, `at-commands` oturum makinesini (echo/URC
+    ayrımı) hiç bilmez.
 
     Katalogun "model, firmware, IMEI, SIM, operator, RAT, band, IP" vaadinden
     bu dalgada YALNIZ IMEI/SIM/operator/RAT(AcT)/IP üretilebilir —
     model/firmware (ATI, AT+CGMM, AT+CGMR) ve bant (vendor-özel, ör.
     AT+QNWINFO) madde 8'in komut kümesinde YOK, LoRa'nın RSSI/SNR Scatter'ıyla
     aynı gerekçeyle uydurulmadı.
+
+    **UYGULANDI (2026-08-20).** `features/cellular-dashboard/
+    CellularInitializationDashboard.tsx` — çok satırlı, düz metin (HEX
+    DEĞİL) bir AT oturumu textarea'sı; her satır ayrı ayrı
+    `lteModemAtParser.parse()`den geçer (echo/`OK`/`ERROR` satırları da dahil
+    — tanıdık alan üretmedikleri için `ingest` onları sessizce yok sayar,
+    `createAtCommandSession`'ın echo/URC ayrımını burada yeniden kurmaya
+    gerek YOK). Girdi STATİK olduğu için `MonitorIngestor` gibi kalıcı bir
+    örnek tutulmaz — her değişiklikte `createCellularInitializationState()`
+    SIFIRDAN çağrılır (saf `useMemo`); biriktirilecek "zamanla gelen" bir
+    olay yok, tüm oturum tek seferde elde. `ProtocolPage`e `data` sekmesinde
+    bağlandı, sabit `activeTab === 'data' && protocol.pluginId ===
+    'lte-modem-at'` kontrolüyle (Karar 6'nın `calculatorIds`i gibi genel bir
+    alan/tablo KURULMADI — tek kullanıcı var, nb-iot/gnss-modem'in kendi
+    panoları farklı veri şekilleri, aynı bileşenin örnekleri değil; ikinci
+    gerçek kullanıcı gelince genellemek `DEFINITION_PANELS`in kendi emsaliyle
+    tutarlı). `timing` sekmesindeki `calculatorIds` bağlantılarından farklı
+    olarak `planlandı` bildirimi bu sekmede BASILMAZ — `data` artık gerçekten
+    çalışıyor, DecodePanel/DefinitionPanel'le aynı ilke
+    ("motoru olan protokolde bildirim yalanlanmış olurdu").
+
+    Varsayılan oturum EXAMPLE_FRAMES'ten seçildi (uydurma değer değil, 9c'nin
+    kendi doğrulanmış fixture'ları — TS 27.007 §5.4 CGSN örneği dahil); tek
+    istisna CGDCONT'un PDP adresi (fixture'da bilinçli BOŞ, "yok" ile
+    "bilinmiyor" ayrımını sınamak için) — demo amaçlı dolu bir adresle
+    (`10.45.12.8`) değiştirildi, spec-doğrulanmış bir değer İDDİA EDİLMİYOR,
+    yalnız editable bir örnek. Bekçi: `CellularInitializationDashboard.
+    test.tsx` (gerçek motor, mock yok — `DecodePanel.test.tsx`la aynı
+    disiplin): sekiz alanın hepsi ayrı transaction'lardan doğru birikiyor,
+    girdi değişince SIFIRDAN hesaplanıyor (önceki oturumdan sızıntı yok),
+    çözümlenemeyen satır paneli çökertmiyor, boş girdide boş-durum mesajı
+    çıkıyor. `ProtocolPage.test.tsx`e üç test: `data` sekmesinde pano açılır
+    + bildirim YOK, aynı protokolün başka sekmesi (`diagnostics`) etkilenmez,
+    BAŞKA bir eklentili protokolün (Modbus RTU) `data` sekmesi de etkilenmez
+    (sabit `pluginId` kontrolü sızdırmıyor). Tarayıcıda elle doğrulandı
+    (`/comm/wireless-iot/cellular-iot/lte-modem-at?tab=data`): sekiz alan
+    doğru değerlerle doluyor, girdi değişince tepki veriyor, boş girdide
+    boş-durum, konsol hatasız.
+
+    Doğrulama: `npm run typecheck` temiz · `npm test` 3085/3085 (10 yeni: 7
+    bileşen + 3 `ProtocolPage`) · `npm run test:e2e` 452/452 (bu dalganın
+    dışında, regresyon yok — yeni özelliğin kendi e2e'si yazılmadı, karar
+    6'daki gibi birim + entegrasyon testi yeterli görüldü).
 
 Doğrulama: `npm run typecheck` temiz · `npm test` 3033/3033 (39 yeni) ·
 `e2e/lte-modem-at-decode.spec.ts` (yeni) 9/9 — HEX ofset/vurgulama gerçek
@@ -802,14 +845,18 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
 - **`hayes-command-set`** (madde 7) — ortak AT motorunu (`atCommandsParser`)
   içeriden mi çağıracak yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci
   bir `ProtocolPlugin` mi olacak, dar bir karar bekliyor.
-- **Cellular Initialization Dashboard'ın UI'ı** — motor (9c'de) hazır, karar
+- ~~**Cellular Initialization Dashboard'ın UI'ı** — motor (9c'de) hazır, karar
   6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
-  bağlama"), birlikte tasarlanabilir.
+  bağlama"), birlikte tasarlanabilir.~~ **bitti** (yukarı bkz. "9c" içindeki
+  "UYGULANDI (2026-08-20)"). Veri kaynağı ve sekme kararı kullanıcıya
+  soruldu: çok satırlı gerçek AT oturumu girdisi (canlı bağlantı değil) +
+  `data` sekmesi — ikisi de "Önerilen" seçenekti.
 
-~~Sıradaki iş olarak Karar 6 öneriliyor~~ — **bitti**. Geriye BAĞIMSIZ iki iş
-kaldı, sıraları önemsiz: `hayes-command-set` (madde 7, dar bir karar bekliyor
-— motoru içeriden mi çağıracak yoksa ikinci `ProtocolPlugin` mi) ve Cellular
-Initialization Dashboard'ın React UI'ı (motor hazır, karar 6'yla aynı sınıf
-iş). İkisi de kendi turunu bekliyor.
+~~Sıradaki iş olarak Karar 6 öneriliyor~~ — **bitti**. ~~Cellular
+Initialization Dashboard'ın React UI'ı~~ — **bitti**. Geriye BAĞIMSIZ TEK iş
+kaldı: `hayes-command-set` (madde 7, dar bir karar bekliyor — motoru
+içeriden mi çağıracak yoksa ikinci `ProtocolPlugin` mi). Fresh bir oturumun
+ilk turu muhtemelen bu soruyu sormak olacak, triyaj kartı değil.
 
-Model önerisi: ikisi de Sonnet · medium.
+Model önerisi: Sonnet · medium (dar kapsam, tek soru netleşince karar zaten
+yazılı hâle gelir).
