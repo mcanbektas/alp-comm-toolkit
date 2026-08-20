@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-20 itibarıyla dalga 9b). Kalan protokol dalgaları (spec Phase 7-10: CANopen/LIN/ISO-TP/UDS/OBD → NMEA2000/AIS/MAVLink/UBX/RTCM → Ethernet/TCP/MQTT/CoAP/PCAP → industrial/wireless/RE/test-automation) | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-20 itibarıyla dalga 9 — beş kayıtlık AT-komut zinciri + Karar 6 + Cellular Dashboard TAMAM). Kalan protokol dalgaları (spec Phase 7-10: CANopen/LIN/ISO-TP/UDS/OBD → NMEA2000/AIS/MAVLink/UBX/RTCM → Ethernet/TCP/MQTT/CoAP/PCAP → industrial/wireless/RE/test-automation) | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -40,12 +40,14 @@
 
 ## Sıradaki adım
 
-Comm SPA'sında **Faz 9 bitti, Faz 10 sürüyor** — son iş 2026-08-20, dalga 9b
-(AT komut jenerik motoru). Plugin deseni kanıtlandı: katalogdaki **172 kaydın 41'i
-`ready`, 9'u `partial`, 122'si hâlâ `planned`**; `registerProtocolPlugin` ile kayıtlı
-**13 farklı protokol** var (arinc-429 · bacnet-ip · can-2-0 · canopen · dali · j1939 ·
-lin · mavlink · modbus-rtu · nmea-0183 · sent…). Dalga brifleri
-`docs/brief-faz10-dalga*.md` altında.
+Comm SPA'sında **Faz 9 bitti, Faz 10 sürüyor** — son iş 2026-08-20, dalga 9
+TAMAMEN KAPANDI (`hayes-command-set → at-commands → lte-modem-at → {nb-iot,
+gnss-modem}` zinciri + Karar 6 + Cellular Initialization Dashboard). Plugin
+deseni kanıtlandı: katalogdaki **172 kaydın 45'i `ready`, 9'u `partial`,
+118'i hâlâ `planned`**; registry 53 kayıt taşıyor. Dalga brifleri
+`docs/brief-faz10-dalga*.md` altında; dalga 9'un tam dökümü
+`brief-faz10-dalga9.md`de. **Sıradaki dalga/faz henüz tanımlanmadı** — yeni
+bir keşif/planlama turu gerekir.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

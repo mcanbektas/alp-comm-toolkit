@@ -900,6 +900,63 @@ code sınıflandırmasının `at-commands.ts`'e mi (jenerik, tüm AT lehçelerin
 fayda sağlar) yoksa `hayesCommandSet.ts`'e mi (dar, yalnız bu dalganın
 sorumluluğu) gideceği küçük bir yerleşim kararı.
 
+## hayes-command-set — UYGULANDI (2026-08-20)
+
+`src/protocols/serial/atcommands/hayesCommandSet.ts` (yeni) — `at-commands`ı
+içeriden çağırıp `kind: 'command'` (ham gövde) ve `kind: 'text'` (S-register
+yanıt adayı) çerçevelerini zenginleştirir, karar VERİLDİ notuyla birebir
+("içeriden çağır + zenginleştir", CAN 2.0A/2.0B emsali kullanılmadı).
+
+Açık bırakılan küçük sorular şöyle çözüldü:
+
+- **Guard-time satıcısı → u-blox**, tahmin doğru çıktı: S12 varsayılan 50
+  birim × 20ms = 1000ms. `detectEscapeSequence()` SAF fonksiyon, KAYITLI bir
+  bayt akışını (capture) geriye dönük tarar — bu depo analiz SPA'sı, canlı
+  modem sürücüsü değil, bu yüzden state machine değil batch analiz seçildi.
+- **S5 BİLEREK `KNOWN_S_REGISTERS` tablosuna EKLENMEDİ** — anlamı/aralığı
+  hâlâ doğrulanmadı, yapısal (numara+işlem+değer) kalır, isim uydurulmadı.
+- **`H1`/off-hook YAZILMADI** — yalnız H0 physicalValue alır, H1+ değeri
+  `WARN_HOOK_PARAMETER_UNDOCUMENTED` ile işaretlenir.
+- **T/P dial-string önekinin ton/puls anlamı ayrıştırılmadı** — birincil
+  kaynak doğrulaması bu turda da yapılmadı, dial-string opak metin olarak
+  taşınır (uydurmaktan iyi).
+- **Numerik result code (ATV0) `at-commands.ts`e gitti**, `hayesCommandSet.ts`e
+  DEĞİL — jenerik, `lte-modem-at`/`nb-iot`/`gnss-modem`nin hepsine bileşim
+  yoluyla otomatik miras kaldı. `atCommands.ts:87`nin yanlış "§6.3.1" atfı da
+  düzeltildi (→ §5.7.1, Tablo 1).
+
+Ayrıca: `createHayesModeTracker()` (command/data mode, CONNECT→data,
+guard-time onaylı `+++` ya da belgeli H0→command) — motor hazır, UI'a
+BAĞLANMADI (Cellular Initialization Dashboard'la aynı sınıf iş, kendi
+turunu bekliyor — katalog `tools` listesindeki "Command / Data Mode State
+View" ve "Escape Sequence Guard-Time Analyzer" bu yüzden hâlâ dar bir
+motor-var-panel-yok durumunda).
+
+Katalog: `status: 'ready'`, `pluginId: 'hayes-command-set'`,
+`related: ['interfaces-framing/framing-stream-protocols/at-commands']`.
+Registry 52 → 53.
+
+Bekçiler: `hayesCommandSet.test.ts` (42 test), `atCommands.test.ts`e +6
+(numerik result code + "013" zorunlu ayrımı — S-register yanıtıyla
+karışmasın diye sıfır dolgusuz sayı deseni). `src/protocols/index.test.ts`e
+`hayes-command-set` eklendi. `tr.ts`/`en.ts` tam.
+
+**Bu turda yazarken yakalanan iki gerçek bug** (fixture'sız kalsaydı sessiz
+kalırdı): (1) dial-string ham `data`dan değil CR/LF arındırılmış
+`bodyText`ten kesilmeliydi — aksi halde son iki bayt dial-string'e
+karışıyordu; (2) `A` (answer) atomunda cursor'u satır sonuna sıçratmak
+`unparsed-tail`i sessizce yutuyordu, yalnız 'A' kadar ilerletmek gerekti.
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3139/3139, `npm run
+test:e2e` 462/462 (452 baseline + 10 yeni). Tarayıcıda elle açıldı
+(`/comm/interfaces-framing/framing-stream-protocols/hayes-command-set?tab=decode`):
+Hazır rozeti, zincirlenmiş komutlar, S-register + uyarı örnekleri, overview
+sekmesinde 7 `tools`un 7'si listeli, "AT Commands" `related` bağlantısı
+çalışıyor, konsol hatasız. Commit `141309b`, `main`e push edildi.
+
+**Beş kayıtlık AT-komut zinciri + Karar 6 + Cellular Dashboard — dalga 9
+TAMAMEN KAPANDI.** Sıradaki faz/dalga bu brief'te tanımlı değil.
+
 ## Tuzaklar
 
 - ~~**CRC terimi (karar 2)**~~ **KAPATILDI (9a)**: parametrik yazıldı, fark
@@ -1006,10 +1063,10 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
 ~~**Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
 (`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.~~
 **bitti** (yukarı bkz. "UYGULANDI (2026-08-20)").
-- **`hayes-command-set`** (madde 7) — mimari KARARI VERİLDİ (2026-08-20,
+- ~~**`hayes-command-set`** (madde 7) — mimari KARARI VERİLDİ (2026-08-20,
   yukarı bkz. "9b madde 7" içindeki VERİLDİ notu): ortak AT motorunu
   içeriden çağırıp zenginleştirecek, CAN 2.0A/2.0B emsali ELENDİ. UYGULAMA
-  hâlâ YAZILMADI.
+  hâlâ YAZILMADI.~~ **bitti** (aşağı bkz. "UYGULANDI (2026-08-20)").
 - ~~**Cellular Initialization Dashboard'ın UI'ı** — motor (9c'de) hazır, karar
   6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
   bağlama"), birlikte tasarlanabilir.~~ **bitti** (yukarı bkz. "9c" içindeki
@@ -1018,10 +1075,13 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
   `data` sekmesi — ikisi de "Önerilen" seçenekti.
 
 ~~Sıradaki iş olarak Karar 6 öneriliyor~~ — **bitti**. ~~Cellular
-Initialization Dashboard'ın React UI'ı~~ — **bitti**. Geriye TEK iş kaldı:
-`hayes-command-set`in UYGULAMASI (madde 7 — mimari karar artık yazılı,
-"içeriden çağır + zenginleştir"). Fresh bir oturum doğrudan başlayabilir,
-soru yok.
+Initialization Dashboard'ın React UI'ı~~ — **bitti**. ~~Geriye TEK iş kaldı:
+`hayes-command-set`in UYGULAMASI~~ — **bitti** (aşağı bkz. "UYGULANDI
+(2026-08-20)"). **Dalga 9 TAMAMEN KAPANDI** — beş kayıtlık AT-komut zinciri
+(`hayes-command-set → at-commands → lte-modem-at → {nb-iot, gnss-modem}`)
++ Karar 6 + Cellular Initialization Dashboard, hepsi kod+test+e2e ile
+yazılı, `main`e commit'lendi (`141309b`). Sıradaki faz/dalga bu brief'te
+YAZILI DEĞİL — yeni bir keşif/planlama turu gerekir.
 
 **Kapsam, gözden geçirildikten sonra ilk tahminden geniş çıktı:** yalnız
 motoru bağlamak değil, V.250 temel sözdizimi (ATD/ATA/ATH/ATZ), S-register
