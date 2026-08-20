@@ -306,8 +306,9 @@ bu yüzden motorda varsayılanı 0 (kendiliğinden kimya varsaymaz), formda 1
 
 ## Verilmesi gereken kararlar (dalga başında sor, kendiliğinden seçme)
 
-Durum: **1 ve 2 uygulandı** (9a). **3, 4, 5 hâlâ cevapsız** — 9b'yi bunlar bloklar.
-**6 yeni** (9a'da doğdu), bağımsız.
+Durum: **hepsi karara bağlandı.** 1 ve 2 uygulandı (9a). **3, 4, 5 ve 6 verildi**
+(2026-08-20, kullanıcı onayı) — hepsinde brief'in kendi önerisi seçildi, aşağıda
+her kararın altında "VERİLDİ" satırıyla yazılı. 9b'nin önünde engel kalmadı.
 
 ### Karar 1 — `lora` yalnız hesap mı, hesap+mini-decode mi? — **UYGULANDI (9a)**
 
@@ -343,7 +344,7 @@ sınamak `avbentem` ile farkı asla ortaya çıkarmaz).
 > kullanıcıya görünen açıklamada yazılı — "avbentem farklı sonuç veriyor"
 > tuzağı ikisiyle de kapatıldı.
 
-### Karar 3 — AT motoru hangi dizine gider?
+### Karar 3 — AT motoru hangi dizine gider? — **VERİLDİ: `src/protocols/serial/atcommands/`**
 
 `src/protocols/` alt dizinleri (CLAUDE.md): `serial · industrial · automotive ·
 marine · aerospace · building · network · wireless`. AT komutları ne kablosuz
@@ -357,7 +358,12 @@ seri hat üzerinde metin çerçeveleme — `wireless/`e koymak `lte-modem-at`
 YÜZÜNDEN yanlış bir emsal kurar (motor wireless değil, ÜZERİNDE çalıştığı
 CİHAZ wireless).
 
-### Karar 4 — Stateful dashboard'lar `ProtocolParser`'ın saf sözleşmesiyle nasıl uyuşur?
+> **VERİLDİ:** öneri seçildi. Beş kaydın da motoru `src/protocols/serial/atcommands/`
+> altında toplanır; `wireless-iot` domain'indeki üç kayıt (`lte-modem-at`,
+> `nb-iot`, `gnss-modem`) oradan beslenir. `protocol-core/framing/at/` seçeneği
+> elendi: katalogdaki `at-commands` kaydının kendi eklentisi olması bekleniyor.
+
+### Karar 4 — Stateful dashboard'lar `ProtocolParser`'ın saf sözleşmesiyle nasıl uyuşur? — **VERİLDİ: parser saf kalır**
 
 `Cellular Initialization Dashboard`, `TTFF Calculator`, `Fix Loss Detector`
 BİRDEN ÇOK transaction'ı biriktirir — ama `protocol-core/types.ts`: *"Akış
@@ -370,7 +376,13 @@ katmanın işi — bkz. `src/features/live-monitor/`).** Yeni bir "stateful pars
 sınıfı İCAT ETME — bu sözleşmeyi bu dalgada bükmenin bedeli 172 protokolün
 TAMAMINA yayılır (types.ts'in kendi uyarısı).
 
-### Karar 5 — `nb-iot`/`gnss-modem` nasıl "bağlı" olacak: `aliasOf`, `related`, yoksa ayrı `pluginId`?
+> **VERİLDİ:** öneri seçildi. `ProtocolParser` imzası DEĞİŞMEZ — ne ikinci bir
+> stateful sözleşme, ne `parse(bytes, context?)` gibi genişletilmiş imza.
+> `Cellular Initialization Dashboard`, `TTFF Calculator` ve `Fix Loss Detector`
+> feature katmanında yaşar; girdileri parser'ın ürettiği tekil `ParsedFrame`
+> dizisidir. 9c/9e yazılırken bu sınır aşılırsa dur ve sor.
+
+### Karar 5 — `nb-iot`/`gnss-modem` nasıl "bağlı" olacak? — **VERİLDİ: ayrı `pluginId` + iç çağrı**
 
 Üçü de mümkün, ikisi hâlâ `related` (motor paylaşımı ama İKİNCİ bir yorumlama
 katmanı — wireless-m-bus/mqtt/coap'ın SIFIR-yeni-kod `aliasOf`'undan farklı).
@@ -381,7 +393,13 @@ ayıklama) — `aliasOf` "ikinci parser yazma, birebir aynı motor" demektir
 (CLAUDE.md), burada aynı değil. `gnss-modem/nmea-0183` emsali zaten `related`
 kullanıyor, `aliasOf` değil — tutarlı.
 
-### Karar 6 — Hesap sekmeleri protokol sayfasına nasıl bağlanacak? (9a'da DOĞDU, cevapsız)
+> **VERİLDİ:** öneri seçildi. Beş kaydın beşi de kendi `pluginId`sini alır;
+> hiçbiri `aliasOf` DEĞİLDİR. `nb-iot` ve `gnss-modem` `lte-modem-at`in
+> ayrıştırıcısını İÇERİDEN çağırır, kendi yorumlama katmanını üstüne yazar
+> (AcT=9 tespiti + PSM/eDRX çıkarımı; `AT+QGPSGNMEA` yanıtından NMEA cümlesi
+> ayıklayıp `nmea-0183` motoruna devretme). NMEA parser'ı YENİDEN YAZILMAZ.
+
+### Karar 6 — Hesap sekmeleri protokol sayfasına nasıl bağlanacak? — **VERİLDİ: `calculatorIds` + bağlantı**
 
 Bugün `ProtocolPage` yalnız `decode` sekmesinde eklenti yükler; `timing`, `data`,
 `diagnostics` sekmeleri katalogdaki `tools` **metin listesini** anahtar kelimeyle
@@ -408,6 +426,20 @@ Seçenekler:
 **Öneri: (b).** `ready`'nin ne demek olduğunu bozmadan vaadi karşılar ve (c)'yi
 ileride engellemez. (c) kendi dalgasını hak eder — karar 4'ün "stateful dashboard
 UI katmanında yaşar" sonucuyla aynı yere bakıyor, ikisi birlikte tasarlanmalı.
+
+> **VERİLDİ: (b).** `CatalogProtocol`e opsiyonel `calculatorIds?: readonly string[]`
+> eklenir, `ProtocolPage` ilgili sekmede araca bağlantı basar. Kapsam ve bekçiler:
+>
+> - `lora` ilk kullanıcı: `['lora-airtime', 'lora-link-budget', 'lora-battery']`.
+> - `catalog.test.ts`e iki yönlü bekçi: her `calculatorIds` girdisi
+>   `CALCULATOR_TOOLS`ta VAR olmalı (`registry.test.ts`in protokol tarafındaki
+>   karşılığı). Ölü id sessizce 404'e düşer, yalnız burada yakalanır.
+> - `ProtocolPage.test.tsx:73-79` (Modbus RTU, `calculatorIds` yok) DEĞİŞMEDEN
+>   geçmeli — dal yalnız alan doluyken kurulur.
+> - Bu dalgada katalog sayıları (8/54/172) ve `lora.status` (`partial`)
+>   DEĞİŞMEZ. `ready`'ye yükseltmek (c)'nin işi.
+>
+> Kendi turu var, 9b-9e zincirinden bağımsız; sırayı bozmadan araya alınabilir.
 
 ## Tuzaklar
 
@@ -472,6 +504,19 @@ Tüm e2e paketi 416/416 yeşil.
 oldu (motor + React aracı + kayıt + i18n + e2e), ama hiçbiri mimari karar
 gerektirmedi. Karar 6 bunun artığıdır ve 9a'yı bloklamadı.
 
-**9b-9e için karar 3/4/5'i yanıtla, sonra başla.** Karar 3 (dizin) ve karar 4
-(stateful/saf gerilimi) mimari niteliğinde — Opus · high. 9b bitmeden 9c/9d/9e'ye
-girilmez. Karar 6 bağımsızdır, kendi turunda ele alınabilir.
+**9b-9e'nin önünde engel kalmadı** — karar 3/4/5 verildi (2026-08-20). Sıradaki
+iş **9b: `at-commands` jenerik motoru**, `src/protocols/serial/atcommands/`
+altına. Jenerik çerçeveleme: komut/yanıt ayrımı, URC akışı, final result code
+(`OK`/`ERROR`/`+CME ERROR: <n>`/`+CMS ERROR: <n>`), komut durum makinesi
+(IDLE→COMMAND_SENT→WAIT_RESPONSE→FINAL_RESULT). `hayes-command-set` bu motorun
+üstüne kendi sözlüğünü koyar (ATD/ATA/ATH/ATZ, S-register, `+++` guard-time).
+
+Tuzaklar hatırlatma: satır sonu `\r\n` SABİT VARSAYILMAZ (V.250 S3/S4
+seçilebilir kılıyor); `+++` yalnız üç `+` aranarak bulunmaz, guard-time
+penceresi ZORUNLU.
+
+9b bitmeden 9c/9d/9e'ye girilmez. **Karar 6 bağımsız** ve kendi turu var —
+9b'den önce ya da sonra alınabilir, zinciri bozmaz.
+
+Model önerisi: 9b Sonnet · high (tarif net, emsal var, mimari karar kalmadı).
+Karar 6 turu Sonnet · medium (dar, bekçileri yazılı).
