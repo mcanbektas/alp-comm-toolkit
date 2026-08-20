@@ -125,6 +125,6 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Faz 2'de hiçbir protokol motoru yok: katalogdaki 172 kaydın tamamı `status: 'planned'`.
-  Sekmeler görünür ama içleri "planlandı" bildirimi taşır. Boş kart basmak yasak — bir sekme
-  açılıyorsa ya gerçek bir motoru vardır ya da neyin geleceğini söyler.
+- Katalogdaki 172 kaydın **122'si hâlâ `status: 'planned'`** (41 `ready`, 9 `partial`).
+  O sekmeler görünür ama içleri "planlandı" bildirimi taşır. **Boş kart basmak yasak** —
+  bir sekme açılıyorsa ya gerçek bir motoru vardır ya da neyin geleceğini söyler.
