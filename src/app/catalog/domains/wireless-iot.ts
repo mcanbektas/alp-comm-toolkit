@@ -404,7 +404,15 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'AT command layer of cellular modems (3GPP TS 27.007 plus vendor extensions) used to bring up SIM, network registration, data sessions and sockets on IoT hardware.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 9c: TS 27.007 komut veritabanı yazıldı
+          // (src/protocols/wireless/cellular/lteModemAt.ts) — CSQ/COPS/CREG/
+          // CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN, at-commands'ın üstünde.
+          // "AT Console"/"Boot Timeline" (Web Serial UI) ve Dashboard'ın React
+          // katmanı bu dalgada YOK — motor (`createCellularInitializationState`)
+          // hazır, UI kendi turunu hak ediyor (karar 6'nın hesap sekmesi
+          // bağlantısıyla aynı sınıf iş).
+          status: 'ready',
+          pluginId: 'lte-modem-at',
           tabs: [
             'overview',
             'live',

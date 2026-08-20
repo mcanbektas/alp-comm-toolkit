@@ -1734,6 +1734,62 @@ export const en: TranslationDictionary = {
   'protocol.atCommands.example.bannerText.description':
     'Manufacturer/banner text that matches no known pattern — not treated as an error.',
 
+  // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
+  'protocol.lteModemAt.documentation.summary':
+    '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',
+  'protocol.lteModemAt.warning.csqUnknown': 'Value is 99 — signal could not be measured or detected.',
+  'protocol.lteModemAt.warning.accessTechnologyVendorCollision':
+    'AcT value is 8 or higher — vendor firmware in this range may use extensions that COLLIDE with the official TS 27.007 table (e.g. SIMCom uses 8=CDMA/HDR while the spec defines 8=EC-GSM-IoT). Check the device’s own AT command manual to be sure.',
+  'protocol.lteModemAt.warning.pdpTypeObsolete':
+    'This PDP type is marked "Obsolete" in the current spec text — still listed, but not expected on new deployments.',
+  'protocol.lteModemAt.warning.cgdcontTailNotDecoded':
+    'Everything after the first six parameters (cid..h_comp) varies by vendor/release — not decoded as a fixed schema, left raw.',
+  'protocol.lteModemAt.warning.cpinUnrecognizedCode':
+    'Not in TS 27.007’s 16-code list — likely a vendor-specific status code.',
+  'protocol.lteModemAt.warning.bareIdentifierAmbiguous':
+    'An unprefixed bare digit string: could be an AT+CIMI (IMSI) or bare AT+CGSN (IMEI/serial) response — which one it is CANNOT be determined from a single line, it needs session context that knows which command was sent.',
+  'protocol.lteModemAt.warning.sensitiveExportValue':
+    'This value is a device/subscriber identifier — masking it on export is recommended.',
+  'protocol.lteModemAt.example.csq.name': 'Signal quality (CSQ)',
+  'protocol.lteModemAt.example.csq.description':
+    'RSSI is converted to dBm; BER stays an ordinal class, never a percentage (vendor tables disagree).',
+  'protocol.lteModemAt.example.copsAlphanumeric.name': 'Operator info (alphanumeric)',
+  'protocol.lteModemAt.example.copsAlphanumeric.description':
+    'Long alphanumeric operator name; access technology decodes to E-UTRAN.',
+  'protocol.lteModemAt.example.copsNumericActCollision.name': 'Operator info (numeric, AcT collision warning)',
+  'protocol.lteModemAt.example.copsNumericActCollision.description':
+    'MCC/MNC split plus the vendor-collision warning for AcT=8 — MCC 901 is not assigned to any real country, chosen for illustration.',
+  'protocol.lteModemAt.example.cregRegistered.name': 'Registration status (CREG, home network)',
+  'protocol.lteModemAt.example.cregRegistered.description':
+    'LAC and cell ID are converted from hex to decimal; access technology is E-UTRAN.',
+  'protocol.lteModemAt.example.ceregEmergency.name': 'LTE registration status (CEREG, emergency only)',
+  'protocol.lteModemAt.example.ceregEmergency.description':
+    'The field is named TAC (unlike CREG’s LAC); AcT=9 indicates NB-IoT.',
+  'protocol.lteModemAt.example.cgattAttached.name': 'PS attach state (CGATT)',
+  'protocol.lteModemAt.example.cgattAttached.description': 'A simple boolean state — attached or not.',
+  'protocol.lteModemAt.example.cgdcontFull.name': 'PDP context (CGDCONT)',
+  'protocol.lteModemAt.example.cgdcontFull.description':
+    'The six fixed fields are decoded; an empty PDP address is skipped without producing a field (vendors disagree on this behavior).',
+  'protocol.lteModemAt.example.cimiBare.name': 'IMSI query (CIMI, unprefixed)',
+  'protocol.lteModemAt.example.cimiBare.description':
+    'The Quectel EC25/EC21 manual’s own worked example — an unprefixed bare digit string, indistinguishable from CGSN’s bare form.',
+  'protocol.lteModemAt.example.cgsnBare.name': 'Serial number (CGSN, unprefixed)',
+  'protocol.lteModemAt.example.cgsnBare.description':
+    '3GPP TS 27.007’s own §5.4 example — an unprefixed bare digit string, indistinguishable from CIMI.',
+  'protocol.lteModemAt.example.cgsnPrefixed.name': 'Serial number (CGSN=1, DEFINITE IMEI)',
+  'protocol.lteModemAt.example.cgsnPrefixed.description':
+    'The prefixed form — unambiguous, decodes directly as IMEI and carries the sensitive-value warning.',
+  'protocol.lteModemAt.example.cclk.name': 'Real-time clock (CCLK)',
+  'protocol.lteModemAt.example.cclk.description':
+    'The timezone is in QUARTER-HOUR units — "+08" means two hours, not four (verified against the spec’s own example).',
+  'protocol.lteModemAt.example.cpinReady.name': 'SIM status (ready)',
+  'protocol.lteModemAt.example.cpinReady.description': 'No PIN required, the SIM is ready to use.',
+  'protocol.lteModemAt.example.cpinLocked.name': 'SIM status (PIN pending)',
+  'protocol.lteModemAt.example.cpinLocked.description': 'A known status from the standard 16-code list.',
+  'protocol.lteModemAt.example.finalOk.name': 'OK',
+  'protocol.lteModemAt.example.finalOk.description':
+    'A final result code carried over verbatim from at-commands — stays consistent on this page too.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header is incomplete: at least 8 bytes are required (version, inverse version, payload type, payload length).',

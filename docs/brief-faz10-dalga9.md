@@ -14,9 +14,10 @@ LoRaWAN'dan farklı — PHY hesap makinesi) ve beş kayıtlık bir AT-komut aile
 **9a TAMAM.** Karar 1 ve karar 2 uygulandı. Ne yazıldığı ve keşif turunun hangi
 öncülünün yanlış çıktığı aşağıda: bkz. "9a — ne yapıldı" ve düzeltilmiş §2.
 
-**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı TAMAM** —
-bkz. "9b — ne yapıldı". `hayes-command-set` bu turda YAZILMADI, kendi küçük
-kararını bekliyor (aşağıda ayrıca işaretli). 9c/9d/9e hâlâ önde.
+**Karar 3/4/5/6 verildi** (2026-08-20). **9b'nin `at-commands` kısmı ve 9c'nin
+tamamı TAMAM** — bkz. "9b — ne yapıldı" ve "9c — ne yapıldı". `hayes-command-set`
+bu turda YAZILMADI, kendi küçük kararını bekliyor (aşağıda ayrıca işaretli).
+9d/9e hâlâ önde, 9c'ye bağlı.
 
 ## Durum — keşif turunda doğrulananlar
 
@@ -181,18 +182,20 @@ satır-yönelimli ASCII'dir (`\r\n` ile kendi kendini sınırlar) — tıpkı h�
 | Yol | Durum | pluginId/aliasOf | Bu dalgada |
 |---|---|---|---|
 | `wireless-iot/lora-lpwan/lora` | ~~planned~~ **partial** | yok/yok (bilinçli) | **TAMAM** — motor `protocol-core/timing/lora.ts`, araçlar `/calculators` altında; eklenti YAZILMADI, gerekçe 9a bölümünde |
-| `interfaces-framing/framing-stream-protocols/hayes-command-set` | planned | yok/yok | karar 1'e bağlı |
-| `interfaces-framing/framing-stream-protocols/at-commands` | planned | yok/yok | **ready**, motor |
-| `wireless-iot/cellular-iot/lte-modem-at` | planned | yok/yok | karar 4'e bağlı |
+| `interfaces-framing/framing-stream-protocols/hayes-command-set` | planned | yok/yok | madde 7'ye bağlı (henüz yazılmadı) |
+| `interfaces-framing/framing-stream-protocols/at-commands` | ~~planned~~ **ready** | `at-commands` | **TAMAM** |
+| `wireless-iot/cellular-iot/lte-modem-at` | ~~planned~~ **ready** | `lte-modem-at` | **TAMAM** — motor `protocols/wireless/cellular/lteModemAt.ts` |
 | `wireless-iot/cellular-iot/nb-iot` | planned | yok/yok | 9d, lte-modem-at'e bağlı |
 | `wireless-iot/cellular-iot/gnss-modem` | planned | yok/yok | 9e, lte-modem-at + nmea-0183'e bağlı |
 
 ## BEKÇİ BORCU — YOK
 
 Altı kayıt da zaten katalogda; yalnız `status`/`pluginId` işlenecek. 8/54/172
-dokunulmaz. Registry 48 (dalga 8 sonrası) → en fazla **53**: `lora` eklenti
-YAZILMADI (karar 1'in sonucu), yalnız beş AT kaydı registry'ye girebilir.
-9a sonrası registry hâlâ 48. Katalog sayıları da 9a'da değişmedi.
+dokunulmaz. Registry 48 (dalga 8 sonrası) → 9b'de **49** (`at-commands`) →
+9c'de **50** (`lte-modem-at`). `lora` eklenti hiç YAZILMADI (karar 1'in
+sonucu), `hayes-command-set` hâlâ yazılmadı — en fazla **52** kalabilir
+(nb-iot + gnss-modem, 9d/9e). Katalog sayıları (8/54/172) 9a/9b/9c'nin
+hiçbirinde değişmedi.
 
 ## Kapsam bölmesi
 
@@ -310,19 +313,79 @@ bu yüzden motorda varsayılanı 0 (kendiliğinden kimya varsaymaz), formda 1
    üstüne ATD/ATA/ATH/ATZ/S-register/`+++` sözlüğünü mü koyar, yoksa CAN
    2.0A/2.0B emsali gibi AYNI dosyada ikinci bir `ProtocolPlugin` mi olur.
 
-### 9c — `lte-modem-at` (hücresel sözlük, 9b'ye bağlı)
+### 9c — `lte-modem-at` (hücresel sözlük, 9b'ye bağlı) — **TAMAM**
 
-8. TS 27.007 komut veritabanı: en az CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/
-   CGSN/CCLK/CPIN (brief'te tam yanıt formatlarıyla doğrulandı, kaynaklar
-   tablosuna bkz.). Dar küme — CLAUDE.md "Yeni bir motor yazarken fixture'ını da
-   yaz" kuralı burada AT+CSQ→`+CSQ: 20,99` gibi somut örneklerle karşılanır.
-9. IMEI/IMSI/ICCID/telefon numarası **Privacy Masking on Export** — katalog
-   bunu açıkça vaat ediyor (`wireless-iot.ts:417`), CLAUDE.md'nin "kullanıcı
-   verisi yerelde kalır" ilkesiyle aynı yönde ama EXPORT'a özel bir maskeleme
-   davranışı — dar kapsamda olsa bile atlanmamalı (güvenlik-bitişik özellik).
-10. `Cellular Initialization Dashboard` STATEFUL (birden çok transaction'ı
-    biriktirir) — `ProtocolParser`'ın saf/durumsuz sözleşmesiyle nasıl bir
-    araya geleceği karar 4.
+Ne yazıldı: `src/protocols/wireless/cellular/lteModemAt.ts` (+ `.test.ts`, 39
+test). Katalog kategorisiyle hizalı dizin (`wireless-iot` → `wireless/`),
+`at-commands`i CROSS-IMPORT eder (`gnss-modem → nmea-0183` için brief'in zaten
+planladığı desenin aynısı). Katalog: `planned` → `ready`, `pluginId: 'lte-modem-at'`,
+`EXPECTED_CATEGORY: wireless-iot`. Registry 49 → **50**.
+
+**Mimari: bileşim, kopyalama değil.** `lteModemAtParser.parse()` önce
+`atCommandsParser.parse()`i çağırır (satır sınıflandırma, final result code,
+echo — hepsi 9b'de çözülü kalır), sonra yalnız `kind: 'information'` ve
+prefiksi bilinen bir komut adına denk gelen çerçeveleri zenginleştirir.
+`OK`/`ERROR`/echo/prompt satırları bu dosyaya hiç uğramadan aynen geçer.
+
+8. TS 27.007 komut veritabanı — **madde 8 TAMAM**, on komutun onu da yazıldı
+   (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN). Fixture'lar spec'in
+   VE vendor kılavuzlarının kendi doğrulanmış örnekleri (araştırma turu: 3GPP TS
+   27.007 v18.8.0 doğrudan PDF'ten okundu, Quectel EC25&EC21/u-blox SARA-R4-N4/
+   SIMCom SIM7500-7600 çapraz doğrulama). Üç gerçek satıcı çelişkisi bulundu ve
+   HİÇBİRİ sessizce çözülmedi:
+   - **BER yüzdesi**: u-blox ve SIMCom farklı tablo veriyor → yalnız ordinal
+     sınıf (0-7) taşınır, yüzde uydurulmaz.
+   - **AcT ≥ 8**: SIMCom'un 8=CDMA/HDR'ı spec'in 8=EC-GSM-IoT'siyle ÇAKIŞIYOR →
+     eşik-üstü değerler satıcı-çakışma uyarısı taşır (hem birim testinde hem
+     e2e'de sınandı).
+   - **CGDCONT `<PDP_addr>`**: SIMCom hep boş döner diyor, u-blox'un kendi
+     örneği dolu gösteriyor → boşsa alan hiç üretilmez, "yok" ile "bilinmiyor"
+     ayrımı zorlanmaz.
+
+   **CIMI/CGSN bare yanıt — dürüst belirsizlik.** İkisi de öneksiz salt rakam
+   döner (V.250'nin bilinçli istisnası), tek satırdan AYIRT EDİLEMEZ — bu
+   yüzden `numeric-identifier` alanı ikisini de kapsayan GENEL bir aday,
+   "kesinlikle IMSI" ya da "kesinlikle IMEI" iddia edilmez. `AT+CGSN=1`in
+   prefiksli formu (`+CGSN: "..."`) kesindir, ayrı `serial-number` alanına gider.
+
+   **CREG/CEREG `reject_cause` anlamı çözülmedi** — CREG TS 24.008 Annex G'ye,
+   CEREG TS 24.301 Annex A'ya bakar (FARKLI tablolar), yalnız CEREG tarafı
+   kısmen doğrulandı (araştırma #7/#8/#14'ü doğrudan spec'ten teyit etti);
+   CREG tarafı hiç doğrulanmadı. Asimetrik/eksik doğrulanmış bir tabloyu
+   kısmen yazmak CME/CMS disipliniyle çelişirdi — yapı (cause_type + ham sayı)
+   çözülür, HİÇBİR anlam tablosu yazılmaz.
+
+9. **Privacy Masking on Export — motor yazıldı, bağlantı YOK, bilinçli.**
+   `maskSensitiveIdentifier()` (son 4 hane görünür, gerisi •) test edilmiş ve
+   hazır; `serial-number`/`numeric-identifier` alanları `sensitiveExportValue`
+   uyarısıyla DecodePanel'de ZATEN görünür işaretli (ekranda sınandı). Ama
+   BAĞLANMADI: keşif turu bu depoda decoded-alan seviyesinde export eden TEK
+   mekanizmanın `live-monitor/formatRecord.ts` (CSV/JSON/TXT) olduğunu, ve
+   onun HAM BAYT üzerinden çalıştığını buldu — 172 protokolün TAMAMI için
+   protokol BAĞIMSIZ, decode edilmiş alan bilmiyor. Maskelemeyi oraya bağlamak
+   o jenerik mekanizmayı protokol-farkında yapmayı gerektirirdi — karar 4'ün
+   "172 protokolün tamamına yayılır" uyarısıyla AYNI SINIF risk, tek dalganın
+   kapsamının çok ötesinde. ICCID/telefon numarası maskelemesi de YOK — kaynak
+   komutları (AT+CCID/AT+QCCID, AT+CNUM) madde 8'in listesinde değil.
+10. `Cellular Initialization Dashboard` — **motor yazıldı
+    (`createCellularInitializationState`), React UI YOK.** Karar 4 uygulandı:
+    `features/live-monitor/monitorIngestor.ts`teki `MonitorIngestor` ile AYNI
+    desen — React'ten bağımsız, kapanışlı, saf durum biriktirici,
+    `lteModemAtParser`in ürettiği `ParsedFrame`leri tüketir, `at-commands`
+    oturum makinesini (echo/URC ayrımı) hiç bilmez. UI katmanı karar 6'nın
+    hesap sekmesi bağlantısıyla aynı sınıf iş, kendi turunu hak ediyor.
+
+    Katalogun "model, firmware, IMEI, SIM, operator, RAT, band, IP" vaadinden
+    bu dalgada YALNIZ IMEI/SIM/operator/RAT(AcT)/IP üretilebilir —
+    model/firmware (ATI, AT+CGMM, AT+CGMR) ve bant (vendor-özel, ör.
+    AT+QNWINFO) madde 8'in komut kümesinde YOK, LoRa'nın RSSI/SNR Scatter'ıyla
+    aynı gerekçeyle uydurulmadı.
+
+Doğrulama: `npm run typecheck` temiz · `npm test` 3033/3033 (39 yeni) ·
+`e2e/lte-modem-at-decode.spec.ts` (yeni) 9/9 — HEX ofset/vurgulama gerçek
+tarayıcıda sınandı (LAC `1A2D`→6701, hücre kimliği `0001A2B3`→107187, CCLK
+`+08`→2 saat hepsi ekranda doğrulandı) · ekran görüntüsüyle bakıldı (CSQ,
+CREG, CCLK, CGSN-bare).
 
 ### 9d — `nb-iot` (9c'ye bağlı)
 
@@ -548,16 +611,27 @@ sorulmadan kendiliğinden karar verilmedi. Küçük, dar bir soru: ortak motoru
 İÇERİDEN mi çağırır, yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci bir
 `ProtocolPlugin` mi olur.
 
-Sıradaki iş **9c: `lte-modem-at`** (hücresel sözlük) — `at-commands`in
-üstüne TS 27.007 komut veritabanı (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/
-CGSN/CCLK/CPIN), IMEI/IMSI/ICCID export maskesi, Cellular Initialization
-Dashboard (karar 4 gereği: parser saf kalır, dashboard feature katmanında).
+~~Sıradaki iş **9c: `lte-modem-at`**~~ — **bitti** (yukarı bkz. "9c — ne yapıldı").
+On komutun onu da yazıldı, üç gerçek satıcı çelişkisi (BER%, AcT≥8, CGDCONT
+PDP_addr) hiçbiri sessizce çözülmedi. Privacy masking motoru hazır ama
+BAĞLANMADI (jenerik export ham bayt üzerinden çalışıyor, protokol-farkında
+değil — bağlamak 172 protokolün tamamını ilgilendiren bir sözleşme değişikliği
+olurdu). Cellular Initialization Dashboard'ın motoru hazır, React UI yok —
+karar 6'yla aynı sınıf iş, kendi turunu bekliyor.
 
-9c bitmeden 9d/9e'ye girilmez. **Karar 6 hâlâ bağımsız** ve kendi turu var.
-**`hayes-command-set` (madde 7) de bağımsız** — 9c'den önce, sonra ya da
-paralel alınabilir, zinciri bozmaz (yalnız kendi küçük kararını gerektirir).
+Sıradaki iş **9d: `nb-iot`** (`lte-modem-at`'e bağlı) — CEREG/CSQ/vendor
+URC'lerinden NB-IoT'ye özgü görünüm (AcT=9 tespiti, PSM/eDRX zamanlayıcı
+çıkarımı). Karar 5 zaten verildi: `aliasOf` DEĞİL, ayrı `pluginId` + iç çağrı.
 
-Model önerisi: 9c Sonnet · high (tarif net — dar komut kümesi, fixture'lar
-brief'te hazır — ama Cellular Dashboard'ın stateful/saf sınırını doğru
-çizmek dikkat ister). Karar 6 turu Sonnet · medium. hayes-command-set turu
-Sonnet · medium (dar, iki seçenekten biri).
+9d bitmeden 9e'ye girilmez (nb-iot bağımsız görünüyor olabilir ama brief
+sırayı böyle koymuş — 9c'nin çıktısını gördükten sonra değişmedi). **Karar 6
+hâlâ bağımsız** ve kendi turu var. **`hayes-command-set` (madde 7) de
+bağımsız** — 9d'den önce, sonra ya da paralel alınabilir, zinciri bozmaz.
+**Cellular Initialization Dashboard'ın UI'ı da bağımsız üçüncü bir iş** —
+motoru hazır, karar 6'yla birlikte tasarlanmalı (ikisi de "hesap/dashboard
+sekmesini protokol sayfasına bağlama" sorusuna bakıyor).
+
+Model önerisi: 9d Sonnet · high (tarif net, emsal var — gnss-modem/nmea-0183
+zaten aynı "yorumlama katmanı, motor paylaşımı" desenini planlıyor). Karar 6
+ve UI turları Sonnet · medium. hayes-command-set turu Sonnet · medium (dar,
+iki seçenekten biri).

@@ -295,4 +295,11 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'at-commands', () =>
     import('./serial/atcommands/atCommands').then((module) => module.atCommandsPlugin),
   );
+  // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
+  // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
+  // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant
+  // bu dalgada YOK — kaynak komutları madde 8 listesinde değil.
+  registerOnce(registry, 'lte-modem-at', () =>
+    import('./wireless/cellular/lteModemAt').then((module) => module.lteModemAtPlugin),
+  );
 }

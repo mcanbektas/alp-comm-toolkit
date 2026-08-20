@@ -1736,6 +1736,62 @@ export const tr = {
   'protocol.atCommands.example.bannerText.description':
     'Bilinen hiçbir kalıba uymayan üretici/banner metni — hata sayılmaz.',
 
+  // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
+  'protocol.lteModemAt.documentation.summary':
+    '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',
+  'protocol.lteModemAt.warning.csqUnknown': 'Değer 99 — sinyal ölçülemedi ya da algılanamadı.',
+  'protocol.lteModemAt.warning.accessTechnologyVendorCollision':
+    'AcT değeri 8 ve üstü — satıcı firmware’leri bu aralıkta resmi TS 27.007 tablosuyla ÇAKIŞAN eklentiler kullanabilir (ör. SIMCom’da 8=CDMA/HDR, spec’te 8=EC-GSM-IoT). Emin olmak için cihazın kendi AT komut kılavuzuna bakın.',
+  'protocol.lteModemAt.warning.pdpTypeObsolete':
+    'Bu PDP türü güncel spec metninde "Obsolete" işaretli — hâlâ listeli ama yeni dağıtımlarda beklenmez.',
+  'protocol.lteModemAt.warning.cgdcontTailNotDecoded':
+    'İlk altı parametreden (cid..h_comp) sonrası satıcıya/sürüme göre değişir — sabit bir şema olarak çözülmedi, ham bırakıldı.',
+  'protocol.lteModemAt.warning.cpinUnrecognizedCode':
+    'TS 27.007’nin 16 kodluk listesinde yok — muhtemelen satıcıya özel bir durum kodu.',
+  'protocol.lteModemAt.warning.bareIdentifierAmbiguous':
+    'Öneksiz salt rakam dizisi: AT+CIMI (IMSI) ya da çıplak AT+CGSN (IMEI/seri no) yanıtı olabilir — hangisi olduğu tek satırdan AYIRT EDİLEMEZ, gönderilen komutu bilen oturum bağlamı gerekir.',
+  'protocol.lteModemAt.warning.sensitiveExportValue':
+    'Bu değer bir cihaz/abone kimliğidir — dışa aktarırken maskelenmesi önerilir.',
+  'protocol.lteModemAt.example.csq.name': 'Sinyal kalitesi (CSQ)',
+  'protocol.lteModemAt.example.csq.description':
+    'RSSI dBm’e çevrilir; BER ordinal sınıf olarak kalır, yüzdeye çevrilmez (satıcılar arası tablo çelişkisi).',
+  'protocol.lteModemAt.example.copsAlphanumeric.name': 'Operatör bilgisi (alfanumerik)',
+  'protocol.lteModemAt.example.copsAlphanumeric.description':
+    'Uzun alfanumerik biçimde operatör adı; erişim teknolojisi E-UTRAN olarak çözülür.',
+  'protocol.lteModemAt.example.copsNumericActCollision.name': 'Operatör bilgisi (numeric, AcT çakışma uyarısı)',
+  'protocol.lteModemAt.example.copsNumericActCollision.description':
+    'MCC/MNC ayrıştırması ve AcT=8’in satıcı çakışma uyarısı — MCC 901 gerçek bir ülkeye atanmamış, gösterim amaçlı.',
+  'protocol.lteModemAt.example.cregRegistered.name': 'Kayıt durumu (CREG, ev şebekesi)',
+  'protocol.lteModemAt.example.cregRegistered.description':
+    'LAC ve hücre kimliği hex’ten ondalığa çevrilir; erişim teknolojisi E-UTRAN.',
+  'protocol.lteModemAt.example.ceregEmergency.name': 'LTE kayıt durumu (CEREG, yalnız acil çağrı)',
+  'protocol.lteModemAt.example.ceregEmergency.description':
+    'Alan adı TAC olur (CREG’in LAC’ından farklı); AcT=9 NB-IoT’ye işaret eder.',
+  'protocol.lteModemAt.example.cgattAttached.name': 'PS bağlanma durumu (CGATT)',
+  'protocol.lteModemAt.example.cgattAttached.description': 'Basit ikili durum — bağlı/bağlı değil.',
+  'protocol.lteModemAt.example.cgdcontFull.name': 'PDP bağlamı (CGDCONT)',
+  'protocol.lteModemAt.example.cgdcontFull.description':
+    'Altı sabit alan çözülür; boş PDP adresi alan hiç üretmeden atlanır (satıcılar arası çelişkili davranış).',
+  'protocol.lteModemAt.example.cimiBare.name': 'IMSI sorgusu (CIMI, öneksiz)',
+  'protocol.lteModemAt.example.cimiBare.description':
+    'Quectel EC25/EC21 kılavuzunun kendi doğrulama örneği — öneksiz salt rakam, CGSN’in bare formundan AYIRT EDİLEMEZ.',
+  'protocol.lteModemAt.example.cgsnBare.name': 'Seri numarası (CGSN, öneksiz)',
+  'protocol.lteModemAt.example.cgsnBare.description':
+    '3GPP TS 27.007’nin kendi §5.4 örneği — öneksiz salt rakam, CIMI’den AYIRT EDİLEMEZ.',
+  'protocol.lteModemAt.example.cgsnPrefixed.name': 'Seri numarası (CGSN=1, KESİN IMEI)',
+  'protocol.lteModemAt.example.cgsnPrefixed.description':
+    'Prefiksli form — belirsizlik yok, doğrudan IMEI olarak çözülür ve hassas-veri uyarısı taşır.',
+  'protocol.lteModemAt.example.cclk.name': 'Gerçek zamanlı saat (CCLK)',
+  'protocol.lteModemAt.example.cclk.description':
+    'Saat dilimi ÇEYREK SAAT biriminde — "+08" dört değil iki saat demektir (spec’in kendi örneğiyle doğrulandı).',
+  'protocol.lteModemAt.example.cpinReady.name': 'SIM durumu (hazır)',
+  'protocol.lteModemAt.example.cpinReady.description': 'PIN istenmiyor, SIM kullanıma hazır.',
+  'protocol.lteModemAt.example.cpinLocked.name': 'SIM durumu (PIN bekleniyor)',
+  'protocol.lteModemAt.example.cpinLocked.description': '16 kodluk standart listeden bilinen bir durum.',
+  'protocol.lteModemAt.example.finalOk.name': 'OK',
+  'protocol.lteModemAt.example.finalOk.description':
+    'at-commands’tan aynen devralınan final result code — bu sayfada da tutarlı görünür.',
+
   // --- DoIP ---
   'protocol.doip.error.headerTruncated':
     'Generic header eksik: en az 8 bayt gerekir (version, inverse version, payload type, payload length).',
