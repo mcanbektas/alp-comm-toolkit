@@ -304,16 +304,33 @@ bu yüzden motorda varsayılanı 0 (kendiliğinden kimya varsaymaz), formda 1
    (`command-name`/`action`/`parameters`); temel sözdizimi (`ATD`, `ATZ`) hâlâ
    `kind: 'command'` sayılır ama gövdesi ham kalır — bu, madde 7'nin işi.
 
-7. **`hayes-command-set`in bu motoru nasıl kullanacağı — hâlâ AÇIK, bugün
-   YAZILMADI.** Brief'in bu maddedeki "karar 1" atfı bu dalganın kendi karar
-   listesindeki (1-6) hiçbirine karşılık gelmiyor — muhtemelen erken bir
-   taslaktan kalma referans. Kullanıcıya sorulmadı, dolayısıyla KENDİLİĞİNDEN
-   karar verilmedi; yalnız madde 6 (at-commands, sınırları net) uygulandı.
-   `hayes-command-set` katalog kaydı hâlâ `planned`, `pluginId` yok,
-   dokunulmadı. Küçük ve dar bir karar gerekiyor — örnek çerçeve: ortak
-   motoru (`atCommandsParser`/`createAtLineExtractor`) İÇERİDEN çağırıp
-   üstüne ATD/ATA/ATH/ATZ/S-register/`+++` sözlüğünü mü koyar, yoksa CAN
-   2.0A/2.0B emsali gibi AYNI dosyada ikinci bir `ProtocolPlugin` mi olur.
+7. **`hayes-command-set`in bu motoru nasıl kullanacağı — KARAR VERİLDİ
+   (2026-08-20), UYGULAMA HENÜZ YAZILMADI.** Brief'in bu maddedeki "karar 1"
+   atfı bu dalganın kendi karar listesindeki (1-6) hiçbirine karşılık
+   gelmiyor — muhtemelen erken bir taslaktan kalma referans.
+
+   > **VERİLDİ: içeriden çağır + zenginleştir**, `lte-modem-at`/`nb-iot`/
+   > `gnss-modem`'in ÜÇÜNÜN de kullandığı desenin dördüncü kopyası —
+   > `hayesCommandSetParser.parse()` önce `atCommandsParser.parse()`i
+   > çağırır (satır sınıflandırması oradan gelir), sonra yalnız temel
+   > sözdizimi (`kind: 'command'`, ham gövde) çerçevelerini `enrichFrame`
+   > ile ATD/ATA/ATH/ATZ/S-register/`+++` alanlarıyla zenginleştirir.
+   > **CAN 2.0A/2.0B emsali ELENDİ** — araştırma turu CAN'ın gerçek deseninin
+   > "iki bağımsız parser, aynı dosyada TEK paylaşılan private helper, AYNI
+   > wire format" olduğunu gösterdi (`canClassic.ts`, `parseClassicFrame`);
+   > hayes-command-set/at-commands o kalıba uymuz — at-commands zaten HER AT
+   > satırını sınıflandırıyor, yalnız temel sözdizimin gövdesini bilerek ham
+   > bırakıyor. Kullanıcıya soruldu (`AskUserQuestion`, iki seçenek + gerekçe),
+   > "içeriden çağır" seçildi.
+
+   `hayes-command-set` katalog kaydı hâlâ `planned`, `pluginId` yok — karar
+   verildi ama dosya (`src/protocols/serial/atcommands/hayesCommandSet.ts`,
+   `atCommands.ts`ın yanında, `nbIot.ts`/`gnssModem.ts`in `lteModemAt.ts`in
+   yanında durmasıyla aynı yerleşim) henüz YAZILMADI. Gerçek iş: V.250 temel
+   sözdizimi (ATD/ATA/ATH/ATZ), S-register okuma/yazma (`ATSn?`/`ATSn=v`),
+   `+++` guard-time kaçışı, result code sayısal/verbose eşlemesi (ATV) —
+   spec araştırması gerektiren YENİ ayrıştırma mantığı, yalnız zaten var olan
+   veriyi yeniden etiketlemek değil.
 
 ### 9c — `lte-modem-at` (hücresel sözlük, 9b'ye bağlı) — **TAMAM**
 
@@ -842,9 +859,10 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
 ~~**Karar 6** — hesap sekmelerinin protokol sayfasına bağlanması
 (`calculatorIds`). Kendi turu var, `lora`nın ilk kullanıcısı olacak.~~
 **bitti** (yukarı bkz. "UYGULANDI (2026-08-20)").
-- **`hayes-command-set`** (madde 7) — ortak AT motorunu (`atCommandsParser`)
-  içeriden mi çağıracak yoksa CAN 2.0A/2.0B emsali gibi aynı dosyada ikinci
-  bir `ProtocolPlugin` mi olacak, dar bir karar bekliyor.
+- **`hayes-command-set`** (madde 7) — mimari KARARI VERİLDİ (2026-08-20,
+  yukarı bkz. "9b madde 7" içindeki VERİLDİ notu): ortak AT motorunu
+  içeriden çağırıp zenginleştirecek, CAN 2.0A/2.0B emsali ELENDİ. UYGULAMA
+  hâlâ YAZILMADI.
 - ~~**Cellular Initialization Dashboard'ın UI'ı** — motor (9c'de) hazır, karar
   6'yla aynı sınıf iş ("hesap/dashboard sekmesini protokol sayfasına
   bağlama"), birlikte tasarlanabilir.~~ **bitti** (yukarı bkz. "9c" içindeki
@@ -853,10 +871,16 @@ omurgası kapandı. Geriye BAĞIMSIZ üç iş kaldı, hiçbiri zincire bağlı d
   `data` sekmesi — ikisi de "Önerilen" seçenekti.
 
 ~~Sıradaki iş olarak Karar 6 öneriliyor~~ — **bitti**. ~~Cellular
-Initialization Dashboard'ın React UI'ı~~ — **bitti**. Geriye BAĞIMSIZ TEK iş
-kaldı: `hayes-command-set` (madde 7, dar bir karar bekliyor — motoru
-içeriden mi çağıracak yoksa ikinci `ProtocolPlugin` mi). Fresh bir oturumun
-ilk turu muhtemelen bu soruyu sormak olacak, triyaj kartı değil.
+Initialization Dashboard'ın React UI'ı~~ — **bitti**. Geriye TEK iş kaldı:
+`hayes-command-set`in UYGULAMASI (madde 7 — mimari karar artık yazılı,
+"içeriden çağır + zenginleştir"). Fresh bir oturum doğrudan başlayabilir,
+soru yok.
 
-Model önerisi: Sonnet · medium (dar kapsam, tek soru netleşince karar zaten
-yazılı hâle gelir).
+**Kapsam, gözden geçirildikten sonra ilk tahminden geniş çıktı:** yalnız
+motoru bağlamak değil, V.250 temel sözdizimi (ATD/ATA/ATH/ATZ), S-register
+okuma/yazma, `+++` guard-time, result code sayısal/verbose eşlemesi — hepsi
+spec araştırması gerektiren YENİ ayrıştırma mantığı (9a/9c/9d/9e'nin kendi
+sınıfı, "dar bir wiring kararı" değil). Model önerisi güncellendi: **Sonnet ·
+high** (mimari fork yok — bu artık netleşti — ama spec'e sadık kalmak birden
+çok doğrulanmış kaynak istiyor, tıpkı 9c'nin BER/AcT/CGDCONT satıcı
+çelişkileri gibi).
