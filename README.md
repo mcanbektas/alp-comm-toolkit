@@ -7,9 +7,9 @@ toplar; ham baytı çerçeveye, çerçeveyi mühendislik değerine çevirir.
 ALP süitinin üç ürününden biri. Hesap, veritabanı, API ve dağıtım
 [alp-platform](https://github.com/mcanbektas/alp-platform) deposundadır.
 
-> **Durum: Faz 10 — protokol dalgaları (2026-08-21, dalga 10b).** Dönüşüm/CRC/zamanlama
+> **Durum: Faz 10 — protokol dalgaları (2026-08-21, dalga 10c).** Dönüşüm/CRC/zamanlama
 > motorları, stream-framing çekirdeği, şema parser'ı ve Live Serial Monitor çalışıyor.
-> Katalogdaki 172 kaydın **49'u `ready`, 9'u `partial`, 114'ü `planned`**; kayıtlı 57
+> Katalogdaki 172 kaydın **51'i `ready`, 9'u `partial`, 112'si `planned`**; kayıtlı 59
 > protokol plugin'i var. Yol haritası aşağıda.
 
 ## Özellikler
@@ -263,13 +263,14 @@ altındaki `websocket/` klasörü aynı `ByteSource` sözleşmesini gerçekleyec
 
 Sıra numaraya göre değil bağımlılığa göre ilerledi: 3 ve 4 kardeş depoda olduğu için
 SPA tarafı 5→6→8→7 diye gitti. Faz 9 bitti; Faz 10 sürüyor — dalga 9 kapandı, dalga
-10'un 10a (SLIP+COBS) ve 10b (KISS+PPP) alt-dalgaları bitti, sıradaki 10c (HDLC+SDLC).
+10'un 10a (SLIP+COBS), 10b (KISS+PPP) ve 10c (HDLC+SDLC) alt-dalgaları bitti, sıradaki
+10d (XMODEM+YMODEM+ZMODEM).
 
 **Bugün ne çalışıyor:** spec §50'nin "gerçekten çalışmalı" dediği 15 aracın tamamı —
 HEX/ASCII, IEEE-754, endian, CRC hesaplayıcı, UART/SPI/I²C zamanlama, Live Serial Monitor,
 Custom Protocol Studio, Packet Builder ve protokol decoder'ları. `registerProtocolPlugin`
-ile kayıtlı 57 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
-114 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
+ile kayıtlı 59 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
+112 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
 
 ## Lisans
 

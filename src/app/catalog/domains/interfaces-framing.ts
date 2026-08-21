@@ -721,7 +721,21 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Bit-oriented data-link framing with a 0x7E flag, five-ones bit stuffing and an I/S/U control field, forming the base of PPP, SDLC and many telecom links.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10c: `hdlcCore.ts`nin (PAYLAŞILAN çekirdek, SDLC de
+          // kullanıyor) ÜSTÜNDE ince ProtocolPlugin sarmalı. Decode sekmesinin
+          // girdisi (hex yapıştırma) zaten bit-destuffed "Logical Frame"
+          // sayılır (spec'in kendi terimi) — bit-stuffing/senkron yakalama bu
+          // dalgada YOK ("Bit Stuffing View"/"Transmitted Bit Stream View"
+          // ERTELENDİ, COBS'un "COBS + CRC Pipeline" ertelemesiyle aynı
+          // disiplin). Control field basık/modulo-8 mod (ISO 13239 varsayılan
+          // profili); U-frame KOMUT adları (SABM/DISC/UA vb.) doğrulanmış bir
+          // bit-deseni↔ad tablosu yokluğunda BİLEREK adlanmadı, yalnız ham
+          // M-bit'ler + format (I/S/U) + P/F + N(S)/N(R)/S-tipi çözülür. FCS
+          // (CRC16_X25) hesaplanır VE doğrulanır (bacnetmstp.ts/zigbee.ts'in
+          // PASS/FAIL deseniyle aynı — PPP'nin (10b) fixture'sızlıkla
+          // ERTELEDİĞİNİN AKSİNE, burada motor+fixture ikisi de var).
+          status: 'ready',
+          pluginId: 'hdlc',
           // 'live' yok: bit-senkron çerçeveleme sıradan seri portla yakalanamaz,
           // ilk sürüm log/import üzerinden çalışır.
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
@@ -742,7 +756,13 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             "IBM's synchronous bit-oriented predecessor of HDLC, built around primary/secondary stations, station addressing and poll/final signalling in legacy mainframe links.",
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10c: `hdlcCore.ts`nin AYNISI (HDLC ile birebir aynı
+          // çerçeve şekli) — yalnız Address alanı "Station Address" olarak
+          // adlanır, 0xFF All-Stations (broadcast) notu taşır. HDLC'nin
+          // ERTELEDİĞİ aynı ikisi (bit-stuffing/senkron yakalama, U-frame
+          // komut adları) burada da YOK.
+          status: 'ready',
+          pluginId: 'sdlc',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Flag Detector',

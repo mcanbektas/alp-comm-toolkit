@@ -273,6 +273,68 @@ uyarı kodu: `noProtocolField`/`unknownLcpOption`/`malformedLcpOptions`).
 
 Doğrulama: `npm run typecheck` temiz, `npm test` 3206/3206.
 
-**Sıradaki alt-dalga 10c (HDLC + SDLC)** — brief'te tanımlı (yukarı), henüz
-uygulanmadı. 10a/10b'nin aksine GERÇEK yeni iş: FCS + I/S/U çerçeve
-sınıflandırması hiç yazılmadı.
+## 10c — UYGULANDI (2026-08-21)
+
+`src/protocols/serial/framing/hdlcCore.ts` (yeni, PAYLAŞILAN çekirdek) +
+`hdlc.ts` + `sdlc.ts` (ince sarmallar) — 10a/10b'nin aksine GERÇEK yeni iş:
+FCS + I/S/U çerçeve sınıflandırması motorda hiç yoktu, burada yazıldı.
+
+**Çerçeveleme kararı (brief'in "bit-stuffing bağlama kararı" diye
+işaretlediği açık uç) — `hdlcFlagExtractor` (PPP'nin/dalga 10b'nin motoru)
+KULLANILMADI, YANLIŞ araç olduğu için:** o motor `0x7D`'yi kaçış baytı
+sayıp XOR çözer (async HDLC/PPP kuralı), ama gerçek bit-senkron HDLC/
+SDLC'de bayt-seviyeli kaçış hiç YOK (bit-stuffing yalnız 5 ardışık `1`
+bitini hedefler) — kullansaydık rastgele bir Address/Control/Info baytını
+bozardık. `bitStuffing.ts` da uygun değildi (`BitStream` alır, bayt
+arabelleği değil — bilerek `FrameExtractor` DEĞİL, log/import ayrı bir yol
+için). Seçilen yol: decode sekmesinin girdisi (hex yapıştırma) spec'in
+kendi ayrımıyla (`02-framing-protokolleri.md` satır 163-164) zaten
+"Logical Frame" — bit-stuffing gerçek donanımda/sürücüde temizlenmiş
+sayılır. Bu yüzden KAÇIŞSIZ `createBoundedDelimiterExtractor`
+(`delimiterFraming.ts`, zaten var, start=end=0x7E) doğrudan kullanıldı —
+`framingErrorMapping.ts`e `'no-sync' → 'start-delimiter-not-found'`
+eşlemesi eklendi (bu motorun ürettiği, daha önce hiç eşlenmemiş bir kod).
+
+**Test sırasında yakalanan bir varsayım hatası (benim, kod bugu DEĞİL):**
+`createBoundedDelimiterExtractor`, `createEscapedDelimiterExtractor`den
+(SLIP/PPP/KISS'in motoru) FARKLI davranıyor — art arda iki delimiter'ı
+(`7E 7E`) HATA saymıyor, boş bir `frame` ile `'complete'` dönüyor
+(`delimiterFraming.ts:90`). İlk yazdığım test bunun tersini varsaymıştı,
+BAŞARISIZ oldu, düzeltildi (`hdlcCore.test.ts`). Gerçek güvenlik ağı motor
+DEĞİL — `hdlc.ts`/`sdlc.ts`in kendi `MIN_CONTENT_LENGTH` (4 bayt: Address+
+Control+FCS) kontrolü.
+
+**Control field — ISO 13239/Q.921 TEMEL/modulo-8 mod seçildi** (spec bit
+pozisyonlarını "profile-bağımlı" diye kasıtlı açık bırakıyor, PPP'nin RFC
+1662 varsayılanı seçmesiyle aynı disiplin): bit0=0→I-frame, bit0-1=01→
+S-frame (RR/REJ/RNR/SREJ adlanır), bit0-1=11→U-frame. **U-frame KOMUT
+adları (SABM/DISC/UA/FRMR vb.) BİLEREK adlanmadı** — repoda doğrulanmış
+bir bit-deseni↔ad tablosu yok, ezberden uydurmak yanlış ad basma riski
+taşır (LCP 12+/KISS persistence formülünün aynı disiplini, dalga 10b);
+yalnız format + P/F gösterilir.
+
+**FCS — HESAPLANIR VE DOĞRULANIR** (PPP'nin (10b) fixture'sızlıkla
+ERTELEMESİNİN AKSİNE): `CRC16_X25`, `bacnetmstp.ts`/`zigbee.ts`in PASS/FAIL
+deseniyle birebir. Fixture: `crcEngine.test.ts`teki doğrulanmış check değeri
+(`"123456789"` → `0x906E`) + bu dalganın örnek/test çerçeveleri motorun
+KENDİSİYLE (`computeNamedCrc`) hesaplanır — `bacnetmstp.test.ts`in "motorun
+kendi hesabından bağımsız" gerekçesiyle aynı: `crcCatalogue` ayrıca
+doğrulanmış, test edilen şey bayt sınırları (offset/uzunluk), CRC
+algoritmasının kendisi değil.
+
+Katalog: `hdlc`/`sdlc` → `status: 'ready'`, `pluginId` verildi. Registry
+57 → 59. Bekçiler: `hdlcCore.test.ts` (14, çekirdek bit-aritmetiği) +
+`hdlc.test.ts` (16) + `sdlc.test.ts` (14) + `e2e/hdlc-decode.spec.ts` +
+`e2e/sdlc-decode.spec.ts`. `tr.ts`/`en.ts` tam (HDLC 13, SDLC 13 yeni
+anahtar).
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3250/3250, `npm run
+test:e2e` 492/492, `npm run build` temiz. Tarayıcıda elle açıldı (decode +
+overview, HDLC+SDLC), FCS PASS gösterimi ve Station Address broadcast
+notu doğru, konsol hatasız.
+
+**Sıradaki alt-dalga: 10d (XMODEM + YMODEM + ZMODEM)** — brief'te tanımlı,
+henüz uygulanmadı. 10a/10b/10c'nin HİÇBİRİNE benzemez: framing motoruna
+UYMAYAN tek alt-dalga (stop-and-wait ACK/NAK oturumlu dosya transferi),
+üçü de sıfırdan. XMODEM checksum fixture'ı spec'te YOK (sembolik), sentetik
+payload için bağımsız hesaplanması gerekecek (dalga6/UBX emsali).

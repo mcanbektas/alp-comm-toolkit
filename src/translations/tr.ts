@@ -1872,6 +1872,46 @@ export const tr = {
   'protocol.ppp.example.compressedFields.description':
     'Address/Control atlanmış (ACFC), Protocol tek bayt olarak sıkıştırılmış (PFC) — ikisi birden.',
 
+  // --- HDLC (ISO/IEC 13239 temel mod, hdlcCore.ts'in üstünde ince sarmal) ---
+  'protocol.hdlc.documentation.summary':
+    'ISO/IEC 13239 (Q.921 temel modu) — 0x7E bayrağı, beş-bir bit doldurma ve I/S/U kontrol alanıyla PPP’nin, SDLC’nin ve birçok telekom hattının temelini oluşturan bit-yönelimli veri bağı çerçevelemesi. Decode sekmesi zaten bit-çözülmüş (destuffed) bayt dizisi alır — bit doldurma ve senkron yakalama bu dalgada kapsam dışı.',
+  'protocol.hdlc.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.hdlc.error.noDelimiter': 'Arabellekte Flag (0x7E) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.hdlc.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.hdlc.error.tooShort': 'İçerik Address+Control+FCS asgarisinden (4 bayt) kısa.',
+  'protocol.hdlc.error.fcsMismatch': 'FCS uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.hdlc.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.hdlc.example.iFrame.name': 'I-frame (sıra numaralı veri)',
+  'protocol.hdlc.example.iFrame.description':
+    'N(S)=1, N(R)=2, P/F=0 taşıyan bir Information çerçevesi — FCS doğrulanır.',
+  'protocol.hdlc.example.sFrame.name': 'S-frame (RR)',
+  'protocol.hdlc.example.sFrame.description':
+    'RR (Receive Ready), N(R)=3, P/F=1 taşıyan bir Supervisory çerçevesi — Information alanı yok.',
+  'protocol.hdlc.example.uFrame.name': 'U-frame (adlanmamış komut)',
+  'protocol.hdlc.example.uFrame.description':
+    'Unnumbered format — komut bitleri bu dalgada adlanmıyor (dosya başı disiplini), yalnız format + FCS gösterilir.',
+
+  // --- SDLC (hdlcCore.ts'in AYNISI, Address alanı Station Address olarak adlanır) ---
+  'protocol.sdlc.documentation.summary':
+    'IBM’in HDLC’den önceki senkron bit-yönelimli protokolü — istasyon adresleme ve primary/secondary poll/final sinyalizasyonu etrafında kurulu. Çerçeve şekli HDLC ile birebir aynı (`hdlcCore.ts` paylaşılır); yalnız Address alanı Station Address olarak yorumlanır.',
+  'protocol.sdlc.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.sdlc.error.noDelimiter': 'Arabellekte Flag (0x7E) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.sdlc.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.sdlc.error.tooShort': 'İçerik Station Address+Control+FCS asgarisinden (4 bayt) kısa.',
+  'protocol.sdlc.error.fcsMismatch': 'FCS uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.sdlc.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.sdlc.example.iFrame.name': 'I-frame (sıra numaralı veri)',
+  'protocol.sdlc.example.iFrame.description':
+    'N(S)=1, N(R)=2, P/F=0 taşıyan bir Information çerçevesi — FCS doğrulanır.',
+  'protocol.sdlc.example.poll.name': 'Poll (yayın adresi, RR)',
+  'protocol.sdlc.example.poll.description':
+    'Station Address=0xFF (All-Stations), RR ve P/F=1 — bir primary istasyonun poll çağrısı örneği.',
+  'protocol.sdlc.example.uFrame.name': 'U-frame (adlanmamış komut)',
+  'protocol.sdlc.example.uFrame.description':
+    'Unnumbered format — komut bitleri bu dalgada adlanmıyor (dosya başı disiplini), yalnız format + FCS gösterilir.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

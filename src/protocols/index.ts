@@ -320,6 +320,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // ÜSTÜNDE ince sarmal — motor zaten kesiyor VE async kaçış çözüyor. Yeni iş
   // Address/Control+Protocol demux ve LCP paket/seçenek çözümü (RFC 1661).
   registerOnce(registry, 'ppp', () => import('./serial/framing/ppp').then((module) => module.pppPlugin));
+  // HDLC — Faz 10 dalga 10c: `hdlcCore.ts`nin (bu dalga, PAYLAŞILAN çekirdek
+  // — SDLC de kullanıyor) ÜSTÜNDE ince sarmal. 10a/10b'nin AKSİNE gerçek
+  // yeni iş: FCS (CRC16_X25) + I/S/U çerçeve sınıflandırması hiç yoktu,
+  // burada yazıldı. Kaçışsız `createBoundedDelimiterExtractor` kullanır
+  // (`hdlcFlagExtractor` DEĞİL — o async kaçışlı, gerçek bit-senkron veride
+  // yanlış araç, bkz. hdlcCore.ts dosya başı).
+  registerOnce(registry, 'hdlc', () => import('./serial/framing/hdlc').then((module) => module.hdlcPlugin));
+  // SDLC — Faz 10 dalga 10c: `hdlcCore.ts`nin AYNISI (HDLC ile birebir aynı
+  // çerçeve şekli), yalnız Address alanı "Station Address" olarak adlanır.
+  registerOnce(registry, 'sdlc', () => import('./serial/framing/sdlc').then((module) => module.sdlcPlugin));
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant

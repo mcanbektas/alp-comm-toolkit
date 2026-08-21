@@ -1870,6 +1870,46 @@ export const en: TranslationDictionary = {
   'protocol.ppp.example.compressedFields.description':
     'Address/Control omitted (ACFC), Protocol compressed to a single byte (PFC) — both at once.',
 
+  // --- HDLC (ISO/IEC 13239 basic mode, thin wrapper over hdlcCore.ts) ---
+  'protocol.hdlc.documentation.summary':
+    'ISO/IEC 13239 (Q.921 basic mode) — bit-oriented data-link framing with a 0x7E flag, five-ones bit stuffing and an I/S/U control field, forming the base of PPP, SDLC and many telecom links. The decode tab already receives a bit-destuffed byte sequence — bit stuffing and synchronous capture are out of scope for this wave.',
+  'protocol.hdlc.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.hdlc.error.noDelimiter': 'No Flag (0x7E) byte found in the buffer — frame incomplete.',
+  'protocol.hdlc.error.aborted': 'Parsing was aborted.',
+  'protocol.hdlc.error.tooShort': 'Content is shorter than the Address+Control+FCS minimum (4 bytes).',
+  'protocol.hdlc.error.fcsMismatch': 'FCS mismatch — the frame may have been corrupted in transit.',
+  'protocol.hdlc.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.hdlc.example.iFrame.name': 'I-frame (sequenced data)',
+  'protocol.hdlc.example.iFrame.description':
+    'An Information frame carrying N(S)=1, N(R)=2, P/F=0 — the FCS is validated.',
+  'protocol.hdlc.example.sFrame.name': 'S-frame (RR)',
+  'protocol.hdlc.example.sFrame.description':
+    'A Supervisory frame carrying RR (Receive Ready), N(R)=3, P/F=1 — no Information field.',
+  'protocol.hdlc.example.uFrame.name': 'U-frame (unnamed command)',
+  'protocol.hdlc.example.uFrame.description':
+    'Unnumbered format — command bits are not named in this wave (see file header), only format and FCS are shown.',
+
+  // --- SDLC (identical to hdlcCore.ts, Address field is named Station Address) ---
+  'protocol.sdlc.documentation.summary':
+    'IBM synchronous bit-oriented predecessor of HDLC, built around station addressing and primary/secondary poll/final signalling. The frame shape is identical to HDLC (shares hdlcCore.ts) — only the Address field is interpreted as a Station Address.',
+  'protocol.sdlc.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.sdlc.error.noDelimiter': 'No Flag (0x7E) byte found in the buffer — frame incomplete.',
+  'protocol.sdlc.error.aborted': 'Parsing was aborted.',
+  'protocol.sdlc.error.tooShort': 'Content is shorter than the Station Address+Control+FCS minimum (4 bytes).',
+  'protocol.sdlc.error.fcsMismatch': 'FCS mismatch — the frame may have been corrupted in transit.',
+  'protocol.sdlc.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.sdlc.example.iFrame.name': 'I-frame (sequenced data)',
+  'protocol.sdlc.example.iFrame.description':
+    'An Information frame carrying N(S)=1, N(R)=2, P/F=0 — the FCS is validated.',
+  'protocol.sdlc.example.poll.name': 'Poll (broadcast address, RR)',
+  'protocol.sdlc.example.poll.description':
+    'Station Address=0xFF (All-Stations), RR with P/F=1 — an example primary-station poll.',
+  'protocol.sdlc.example.uFrame.name': 'U-frame (unnamed command)',
+  'protocol.sdlc.example.uFrame.description':
+    'Unnumbered format — command bits are not named in this wave (see file header), only format and FCS are shown.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',
