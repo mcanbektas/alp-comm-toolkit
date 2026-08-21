@@ -399,7 +399,12 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Single data line plus ground bus where reset/presence pulses, a 64-bit ROM ID per device and a search tree replace addressing, often with the device powered parasitically from the line.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11a: ROM Command (asgari 4 + Overdrive çifti) + 64-bit ROM ID
+          // (Family/Serial/CRC-8/MAXIM) çözülüyor. Reset/Presence pulse timing'i
+          // ve Search ROM'un bit-seviyeli arama ağacı KAPSAM DIŞI (onewire.ts
+          // dosya başı notu) — 'timing' sekmesi hâlâ karşılıksız kalıyor.
+          status: 'ready',
+          pluginId: 'one-wire',
           tabs: ['overview', 'decode', 'timing', 'data', 'examples'],
           tools: [
             'Reset Pulse',

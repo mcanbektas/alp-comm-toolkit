@@ -399,4 +399,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'gnss-modem', () =>
     import('./wireless/cellular/gnssModem').then((module) => module.gnssModemPlugin),
   );
+  // 1-Wire — Faz 10 dalga 11a: Peripheral Buses ailesinin İLK üyesi
+  // (brief-faz10-dalga11.md). ROM Command (Microchip AN3320 + esp-open-rtos
+  // onewire.c çapraz teyitli) + 64-bit ROM ID (Family/Serial/CRC-8/MAXIM,
+  // motor `protocol-core/checksums`ta ZATEN vardı) çözülür. Framing motoruna
+  // (Faz 6) HİÇ UĞRAMAZ — XMODEM/ZMODEM gibi kendi sabit-uzunluklu çerçevesi
+  // var. Search ROM'un bit-seviyeli arama ağacı ve Reset/Presence pulse
+  // timing'i KAPSAM DIŞI (onewire.ts dosya başı notu, ayrı bir iş).
+  registerOnce(registry, 'one-wire', () =>
+    import('./serial/peripheral-buses/onewire').then((module) => module.oneWirePlugin),
+  );
 }

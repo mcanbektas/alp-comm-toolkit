@@ -3704,6 +3704,43 @@ export const tr = {
   'protocol.matter.example.truncatedString.name': 'Kesik string gövdesi (hata yolu)',
   'protocol.matter.example.truncatedString.description':
     '6 bayt uzunluk bildiriyor ama tamponda 2 bayt var — value-overflow basar.',
+
+  // --- 1-Wire (faz 10 dalga 11a) ---
+  'protocol.oneWire.error.emptyFrame': 'Arabellek en az 1 bayt (ROM Command) içermeli.',
+  'protocol.oneWire.error.romIdTruncated':
+    'Read ROM/Match ROM/Overdrive Match ROM komutundan sonra 64-bit ROM ID için gereken 8 bayt arabellekte yok.',
+  'protocol.oneWire.error.frameTooLong': 'Çerçeve, verilen azami uzunluğu aşıyor.',
+  'protocol.oneWire.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.oneWire.error.crcMismatch':
+    'Hesaplanan CRC-8/MAXIM, ROM ID’nin son baytıyla eşleşmiyor.',
+  'protocol.oneWire.warning.unknownRomCommand':
+    'ROM Command değeri bilinen kümede (Read/Match/Skip/Search ROM, Overdrive Skip/Match ROM) yok — ham gösteriliyor.',
+  'protocol.oneWire.summary.commandOnly': '{command}',
+  'protocol.oneWire.summary.romId': '{command}: Family {family}',
+  'protocol.oneWire.summary.unknownCommand': '{command} (tanınmayan)',
+  'protocol.oneWire.documentation.summary':
+    'ROM Command baytı (Read/Match/Skip/Search ROM + Overdrive çifti, Microchip AN3320 ve esp-open-rtos onewire.c ile çapraz teyitli) ve — Read ROM/Match ROM/Overdrive Match ROM’da — izleyen 64-bit ROM ID (Family Code + Serial Number + CRC-8/MAXIM) çözülür. Serial Number’ın iç bayt sırası doğrulanmadığı için tek sayıya birleştirilmez, yalnız ham bayt gösterilir. Search ROM’un bit-seviyeli Bit/Complement/Branch/Discrepancy arama ağacı ve Reset/Presence pulse timing’i bu motorun kapsamı dışındadır.',
+  'protocol.oneWire.example.readRom.name': 'Read ROM (Family 0x28, geçerli CRC)',
+  'protocol.oneWire.example.readRom.description':
+    'Read ROM komutunu, Family Code 0x28 (DS18B20 ailesi) + temsili seri no + bağımsız hesaplanmış CRC-8/MAXIM izler.',
+  'protocol.oneWire.example.matchRom.name': 'Match ROM (farklı seri no, geçerli CRC)',
+  'protocol.oneWire.example.matchRom.description':
+    'Match ROM komutuyla farklı bir temsili seri no + bağımsız hesaplanmış CRC-8/MAXIM.',
+  'protocol.oneWire.example.skipRom.name': 'Skip ROM (ROM ID yok)',
+  'protocol.oneWire.example.skipRom.description':
+    'Tek bayt — tüm cihazlara adressiz erişim, ROM ID hiç izlemez.',
+  'protocol.oneWire.example.searchRom.name': 'Search ROM (arama ağacı kapsam dışı)',
+  'protocol.oneWire.example.searchRom.description':
+    'Komut tanınır; asıl bit-seviyeli çoklu-cihaz arama algoritması bu motorun kapsamında değildir.',
+  'protocol.oneWire.example.overdriveSkipRom.name': 'Overdrive Skip ROM',
+  'protocol.oneWire.example.overdriveSkipRom.description':
+    'Overdrive ailesinin ROM ID taşımayan üyesi — yalnız Microchip AN3320’de doğrulandı.',
+  'protocol.oneWire.example.badCrc.name': 'Bozuk CRC (hata yolu)',
+  'protocol.oneWire.example.badCrc.description':
+    '"Read ROM" örneğiyle aynı gövde, yalnız CRC baytı bilerek bozuldu — ParseFailure değil ama çerçeve valid:false ve crc-mismatch hatası taşır.',
+  'protocol.oneWire.example.unknownCommand.name': 'Tanınmayan ROM Command (uyarı yolu)',
+  'protocol.oneWire.example.unknownCommand.description':
+    '0xAA bilinen 6 ROM komutundan biri değil — yalnız uyarı üretir, hata basmaz.',
 } as const;
 
 /**

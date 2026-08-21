@@ -3716,4 +3716,41 @@ export const en: TranslationDictionary = {
   'protocol.matter.example.truncatedString.name': 'Truncated string body (error path)',
   'protocol.matter.example.truncatedString.description':
     'It declares a 6-byte length but only 2 bytes remain in the buffer — raises value-overflow.',
+
+  // --- 1-Wire (phase 10 wave 11a) ---
+  'protocol.oneWire.error.emptyFrame': 'The buffer must contain at least 1 byte (ROM Command).',
+  'protocol.oneWire.error.romIdTruncated':
+    'The buffer does not contain the 8 bytes required for the 64-bit ROM ID after a Read ROM/Match ROM/Overdrive Match ROM command.',
+  'protocol.oneWire.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.oneWire.error.aborted': 'Parsing was cancelled.',
+  'protocol.oneWire.error.crcMismatch':
+    'The calculated CRC-8/MAXIM does not match the last byte of the ROM ID.',
+  'protocol.oneWire.warning.unknownRomCommand':
+    'The ROM Command value is not in the known set (Read/Match/Skip/Search ROM, Overdrive Skip/Match ROM) — shown raw.',
+  'protocol.oneWire.summary.commandOnly': '{command}',
+  'protocol.oneWire.summary.romId': '{command}: Family {family}',
+  'protocol.oneWire.summary.unknownCommand': '{command} (unrecognized)',
+  'protocol.oneWire.documentation.summary':
+    'Decodes the ROM Command byte (Read/Match/Skip/Search ROM plus the Overdrive pair, cross-checked against Microchip AN3320 and the esp-open-rtos onewire.c source) and — for Read ROM/Match ROM/Overdrive Match ROM — the 64-bit ROM ID that follows it (Family Code + Serial Number + CRC-8/MAXIM). The Serial Number is never collapsed into a single integer since its internal byte order was not verified — only the raw bytes are shown. Search ROM\'s bit-level Bit/Complement/Branch/Discrepancy search tree and the reset/presence pulse timing are out of scope for this engine.',
+  'protocol.oneWire.example.readRom.name': 'Read ROM (Family 0x28, valid CRC)',
+  'protocol.oneWire.example.readRom.description':
+    'A Read ROM command followed by Family Code 0x28 (the DS18B20 family) plus a representative serial number plus an independently calculated CRC-8/MAXIM.',
+  'protocol.oneWire.example.matchRom.name': 'Match ROM (a different serial number, valid CRC)',
+  'protocol.oneWire.example.matchRom.description':
+    'A Match ROM command with a different representative serial number plus an independently calculated CRC-8/MAXIM.',
+  'protocol.oneWire.example.skipRom.name': 'Skip ROM (no ROM ID)',
+  'protocol.oneWire.example.skipRom.description':
+    'A single byte — addressless access to all devices, no ROM ID follows at all.',
+  'protocol.oneWire.example.searchRom.name': 'Search ROM (search tree out of scope)',
+  'protocol.oneWire.example.searchRom.description':
+    'The command is recognized; the actual bit-level multi-device search algorithm is out of scope for this engine.',
+  'protocol.oneWire.example.overdriveSkipRom.name': 'Overdrive Skip ROM',
+  'protocol.oneWire.example.overdriveSkipRom.description':
+    'The Overdrive family\'s member without a ROM ID — verified only against Microchip AN3320.',
+  'protocol.oneWire.example.badCrc.name': 'Corrupted CRC (error path)',
+  'protocol.oneWire.example.badCrc.description':
+    'The exact same body as "Read ROM", except the CRC byte was deliberately corrupted — not a ParseFailure, but the frame carries valid:false and a crc-mismatch error.',
+  'protocol.oneWire.example.unknownCommand.name': 'Unrecognized ROM Command (warning path)',
+  'protocol.oneWire.example.unknownCommand.description':
+    '0xAA is not one of the 6 known ROM commands — raises only a warning, not an error.',
 };
