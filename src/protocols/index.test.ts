@@ -66,6 +66,7 @@ const BUILT_IN_IDS = [
   'xmodem',
   'ymodem',
   'zigbee',
+  'zmodem',
 ];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
@@ -130,6 +131,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   xmodem: 'interfaces-framing',
   ymodem: 'interfaces-framing',
   zigbee: 'wireless-iot',
+  zmodem: 'interfaces-framing',
 };
 
 describe('registerBuiltInProtocols', () => {

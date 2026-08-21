@@ -5,9 +5,11 @@
  * Bir `ProtocolParser.parse()` içeriden bir `FrameExtractor.extract()`
  * çağırdığında ikisi arasında köprü gerekiyor — bu dosya o köprü, yalnız
  * SLIP/COBS/KISS/PPP/HDLC/SDLC'nin üretebildiği kodlarla sınırlı (SDLC
- * kendi bir framing motoru YOK, HDLC'ninkini paylaşıyor — bkz. hdlcCore.ts;
- * XMODEM/YMODEM/ZMODEM gelince genişler, şimdiden tüm 9 kodu kapsayan bir
- * tablo UYDURULMADI).
+ * kendi bir framing motoru YOK, HDLC'ninkini paylaşıyor — bkz. hdlcCore.ts).
+ * **XMODEM/YMODEM/ZMODEM BEKLENENİN AKSİNE genişletmedi** — üçü de framing
+ * motoruna (Faz 6) hiç uğramıyor (xmodemCore.ts/zmodemCore.ts dosya başı),
+ * kendi hata nedenlerini doğrudan `ProtocolErrorCode`a eşliyor, bu köprüyü
+ * hiç çağırmıyor.
  */
 
 import type { FramingError, FramingErrorCode } from '@/protocol-core/framing/types';

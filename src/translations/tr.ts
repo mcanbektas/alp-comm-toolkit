@@ -1954,6 +1954,36 @@ export const tr = {
   'protocol.ymodem.example.dataBlock.description':
     'Block 1 — normal dosya içeriği, yapı XMODEM’in kendisiyle birebir aynı.',
 
+  // --- ZMODEM (lrzsz profili — XMODEM/YMODEM'le wire seviyesinde ortak yanı yok) ---
+  'protocol.zmodem.documentation.summary':
+    'XMODEM/YMODEM’den tamamen farklı, streaming ve konum-tabanlı hata kurtarma sunan dosya transfer protokolü. ZRQINIT/ZRINIT/ZFILE/ZRPOS/ZDATA/ZEOF/ZFIN başlıklarını ZDLE kaçışıyla değişir. Kanonik tek tanımı yok — lrzsz (Forsberg) profili çözülür.',
+  'protocol.zmodem.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.zmodem.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.zmodem.error.noZdle': 'ZPAD sonrası ZDLE (0x18) bulunamadı — header başlangıcı tanınmıyor.',
+  'protocol.zmodem.error.unsupportedHeaderType':
+    'RLE’li header varyantı (ZBINR32/ZVBIN/ZVHEX/ZVBIN32/ZVBINR32) — lrzsz’nin 1993 uzantısı, seçilen profilde desteklenmiyor.',
+  'protocol.zmodem.error.unknownHeaderType': 'Bilinmeyen header-form baytı — ZBIN (A), ZHEX (B) ya da ZBIN32 (C) değil.',
+  'protocol.zmodem.error.truncatedFrame': 'Çerçeve header/subpacket tamamlanmadan bitti.',
+  'protocol.zmodem.error.invalidEscape': 'ZDLE sonrası tanınmayan bayt — geçerli bir kaçış ya da terminatör değil.',
+  'protocol.zmodem.error.invalidHexDigit': 'HEX header’da geçersiz hane — yalnız küçük harf 0-9a-f kabul edilir.',
+  'protocol.zmodem.error.unknownFrameType': 'Bilinmeyen frame type — ZRQINIT (0) ile ZSTDERR (19) arasında değil.',
+  'protocol.zmodem.error.headerCrcMismatch': 'Header CRC uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.zmodem.error.subpacketCrcMismatch': 'Subpacket CRC uyuşmuyor — veri iletim sırasında bozulmuş olabilir.',
+  'protocol.zmodem.warning.incompleteSubpacket':
+    'Subpacket terminatörü (ZCRCE/G/Q/W) ya da CRC’si bulunamadı — girdi kısmi yapıştırılmış olabilir.',
+  'protocol.zmodem.example.zrqinitHex.name': 'ZRQINIT (HEX header)',
+  'protocol.zmodem.example.zrqinitHex.description':
+    'Oturum başlatma isteği, HEX formda — kaçış yok, insan-okunur ASCII hex.',
+  'protocol.zmodem.example.zrinitBinary.name': 'ZRINIT (binary16, CANFDX+CANOVIO+CANFC32)',
+  'protocol.zmodem.example.zrinitBinary.description':
+    'Alıcı yeteneklerini bildirir — tam dupleks, örtüşen I/O, 32-bit CRC desteği bayrakları set.',
+  'protocol.zmodem.example.zfileWithSubpacket.name': 'ZFILE + subpacket (dosya adı + boyutu)',
+  'protocol.zmodem.example.zfileWithSubpacket.description':
+    'Dosya transferi başlangıcı — subpacket içeriği YMODEM Block 0 ile aynı formatta (spec §13).',
+  'protocol.zmodem.example.zdataBinary32.name': 'ZDATA (binary32, 32-bit CRC oturumu)',
+  'protocol.zmodem.example.zdataBinary32.description':
+    'Streaming veri çerçevesi — Position alanı 5.242.880, subpacket 32-bit CRC ile korunur.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

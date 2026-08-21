@@ -900,7 +900,8 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Streaming file transfer with position-based error recovery and resume, exchanging ZRQINIT/ZRINIT/ZFILE/ZRPOS/ZDATA/ZEOF/ZFIN frames instead of waiting for a per-block ACK.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'zmodem',
           tabs: [
             'overview',
             'live',
@@ -911,8 +912,13 @@ export const interfacesFramingDomain: CatalogDomain = {
             'diagnostics',
             'examples',
           ],
-          // Kanonik tek bir ZMODEM yok; parser hangi implementasyon profiline
-          // göre çözdüğünü metadata olarak taşımalı.
+          // Kanonik tek bir ZMODEM yok; **lrzsz profili** seçildi (kullanıcı
+          // kararı, dalga 10d/2) — header/frame-type/CRC16-32/ZDLE kaçışı bu
+          // profille çözülür. "Implementation Profile Metadata" ve
+          // session/batch araçları (Session State Machine/Error Recovery
+          // View/Batch Transfer Tree) ASPİRASYONEL kaldı — decode tab
+          // stateless tek header+subpacket alır, oturum takibi bu dalganın
+          // işi değil (XMODEM/YMODEM/PPP'nin aynı ertelemesiyle aynı disiplin).
           tools: [
             'Session State Machine',
             'ZRQINIT/ZRINIT Negotiation',

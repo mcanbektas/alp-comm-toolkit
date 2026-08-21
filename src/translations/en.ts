@@ -1951,6 +1951,34 @@ export const en: TranslationDictionary = {
   'protocol.ymodem.example.dataBlock.name': 'Data block (same as XMODEM)',
   'protocol.ymodem.example.dataBlock.description': 'Block 1 — regular file content, identical in shape to XMODEM itself.',
 
+  // --- ZMODEM (lrzsz profile — shares nothing wire-level with XMODEM/YMODEM) ---
+  'protocol.zmodem.documentation.summary':
+    'A file transfer protocol entirely unlike XMODEM/YMODEM, offering streaming and position-based error recovery. Exchanges ZRQINIT/ZRINIT/ZFILE/ZRPOS/ZDATA/ZEOF/ZFIN headers via ZDLE escaping. No single canonical definition exists — the lrzsz (Forsberg) profile is decoded.',
+  'protocol.zmodem.error.aborted': 'Parsing was aborted.',
+  'protocol.zmodem.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.zmodem.error.noZdle': 'No ZDLE (0x18) found after ZPAD — header start not recognized.',
+  'protocol.zmodem.error.unsupportedHeaderType':
+    'RLE header variant (ZBINR32/ZVBIN/ZVHEX/ZVBIN32/ZVBINR32) — an lrzsz 1993 extension, not supported in the selected profile.',
+  'protocol.zmodem.error.unknownHeaderType': 'Unknown header-form byte — not ZBIN (A), ZHEX (B), or ZBIN32 (C).',
+  'protocol.zmodem.error.truncatedFrame': 'Frame ended before the header/subpacket was complete.',
+  'protocol.zmodem.error.invalidEscape': 'Unrecognized byte after ZDLE — neither a valid escape nor a terminator.',
+  'protocol.zmodem.error.invalidHexDigit': 'Invalid digit in HEX header — only lowercase 0-9a-f is accepted.',
+  'protocol.zmodem.error.unknownFrameType': 'Unknown frame type — not between ZRQINIT (0) and ZSTDERR (19).',
+  'protocol.zmodem.error.headerCrcMismatch': 'Header CRC mismatch — the frame may have been corrupted in transit.',
+  'protocol.zmodem.error.subpacketCrcMismatch': 'Subpacket CRC mismatch — the data may have been corrupted in transit.',
+  'protocol.zmodem.warning.incompleteSubpacket':
+    'No subpacket terminator (ZCRCE/G/Q/W) or CRC found — the input may have been pasted partially.',
+  'protocol.zmodem.example.zrqinitHex.name': 'ZRQINIT (HEX header)',
+  'protocol.zmodem.example.zrqinitHex.description': 'Session-init request, in HEX form — no escaping, human-readable ASCII hex.',
+  'protocol.zmodem.example.zrinitBinary.name': 'ZRINIT (binary16, CANFDX+CANOVIO+CANFC32)',
+  'protocol.zmodem.example.zrinitBinary.description':
+    'Announces receiver capabilities — full duplex, overlapped I/O, and 32-bit CRC support flags set.',
+  'protocol.zmodem.example.zfileWithSubpacket.name': 'ZFILE + subpacket (filename + size)',
+  'protocol.zmodem.example.zfileWithSubpacket.description':
+    'Start of a file transfer — the subpacket content is in the same format as YMODEM Block 0 (spec §13).',
+  'protocol.zmodem.example.zdataBinary32.name': 'ZDATA (binary32, 32-bit CRC session)',
+  'protocol.zmodem.example.zdataBinary32.description': 'A streaming data frame — Position field is 5,242,880, subpacket protected with a 32-bit CRC.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',

@@ -342,6 +342,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // ayrıca çözülür — mtime/mode/serial encoding'i standardize DEĞİL, ham
   // bırakılır (uydurulmadı).
   registerOnce(registry, 'ymodem', () => import('./serial/framing/ymodem').then((module) => module.ymodemPlugin));
+  // ZMODEM — Faz 10 dalga 10d/2: `xmodemCore.ts`yle wire seviyesinde HİÇBİR
+  // ortak yanı yok, kendi çekirdeği (`zmodemCore.ts`). Projenin kendi speci
+  // bit seviyesi vermiyor ("kanonik tanım yok") — kullanıcı kararıyla
+  // **lrzsz profili** seçildi, sabitler Forsberg'in zmodem.txt/zmodem.h'si +
+  // zm.c/crctab.c'den (iki bağımsız mirror, çapraz doğrulandı) türetildi.
+  // ZDLE kaçışı (XOR 0x40 + ZRUB0/1 literal + ZCRCE/G/Q/W terminatör) ÜÇ
+  // ayrı anlam taşıdığından `escaping.ts`nin jenerik motoru KULLANILMADI
+  // (HDLC'nin `hdlcFlagExtractor`i reddetmesiyle aynı gerekçe kalıbı).
+  registerOnce(registry, 'zmodem', () => import('./serial/framing/zmodem').then((module) => module.zmodemPlugin));
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant
