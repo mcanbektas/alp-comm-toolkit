@@ -1984,6 +1984,48 @@ export const tr = {
   'protocol.zmodem.example.zdataBinary32.description':
     'Streaming veri çerçevesi — Position alanı 5.242.880, subpacket 32-bit CRC ile korunur.',
 
+  // --- Custom Binary Protocol (4 "jenerik" sayfanın ilki — specFixture.ts aynen) ---
+  'protocol.customBinaryProtocol.documentation.summary':
+    'Üreticiye özel binary çerçeve formatı — header, address, command, length, payload ve CRC. Spec §8.3/§9.6/§43 arasında çapraz doğrulanmış ALP Sensor Protocol şeması kullanılır.',
+  'protocol.customBinaryProtocol.example.sensorData.name': 'Sensor Data (spec §43 kabul çerçevesi)',
+  'protocol.customBinaryProtocol.example.sensorData.description':
+    'Address=5, Command=Sensor Data, Payload=34 12 7F, Checksum (XOR8) PASS.',
+  'protocol.customBinaryProtocol.example.checksumMismatch.name': 'Bozuk checksum',
+  'protocol.customBinaryProtocol.example.checksumMismatch.description':
+    'Aynı çerçeve, yalnız checksum baytı bozuk (0x4F → 0x50) — DecodePanel.test.tsx ile aynı vektör.',
+
+  // --- ASCII Protocol (4 "jenerik" sayfanın ikincisi) ---
+  'protocol.asciiProtocol.documentation.summary':
+    'İnsan-okunur, satır tabanlı seri protokol sınıfı — CR/LF sonlandırma ve komut/parametre ayrımı. Virgüllü sayısal alan parse\'ı motor seviyesinde desteklenmiyor, ham metin kalır.',
+  'protocol.asciiProtocol.example.temperatureReading.name': 'Sıcaklık okuması (spec özeti satır 57)',
+  'protocol.asciiProtocol.example.temperatureReading.description':
+    '"TEMP,25.3,40.2\\r\\n" — command TEMP, parametreler ham metin, CRLF ayrı alanda.',
+  'protocol.asciiProtocol.example.missingLineEnding.name': 'CRLF eksik',
+  'protocol.asciiProtocol.example.missingLineEnding.description':
+    'Aynı satır, sonlandırıcı KESİLMİŞ — spec özetinin "Missing CR/LF" durumunu gösterir.',
+
+  // --- Delimiter-Based Protocol (4 "jenerik" sayfanın üçüncüsü — Faz 6'nın hdlc-flag motoru aynen) ---
+  'protocol.delimiterBasedProtocol.documentation.summary':
+    'STX/ETX gibi başlangıç-bitiş baytlarıyla çerçeveleme — asıl iş, delimiter değeri payload içinde de geçtiğinde (delimiter collision) escape mekanizmasını yönetmek. Faz 6\'nın hdlc-flag motoru (PPP\'nin de kullandığı) kullanılır.',
+  'protocol.delimiterBasedProtocol.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.delimiterBasedProtocol.error.incomplete': 'Çerçeve tamamlanmadı — kapanış bayrağı (0x7E) bulunamadı.',
+  'protocol.delimiterBasedProtocol.example.collisionEscaped.name': 'Delimiter collision (kaçışlı)',
+  'protocol.delimiterBasedProtocol.example.collisionEscaped.description':
+    'Payload (01 7E 02) flag baytıyla çakışan bir 0x7E içeriyor — spec özetinin "Escape Örneği" (01 7E 02 → 01 7D 5E 02) ile birebir.',
+  'protocol.delimiterBasedProtocol.example.missingEndFlag.name': 'Kapanış bayrağı eksik',
+  'protocol.delimiterBasedProtocol.example.missingEndFlag.description':
+    'Açılış bayrağı var, kapanış yok — akış ortasında kesilmiş çerçeveyi gösterir.',
+
+  // --- Length-Based Protocol (4 "jenerik" sayfanın dördüncüsü) ---
+  'protocol.lengthBasedProtocol.documentation.summary':
+    'Çerçeve uzunluğu header içindeki bir alandan belirlenir — uzunluk semantiği, endianness ve azami çerçeve koruması. LENGTH (uint16 büyük-uçlu) + PAYLOAD + CHECKSUM (XOR8), bağımsız hesaplanmış fixture.',
+  'protocol.lengthBasedProtocol.example.validFrame.name': 'Geçerli çerçeve',
+  'protocol.lengthBasedProtocol.example.validFrame.description':
+    'LENGTH=4 (büyük-uçlu) + PAYLOAD (AA BB CC DD) + CHECKSUM — bağımsız hesap: XOR8(AA,BB,CC,DD)=0x00.',
+  'protocol.lengthBasedProtocol.example.oversizedLength.name': 'Uzunluk alanı tel içerikle tutarsız',
+  'protocol.lengthBasedProtocol.example.oversizedLength.description':
+    'LENGTH=1000 diyor ama tel yalnız 1 bayt payload taşıyor — "declared length exceeds available data" durumunu gösterir.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

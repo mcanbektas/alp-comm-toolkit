@@ -351,6 +351,32 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // ayrı anlam taşıdığından `escaping.ts`nin jenerik motoru KULLANILMADI
   // (HDLC'nin `hdlcFlagExtractor`i reddetmesiyle aynı gerekçe kalıbı).
   registerOnce(registry, 'zmodem', () => import('./serial/framing/zmodem').then((module) => module.zmodemPlugin));
+  // Custom Binary Protocol — Faz 10 dalga 10e: 4 "jenerik" sayfanın ilki.
+  // `specFixture.ts`teki SPEC_SENSOR_PROTOCOL (§8.3+§9.6+§43 çapraz
+  // doğrulanmış) AYNEN sarıldı — `ProtocolFramingSchema`nın 'startEnd'
+  // türü zaten yetiyor, 15 yöntemlik framing motoruna hiç uğranmaz.
+  registerOnce(registry, 'custom-binary-protocol', () =>
+    import('./serial/framing/customBinaryProtocol').then((module) => module.customBinaryProtocolPlugin),
+  );
+  // ASCII Protocol — Faz 10 dalga 10e. `ProtocolFramingSchema` 'none' türü
+  // yeterli. Virgülle ayrılmış sayısal alan parse'ı (spec özetinin vaadi)
+  // FIELD_TYPES'ta yok — `parameters` alanı ham metin kalır, uydurulmadı.
+  registerOnce(registry, 'ascii-protocol', () =>
+    import('./serial/framing/asciiProtocol').then((module) => module.asciiProtocolPlugin),
+  );
+  // Delimiter-Based Protocol — Faz 10 dalga 10e, 4'ün TEK istisnası:
+  // `ProtocolFramingSchema` bir EscapeRule taşımıyor, bu yüzden Faz 6'nın
+  // `hdlcFraming.ts`si (PPP'nin de kullandığı `hdlc-flag` motoru) AYNEN
+  // kullanıldı — delimiter-collision + escape mekaniği somut gösterilir.
+  registerOnce(registry, 'delimiter-based-protocol', () =>
+    import('./serial/framing/delimiterBasedProtocol').then((module) => module.delimiterBasedProtocolPlugin),
+  );
+  // Length-Based Protocol — Faz 10 dalga 10e. `ProtocolFramingSchema`
+  // 'lengthField' türü yeterli — LENGTH(uint16 BE)+PAYLOAD+CHECKSUM(xor8),
+  // bağımsız hesaplanmış fixture (spec özeti sembolik, CRC vermiyordu).
+  registerOnce(registry, 'length-based-protocol', () =>
+    import('./serial/framing/lengthBasedProtocol').then((module) => module.lengthBasedProtocolPlugin),
+  );
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant

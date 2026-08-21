@@ -40,18 +40,23 @@
 
 ## Sıradaki adım
 
-Comm SPA'sında **Faz 9 bitti, Faz 10 sürüyor** — dalga 9 TAMAMEN KAPANDI
-(`hayes-command-set → at-commands → lte-modem-at → {nb-iot, gnss-modem}`
-zinciri + Karar 6 + Cellular Initialization Dashboard), dalga 10 sürüyor:
-2026-08-21, alt-dalga 10a (SLIP + COBS), 10b (KISS + PPP), 10c (HDLC +
-SDLC) bitti, 10d bitti — XMODEM + YMODEM (paylaşılan `xmodemCore.ts`
-çekirdeği, framing motoruna hiç uğramaz) önce, ZMODEM (kendi çekirdeği
-`zmodemCore.ts`, kanonik tanımı olmadığı için AYRI turda — kullanıcı
+Comm SPA'sında **Faz 9 bitti, Faz 10 (protokol dalgaları) TAMAMEN BİTTİ**
+— dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
+lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
+Initialization Dashboard), dalga 10'un 2026-08-21'de biten alt-dalgaları:
+10a (SLIP + COBS), 10b (KISS + PPP), 10c (HDLC + SDLC), 10d (XMODEM +
+YMODEM — paylaşılan `xmodemCore.ts`; ZMODEM — kendi çekirdeği
+`zmodemCore.ts`, kanonik tanımı olmadığı için AYRI turda, kullanıcı
 kararıyla **lrzsz profili** seçildi, sabitler Forsberg'in zmodem.txt/
-zmodem.h/zm.c/crctab.c'sinden türetildi) sonra. Katalogdaki **172 kaydın
-54'ü `ready`, 9'u `partial`, 109'u hâlâ `planned`**; registry 62 kayıt
-taşıyor. Dalga brifleri `docs/brief-faz10-dalga*.md` altında; dalga 10'un
-tam dökümü + kalan iş (10e — 4 jenerik sayfa mimari kararı) `brief-faz10-dalga10.md`de.
+zmodem.h/zm.c/crctab.c'sinden türetildi), 10e (Custom Binary/ASCII/
+Delimiter-Based/Length-Based Protocol — kullanıcı kararıyla
+`ProtocolFramingSchema` GENİŞLETİLMEDİ, 3'ü mevcut 5 framing türüyle,
+Delimiter-Based Faz 6'nın hazır `hdlc-flag` motoruyla çözüldü).
+`framing-stream-protocols` ailesindeki 17 kaydın tamamı artık `ready`/
+alias. Katalogdaki **172 kaydın 58'i `ready`, 9'u `partial`, 105'i hâlâ
+`planned`**; registry 66 kayıt taşıyor. Dalga brifleri
+`docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü
+`brief-faz10-dalga10.md`de.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

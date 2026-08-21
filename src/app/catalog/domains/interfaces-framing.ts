@@ -561,7 +561,8 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Vendor-specific binary frame format described by the user — header, address, command, length, payload and CRC — which is what most industrial devices actually speak.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'custom-binary-protocol',
           tabs: [
             'overview',
             'live',
@@ -573,6 +574,11 @@ export const interfacesFramingDomain: CatalogDomain = {
             'definitions',
             'examples',
           ],
+          // Karar (kullanıcı, dalga 10e): schema.framing GENİŞLETİLMEDİ — bu
+          // sayfa specFixture.ts'in SPEC_SENSOR_PROTOCOL'ünü (§8.3+§9.6+§43
+          // çapraz doğrulanmış) aynen sarar. Sequence Counter Tracker/
+          // Request-Response Matcher ASPİRASYONEL — çok-çerçeveli oturum
+          // takibi bu turun dışında (X/Y/ZMODEM'in aynı ertelemesi).
           tools: [
             'Header Field',
             'Address Field',
@@ -593,7 +599,8 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Human-readable line-oriented serial protocol class where CR/LF termination, numeric field parsing and echo detection decide whether a response was understood correctly.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ascii-protocol',
           tabs: [
             'overview',
             'live',
@@ -605,6 +612,11 @@ export const interfacesFramingDomain: CatalogDomain = {
             'definitions',
             'examples',
           ],
+          // Numeric Field Parser/Echo Detection ASPİRASYONEL — alan şeması
+          // motoru (schemaParser.ts) virgülle ayrılmış değişken-genişlikli
+          // sayısal alan OKUMUYOR (FIELD_TYPES'ta yok), `parameters` ham
+          // metin kalır; echo/response eşleştirmesi çok-çerçeveli oturum
+          // işi, bu turun dışında.
           tools: [
             'HEX + ASCII Dual View',
             'Line Termination Handler',
@@ -621,7 +633,8 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Framing by start and end marker bytes such as STX/ETX, where the real work is handling a delimiter value that also appears inside the payload.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'delimiter-based-protocol',
           tabs: [
             'overview',
             'live',
@@ -634,6 +647,9 @@ export const interfacesFramingDomain: CatalogDomain = {
           ],
           // Kaynak escape dönüşümünü kasıtlı olarak açık bırakıyor: tek bir
           // algoritma yeterli değil, kural kullanıcı tarafından tanımlanmalı.
+          // Uygulama (dalga 10e): Faz 6'nın hazır `hdlc-flag` motoru (PPP'nin
+          // de kullandığı) AYNEN kullanıldı — kural kullanıcı tanımlı DEĞİL
+          // ama gerçek, çalışan bir escape mekaniği gösterir.
           tools: [
             'Start/End Delimiter Configuration',
             'STX/ETX Framing',
@@ -650,7 +666,8 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Framing driven by a length field in the header, where length semantics, endianness and a maximum-frame guard separate a working parser from one that hangs on a corrupt byte.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'length-based-protocol',
           tabs: [
             'overview',
             'live',
@@ -661,6 +678,10 @@ export const interfacesFramingDomain: CatalogDomain = {
             'definitions',
             'examples',
           ],
+          // Length Semantics Selector/Resynchronization Analyzer ASPİRASYONEL
+          // — bu turun şeması tek bir length-anlamı (payload-only) ve tek bir
+          // fixture gösterir, 4 semantik seçenek arası geçiş ve bozuk-header
+          // sonrası resync bu turun dışında.
           tools: [
             'Length Field Configuration',
             'Length Semantics Selector',

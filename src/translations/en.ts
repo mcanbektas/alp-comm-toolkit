@@ -1979,6 +1979,48 @@ export const en: TranslationDictionary = {
   'protocol.zmodem.example.zdataBinary32.name': 'ZDATA (binary32, 32-bit CRC session)',
   'protocol.zmodem.example.zdataBinary32.description': 'A streaming data frame — Position field is 5,242,880, subpacket protected with a 32-bit CRC.',
 
+  // --- Custom Binary Protocol (first of the 4 "generic" pages — specFixture.ts verbatim) ---
+  'protocol.customBinaryProtocol.documentation.summary':
+    'Vendor-specific binary frame format — header, address, command, length, payload and CRC. Uses the ALP Sensor Protocol schema, cross-verified across spec §8.3/§9.6/§43.',
+  'protocol.customBinaryProtocol.example.sensorData.name': 'Sensor Data (spec §43 acceptance frame)',
+  'protocol.customBinaryProtocol.example.sensorData.description':
+    'Address=5, Command=Sensor Data, Payload=34 12 7F, Checksum (XOR8) PASS.',
+  'protocol.customBinaryProtocol.example.checksumMismatch.name': 'Checksum mismatch',
+  'protocol.customBinaryProtocol.example.checksumMismatch.description':
+    'The same frame with only the checksum byte corrupted (0x4F → 0x50) — the same vector used in DecodePanel.test.tsx.',
+
+  // --- ASCII Protocol (second of the 4 "generic" pages) ---
+  'protocol.asciiProtocol.documentation.summary':
+    'A human-readable, line-oriented serial protocol class — CR/LF termination and command/parameter separation. Comma-separated numeric field parsing is not supported at the engine level, it stays raw text.',
+  'protocol.asciiProtocol.example.temperatureReading.name': 'Temperature reading (spec summary line 57)',
+  'protocol.asciiProtocol.example.temperatureReading.description':
+    '"TEMP,25.3,40.2\\r\\n" — command TEMP, parameters as raw text, CRLF in its own field.',
+  'protocol.asciiProtocol.example.missingLineEnding.name': 'Missing CRLF',
+  'protocol.asciiProtocol.example.missingLineEnding.description':
+    'The same line with the terminator CUT OFF — shows the spec summary\'s "Missing CR/LF" case.',
+
+  // --- Delimiter-Based Protocol (third of the 4 "generic" pages — Faz 6's hdlc-flag engine, verbatim) ---
+  'protocol.delimiterBasedProtocol.documentation.summary':
+    'Framing via start/end marker bytes such as STX/ETX — the real work is handling escaping when the delimiter value also appears inside the payload (delimiter collision). Reuses Faz 6\'s hdlc-flag engine (the same one PPP uses).',
+  'protocol.delimiterBasedProtocol.error.aborted': 'Parsing was aborted.',
+  'protocol.delimiterBasedProtocol.error.incomplete': 'Frame incomplete — no closing flag (0x7E) found.',
+  'protocol.delimiterBasedProtocol.example.collisionEscaped.name': 'Delimiter collision (escaped)',
+  'protocol.delimiterBasedProtocol.example.collisionEscaped.description':
+    'The payload (01 7E 02) contains a 0x7E that collides with the flag byte — matches the spec summary\'s "Escape Example" (01 7E 02 → 01 7D 5E 02) exactly.',
+  'protocol.delimiterBasedProtocol.example.missingEndFlag.name': 'Missing closing flag',
+  'protocol.delimiterBasedProtocol.example.missingEndFlag.description':
+    'An opening flag but no closing one — shows a frame cut off mid-stream.',
+
+  // --- Length-Based Protocol (fourth of the 4 "generic" pages) ---
+  'protocol.lengthBasedProtocol.documentation.summary':
+    'Frame length is driven by a field inside the header — length semantics, endianness, and a maximum-frame guard. LENGTH (uint16 big-endian) + PAYLOAD + CHECKSUM (XOR8), an independently computed fixture.',
+  'protocol.lengthBasedProtocol.example.validFrame.name': 'Valid frame',
+  'protocol.lengthBasedProtocol.example.validFrame.description':
+    'LENGTH=4 (big-endian) + PAYLOAD (AA BB CC DD) + CHECKSUM — computed independently: XOR8(AA,BB,CC,DD)=0x00.',
+  'protocol.lengthBasedProtocol.example.oversizedLength.name': 'Length field inconsistent with wire content',
+  'protocol.lengthBasedProtocol.example.oversizedLength.description':
+    'LENGTH says 1000 but the wire carries only 1 byte of payload — shows the "declared length exceeds available data" case.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',

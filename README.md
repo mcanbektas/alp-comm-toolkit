@@ -7,10 +7,10 @@ toplar; ham baytı çerçeveye, çerçeveyi mühendislik değerine çevirir.
 ALP süitinin üç ürününden biri. Hesap, veritabanı, API ve dağıtım
 [alp-platform](https://github.com/mcanbektas/alp-platform) deposundadır.
 
-> **Durum: Faz 10 — protokol dalgaları (2026-08-21, dalga 10d/2: ZMODEM, lrzsz profili).**
+> **Durum: Faz 10 — protokol dalgaları TAMAMLANDI (2026-08-21, dalga 10e: 4 jenerik sayfa).**
 > Dönüşüm/CRC/zamanlama motorları, stream-framing çekirdeği, şema parser'ı ve Live
-> Serial Monitor çalışıyor. Katalogdaki 172 kaydın **54'ü `ready`, 9'u `partial`,
-> 109'u `planned`**; kayıtlı 62 protokol plugin'i var. Yol haritası aşağıda.
+> Serial Monitor çalışıyor. Katalogdaki 172 kaydın **58'i `ready`, 9'u `partial`,
+> 105'i `planned`**; kayıtlı 66 protokol plugin'i var. Yol haritası aşağıda.
 
 ## Özellikler
 
@@ -262,16 +262,19 @@ altındaki `websocket/` klasörü aynı `ByteSource` sözleşmesini gerçekleyec
 | 10+ | Kalan protokol dalgaları | |
 
 Sıra numaraya göre değil bağımlılığa göre ilerledi: 3 ve 4 kardeş depoda olduğu için
-SPA tarafı 5→6→8→7 diye gitti. Faz 9 bitti; Faz 10 sürüyor — dalga 9 kapandı, dalga
-10'un 10a (SLIP+COBS), 10b (KISS+PPP), 10c (HDLC+SDLC), 10d (XMODEM+YMODEM+ZMODEM)
-alt-dalgaları bitti — ZMODEM kanonik tanımı olmadığı için ayrı turda, kullanıcı
-kararıyla lrzsz profili seçilerek çözüldü.
+SPA tarafı 5→6→8→7 diye gitti. Faz 9 bitti; **Faz 10 (protokol dalgaları) TAMAMEN
+BİTTİ** — dalga 9 kapandı, dalga 10'un 10a (SLIP+COBS), 10b (KISS+PPP), 10c
+(HDLC+SDLC), 10d (XMODEM+YMODEM+ZMODEM — ZMODEM kanonik tanımı olmadığı için ayrı
+turda, kullanıcı kararıyla lrzsz profili seçilerek çözüldü) ve 10e (4 "jenerik"
+sayfa — Custom Binary/ASCII/Delimiter-Based/Length-Based Protocol, kullanıcı
+kararıyla `ProtocolFramingSchema` genişletilmedi) alt-dalgaları bitti.
+`framing-stream-protocols` ailesindeki 17 kaydın tamamı artık `ready`/alias.
 
 **Bugün ne çalışıyor:** spec §50'nin "gerçekten çalışmalı" dediği 15 aracın tamamı —
 HEX/ASCII, IEEE-754, endian, CRC hesaplayıcı, UART/SPI/I²C zamanlama, Live Serial Monitor,
 Custom Protocol Studio, Packet Builder ve protokol decoder'ları. `registerProtocolPlugin`
-ile kayıtlı 62 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
-109 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
+ile kayıtlı 66 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
+105 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
 
 ## Lisans
 

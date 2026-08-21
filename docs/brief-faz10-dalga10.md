@@ -428,6 +428,49 @@ test:e2e` 508/508 (tam paket, build dahil). Tarayıcıda elle açıldı (4
 örnek — ZRQINIT/ZRINIT/ZFILE/ZDATA, screenshot + görsel inceleme), PASS
 rozetleri + hex viewer renk hizası doğru, konsol hatasız.
 
-**Sonra 10e** — 4 "jenerik" sayfanın mimari kararı (`ProtocolFramingSchema`
-vs `FramingMethodConfig`, brief'te a/b/c) HÂLÂ SORULMADI, dalga 10'un son
-açık ucu.
+**10e (4 jenerik sayfa) — commit'lendi, 2026-08-21:** mimari karar
+AskUserQuestion'la 3 seçenek sunularak soruldu (brief'in a/b/c'si +
+kod okunarak bulunan iki YENİ bulgu: (a)'nın spec §9.6'nın "AYNEN"
+kilitli alan adlarına dokunacağı VE Protocol Studio'nun yanı sıra Packet
+Builder+Projects'i (kalıcı veri) de etkileyeceği; (c)'nin "önce kolay
+işi bitir" gerekçesinin artık geçersiz olduğu — Encapsulation/Data
+Transfer alt aileleri zaten bitmişti). Kullanıcı **(b) ikisini ayrı
+tut**u seçti.
+
+**Uygulamada (b) beklenenden daha kolay çıktı** — `parseWithSchema`
+okununca `ProtocolFramingSchema.type` çoğunlukla ETİKET olduğu
+görüldü (`startBytes`/`endBytes`/`maximumFrameLength` her zaman
+kullanılıyor, `type` yalnız `'startEnd'` için endBytes doğrulamasını
+açıyor). Sonuç: 4 sayfanın 3'ü mevcut 5 türle TAMAMEN yetti, 15
+yöntemlik framing motoruna HİÇ uğranmadı:
+
+- **custom-binary-protocol** — `specFixture.ts`teki `SPEC_SENSOR_PROTOCOL`
+  AYNEN sarıldı (§8.3+§9.6+§43 çapraz doğrulanmış, Protocol Studio'nun da
+  varsayılanı). `ProtocolPage.tsx`nin motoru-olmayan-protokoller için
+  gösterdiği geçici `SAMPLE_FRAME_BYTES` placeholder'ı AYNI çerçeveydi —
+  bu plugin artık o geçici yolu hiç görmüyor.
+- **length-based-protocol** — yeni şema: `LENGTH(uint16 BE)+PAYLOAD+
+  CHECKSUM(xor8)`, start baytı yok (saf length-driven). Spec özeti
+  sembolik bir örnek veriyordu (CRC hesaplanmamış) — bağımsız hesaplanmış
+  kendi fixture'ı kuruldu.
+- **ascii-protocol** — spec özetinin kendi örneği (`TEMP,25.3,40.2\r\n`).
+  Virgüllü sayısal alan parse'ı `FIELD_TYPES`te YOK — `parameters` ham
+  metin kaldı, uydurulmadı.
+- **delimiter-based-protocol** — 4'ün TEK istisnası: `ProtocolFramingSchema`
+  bir `EscapeRule` taşımıyor, bu yüzden Faz 6'nın `hdlcFraming.ts`si
+  (PPP'nin de kullandığı `hdlc-flag` motoru) AYNEN kullanıldı — payload
+  içine kaçan bir 0x7E escape'lenip delimiter-collision somut gösterildi
+  (spec özetinin `01 7E 02→01 7D 5E 02` örneğiyle birebir).
+
+`definitions` sekmesi (`custom-schema` formatı) BİLEREK bu turun dışında
+bırakıldı — bugün HİÇBİR protokolde (yalnız dbc/eds panel var) bir
+karşılığı yok, HDLC'nin `'live'`i atlamasıyla aynı disiplin, ayrı iş.
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3351/3351, `npm run
+test:e2e` 524/524 (tam paket, build dahil). Tarayıcıda 4 sayfa elle
+açılıp screenshot'la incelendi (alan tabloları + PASS/valid rozetleri +
+çeviri anahtarları doğru render, konsol hatasız).
+
+**Dalga 10 (ve Faz 10'un protokol dalgaları bölümü) burada TAMAMEN
+KAPANDI** — `framing-stream-protocols` ailesindeki 17 kaydın tamamı
+`ready`/alias.
