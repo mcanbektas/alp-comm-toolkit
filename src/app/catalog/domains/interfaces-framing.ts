@@ -833,7 +833,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Stop-and-wait serial file transfer in 128- or 1024-byte blocks with block-number complement checking, checksum or CRC-16 mode, and NAK-driven retransmission.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 10d: `xmodemCore.ts`nin (PAYLAŞILAN çekirdek, YMODEM
+          // de kullanıyor) ÜSTÜNDE ince sarmal. Framing motoruna (Faz 6) hiç
+          // uğramaz — çerçeve sınırı Header baytının (SOH/STX) taşıdığı sabit
+          // veri uzunluğundan (128/1024) türetilir, delimiter/length-field
+          // YOK. Checksum(SUM-8)/CRC(CRC16_XMODEM) modu çerçeve UZUNLUĞUNDAN
+          // çözülür. "Transfer Session View"/"ACK-NAK Timeline"/"Progress
+          // View" (çok-çerçeveli oturum takibi) bu dalgada YOK — decode tek
+          // bir blok/kontrol baytı çözer, PPP'nin (10b) LCP oturum takibini
+          // ERTELEMESİYLE aynı disiplin.
+          status: 'ready',
+          pluginId: 'xmodem',
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Transfer Session View',
@@ -852,7 +862,15 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'XMODEM extended with a block 0 metadata header carrying filename, size and modification time, enabling batch transfer of several files in one session.',
           layer: 'application',
-          status: 'planned',
+          // Faz 10 dalga 10d: `xmodemCore.ts`nin AYNISI (blok yapısı XMODEM
+          // ile birebir) — yalnız Block 0 "batch metadata" olarak ayrıca
+          // çözülür: dosya adı + boyutu NET (spec), mtime/mode/serial
+          // encoding'i standardize DEĞİL, ham bırakılır (uydurulmadı). Boş
+          // dosya adı batch terminatörü olarak adlanır. "Modification Time
+          // Decoder"/"Batch Session Tree" (çok-dosyalı oturum takibi) bu
+          // dalgada YOK — XMODEM'in aynı gerekçesi.
+          status: 'ready',
+          pluginId: 'ymodem',
           tabs: [
             'overview',
             'live',

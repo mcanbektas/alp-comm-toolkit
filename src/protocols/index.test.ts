@@ -63,6 +63,8 @@ const BUILT_IN_IDS = [
   'udp',
   'uds',
   'vlan-802-1q',
+  'xmodem',
+  'ymodem',
   'zigbee',
 ];
 
@@ -125,6 +127,8 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   udp: 'network-ethernet',
   uds: 'automotive',
   'vlan-802-1q': 'network-ethernet',
+  xmodem: 'interfaces-framing',
+  ymodem: 'interfaces-framing',
   zigbee: 'wireless-iot',
 };
 

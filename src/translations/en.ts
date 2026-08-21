@@ -1910,6 +1910,47 @@ export const en: TranslationDictionary = {
   'protocol.sdlc.example.uFrame.description':
     'Unnumbered format — command bits are not named in this wave (see file header), only format and FCS are shown.',
 
+  // --- XMODEM (never touches the framing engine, thin wrapper over xmodemCore.ts) ---
+  'protocol.xmodem.documentation.summary':
+    'Stop-and-wait serial file transfer — 128- or 1024-byte blocks, block-number complement checking, checksum (SUM-8) or CRC-16 (CRC16_XMODEM) mode, NAK-driven retransmission. Never touches the framing engine — the frame boundary is derived from the fixed data length carried by the Header byte itself.',
+  'protocol.xmodem.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.xmodem.error.unknownHeader':
+    'Unknown Header/control byte — not SOH (0x01), STX (0x02), or a recognized control byte (EOT/ACK/NAK/CAN).',
+  'protocol.xmodem.error.badTrailerLength':
+    'Frame length is consistent with neither checksum (1 byte) nor CRC (2 byte) mode.',
+  'protocol.xmodem.error.aborted': 'Parsing was aborted.',
+  'protocol.xmodem.error.complementMismatch': 'Block number complement (~Block) does not match.',
+  'protocol.xmodem.error.checksumMismatch': 'Checksum mismatch — the frame may have been corrupted in transit.',
+  'protocol.xmodem.error.crcMismatch': 'CRC mismatch — the frame may have been corrupted in transit.',
+  'protocol.xmodem.example.checksumBlock.name': 'Checksum mode (128 bytes)',
+  'protocol.xmodem.example.checksumBlock.description': 'Block 1 with SUM-8 checksum — the standard 128-byte block.',
+  'protocol.xmodem.example.crcBlock1k.name': 'CRC-16 mode, XMODEM-1K (1024 bytes)',
+  'protocol.xmodem.example.crcBlock1k.description':
+    'Block 2 with CRC-16 (CRC16_XMODEM) — the STX-headed extended 1024-byte block.',
+  'protocol.xmodem.example.eot.name': 'EOT (end of transmission)',
+  'protocol.xmodem.example.eot.description': 'A single-byte control signal — the sender announces the transfer is complete.',
+
+  // --- YMODEM (identical to xmodemCore.ts, Block 0 is named as batch metadata) ---
+  'protocol.ymodem.documentation.summary':
+    'An extended XMODEM — adds a Block 0 metadata header carrying the filename and size, allowing multiple files (a batch) to transfer in one session. The block shape is identical to XMODEM (the core is shared).',
+  'protocol.ymodem.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.ymodem.error.unknownHeader':
+    'Unknown Header/control byte — not SOH (0x01), STX (0x02), or a recognized control byte (EOT/ACK/NAK/CAN).',
+  'protocol.ymodem.error.badTrailerLength':
+    'Frame length is consistent with neither checksum (1 byte) nor CRC (2 byte) mode.',
+  'protocol.ymodem.error.aborted': 'Parsing was aborted.',
+  'protocol.ymodem.error.complementMismatch': 'Block number complement (~Block) does not match.',
+  'protocol.ymodem.error.checksumMismatch': 'Checksum mismatch — the frame may have been corrupted in transit.',
+  'protocol.ymodem.error.crcMismatch': 'CRC mismatch — the frame may have been corrupted in transit.',
+  'protocol.ymodem.example.blockZeroMetadata.name': 'Block 0 (filename + size)',
+  'protocol.ymodem.example.blockZeroMetadata.description':
+    'The first block of a batch — carries the filename and size; the mtime/mode field is not decoded in this wave.',
+  'protocol.ymodem.example.batchTerminator.name': 'Batch terminator (empty filename)',
+  'protocol.ymodem.example.batchTerminator.description':
+    'Block 0 with an empty filename — signals no more files remain in the session.',
+  'protocol.ymodem.example.dataBlock.name': 'Data block (same as XMODEM)',
+  'protocol.ymodem.example.dataBlock.description': 'Block 1 — regular file content, identical in shape to XMODEM itself.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',

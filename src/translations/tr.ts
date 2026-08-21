@@ -1912,6 +1912,48 @@ export const tr = {
   'protocol.sdlc.example.uFrame.description':
     'Unnumbered format — komut bitleri bu dalgada adlanmıyor (dosya başı disiplini), yalnız format + FCS gösterilir.',
 
+  // --- XMODEM (framing motoruna uğramaz, xmodemCore.ts'in üstünde ince sarmal) ---
+  'protocol.xmodem.documentation.summary':
+    'Stop-and-wait seri dosya transferi — 128 ya da 1024 baytlık bloklar, blok numarası tümleyeni kontrolü, checksum (SUM-8) ya da CRC-16 (CRC16_XMODEM) modu, NAK ile yeniden gönderim. Framing motoruna hiç uğramaz — çerçeve sınırı Header baytının taşıdığı sabit veri uzunluğundan türetilir.',
+  'protocol.xmodem.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.xmodem.error.unknownHeader':
+    'Bilinmeyen Header/kontrol baytı — SOH (0x01), STX (0x02) ya da tanınan bir kontrol baytı (EOT/ACK/NAK/CAN) değil.',
+  'protocol.xmodem.error.badTrailerLength':
+    'Çerçeve uzunluğu ne checksum (1 bayt) ne CRC (2 bayt) moduyla tutarlı.',
+  'protocol.xmodem.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.xmodem.error.complementMismatch': 'Blok numarası tümleyeni (~Block) uyuşmuyor.',
+  'protocol.xmodem.error.checksumMismatch': 'Checksum uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.xmodem.error.crcMismatch': 'CRC uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.xmodem.example.checksumBlock.name': 'Checksum modu (128 bayt)',
+  'protocol.xmodem.example.checksumBlock.description': 'Block 1, SUM-8 checksum ile — 128 baytlık standart blok.',
+  'protocol.xmodem.example.crcBlock1k.name': 'CRC-16 modu, XMODEM-1K (1024 bayt)',
+  'protocol.xmodem.example.crcBlock1k.description':
+    'Block 2, CRC-16 (CRC16_XMODEM) ile — STX başlıklı 1024 baytlık genişletilmiş blok.',
+  'protocol.xmodem.example.eot.name': 'EOT (aktarım sonu)',
+  'protocol.xmodem.example.eot.description': 'Tek baytlık kontrol sinyali — gönderici aktarımın bittiğini bildirir.',
+
+  // --- YMODEM (xmodemCore.ts'in AYNISI, Block 0 batch metadata olarak adlanır) ---
+  'protocol.ymodem.documentation.summary':
+    'XMODEM’in genişletilmiş hali — dosya adı/boyutunu taşıyan bir Block 0 metadata başlığı ekler, tek oturumda çoklu dosya (batch) transferine izin verir. Blok yapısı XMODEM ile birebir aynı (aynı çekirdek paylaşılır).',
+  'protocol.ymodem.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.ymodem.error.unknownHeader':
+    'Bilinmeyen Header/kontrol baytı — SOH (0x01), STX (0x02) ya da tanınan bir kontrol baytı (EOT/ACK/NAK/CAN) değil.',
+  'protocol.ymodem.error.badTrailerLength':
+    'Çerçeve uzunluğu ne checksum (1 bayt) ne CRC (2 bayt) moduyla tutarlı.',
+  'protocol.ymodem.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ymodem.error.complementMismatch': 'Blok numarası tümleyeni (~Block) uyuşmuyor.',
+  'protocol.ymodem.error.checksumMismatch': 'Checksum uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.ymodem.error.crcMismatch': 'CRC uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.ymodem.example.blockZeroMetadata.name': 'Block 0 (dosya adı + boyutu)',
+  'protocol.ymodem.example.blockZeroMetadata.description':
+    'Batch’in ilk bloğu — dosya adı ve boyutu taşır, mtime/mode alanı bu dalgada çözülmez.',
+  'protocol.ymodem.example.batchTerminator.name': 'Batch terminatörü (boş dosya adı)',
+  'protocol.ymodem.example.batchTerminator.description':
+    'Block 0, boş dosya adıyla — oturumda başka dosya kalmadığını bildirir.',
+  'protocol.ymodem.example.dataBlock.name': 'Veri bloğu (XMODEM ile aynı)',
+  'protocol.ymodem.example.dataBlock.description':
+    'Block 1 — normal dosya içeriği, yapı XMODEM’in kendisiyle birebir aynı.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

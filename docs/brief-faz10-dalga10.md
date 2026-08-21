@@ -333,8 +333,69 @@ test:e2e` 492/492, `npm run build` temiz. Tarayıcıda elle açıldı (decode +
 overview, HDLC+SDLC), FCS PASS gösterimi ve Station Address broadcast
 notu doğru, konsol hatasız.
 
-**Sıradaki alt-dalga: 10d (XMODEM + YMODEM + ZMODEM)** — brief'te tanımlı,
-henüz uygulanmadı. 10a/10b/10c'nin HİÇBİRİNE benzemez: framing motoruna
-UYMAYAN tek alt-dalga (stop-and-wait ACK/NAK oturumlu dosya transferi),
-üçü de sıfırdan. XMODEM checksum fixture'ı spec'te YOK (sembolik), sentetik
-payload için bağımsız hesaplanması gerekecek (dalga6/UBX emsali).
+## 10d/1 — XMODEM + YMODEM UYGULANDI, ZMODEM AYRI TUTULDU (2026-08-21)
+
+`src/protocols/serial/framing/xmodemCore.ts` (yeni, PAYLAŞILAN çekirdek —
+XMODEM+YMODEM'in blok yapısı birebir aynı, brief'in kendi önerisi) +
+`xmodem.ts` + `ymodem.ts` (ince sarmallar). 10a/10b/10c'nin HİÇBİRİNE
+benzemez: framing motoruna (Faz 6) hiç UĞRAMAZ, hiçbir `createExtractor*`
+çağrısı YOK — çerçeve sınırı Header baytının (SOH/STX) taşıdığı SABİT veri
+uzunluğundan (128/1024) türetilir, delimiter/length-field yok.
+
+**Uygulama öncesi ayrı bir keşif turu yapıldı** (kullanıcı "brief hazır mı"
+diye sordu) — `docs/spec/ozet/02-framing-protokolleri.md`nin XMODEM/YMODEM/
+ZMODEM bölümleri (234-287) okundu, NET/BELİRSİZ ayrımı çıkarıldı:
+
+- **NET:** XMODEM'in tam blok yapısı (`Header Block ~Block Data Trailer`),
+  checksum formülü (`SUM-8`), CRC-mod el sıkışması (`Receiver→C`), kontrol
+  baytları (SOH/EOT/ACK/NAK/CAN), retry akışı. Checksum motorları
+  (`sum8Checksum` + `CRC16_XMODEM`) KODDA ZATEN vardı, test fixture'lı
+  (`crcEngine.test.ts` `"123456789"→0x31C3`) — sıfırdan yazılmadı, yalnız
+  kablolandı.
+- **BELİRSİZ (spec'te yok, genel/evrensel XMODEM-YMODEM konvansiyonundan
+  dolduruldu, UYDURULMADI):** checksum-modu el sıkışması (spec yalnız
+  CRC-modunu belgeliyor — bu yüzden decode tek çerçeve aldığı için el
+  sıkışma baytına HİÇ bakılmadı, mod ÇERÇEVE UZUNLUĞUNDAN türetildi:
+  1 baytlık trailer→checksum, 2 baytlık→CRC); STX(0x02)'nin 1024-baytlık
+  bloğu işaretlemesi (evrensel XMODEM-1K konvansiyonu); YMODEM Block 0'ın
+  filename+filesize encoding'i (ASCII, NUL/boşluk ayraçlı — bu iki alan
+  ÇÖZÜLDÜ, ama mtime/mode/serial alanlarının genişliği/tabanı (octal mi
+  decimal mi) spec'te YOK ve gerçek YMODEM implementasyonları arasında da
+  TUTARSIZ — bu yüzden ÇÖZÜLMEDİ, `metadata-remainder` alanında ham+dürüst
+  notla bırakıldı, ezberden formatı uydurmak yanlış değer basma riski
+  taşırdı).
+
+**CRC bayt sırası — BÜYÜK-UÇLU, HDLC'nin (10c) KÜÇÜK-UÇLU FCS'inin TAM
+TERSİ:** `CRC16_XMODEM` `refin=false/refout=false` (yansıtılmamış) —
+`CRC16_X25`nin (`refin=true/refout=true`) tam tersi profil, CRC teorisinin
+standart eşleşmesi (yansıtılmamış CRC'ler geleneksel olarak büyük-uçlu
+iletilir). Bu ayrım testte (`xmodemCore.test.ts`) AÇIKÇA doğrulandı.
+
+**Session/batch takibi YOK** (kullanıcı "ayrı yapalım" dedi, ZMODEM'in yanı
+sıra bu da bilinçli bir sınır) — `ProtocolParser.parse()` tek bir blok/
+kontrol baytını saf/stateless çözer, canlı oturum durumu (kaç dosya, hangi
+sırada) tutmaz — PPP'nin (10b) LCP oturum takibini ERTELEMESİYLE aynı
+disiplin. "Transfer Session View"/"Batch Session Tree"/"ACK-NAK Timeline"
+katalog `tools` listesinde kalır ama bu dalgada YOK.
+
+Katalog: `xmodem`/`ymodem` → `status: 'ready'`, `pluginId` verildi.
+Registry 59 → 61. Bekçiler: `xmodemCore.test.ts` (paylaşılan çekirdek,
+kontrol baytları + blok çözümü + round-trip) + `xmodem.test.ts` +
+`ymodem.test.ts` (44 test toplam) + `e2e/xmodem-decode.spec.ts` +
+`e2e/ymodem-decode.spec.ts`. `tr.ts`/`en.ts` tam (XMODEM 14, YMODEM 14 yeni
+anahtar).
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3294/3294, `npm run
+test:e2e` 502/502, `npm run build` temiz. Tarayıcıda elle açıldı
+(screenshot + görsel inceleme) — Block 0'ın filename/filesize/metadata-
+remainder gösterimi ve PASS rozetleri doğru, konsol hatasız.
+
+**Sıradaki: ZMODEM (10d/2, ayrı tur)** — spec'in kendi kabulüyle kanonik
+tek bir tanım yok ("çeşitli legacy implementation farkları"), bit-seviyesi
+format hiç belgelenmemiş. Katalog kaydı zaten "Implementation Profile
+Metadata" aracını öngörmüş — parser hangi profile göre çözdüğünü metadata
+olarak taşımalı, tek "doğru" decoder yazılamaz. Bu, 10a-10d/1'in HİÇBİRİNE
+benzemeyen ayrı bir mimari karar turu gerektirir.
+**Sonra 10e** — 4 "jenerik" sayfanın mimari kararı (`ProtocolFramingSchema`
+vs `FramingMethodConfig`, brief'te a/b/c) HÂLÂ SORULMADI, ZMODEM'den
+bağımsız herhangi bir zaman sorulabilir.

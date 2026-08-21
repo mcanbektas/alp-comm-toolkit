@@ -43,13 +43,14 @@
 Comm SPA'sında **Faz 9 bitti, Faz 10 sürüyor** — dalga 9 TAMAMEN KAPANDI
 (`hayes-command-set → at-commands → lte-modem-at → {nb-iot, gnss-modem}`
 zinciri + Karar 6 + Cellular Initialization Dashboard), dalga 10 sürüyor:
-2026-08-21, alt-dalga 10a (SLIP + COBS), 10b (KISS + PPP) VE 10c (HDLC +
-SDLC) bitti — `framing-stream-protocols` ailesinin frame motorunu doğrudan
-sarmalayan ilk dört protokol + FCS/I-S-U sınıflandırmasını sıfırdan yazan
-paylaşılan çekirdek (`hdlcCore.ts`). Katalogdaki **172 kaydın 51'i `ready`,
-9'u `partial`, 112'si hâlâ `planned`**; registry 59 kayıt taşıyor. Dalga
+2026-08-21, alt-dalga 10a (SLIP + COBS), 10b (KISS + PPP), 10c (HDLC +
+SDLC) bitti, 10d'nin ilk yarısı (XMODEM + YMODEM, paylaşılan
+`xmodemCore.ts` çekirdeği — framing motoruna hiç uğramaz, stop-and-wait
+blok transferi) bitti. ZMODEM kanonik tanımı olmadığı için AYRI tutuldu,
+kendi turunda ele alınacak. Katalogdaki **172 kaydın 53'ü `ready`, 9'u
+`partial`, 110'u hâlâ `planned`**; registry 61 kayıt taşıyor. Dalga
 brifleri `docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü +
-kalan alt-dalgalar (10d-10e) `brief-faz10-dalga10.md`de.
+kalan iş (ZMODEM, 10e) `brief-faz10-dalga10.md`de.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

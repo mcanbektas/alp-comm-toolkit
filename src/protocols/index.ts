@@ -330,6 +330,18 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // SDLC — Faz 10 dalga 10c: `hdlcCore.ts`nin AYNISI (HDLC ile birebir aynı
   // çerçeve şekli), yalnız Address alanı "Station Address" olarak adlanır.
   registerOnce(registry, 'sdlc', () => import('./serial/framing/sdlc').then((module) => module.sdlcPlugin));
+  // XMODEM — Faz 10 dalga 10d: framing motoruna (Faz 6) HİÇ UĞRAMAZ —
+  // stop-and-wait ACK/NAK dosya transferi, motorun 15 yönteminden hiçbiri
+  // bu şekli karşılamıyor. Yeni `xmodemCore.ts` (PAYLAŞILAN çekirdek, YMODEM
+  // de kullanıyor): blok yapısı + checksum(SUM-8)/CRC(CRC16_XMODEM) modu
+  // çerçeve UZUNLUĞUNDAN türetilir, el sıkışma baytına bakılmaz (tek çerçeve
+  // decode, oturum durumu YOK).
+  registerOnce(registry, 'xmodem', () => import('./serial/framing/xmodem').then((module) => module.xmodemPlugin));
+  // YMODEM — Faz 10 dalga 10d: `xmodemCore.ts`nin AYNISI (blok yapısı XMODEM
+  // ile birebir), yalnız Block 0 "batch metadata" (dosya adı+boyutu) olarak
+  // ayrıca çözülür — mtime/mode/serial encoding'i standardize DEĞİL, ham
+  // bırakılır (uydurulmadı).
+  registerOnce(registry, 'ymodem', () => import('./serial/framing/ymodem').then((module) => module.ymodemPlugin));
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant
