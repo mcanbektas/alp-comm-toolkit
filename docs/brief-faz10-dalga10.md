@@ -390,12 +390,44 @@ test:e2e` 502/502, `npm run build` temiz. Tarayıcıda elle açıldı
 (screenshot + görsel inceleme) — Block 0'ın filename/filesize/metadata-
 remainder gösterimi ve PASS rozetleri doğru, konsol hatasız.
 
-**Sıradaki: ZMODEM (10d/2, ayrı tur)** — spec'in kendi kabulüyle kanonik
-tek bir tanım yok ("çeşitli legacy implementation farkları"), bit-seviyesi
-format hiç belgelenmemiş. Katalog kaydı zaten "Implementation Profile
-Metadata" aracını öngörmüş — parser hangi profile göre çözdüğünü metadata
-olarak taşımalı, tek "doğru" decoder yazılamaz. Bu, 10a-10d/1'in HİÇBİRİNE
-benzemeyen ayrı bir mimari karar turu gerektirir.
+**10d/2 (ZMODEM) — commit'lendi (c3c6e51, 2026-08-21):** kanonik tek tanım
+yoktu, çözüm önce kullanıcıya profil sorusu olarak sunuldu —
+AskUserQuestion'la **lrzsz profili** seçildi (3 seçenek: lrzsz tam
+bit-seviyesi / spec-literal minimal / ertele — kullanıcı ilkini seçti).
+Projenin kendi speci ZMODEM'de SIFIR bit-detay veriyordu (yalnız 7 frame
+adı + state machine + resume örneği) — tüm sabitler dış kaynaktan:
+Forsberg'in `zmodem.txt`si (Rev Oct-14-88) + `zmodem.h` (İKİ bağımsız
+mirror, stuff.mit.edu 1987 + coderfordev/rzsz 1993, birebir aynı
+`#define`ler) + `zm.c`/`crctab.c` (CRC init/tel-sırası kaynak koddan).
+
+`src/protocols/serial/framing/zmodemCore.ts` (yeni, kendi çekirdeği —
+XMODEM'inkiyle wire seviyesinde HİÇ ortak yanı yok) + `zmodem.ts` (ince
+sarmal). ZDLE'den sonraki bayt ÜÇ ayrı anlam taşıdığından (XOR-kaçış /
+ZRUB0-1 literal / ZCRCE-G-Q-W terminatör) `escaping.ts`nin jenerik motoru
+KULLANILMADI (HDLC'nin `hdlcFlagExtractor`i reddetmesiyle aynı gerekçe
+kalıbı, dalga 10c).
+
+**CRC16 parametreleri (poly 0x1021, init 0x0000) kaynakta AÇIK yazmıyordu
+— DOLAYLI ama sağlam kanıtla türetildi:** `zm.c`nin residue-check
+yöntemi CRC32 için `if (crc != 0xDEBB20E3)` (init≠0 → residue sıfırDIŞI,
+spec'in "-1 preset, inversion" notuyla uyumlu), CRC16 için
+`if (crc & 0xFFFF)` (residue SIFIR bekliyor) — aynı matematiksel
+zorunluluk ters yönde CRC16'nın init'inin 0 olduğunu kanıtlıyor. Sonuç:
+mevcut `CRC16_XMODEM` kaydıyla BİREBİR aynı, ayrı katalog kaydı AÇILMADI.
+
+**Kapsam dışı (dosya başı yorumlarında gerekçeli, uydurulmadı):** RLE'li
+header varyantları (ZBINR32/ZVBIN/ZVHEX/ZVBIN32/ZVBINR32 — yalnız rzsz'nin
+1993 header'ında, 1988 taban specinde yok); ZFILE'ın ZF0-ZF2 option
+baytları (Conversion/Management/Transport — enum değerleri kaynaktan
+doğrulanmadı, ham gösterilir, YMODEM'in mtime/mode ertelemesiyle aynı
+disiplin); session/batch takibi (kullanıcının kendi "ayrı yapalım"
+kararıyla zaten dalga 10d/1'de sınırlanmıştı).
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3322/3322, `npm run
+test:e2e` 508/508 (tam paket, build dahil). Tarayıcıda elle açıldı (4
+örnek — ZRQINIT/ZRINIT/ZFILE/ZDATA, screenshot + görsel inceleme), PASS
+rozetleri + hex viewer renk hizası doğru, konsol hatasız.
+
 **Sonra 10e** — 4 "jenerik" sayfanın mimari kararı (`ProtocolFramingSchema`
-vs `FramingMethodConfig`, brief'te a/b/c) HÂLÂ SORULMADI, ZMODEM'den
-bağımsız herhangi bir zaman sorulabilir.
+vs `FramingMethodConfig`, brief'te a/b/c) HÂLÂ SORULMADI, dalga 10'un son
+açık ucu.
