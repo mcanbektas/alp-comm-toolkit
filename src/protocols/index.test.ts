@@ -18,6 +18,7 @@ const BUILT_IN_IDS = [
   'can-xl',
   'canopen',
   'coap',
+  'cobs',
   'dali',
   'dmx512',
   'dnp3',
@@ -53,6 +54,7 @@ const BUILT_IN_IDS = [
   'obd-ii',
   'rtcm',
   'sacn',
+  'slip',
   'tcp',
   'udp',
   'uds',
@@ -74,6 +76,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'can-xl': 'automotive',
   canopen: 'industrial-automation',
   coap: 'network-ethernet',
+  cobs: 'interfaces-framing',
   dali: 'building-automation',
   dmx512: 'building-automation',
   dnp3: 'industrial-automation',
@@ -109,6 +112,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   'obd-ii': 'automotive',
   rtcm: 'marine-navigation',
   sacn: 'building-automation',
+  slip: 'interfaces-framing',
   tcp: 'network-ethernet',
   udp: 'network-ethernet',
   uds: 'automotive',
@@ -156,5 +160,8 @@ describe('registerBuiltInProtocols', () => {
       expect(plugin.exampleFrames.length, `${id} has no example frames`).toBeGreaterThan(0);
       expect(registry.getLoadedPlugin(id), id).toBe(plugin);
     }
-  });
+    // Varsayılan 5000ms, kayıt büyüdükçe (her dalga +birkaç dynamic import)
+    // tam paket koşusunda worker rekabeti altında marjinal hâle geliyordu —
+    // izolasyonda <500ms, tam pakette gözlemlenen bir kez 5000ms'yi aştı.
+  }, 15000);
 });

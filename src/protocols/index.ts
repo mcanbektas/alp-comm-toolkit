@@ -304,6 +304,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'hayes-command-set', () =>
     import('./serial/atcommands/hayesCommandSet').then((module) => module.hayesCommandSetPlugin),
   );
+  // SLIP — Faz 10 dalga 10a: RFC 1055, `protocol-core/framing/slip.ts`nin
+  // (Faz 6) ÜSTÜNDE ince sarmal — motor zaten kesiyor VE kaçış çözüyor,
+  // yeni bir ayrıştırma algoritması YOK.
+  registerOnce(registry, 'slip', () => import('./serial/framing/slip').then((module) => module.slipPlugin));
+  // COBS — Faz 10 dalga 10a: `protocol-core/framing/cobs.ts`nin (Faz 6)
+  // ÜSTÜNDE ince sarmal — SLIP'le aynı gerekçe, motor zaten çözüyor.
+  registerOnce(registry, 'cobs', () => import('./serial/framing/cobs').then((module) => module.cobsPlugin));
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant

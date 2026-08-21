@@ -7,9 +7,9 @@ toplar; ham baytı çerçeveye, çerçeveyi mühendislik değerine çevirir.
 ALP süitinin üç ürününden biri. Hesap, veritabanı, API ve dağıtım
 [alp-platform](https://github.com/mcanbektas/alp-platform) deposundadır.
 
-> **Durum: Faz 10 — protokol dalgaları (2026-08-20, dalga 9 kapandı).** Dönüşüm/CRC/zamanlama
+> **Durum: Faz 10 — protokol dalgaları (2026-08-21, dalga 10a).** Dönüşüm/CRC/zamanlama
 > motorları, stream-framing çekirdeği, şema parser'ı ve Live Serial Monitor çalışıyor.
-> Katalogdaki 172 kaydın **45'i `ready`, 9'u `partial`, 118'i `planned`**; kayıtlı 53
+> Katalogdaki 172 kaydın **47'si `ready`, 9'u `partial`, 116'sı `planned`**; kayıtlı 55
 > protokol plugin'i var. Yol haritası aşağıda.
 
 ## Özellikler
@@ -268,8 +268,8 @@ Faz 10'un henüz tanımlanmamış sonraki dalgaları.
 **Bugün ne çalışıyor:** spec §50'nin "gerçekten çalışmalı" dediği 15 aracın tamamı —
 HEX/ASCII, IEEE-754, endian, CRC hesaplayıcı, UART/SPI/I²C zamanlama, Live Serial Monitor,
 Custom Protocol Studio, Packet Builder ve protokol decoder'ları. `registerProtocolPlugin`
-ile kayıtlı 53 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
-118 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
+ile kayıtlı 55 protokol var (tam liste `src/protocols/index.ts`te, alfabetik). Katalogdaki
+116 kayıt hâlâ `status: 'planned'` — o sekmeler neyin geleceğini söylüyor, boş kart basmıyor.
 
 ## Lisans
 

@@ -678,7 +678,12 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'RFC 1055 framing that wraps IP datagrams on a serial line using END and ESC bytes only, deliberately providing no addressing, no length and no integrity check.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10a: `protocol-core/framing/slip.ts`nin (Faz 6) ÜSTÜNDE
+          // ince ProtocolPlugin sarmalı — motor zaten kesiyor VE kaçış çözüyor/
+          // kodluyor, yeni bir ayrıştırma algoritması yazılmadı. Kaçış olaylarının
+          // bayt konumları (motorun döndürmediği bir ayrıntı) ayrıca işaretlenir.
+          status: 'ready',
+          pluginId: 'slip',
           tabs: ['overview', 'live', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'SLIP Encoder',
@@ -694,7 +699,12 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Reversible byte stuffing that removes every zero byte from a frame so 0x00 can serve as an unambiguous delimiter, at a worst case of one extra byte per 254.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10a: `protocol-core/framing/cobs.ts`nin (Faz 6) ÜSTÜNDE
+          // ince ProtocolPlugin sarmalı — SLIP'le aynı gerekçe, motor zaten kod
+          // baytlarını çözüyor/kodluyor. "COBS + CRC Pipeline" bu dalgada YOK —
+          // CRC katmanı ayrı bir protokolün işi, burada uydurulmadı.
+          status: 'ready',
+          pluginId: 'cobs',
           tabs: ['overview', 'live', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'COBS Encoder',

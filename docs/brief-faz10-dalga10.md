@@ -1,0 +1,214 @@
+# Faz 10, dalga 10 — Framing & Stream Protocols ailesi (keşif, 2026-08-21)
+
+Dalga 9 kapandı (`hayes-command-set → at-commands → lte-modem-at → {nb-iot,
+gnss-modem}` + Karar 6 + Cellular Dashboard, commit `141309b`+`eefff59`).
+`plan-fazlar.md` sıradaki dalgayı tanımlamıyordu — bu brief onu tanımlamak
+için yazıldı. Kod YOK, yalnız keşif.
+
+**Kapsam:** `interfaces-framing/framing-stream-protocols` ailesindeki 17
+kayıttan 13'ü hâlâ `planned`: `custom-binary-protocol`, `ascii-protocol`,
+`delimiter-based-protocol`, `length-based-protocol`, `slip`, `cobs`, `hdlc`,
+`sdlc`, `ppp`, `kiss`, `xmodem`, `ymodem`, `zmodem`. (Kalan 4: `ubx`/`rtcm`
+alias — kanonik kayıtları marine-navigation'da zaten `ready`; `at-commands`/
+`hayes-command-set` dalga 9'da bitti.)
+
+**Kaynak:** `docs/spec/ozet/02-framing-protokolleri.md` (451 satır, ailenin
+17 kaydının 17'sini de kapsıyor, ham spec satır 3629–6253'ün 1:1 damıtımı) +
+`docs/spec/ozet/11-domain-taksonomisi.md:76-100` (ailenin kendi 5 alt-aile
+kırılımı). Framing motoru **Faz 6**'da yazıldı (`plan-fazlar.md:28`,
+`dalga` numaralamasından ÖNCE — dalga6 brief'i BİNA OTOMASYONU'yla ilgili,
+framing motoruyla karıştırılmasın), belgesi `src/protocol-core/framing/*.ts`
+dosyalarının kendi başlık yorumlarında + `02-framing-protokolleri.md`de.
+
+## Framing motoru — 15 yöntem, zaten yazılı ve test edilmiş
+
+`src/protocol-core/framing/` — `createExtractorFromConfig(config)`,
+`@/protocol-core`den import edilir (`at-commands`ın zaten kullandığı emsal).
+`FRAMING_METHOD_IDS` (15): `fixed-length · start-byte · multiple-start-bytes
+· start-end-delimiter · length-field · line-ending · inter-character-timeout
+· inter-frame-timeout · escape-based · bit-stuffing · byte-stuffing · cobs ·
+slip · hdlc-flag · modbus-silent-interval`. `bit-stuffing` KASITLI OLARAK
+`FrameExtractor` üretmiyor (bit-hizasız akış, ayrı primitive —
+`bitStuffing.ts`), gerisi (`FramingMethodConfig`, 14 varyant) çalışır
+switch'le `createExtractor.ts`de.
+
+**Kritik bulgu — SLIP ve COBS yalnız kesmiyor, ÇÖZÜYOR da:**
+`slipExtractor`/`cobsExtractor`in `extract()`i unescape/decode'u kendi
+İÇİNDE yapıp çözülmüş payload'ı döndürüyor (`escapedDelimiterFraming.ts`,
+`cobs.ts:128`). `encodeSlip()`/`encodeCobs()` ters yön için hazır. Bu iki
+protokol için "motor yaz" diye bir iş YOK — yalnız `ProtocolPlugin` sarmalı.
+
+**PPP ve KISS motor gerektirmiyor, DOĞRULANMIŞ fixture'la:**
+- PPP = `hdlc-flag` METODUNUN AYNISI (Flag 0x7E/Escape 0x7D/XOR 0x20 birebir
+  eşit). İki testte doğrulanmış: `escaping.test.ts:41`,
+  `hdlcFraming.test.ts:12` — `01 7E 02 → 01 7D 5E 02` (spec satır 206).
+- KISS = SLIP'in AYNI dört baytı (FEND=0xC0/FESC=0xDB/TFEND=0xDC/TFESC=0xDD).
+  Doğrulanmış: `escaping.test.ts:27,51` — `11 C0 22 DB 33 → 11 DB DC 22 DB
+  DD 33` (spec satır 226).
+
+**HDLC iki AYRI, birbirine bağlanmamış parça olarak var:**
+`hdlcFraming.ts` (`hdlc-flag`, ASENKRON bayt-kaçışlı — PPP'nin de kullandığı)
+ve `bitStuffing.ts` (GERÇEK bit-senkron HDLC stuffing, `FrameExtractor`
+DEĞİL, bilerek ayrı — logic-analyzer/import girdisi için). İkisi de FCS
+(CRC) ve I/S/U çerçeve sınıflandırması YAPMIYOR — bu protokol katmanının
+işi, hiç yazılmadı. Katalog kaydının kendi yorumu zaten `'live'` sekmesini
+çıkarmış: *"bit-senkron çerçeveleme sıradan seri portla yakalanamaz"*.
+
+**SDLC'nin sıfır kodu var**, spec'e göre HDLC'yle "çok benzer" çerçeve
+yapısı, tek farkı primary/secondary istasyon + poll/final. HDLC'nin
+üreteceği bit-stuffing/FCS altyapısını doğrudan paylaşabilir.
+
+**XMODEM/YMODEM/ZMODEM'in HİÇBİRİ framing motoruna uymuyor** — stop-and-wait
+ACK/NAK oturumlu bir dosya transferi, motorun 15 yönteminden hiçbiri bu
+şekli karşılamıyor, üçü de sıfırdan. İki somut yeniden-kullanım noktası
+VAR: `CRC16_XMODEM` zaten `crcCatalogue.ts`de kayıtlı (fixture:
+`0x31c3n`, `crcEngine.test.ts:31`); checksum modu SUM-8 (`(Σ byte) mod
+256`) — `simpleChecksums.ts`/`algorithmCatalogue.ts`de muhtemelen zaten var,
+uygulama turunda adı doğrulanmalı. **Spec XMODEM için HESAPLANMIŞ bir
+checksum fixture'ı VERMİYOR** (yalnız sembolik `CHECKSUM` yazıyor) — dalga6
+emsali gibi (*"sentetik çerçevenin CRC/checksum'ı motordan bağımsız
+hesapla kanıtlanır"*) sentetik bir 128 baytlık payload için checksum'ı
+bağımsız hesaplayıp kanıtlamak gerekecek.
+
+**XMODEM+YMODEM paylaşılan modül adayı** (`canClassic.ts`/`ethernet.ts`
+emsali — tek `parse` fonksiyonu, N plugin): YMODEM = XMODEM + Block-0
+metadata (dosya adı/boyut/zaman) + batch oturum. **ZMODEM AYRI kalmalı** —
+wire seviyesinde XMODEM/YMODEM'le HİÇBİR ortak yanı yok, kendi frame
+adları (ZRQINIT/ZRINIT/ZFILE/ZRPOS/ZDATA/ZEOF/ZFIN), kanonik tek bir
+ZMODEM tanımı yok (katalog kaydının kendi notu + spec'in "Dikkat çekenler
+#9"u bunu ayrıca doğruluyor).
+
+## Karar gereken tek gerçek çatal: 4 "jenerik" sayfa
+
+`custom-binary-protocol` / `ascii-protocol` / `delimiter-based-protocol` /
+`length-based-protocol` — dördü de tek bir sabit spec'i olan protokol
+DEĞİL, kullanıcı tanımlı bir SINIF (hepsi `definitions: ['custom-schema']`
+taşıyor). Alan çözme/kodlama motoru Faz 7'de ZATEN yazıldı
+(`protocol-core/schemas/protocolSchema.ts` + `decoding/schemaParser.ts` +
+`encoding/schemaEncoder.ts`, Protocol Studio'yu besliyor) ve çerçeve kesme
+motoru (yukarıdaki 15 yöntem) da hazır — teoride bu dört sayfa "motor yaz"
+değil "iki hazır motoru bağla" işi.
+
+**Ama:** `ProtocolSchema.framing` kendi DAR tipini kullanıyor —
+`'startEnd' | 'startOnly' | 'fixedLength' | 'lengthField' | 'none'`, yalnız
+5 tür — `FramingMethodId`e (15 tür) hiç referans vermiyor: COBS yok, SLIP
+yok, escape-based/byte-stuffing yok, timeout tabanlı yok, bit-stuffing yok.
+`delimiter-based-protocol`ın kendi `tools` listesi ("Escape Rule Editor",
+"Byte Stuffing View") tam da `ProtocolFramingSchema`nın İFADE EDEMEDİĞİ bir
+şey vaat ediyor. Repo'da bunu çözen hiçbir şey yok — gerçek bir karar
+noktası, varsayılmadı.
+
+**Seçenekler** (aşağıda kullanıcıya soruluyor):
+- **(a) `ProtocolFramingSchema`yı genişlet** — `FramingMethodConfig`in
+  geri kalan 10 türünü de kapsasın, tek şema iki motoru da sürsün. Doğrusu
+  ama `ProtocolSchema` şu an Protocol Studio'nun ÜZERİNE oturduğu tip —
+  değiştirmek o özelliği de dolaylı etkiler, gözden geçirme ister.
+- **(b) İkisini AYRI tut** — bu dört plugin `schema.framing`i hiç
+  KULLANMAZ, çerçeve kesme için doğrudan `createExtractorFromConfig`
+  çağırır (kullanıcı hangi yöntemi seçtiyse), alan çözme için
+  `schemaParser`/`schemaEncoder`i (yalnız `ProtocolFieldSchema[]`, framing
+  kısmı yok sayılır) kullanır. Küçük, geri dönüşü kolay, ama iki ayrı
+  "protokol tanımı" kavramı kullanıcıya nasıl gösterilir (`definitions`
+  sekmesinde tek bir JSON şeması mı, iki ayrı form mu) belirsiz kalır.
+- **(c) Bu dördünü ERTELE**, önce Encapsulation/Data-Transfer alt
+  ailelerini bitir — motor tarafında hiçbir belirsizlik yok, en hızlı somut
+  ilerleme oradan gelir; jenerik sayfalar kendi turunu (ya da (a)'nın
+  gerektirdiği Protocol Studio gözden geçirmesini) bekler.
+
+## Sıralama önerisi (motor-hazırlık sırasına göre, en ucuzdan en pahalıya)
+
+- **10a — SLIP + COBS.** Sıfır yeni ayrıştırma mantığı, yalnız
+  `ProtocolPlugin` sarmalı + örnek çerçeveler + e2e. En ucuz, deseni
+  kanıtlar (framing motorunu DOĞRUDAN bir protokol sayfasına bağlamanın
+  ilk örneği — `at-commands` bile kendi `createAtLineExtractor`ını
+  sarmalamıştı, bu ikisi daha da ince).
+- **10b — KISS + PPP.** Çerçeveleme SLIP/hdlc-flag'ten AYNEN miras, ama
+  gerçek bir çözme katmanı ister (KISS: Command/Port baytı + AX.25'e
+  devir — AX.25 hiç yok, v1 ham kalabilir; PPP: Protocol-field demux + LCP
+  müzakere durum makinesi, bu ikisinin en incelikli parçası).
+- **10c — HDLC + SDLC.** Paylaşılan modül adayı (I/S/U sınıflandırma + FCS
+  + bit-stuffing bağlama kararı ikisi için ortak), SDLC yalnız istasyon/
+  poll-final modelini üstüne ekler. `'live'` sekmesi kasıtlı yok (bit-senkron
+  yakalama donanımı ister).
+- **10d — XMODEM + YMODEM (paylaşılan modül) → ZMODEM (ayrı).** Sıfırdan
+  oturum/ACK-NAK/checksum-CRC state machine; sentetik fixture'ı bağımsız
+  hesapla kanıtlamak gerekiyor (spec vermiyor).
+- **10e — 4 jenerik sayfa.** Yukarıdaki karar VERİLMEDEN başlanmaz.
+
+## Tuzaklar
+
+- **`bit-stuffing` `createExtractorFromConfig`e YAZILAMAZ** — bilerek
+  dışarıda, `FrameExtractor` sözleşmesine uymuyor. HDLC/SDLC'de bu yolu
+  seçersen doğrudan `bitStuffing.ts`in `stuffBits`/`destuffBits`ını çağır.
+- **XMODEM checksum fixture'ı spec'te YOK** — sembolik. Uydurmadan, sentetik
+  payload için bağımsız hesapla, dalga6'nın UBX emsaliyle aynı disiplin.
+- **ZMODEM'i XMODEM/YMODEM'in üçüncü üyesi SANMA** — wire formatı tamamen
+  ayrı, paylaşılan modüle SOKMA (katalog kaydının kendi notu + spec'in
+  "Dikkat çekenler #9"u ikisi de bunu doğruluyor).
+- **`ubx`/`rtcm` alias kayıtlarının `status: 'planned'` taşıması** —
+  `aliasOf` olan bir kayıtta `status`/`pluginId` YAZILMAMASI beklenirdi
+  (`at-commands`/`hayes-command-set` gibi diğer emsallerde alias yok, bu
+  yüzden karşılaştırma net değil); bu dalganın kapsamı dışında ama
+  ileride dokunulursa önce bu tutarsızlık ayrıca sorulmalı.
+
+## Öneri
+
+**10a'yı (SLIP + COBS) başlat** — en düşük risk, framing-motorunu-doğrudan-
+bağlama desenini kanıtlar, 10b/10c'nin üstüne oturacağı temeli kurar. 4
+jenerik sayfanın karar noktası (yukarı) 10a'dan bağımsız, ayrı sorulabilir.
+Model önerisi: **Sonnet · high** (mimari fork yok bu alt-dalgada — motor
+zaten var, yalnız sarmalama — ama SLIP/COBS'un "hiç" belirsizliği yok
+diye Sonnet·medium'a da inilebilir; KISS/PPP'ye geçince LCP state machine
+nedeniyle high'a çık).
+
+## 10a — UYGULANDI (2026-08-21)
+
+`src/protocols/serial/framing/slip.ts` + `cobs.ts` (yeni) — ikisi de
+`protocol-core/framing`in ilgili modülünü (Faz 6) İÇERİDEN çağırıp sonucu
+`ParsedField`a çeviren ince `ProtocolPlugin` sarmalı, karar VERİLDİ notuyla
+birebir: "motor zaten kesiyor VE çözüyor, yeni bir ayrıştırma algoritması
+YOK." Paylaşılan `framingErrorMapping.ts` (yeni) — `FramingErrorCode` →
+`ProtocolErrorCode` köprüsü, yalnız SLIP/COBS'un ürettiği kodlarla sınırlı
+(HDLC/SDLC/PPP/KISS gelince genişler).
+
+**Motorun döndürmediği, yalnız GÖSTERİM için eklenen iki şey:**
+- SLIP: `findEscapeEvents` — her kaçış çiftinin (`0xDB 0xDC`/`0xDB 0xDD`)
+  ORİJİNAL bayt konumunu işaretler, `SLIP_ESCAPE_RULE.substitutions`in
+  TERSİNİ alarak (kod tekrar yazılmadı, veri yeniden kullanıldı).
+  `slipExtractor` zaten doğruladığı için bu yürüyüş kendi doğrulamasını
+  TEKRARLAMAZ, yalnız `status:'complete'` sonrası çağrılır.
+- COBS: `findCodeByteEvents` — her kod baytının konumunu + taşıdığı blok
+  uzunluğunu (+ 0xFF taşırma bloğu / sıfır-geri-gelme ayrımını) işaretler,
+  aynı disiplin.
+
+**Encoder de eklendi** (`encoder: {encode: encodeSlip}` / `encodeCobsFrame`)
+— `'build'` sekmesi bunu henüz OKUMUYOR (ProtocolPage'de jenerik bir
+BuildPanel yok, yalnız `decode` sekmesi `plugin.parser`ı okuyor) ama
+fonksiyon gerçek ve test edilmiş (round-trip testleri var); ileride bu
+sekme geldiğinde SLIP/COBS hazır olacak.
+
+**COBS'un `documentation.references`i YOK** — RFC'si yok (Cheshire & Baker,
+IEEE/ACM ToN 1999), doğrulanmış kalıcı bir URL elde edilemedi, uydurulmadı.
+SLIP RFC 1055'i kaynak gösteriyor (`rfc-editor.org/rfc/rfc1055`, kanonik
+IETF arşiv biçimi).
+
+**Test sırasında yakalanan bir bug:** `index.test.ts`in "loads the real
+plugin behind each id" testi tam paket koşusunda (worker rekabeti altında)
+5000ms varsayılan zaman aşımına yaklaşıyordu (izolasyonda <500ms) — kayıt
+53→55 büyüyünce eşiği aştı. Zaman aşımı 15000ms'ye çekildi; bu test her
+yeni dalgada BÜYÜMEYE devam edecek (sıralı N `import()`), ileride tekrar
+gündeme gelebilir.
+
+Katalog: `slip`/`cobs` → `status: 'ready'`, `pluginId` verildi. Registry
+53 → 55. Bekçiler: `slip.test.ts` (14 test) + `cobs.test.ts` (15 test),
+`e2e/slip-decode.spec.ts` + `e2e/cobs-decode.spec.ts` (5+5 test).
+`tr.ts`/`en.ts` tam.
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3168/3168, `npm run
+test:e2e` 472/472. Tarayıcıda elle açıldı (decode + overview sekmeleri,
+her ikisi de): Hazır rozeti, hex viewer bayt aralıklarını doğru
+renklendiriyor, kod baytı/kaçış olayı alanları doğru konumda, overview'da
+5 `tools`un 5'i de listeli, konsol hatasız.
+
+**Sıradaki iş 10b (KISS + PPP)** — bu brief'te tanımlı (yukarı), henüz
+uygulanmadı.

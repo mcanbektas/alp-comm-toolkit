@@ -1792,6 +1792,42 @@ export const en: TranslationDictionary = {
   'protocol.hayesCommandSet.example.numericResultCode.description':
     'Inherited from at-commands’ numeric result code support — hayes gains it without writing any extra code.',
 
+  // --- SLIP (RFC 1055, thin wrapper over the framing engine) ---
+  'protocol.slip.documentation.summary':
+    'RFC 1055 — wraps IP datagrams on a serial line with END and ESC bytes only; deliberately carries no addressing, length or integrity check. The framing engine (Faz 6) already cuts and decodes it — this page is just the display layer.',
+  'protocol.slip.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.slip.error.noDelimiter': 'No END (0xC0) byte found in the buffer — frame incomplete.',
+  'protocol.slip.error.aborted': 'Parsing was aborted.',
+  'protocol.slip.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.slip.example.escapedPayload.name': 'Escaped payload (END + ESC)',
+  'protocol.slip.example.escapedPayload.description':
+    'The payload carries both an END (0xC0) and an ESC (0xDB) byte — both get escaped, shown as separate fields.',
+  'protocol.slip.example.leadingEndMarker.name': 'Leading optional END',
+  'protocol.slip.example.leadingEndMarker.description':
+    'RFC 1055’s line-noise flush marker — skipped before the frame search begins.',
+  'protocol.slip.example.noEscaping.name': 'Data needing no escaping',
+  'protocol.slip.example.noEscaping.description':
+    'The payload carries no special byte (0xC0/0xDB) — the encoded form passes through unchanged.',
+
+  // --- COBS (thin wrapper over the framing engine) ---
+  'protocol.cobs.documentation.summary':
+    'Encodes a chosen byte value (0x00) completely out of the data in a reversible way — worst case one extra byte per 254. The framing engine (Faz 6) already decodes the code bytes — this page is just the display layer.',
+  'protocol.cobs.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.cobs.error.noDelimiter': 'No delimiter (0x00) byte found in the buffer — frame incomplete.',
+  'protocol.cobs.error.aborted': 'Parsing was aborted.',
+  'protocol.cobs.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.cobs.example.zeroInMiddle.name': 'Zero in the middle (spec fixture)',
+  'protocol.cobs.example.zeroInMiddle.description':
+    'The payload carries a 0x00 partway through — encoded as two code bytes, one of which restores the zero.',
+  'protocol.cobs.example.singleZero.name': 'Single zero byte',
+  'protocol.cobs.example.singleZero.description':
+    'The smallest possible COBS input — a lone 0x00 byte, encoded as two code bytes.',
+  'protocol.cobs.example.noZeroBytes.name': 'Data with no zero bytes',
+  'protocol.cobs.example.noZeroBytes.description':
+    'The payload carries no 0x00 at all — encoded as a single block with one code byte.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',

@@ -1794,6 +1794,42 @@ export const tr = {
   'protocol.hayesCommandSet.example.numericResultCode.description':
     'at-commands’ın numerik result code desteğinden miras — hayes hiçbir ek kod yazmadan devralır.',
 
+  // --- SLIP (RFC 1055, framing motorunun üstünde ince sarmal) ---
+  'protocol.slip.documentation.summary':
+    'RFC 1055 — IP datagramlarını seri hat üzerinde END ve ESC baytlarıyla çerçeveler; adresleme, uzunluk ya da bütünlük denetimi BİLEREK taşımaz. Çerçeveleme motoru (Faz 6) zaten kesip çözüyor, burada yalnız gösterim katmanı var.',
+  'protocol.slip.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.slip.error.noDelimiter': 'Arabellekte END (0xC0) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.slip.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.slip.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.slip.example.escapedPayload.name': 'Kaçışlı payload (END + ESC)',
+  'protocol.slip.example.escapedPayload.description':
+    'Payload hem END (0xC0) hem ESC (0xDB) baytı taşıyor — ikisi de kaçışlanır, ayrı alanlarla gösterilir.',
+  'protocol.slip.example.leadingEndMarker.name': 'Baştaki opsiyonel END',
+  'protocol.slip.example.leadingEndMarker.description':
+    'RFC 1055’in hat temizleme işaretleyicisi — çerçeve aramasından ÖNCE atlanır.',
+  'protocol.slip.example.noEscaping.name': 'Kaçış gerekmeyen veri',
+  'protocol.slip.example.noEscaping.description':
+    'Payload hiç özel bayt (0xC0/0xDB) taşımıyor — kodlanmış hâli değişmeden geçer.',
+
+  // --- COBS (framing motorunun üstünde ince sarmal) ---
+  'protocol.cobs.documentation.summary':
+    'Seçili bir bayt değerini (0x00) veriden tamamen kaldırıp geri döndürülebilir biçimde kodlar — en kötü durumda 254 baytta 1 bayt ek yük. Çerçeveleme motoru (Faz 6) zaten kod baytlarını çözüyor, burada yalnız gösterim katmanı var.',
+  'protocol.cobs.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.cobs.error.noDelimiter': 'Arabellekte delimiter (0x00) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.cobs.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.cobs.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.cobs.example.zeroInMiddle.name': 'Sıfır ortada (spec fixture)',
+  'protocol.cobs.example.zeroInMiddle.description':
+    'Payload ortasında bir 0x00 taşıyor — iki kod baytıyla kodlanır, biri sıfırı geri getirir.',
+  'protocol.cobs.example.singleZero.name': 'Tek sıfır baytı',
+  'protocol.cobs.example.singleZero.description':
+    'En küçük olası COBS girdisi — tek başına bir 0x00 baytı, iki kod baytıyla kodlanır.',
+  'protocol.cobs.example.noZeroBytes.name': 'Sıfır içermeyen veri',
+  'protocol.cobs.example.noZeroBytes.description':
+    'Payload hiç 0x00 taşımıyor — tek bir kod baytıyla, tek blokta kodlanır.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',
