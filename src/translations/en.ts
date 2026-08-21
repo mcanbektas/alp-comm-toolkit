@@ -1828,6 +1828,48 @@ export const en: TranslationDictionary = {
   'protocol.cobs.example.noZeroBytes.description':
     'The payload carries no 0x00 at all — encoded as a single block with one code byte.',
 
+  // --- KISS (TAPR/AX.25 TNC interface protocol, thin wrapper over the framing engine) ---
+  'protocol.kiss.documentation.summary':
+    'Minimal FEND (0xC0) delimited framing between a computer and a packet-radio TNC — the bytes are IDENTICAL to SLIP. The payload is normally an AX.25 frame, which this engine does not decode (v1 scope).',
+  'protocol.kiss.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.kiss.error.noDelimiter': 'No FEND (0xC0) byte found in the buffer — frame incomplete.',
+  'protocol.kiss.error.aborted': 'Parsing was aborted.',
+  'protocol.kiss.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.kiss.warning.unknownCommand':
+    'Unknown or reserved command nibble (7-14) — not defined by the TAPR spec.',
+  'protocol.kiss.example.dataFrame.name': 'Data Frame (command 0)',
+  'protocol.kiss.example.dataFrame.description':
+    'Port 0, Data Frame command — the payload is assumed to be an AX.25 frame, not decoded by this engine.',
+  'protocol.kiss.example.txdelayCommand.name': 'TXDELAY command',
+  'protocol.kiss.example.txdelayCommand.description':
+    'Port 0, TXDELAY command — the parameter byte is converted from 10ms units to milliseconds.',
+  'protocol.kiss.example.escapedDataFrame.name': 'Escaped Data Frame (FEND + FESC)',
+  'protocol.kiss.example.escapedDataFrame.description':
+    'The payload carries both a FEND (0xC0) and a FESC (0xDB) byte — escaped using the exact same rule as SLIP.',
+
+  // --- PPP (RFC 1661/1662, thin wrapper over the framing engine) ---
+  'protocol.ppp.documentation.summary':
+    'RFC 1661 — carries several network-layer protocols over a single point-to-point link, negotiated by LCP, framed HDLC-style with 0x7D escaping. The framing engine (Faz 6) already cuts and decodes it; this page adds Address/Control/Protocol demux and the LCP packet header.',
+  'protocol.ppp.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.ppp.error.noDelimiter': 'No Flag (0x7E) byte found in the buffer — frame incomplete.',
+  'protocol.ppp.error.aborted': 'Parsing was aborted.',
+  'protocol.ppp.error.noProtocolField': 'Not enough bytes for a Protocol field after Address/Control.',
+  'protocol.ppp.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.ppp.warning.unknownLcpOption': 'Unknown LCP option type — shown as raw data.',
+  'protocol.ppp.warning.malformedLcpOptions':
+    'The LCP option chain is malformed (a Length field does not match the remaining data) — the remainder is shown raw.',
+  'protocol.ppp.example.lcpConfigureRequest.name': 'LCP Configure-Request (MRU option)',
+  'protocol.ppp.example.lcpConfigureRequest.description':
+    'LCP Configure-Request over standard Address/Control — a single option: Maximum-Receive-Unit = 1500 bytes.',
+  'protocol.ppp.example.escapedInformation.name': 'Escaped Information (0x7E)',
+  'protocol.ppp.example.escapedInformation.description':
+    'The IPv4 payload carries a 0x7E byte — encoded with the exact same async escaping as HDLC (0x7D + XOR 0x20).',
+  'protocol.ppp.example.compressedFields.name': 'ACFC + PFC (compressed fields)',
+  'protocol.ppp.example.compressedFields.description':
+    'Address/Control omitted (ACFC), Protocol compressed to a single byte (PFC) — both at once.',
+
   // --- LTE Modem AT (3GPP TS 27.007 cellular vocabulary, on top of at-commands) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 cellular AT command vocabulary: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Reject-cause meaning, model/firmware and band are NOT in this engine — their source commands are out of scope.',

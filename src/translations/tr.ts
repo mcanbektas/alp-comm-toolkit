@@ -1830,6 +1830,48 @@ export const tr = {
   'protocol.cobs.example.noZeroBytes.description':
     'Payload hiç 0x00 taşımıyor — tek bir kod baytıyla, tek blokta kodlanır.',
 
+  // --- KISS (TAPR/AX.25 TNC arayüzü, framing motorunun üstünde ince sarmal) ---
+  'protocol.kiss.documentation.summary':
+    'Bilgisayar ile paket-radyo TNC’si arasında FEND (0xC0) ile sınırlanan minimal çerçeveleme — baytları SLIP’le BİREBİR aynı. Payload normalde bir AX.25 çerçevesidir, bu motor onu çözmez (v1 kapsamı).',
+  'protocol.kiss.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.kiss.error.noDelimiter': 'Arabellekte FEND (0xC0) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.kiss.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.kiss.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.kiss.warning.unknownCommand':
+    'Bilinmeyen ya da ayrılmış komut yarım baytı (7-14) — TAPR spec’te tanımlı değil.',
+  'protocol.kiss.example.dataFrame.name': 'Data Frame (komut 0)',
+  'protocol.kiss.example.dataFrame.description':
+    'Port 0, Data Frame komutu — payload bir AX.25 çerçevesi varsayılır, bu motor tarafından çözülmez.',
+  'protocol.kiss.example.txdelayCommand.name': 'TXDELAY komutu',
+  'protocol.kiss.example.txdelayCommand.description':
+    'Port 0, TXDELAY komutu — parametre baytı 10ms biriminden milisaniyeye çevrilir.',
+  'protocol.kiss.example.escapedDataFrame.name': 'Kaçışlı Data Frame (FEND + FESC)',
+  'protocol.kiss.example.escapedDataFrame.description':
+    'Payload hem FEND (0xC0) hem FESC (0xDB) baytı taşıyor — SLIP’in AYNI kuralıyla kaçışlanır.',
+
+  // --- PPP (RFC 1661/1662, framing motorunun üstünde ince sarmal) ---
+  'protocol.ppp.documentation.summary':
+    'RFC 1661 — birden çok ağ katmanı protokolünü tek bir noktadan noktaya bağlantı üzerinde taşır, LCP ile müzakere edilir, HDLC tarzı 0x7D kaçışıyla çerçevelenir. Çerçeveleme motoru (Faz 6) zaten kesip çözüyor; bu sayfa Address/Control/Protocol demux’unu ve LCP paket başlığını ekliyor.',
+  'protocol.ppp.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.ppp.error.noDelimiter': 'Arabellekte Flag (0x7E) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.ppp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ppp.error.noProtocolField': 'Address/Control sonrası Protocol alanı için yeterli bayt yok.',
+  'protocol.ppp.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.ppp.warning.unknownLcpOption': 'Bilinmeyen LCP seçenek türü — ham veri gösterildi.',
+  'protocol.ppp.warning.malformedLcpOptions':
+    'LCP seçenek zinciri bozuk (Length alanı kalan veriyle uyuşmuyor) — kalan bayt ham gösterildi.',
+  'protocol.ppp.example.lcpConfigureRequest.name': 'LCP Configure-Request (MRU seçeneği)',
+  'protocol.ppp.example.lcpConfigureRequest.description':
+    'Standart Address/Control üzerinde LCP Configure-Request — tek seçenek: Maximum-Receive-Unit = 1500 bayt.',
+  'protocol.ppp.example.escapedInformation.name': 'Kaçışlı Information (0x7E)',
+  'protocol.ppp.example.escapedInformation.description':
+    'IPv4 payload’ı 0x7E baytı taşıyor — HDLC’nin AYNI async kaçışıyla (0x7D + XOR 0x20) kodlanır.',
+  'protocol.ppp.example.compressedFields.name': 'ACFC + PFC (sıkıştırılmış alanlar)',
+  'protocol.ppp.example.compressedFields.description':
+    'Address/Control atlanmış (ACFC), Protocol tek bayt olarak sıkıştırılmış (PFC) — ikisi birden.',
+
   // --- LTE Modem AT (3GPP TS 27.007 hücresel sözlük, at-commands üstünde) ---
   'protocol.lteModemAt.documentation.summary':
     '3GPP TS 27.007 hücresel AT komut sözlüğü: CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN. Sebep kodu anlamı, model/firmware ve bant bu motorda YOK — kaynak komutları kapsamda değil.',

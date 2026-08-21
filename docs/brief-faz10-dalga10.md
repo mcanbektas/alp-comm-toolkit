@@ -210,5 +210,69 @@ her ikisi de): Hazır rozeti, hex viewer bayt aralıklarını doğru
 renklendiriyor, kod baytı/kaçış olayı alanları doğru konumda, overview'da
 5 `tools`un 5'i de listeli, konsol hatasız.
 
-**Sıradaki iş 10b (KISS + PPP)** — bu brief'te tanımlı (yukarı), henüz
-uygulanmadı.
+## 10b — UYGULANDI (2026-08-21)
+
+`src/protocols/serial/framing/kiss.ts` + `ppp.ts` (yeni) — 10a'nın aynı
+ilkesiyle: `slipExtractor`/`hdlcFlagExtractor`i (Faz 6) İÇERİDEN çağırıp
+sonucu `ParsedField`a çeviren ince `ProtocolPlugin` sarmalı, YENİ bir
+çerçeveleme algoritması yazılmadı. Ama 10a'dan farklı olarak ikisi de
+çözülmüş içeriğin KENDİ yapısını çözüyor (10a'da tek bir "Decoded Payload"
+alanıydı, burada birden çok adlanmış alt-alan var):
+
+- **KISS**: `slipExtractor`i (SLIP'in AYNISI — FEND/FESC/TFEND/TFESC)
+  kullanıyor. İlk çözülmüş bayt "Type Indicator" (port yarım baytı + komut
+  yarım baytı) olarak adlanıyor; TXDELAY/SlotTime/TXtail 10ms biriminden
+  ms'ye çevriliyor, FullDuplex/Persistence/SetHardware adlanıyor, 0xFF
+  Return sentinel'i ayrı ele alınıyor. Data Frame'in payload'ı (AX.25) v1'de
+  HAM — brief'in kendi kararıyla birebir.
+- **PPP**: `hdlcFlagExtractor`i (PPP'nin AYNISI — Flag/Escape/XOR 0x20)
+  kullanıyor. Address/Control içerikten algılanıyor (0xFF 0x03 varsa
+  standart, yoksa ACFC varsayılıyor — DALI'nin 1/2/3-bayt biçim algılama
+  emsaliyle aynı disiplin), Protocol field RFC 1661 §2'nin LSB-tek/çift
+  kuralıyla PFC algılanarak demux ediliyor. Protocol=LCP (0xC021) olduğunda
+  Code/Identifier/Length + Configure-*'ın seçenek TLV zinciri (MRU/ACCM/
+  Auth-Protocol/Magic-Number/PFC/ACFC, RFC 1661 §6) çözülüyor; bilinmeyen
+  seçenek türü ve bozuk (truncated) zincir uyarıyla ham gösteriliyor,
+  çökmüyor.
+
+**Motorun döndürmediği, yalnız GÖSTERİM için eklenen ortak bir mekanizma:**
+her iki dosyada da `mapDecodedPositions`/`decodedRangeToWire` (ve onu saran
+`buildField`) — çözülmüş herhangi bir bayt ARALIĞININ (Address, Protocol,
+LCP Length, bir seçenek…) tel (escaped) konumunu/uzunluğunu hesaplıyor.
+10a'nın tek-olaylık `findEscapeEvents`i (SLIP'in `substitutions` tersi,
+KISS'te AYNI kopyalanmıştı) YETMEZDİ — PPP'de BİRDEN ÇOK çözülmüş baytı
+kapsayan alanlar var (ör. Magic-Number seçeneği 4 bayt) ve Magic-Number
+RASTGELE bir değer olduğu için çoğu gerçek çerçevede en az bir kaçış
+bekleniyor; bu yüzden byte-viewer'ın DOĞRU vurgulaması için bu genel eşleme
+şart görüldü, kısayol yapılmadı. PPP'nin kaçış tersi SLIP'ten FARKLI: XOR
+kendi tersidir (`escaped XOR 0x20`), `substitutions` haritası yok —
+`escaping.ts` doğrudan okunarak doğrulandı, tersine göre "geçersiz kaçış"
+(`invalid-escape`) PPP için YAPISAL OLARAK İMKANSIZ (XOR total bir işlem);
+yalnız kaçış baytının hemen ardından veri kesilmesi (`truncated-frame`)
+mümkün — testler buna göre yazıldı, imkansız bir hata kodu için sahte test
+YAZILMADI.
+
+**FCS (PPP) — ayrılır, DOĞRULANMAZ:** LCP dalında Length alanı bittikten
+sonra kalan bayt `'fcs'` alanında gösterilir ama CRC16/X25 ile
+karşılaştırılmaz — motor var (`crcCatalogue.ts`) ama bağımsız doğrulanmış
+bir PPP FCS fixture'ı elde yoktu, uydurulmadı (XMODEM checksum'ın 10a
+öncesi aynı gerekçesi, CLAUDE.md fixture disiplini). Non-LCP protokoller
+(IPv4 vb.) için Information hiç bölünmez — PPP başlığında bir uzunluk alanı
+yok, FCS'i payload'dan ayırmanın güvenilir bir yolu yok. "Negotiation
+Timeline" (çok çerçeveli LCP oturumu) ve KISS'in "AX.25 Chain Decode"'u
+aynı disiplinle ERTELENDİ — COBS'un kendi "COBS + CRC Pipeline"
+ertelemesiyle birebir (katalogdaki `tools` listesi ASPİRASYONEL, o dalganın
+hepsini kapsaması gerekmiyor).
+
+Katalog: `ppp`/`kiss` → `status: 'ready'`, `pluginId` verildi. Registry
+55 → 57. Bekçiler: `kiss.test.ts` (17 test) + `ppp.test.ts` (21 test — LCP
+Configure-Ack/Reject/Protocol-Reject, bozuk seçenek zinciri, ACFC/PFC,
+kaçışlı Information dahil), `e2e/kiss-decode.spec.ts` + `e2e/ppp-decode.spec.ts`.
+`tr.ts`/`en.ts` tam (KISS 12, PPP 14 yeni anahtar — PPP'nin 3 fazla hata/
+uyarı kodu: `noProtocolField`/`unknownLcpOption`/`malformedLcpOptions`).
+
+Doğrulama: `npm run typecheck` temiz, `npm test` 3206/3206.
+
+**Sıradaki alt-dalga 10c (HDLC + SDLC)** — brief'te tanımlı (yukarı), henüz
+uygulanmadı. 10a/10b'nin aksine GERÇEK yeni iş: FCS + I/S/U çerçeve
+sınıflandırması hiç yazılmadı.

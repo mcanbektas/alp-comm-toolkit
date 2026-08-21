@@ -42,13 +42,13 @@
 
 Comm SPA'sında **Faz 9 bitti, Faz 10 sürüyor** — dalga 9 TAMAMEN KAPANDI
 (`hayes-command-set → at-commands → lte-modem-at → {nb-iot, gnss-modem}`
-zinciri + Karar 6 + Cellular Initialization Dashboard), dalga 10 başladı:
-2026-08-21, alt-dalga 10a (SLIP + COBS, `framing-stream-protocols`
-ailesinin frame motorunu doğrudan sarmalayan ilk iki protokol) bitti.
-Katalogdaki **172 kaydın 47'si `ready`, 9'u `partial`, 116'sı hâlâ
-`planned`**; registry 55 kayıt taşıyor. Dalga brifleri
+zinciri + Karar 6 + Cellular Initialization Dashboard), dalga 10 sürüyor:
+2026-08-21, alt-dalga 10a (SLIP + COBS) VE 10b (KISS + PPP) bitti —
+`framing-stream-protocols` ailesinin frame motorunu doğrudan sarmalayan
+ilk dört protokol. Katalogdaki **172 kaydın 49'u `ready`, 9'u `partial`,
+114'ü hâlâ `planned`**; registry 57 kayıt taşıyor. Dalga brifleri
 `docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü + kalan
-alt-dalgalar (10b-10e) `brief-faz10-dalga10.md`de.
+alt-dalgalar (10c-10e) `brief-faz10-dalga10.md`de.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

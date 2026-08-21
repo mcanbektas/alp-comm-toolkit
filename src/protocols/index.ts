@@ -311,6 +311,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // COBS — Faz 10 dalga 10a: `protocol-core/framing/cobs.ts`nin (Faz 6)
   // ÜSTÜNDE ince sarmal — SLIP'le aynı gerekçe, motor zaten çözüyor.
   registerOnce(registry, 'cobs', () => import('./serial/framing/cobs').then((module) => module.cobsPlugin));
+  // KISS — Faz 10 dalga 10b: `protocol-core/framing/slip.ts`nin (Faz 6)
+  // ÜSTÜNDE ince sarmal — SLIP'in AYNI dört baytı (FEND/FESC/TFEND/TFESC),
+  // motor TEKRAR YAZILMADI. Type Indicator (port/komut) adlanır; AX.25 v1'de
+  // hiç çözülmez (brief-faz10-dalga10.md, 10b).
+  registerOnce(registry, 'kiss', () => import('./serial/framing/kiss').then((module) => module.kissPlugin));
+  // PPP — Faz 10 dalga 10b: `protocol-core/framing/hdlcFraming.ts`nin (Faz 6)
+  // ÜSTÜNDE ince sarmal — motor zaten kesiyor VE async kaçış çözüyor. Yeni iş
+  // Address/Control+Protocol demux ve LCP paket/seçenek çözümü (RFC 1661).
+  registerOnce(registry, 'ppp', () => import('./serial/framing/ppp').then((module) => module.pppPlugin));
   // LTE Modem AT — Faz 10 dalga 9c: 3GPP TS 27.007 hücresel sözlük
   // (CSQ/COPS/CREG/CEREG/CGATT/CGDCONT/CIMI/CGSN/CCLK/CPIN), at-commands'ın
   // ÜSTÜNDE. Sebep kodu anlamı (CREG/CEREG reject_cause) ve model/firmware/bant

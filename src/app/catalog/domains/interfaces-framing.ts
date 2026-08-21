@@ -761,7 +761,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'RFC 1661 encapsulation that carries several network-layer protocols over one point-to-point link, negotiated by LCP and framed HDLC-style with 0x7D escaping and an ACCM.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10b: `protocol-core/framing/hdlcFraming.ts`nin (Faz 6)
+          // ÜSTÜNDE ince ProtocolPlugin sarmalı — motor zaten kesiyor VE async
+          // kaçış çözüyor/kodluyor. Address/Control+Protocol demux (PFC/ACFC
+          // algılanır) ve LCP Code/Identifier/Length + bilinen seçenek TLV'leri
+          // (MRU/ACCM/Auth-Protocol/Magic-Number/PFC/ACFC) çözülür. "Negotiation
+          // Timeline" (çok çerçeveli oturum takibi) ve "FCS Validator" bu
+          // dalgada YOK — FCS ayrı alanda gösterilir ama doğrulanmaz (bağımsız
+          // fixture yok, CLAUDE.md fixture disiplini; COBS'un kendi "COBS + CRC
+          // Pipeline" ertelemesiyle aynı gerekçe).
+          status: 'ready',
+          pluginId: 'ppp',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'PPP Frame Decoder',
@@ -779,7 +789,13 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Minimal FEND-delimited framing between a computer and a packet-radio TNC, whose payload is normally an AX.25 frame that can be decoded further up the chain.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 10b: `protocol-core/framing/slip.ts`nin (Faz 6) ÜSTÜNDE
+          // ince ProtocolPlugin sarmalı — SLIP'in AYNI dört baytı (FEND/FESC/
+          // TFEND/TFESC), motor TEKRAR YAZILMADI. Type Indicator (port/komut
+          // yarım baytı) adlanır. "AX.25 Chain Decode" bu dalgada YOK — v1
+          // Data Frame payload'ı ham kalır (brief-faz10-dalga10.md, 10b).
+          status: 'ready',
+          pluginId: 'kiss',
           tabs: ['overview', 'live', 'decode', 'build', 'diagnostics', 'examples'],
           tools: [
             'FEND Framing',
