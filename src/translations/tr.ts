@@ -3741,6 +3741,49 @@ export const tr = {
   'protocol.oneWire.example.unknownCommand.name': 'Tanınmayan ROM Command (uyarı yolu)',
   'protocol.oneWire.example.unknownCommand.description':
     '0xAA bilinen 6 ROM komutundan biri değil — yalnız uyarı üretir, hata basmaz.',
+
+  // --- SPI (faz 10 dalga 11b) ---
+  'protocol.spi.error.emptyFrame': 'Arabellek en az 1 bayt (Command) içermeli.',
+  'protocol.spi.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.spi.summary.read': 'Read Register {register}',
+  'protocol.spi.summary.write': 'Write Register {register}',
+  'protocol.spi.documentation.summary':
+    'Command baytının 7. biti (okuma/yazma) okunarak register transaction çözülür: okuma ise 1 dummy bayt artı dönen veri, yazma ise doğrudan yazılan veri gösterilir. CPOL/CPHA ve transfer süresi hesaplayıcısı (Zamanlama sekmesi) ayrı bir motorda zaten hazırdı. Full-duplex tek bir mantıksal bayt dizisine indirgenir — o anki kullanılmayan hat hiç gösterilmez. Dummy bayt sayısı (sabit 1) ve okuma/yazma bitinin konumu spec özetinin kendi örneğine dayanır, gerçek cihazlarda değişebilir.',
+  'protocol.spi.example.registerRead.name': 'Register okuma (spec IMU örneği)',
+  'protocol.spi.example.registerRead.description':
+    'Register 0x75 okunuyor: Command 0xF5 (0x75 üzerine okuma biti eklenmiş), 1 dummy bayt, dönen değer 0x71.',
+  'protocol.spi.example.registerWrite.name': 'Register yazma',
+  'protocol.spi.example.registerWrite.description':
+    'Register okuma örneğiyle simetrik: okuma biti temizken dummy yok, yazılan değer doğrudan komuttan sonra gelir.',
+  'protocol.spi.example.multiByteRead.name': 'Çok baytlı okuma (burst)',
+  'protocol.spi.example.multiByteRead.description':
+    'Aynı register, 4 baytlık burst okuma — Data alanının birden çok baytı tek seferde taşıdığını gösterir.',
+
+  // --- Quad SPI (faz 10 dalga 11b) ---
+  'protocol.quadSpi.error.emptyFrame': 'Arabellek en az 1 bayt (Command) içermeli.',
+  'protocol.quadSpi.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.quadSpi.summary.transaction': 'Command {command}',
+  'protocol.quadSpi.documentation.summary':
+    'Command (1 bayt) artı Address (3 bayt, büyük uçlu — spec özetinin 0xEB/0x001234 örneği) artı Data çözülür. Dummy cycle hiç bayt tüketmez: tri-state hat veri taşımaz, kaç bayta karşılık geldiği lane genişliğine bağlıdır ve bu bir zamanlama parametresidir (Zamanlama sekmesindeki hesaplayıcı zaten kapsıyor). Adres uzunluğu sabit 3 bayt varsayılır; 4 baytlık adresleme bu sürümde yok.',
+  'protocol.quadSpi.example.flashFastRead.name': 'Flash Fast Read (spec örneği)',
+  'protocol.quadSpi.example.flashFastRead.description':
+    'Command 0xEB (Fast Read Quad I/O), Address 0x001234, ardından temsili 4 bayt veri.',
+  'protocol.quadSpi.example.commandOnly.name': 'Yalnız komut (adressiz)',
+  'protocol.quadSpi.example.commandOnly.description':
+    'Write Enable gibi adres taşımayan bir komut örneği — Address ve Data alanı hiç görünmez.',
+
+  // --- Octal SPI (faz 10 dalga 11b) ---
+  'protocol.octalSpi.error.emptyFrame': 'Arabellek en az 1 bayt (Command) içermeli.',
+  'protocol.octalSpi.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.octalSpi.summary.transaction': 'Command {command}',
+  'protocol.octalSpi.documentation.summary':
+    'Quad SPI ile aynı Command artı Address (3 bayt, büyük uçlu) artı Data yapısı çözülür (paylaşılan çekirdek). SDR/DDR ve DQS data strobe elektriksel/zamanlama kavramlarıdır, decode baytlarında görünmez — throughput motoru hazır ama henüz hiçbir hesaplayıcı arayüzü onu okumuyor.',
+  'protocol.octalSpi.example.flashRead.name': 'Flash okuma (temsili)',
+  'protocol.octalSpi.example.flashRead.description':
+    'Command 0x0C, Address 0x000000, ardından temsili 4 bayt veri — gerçek bir üretici datasheet inden alınmadı, illüstratif.',
+  'protocol.octalSpi.example.commandOnly.name': 'Yalnız komut (adressiz)',
+  'protocol.octalSpi.example.commandOnly.description':
+    'Write Enable gibi adres taşımayan bir komut örneği — Address ve Data alanı hiç görünmez.',
 } as const;
 
 /**

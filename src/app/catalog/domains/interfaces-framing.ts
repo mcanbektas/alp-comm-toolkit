@@ -216,7 +216,14 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Four-wire clocked full-duplex bus between a host and chip-selected peripherals, where the CPOL/CPHA mode pair and bit order decide whether the same wires read sense or garbage.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11b: register transaction decode (Command bit7=R/W̄ + 1 dummy
+          // bayt + Data — spec'in kendi IMU örneği). CPOL/CPHA/transfer-süresi
+          // zaten `timing/spi.ts` + `SpiTimingTool`ta vardı, motor tekrar
+          // yazılmadı. 'build'/'diagnostics' sekmeleri hâlâ karşılıksız
+          // (jenerik BuildPanel yok, dalga10a'nın SLIP/COBS'ta bıraktığı boşluk).
+          status: 'ready',
+          pluginId: 'spi',
+          calculatorIds: ['spi-timing'],
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Configuration',
@@ -238,7 +245,13 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Four-lane serial memory interface whose command, address, dummy and data phases can each use a different lane width, used for external NOR Flash and memory-mapped execution.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11b: Command+Address(3 bayt sabit, spec'in 0xEB/0x001234
+          // örneği)+Data decode (qspiCore.ts, octal-spi ile paylaşılan).
+          // Dummy cycle hiç bayt tüketmez (kapsam kararı, dosya başı notu) —
+          // `timing/spi.ts`teki `qspiThroughput` zaten SpiTimingTool'da vardı.
+          status: 'ready',
+          pluginId: 'quad-spi',
+          calculatorIds: ['spi-timing'],
           tabs: ['overview', 'decode', 'timing', 'data', 'examples'],
           tools: [
             'IO0–IO3 Lane View',
@@ -258,7 +271,13 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Eight-lane serial memory interface with SDR/DDR transfers and a DQS strobe, used by modern external Flash and PSRAM for execute-in-place workloads.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11b: quad-spi ile AYNI Command+Address(3)+Data yapısı
+          // (qspiCore.ts paylaşılan). SDR/DDR/DQS decode'a girmez — motor
+          // (`ospiThroughput`) var ama henüz hiçbir UI hesaplayıcısı okumuyor
+          // (bilinen boşluk, octalSpi.ts dosya başı notu).
+          status: 'ready',
+          pluginId: 'octal-spi',
+          calculatorIds: ['spi-timing'],
           tabs: ['overview', 'decode', 'timing', 'data', 'examples'],
           tools: [
             'IO0–IO7 Lane View',

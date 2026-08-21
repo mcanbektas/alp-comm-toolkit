@@ -409,4 +409,22 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'one-wire', () =>
     import('./serial/peripheral-buses/onewire').then((module) => module.oneWirePlugin),
   );
+  // SPI — Faz 10 dalga 11b: register transaction decode (Command bit7=R/W̄ +
+  // 1 dummy bayt + Data, spec'in kendi IMU örneği). CPOL/CPHA/transfer süresi
+  // `timing/spi.ts`ta (Faz 5) zaten vardı, motor tekrar yazılmadı.
+  registerOnce(registry, 'spi', () =>
+    import('./serial/peripheral-buses/spi').then((module) => module.spiPlugin),
+  );
+  // Quad SPI — Faz 10 dalga 11b: `qspiCore.ts`nin (bu dalga, octal-spi ile
+  // PAYLAŞILAN çekirdek) üstünde ince sarmal. Command+Address(3 bayt sabit)+
+  // Data; Dummy cycle hiç bayt tüketmez (kapsam kararı, qspiCore.ts notu).
+  registerOnce(registry, 'quad-spi', () =>
+    import('./serial/peripheral-buses/quadSpi').then((module) => module.quadSpiPlugin),
+  );
+  // Octal SPI — Faz 10 dalga 11b: `qspiCore.ts`nin AYNISI (quad-spi ile
+  // birebir aynı çerçeve şekli). SDR/DDR/DQS decode'a girmez (elektriksel/
+  // zamanlama kavramları, octalSpi.ts dosya başı notu).
+  registerOnce(registry, 'octal-spi', () =>
+    import('./serial/peripheral-buses/octalSpi').then((module) => module.octalSpiPlugin),
+  );
 }

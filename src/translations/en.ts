@@ -3753,4 +3753,47 @@ export const en: TranslationDictionary = {
   'protocol.oneWire.example.unknownCommand.name': 'Unrecognized ROM Command (warning path)',
   'protocol.oneWire.example.unknownCommand.description':
     '0xAA is not one of the 6 known ROM commands — raises only a warning, not an error.',
+
+  // --- SPI (phase 10 wave 11b) ---
+  'protocol.spi.error.emptyFrame': 'The buffer must contain at least 1 byte (Command).',
+  'protocol.spi.error.aborted': 'Parsing was cancelled.',
+  'protocol.spi.summary.read': 'Read Register {register}',
+  'protocol.spi.summary.write': 'Write Register {register}',
+  'protocol.spi.documentation.summary':
+    "Decodes a register transaction by reading bit 7 of the Command byte (read/write): a read is followed by 1 dummy byte plus the returned data, a write shows the written data directly. The CPOL/CPHA and transfer-time calculator (Timing tab) already existed as a separate engine. Full-duplex is collapsed into a single logical byte sequence — the line that is not in use at that moment is never shown. The dummy byte count (fixed at 1) and the position of the read/write bit follow the spec summary's own example; real devices may differ.",
+  'protocol.spi.example.registerRead.name': 'Register read (spec IMU example)',
+  'protocol.spi.example.registerRead.description':
+    'Reading register 0x75: Command 0xF5 (0x75 with the read bit set), 1 dummy byte, returned value 0x71.',
+  'protocol.spi.example.registerWrite.name': 'Register write',
+  'protocol.spi.example.registerWrite.description':
+    'Symmetric to the register-read example: with the read bit clear there is no dummy byte, the written value follows the command directly.',
+  'protocol.spi.example.multiByteRead.name': 'Multi-byte read (burst)',
+  'protocol.spi.example.multiByteRead.description':
+    'Same register, a 4-byte burst read — shows the Data field carrying more than one byte at once.',
+
+  // --- Quad SPI (phase 10 wave 11b) ---
+  'protocol.quadSpi.error.emptyFrame': 'The buffer must contain at least 1 byte (Command).',
+  'protocol.quadSpi.error.aborted': 'Parsing was cancelled.',
+  'protocol.quadSpi.summary.transaction': 'Command {command}',
+  'protocol.quadSpi.documentation.summary':
+    "Decodes Command (1 byte) plus Address (3 bytes, big-endian — the spec summary's own 0xEB/0x001234 example) plus Data. Dummy cycles never consume a byte: the tri-state line carries no data, how many bytes they correspond to depends on lane width, and that is a timing parameter (the Timing tab's calculator already covers it). The address length is assumed to be a fixed 3 bytes; 4-byte addressing is not covered in this release.",
+  'protocol.quadSpi.example.flashFastRead.name': 'Flash Fast Read (spec example)',
+  'protocol.quadSpi.example.flashFastRead.description':
+    'Command 0xEB (Fast Read Quad I/O), Address 0x001234, followed by 4 representative data bytes.',
+  'protocol.quadSpi.example.commandOnly.name': 'Command only (no address)',
+  'protocol.quadSpi.example.commandOnly.description':
+    'An addressless command example, like Write Enable — the Address and Data fields never appear.',
+
+  // --- Octal SPI (phase 10 wave 11b) ---
+  'protocol.octalSpi.error.emptyFrame': 'The buffer must contain at least 1 byte (Command).',
+  'protocol.octalSpi.error.aborted': 'Parsing was cancelled.',
+  'protocol.octalSpi.summary.transaction': 'Command {command}',
+  'protocol.octalSpi.documentation.summary':
+    'Decodes the same Command plus Address (3 bytes, big-endian) plus Data structure as Quad SPI (shared core). SDR/DDR and the DQS data strobe are electrical/timing concepts and never appear in the decoded bytes — the throughput engine exists but no calculator UI reads it yet.',
+  'protocol.octalSpi.example.flashRead.name': 'Flash read (representative)',
+  'protocol.octalSpi.example.flashRead.description':
+    "Command 0x0C, Address 0x000000, followed by 4 representative data bytes — not taken from a real vendor datasheet, illustrative only.",
+  'protocol.octalSpi.example.commandOnly.name': 'Command only (no address)',
+  'protocol.octalSpi.example.commandOnly.description':
+    'An addressless command example, like Write Enable — the Address and Data fields never appear.',
 };
