@@ -9,7 +9,9 @@ import {
   differentialLines,
   expandUartCharacter,
   formatBinaryByte,
+  formatAsciiText,
   formatDifferentialLine,
+  formatMarkSpaceLine,
   formatUartLine,
 } from './uartLineCore';
 
@@ -159,5 +161,39 @@ describe('differentialLines', () => {
   it('alan sınırıyla aynı sayıda kalır (uzun yakalamada şişmez)', () => {
     const data = new Uint8Array(MAX_EXPANDED_CHARACTERS + 5);
     expect(differentialLines(data)).toHaveLength(MAX_EXPANDED_CHARACTERS);
+  });
+});
+
+describe('formatMarkSpaceLine — spec RS-232 eşlemesi', () => {
+  /**
+   * Spec özeti (`01-fiziksel-arayuzler.md:101`): Mark → logic 1 → negatif hat,
+   * Space → logic 0 → pozitif. Start biti daima Space, Stop biti daima Mark.
+   */
+  it('logic 1 Mark, logic 0 Space olur', () => {
+    expect(formatMarkSpaceLine([0, 1, 0, 1])).toBe('SMSM');
+  });
+
+  it("0x41 karakterinin tüm hattını mark/space olarak verir", () => {
+    expect(formatMarkSpaceLine(expandUartCharacter(0x41, UART_8N1).levels)).toBe('SMSSSSSMSM');
+  });
+});
+
+describe('formatAsciiText', () => {
+  it('basılamayan baytları nokta ile gösterir', () => {
+    expect(formatAsciiText(Uint8Array.from([0x48, 0x69, 0x00, 0x0d]))).toBe('Hi..');
+  });
+
+  it('boş dizide boş metin verir', () => {
+    expect(formatAsciiText(new Uint8Array(0))).toBe('');
+  });
+});
+
+describe('buildCharacterFields — describe dışarıdan geçilebilir', () => {
+  /** RS-232 sayfası mark/space sütununu böyle ekliyor; çekirdekte protokole özel dal yok. */
+  it('verilen describe fonksiyonu alan metnini üretir', () => {
+    const fields = buildCharacterFields(Uint8Array.from([0x41]), UART_8N1, {
+      describe: (byte) => `custom-${byte.toString(16)}`,
+    });
+    expect(fields[0]?.physicalValue).toBe('custom-41');
   });
 });

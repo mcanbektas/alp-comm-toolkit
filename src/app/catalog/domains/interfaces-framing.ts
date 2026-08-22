@@ -38,8 +38,18 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Asynchronous parallel-to-serial framing with no shared clock, used between MCUs, GNSS receivers, radio modems and debug consoles that agree on a baud rate in advance.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'uart',
+          calculatorIds: ['uart-timing'],
           tabs: ['overview', 'live', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
+          // Spec'in "UART kendi başına gerilim seviyesi değildir" dersi katalogda
+          // da görünsün: sayfa dört taşıyıcısına doğrudan bağlanıyor.
+          related: [
+            'interfaces-framing/serial-interfaces/rs-232',
+            'interfaces-framing/serial-interfaces/rs-485',
+            'interfaces-framing/serial-interfaces/ttl-uart',
+            'interfaces-framing/serial-interfaces/cmos-uart',
+          ],
           tools: [
             'Configuration',
             'Frame Visualizer',
@@ -95,8 +105,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Single-ended bipolar voltage layer between PCs, PLCs and instruments, where the UART bit stream is inverted onto mark/space levels and DTE/DCE wiring decides whether a null modem is needed.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rs-232',
+          calculatorIds: ['uart-timing'],
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
+          // "UART ≠ RS-232" dersinin karşılığı: sayfa taşıdığı çerçevelemeye
+          // ve komşu elektriksel katmanlara bağlanıyor.
+          related: [
+            'interfaces-framing/serial-interfaces/uart',
+            'interfaces-framing/serial-interfaces/rs-422',
+            'interfaces-framing/serial-interfaces/rs-485',
+          ],
           tools: [
             'UART↔RS-232 Layer View',
             'Signal View',

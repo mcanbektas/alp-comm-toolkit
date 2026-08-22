@@ -135,6 +135,21 @@ export function formatDifferentialLine(levels: readonly number[]): string {
   return levels.map((level) => (level === 1 ? '+' : '−')).join('');
 }
 
+/**
+ * Hat seviyelerinin RS-232 mark/space karşılığı: **logic 1 → Mark (`M`, negatif
+ * hat gerilimi), logic 0 → Space (`S`, pozitif)** — spec özeti
+ * (`01-fiziksel-arayuzler.md:101`): "Mark→Logic1→negatif hat gerilimi;
+ * Space→Logic0→pozitif hat gerilimi". Idle mark olduğu için RS-232 TX hattı
+ * boştayken negatiftir (spec'in "logic inversion" notu).
+ *
+ * Gerçek gerilim ARALIĞI (±3V…±15V) spec özetinde YOK — bu yüzden yalnız
+ * polarite adı üretilir, sayı uydurulmaz (RS-232 kaydının bilerek bıraktığı
+ * boşluk, brief'in "Signal View kapsamı BELİRSİZ" saptaması).
+ */
+export function formatMarkSpaceLine(levels: readonly number[]): string {
+  return levels.map((level) => (level === 1 ? 'M' : 'S')).join('');
+}
+
 function formatHexByte(value: number): string {
   return `0x${value.toString(HEX_RADIX).toUpperCase().padStart(2, '0')}`;
 }
@@ -152,6 +167,19 @@ export function describeCharacter(byte: number, config: UartLineConfig = UART_8N
   return [formatHexByte(byte), ...(ascii === undefined ? [] : [ascii]), '·', line].join(' ');
 }
 
+/**
+ * Yakalamanın ASCII karşılığı; basılamayan bayt `.` olur (spec'in canlı görünüm
+ * örneği: `48 65 6C 6C 6F 0D 0A` → `Hello` + satır sonu, `01-fiziksel-arayuzler.md:91`).
+ * Satır sonu baytları çağıran tarafta ayrılır, burada da `.` olarak görünür.
+ */
+export function formatAsciiText(data: Uint8Array): string {
+  let text = '';
+  for (const byte of data) {
+    text += byte >= PRINTABLE_MIN && byte <= PRINTABLE_MAX ? String.fromCharCode(byte) : '.';
+  }
+  return text;
+}
+
 /** İkilik gösterim (MSB-first) — testlerin ve dokümantasyonun okunurluğu için. */
 export function formatBinaryByte(byte: number, dataBits: number = UART_8N1.dataBits): string {
   return byte.toString(BINARY_RADIX).padStart(dataBits, '0');
@@ -164,6 +192,12 @@ export interface CharacterFieldOptions {
   namePrefix?: string;
   /** İkinci dizinin frame içindeki başlangıç offset'i. */
   baseOffset?: number;
+  /**
+   * Alan metnini üreten fonksiyon; verilmezse `describeCharacter`. RS-232
+   * sayfası buradan kendi mark/space sütununu ekler — çekirdeğe protokole özel
+   * dal koymak yerine davranış dışarıdan geçilir.
+   */
+  describe?: (byte: number, config: UartLineConfig) => string;
 }
 
 /**
@@ -182,6 +216,7 @@ export function buildCharacterFields(
   const idPrefix = options.idPrefix ?? '';
   const namePrefix = options.namePrefix ?? '';
   const baseOffset = options.baseOffset ?? 0;
+  const describe = options.describe ?? describeCharacter;
 
   const expandedCount = Math.min(data.length, MAX_EXPANDED_CHARACTERS);
   const fields: ParsedField[] = [];
@@ -195,7 +230,7 @@ export function buildCharacterFields(
       length: 1,
       rawBytes: data.slice(index, index + 1),
       rawValue: byte,
-      physicalValue: describeCharacter(byte, config),
+      physicalValue: describe(byte, config),
       valid: true,
       warnings: [],
     });

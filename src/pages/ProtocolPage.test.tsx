@@ -22,7 +22,10 @@ registerBuiltInProtocols();
 /** Motoru olan kayıt (katalogda `pluginId: 'modbus-rtu'`). */
 const PLUGGED_PATH = 'industrial-automation/modbus/modbus-rtu';
 /** Motoru olmayan ama `decode` sekmesi olan kayıt. */
-const PLANNED_PATH = 'interfaces-framing/serial-interfaces/uart';
+// Motoru OLMAYAN bir kayıt gerek: uart dalga 11e'de `ready` oldu, fixture
+// microwire'a taşındı (sıralama önerisinde en sondaki iş, #11 — en uzun
+// süre `planned` kalacak kayıt). O da bağlanınca başka bir planned kayda taşı.
+const PLANNED_PATH = 'interfaces-framing/peripheral-buses/microwire';
 
 function renderAt(path: string): RenderResult {
   return render(

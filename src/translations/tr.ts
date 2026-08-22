@@ -3837,6 +3837,33 @@ export const tr = {
   'protocol.rs422.example.multiCharacter.name': 'Çok karakterli aktarım',
   'protocol.rs422.example.multiCharacter.description':
     'Dört karakter (OK + CR + LF) — temsili bir yük, spec RS-422 için somut bayt örneği vermiyor. ASCII sütununun yalnız basılabilir aralıkta dolduğunu da gösterir.',
+
+  // --- UART / RS-232 (faz 10 dalga 11e) ---
+  'protocol.uart.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.uart.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.uart.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi',
+  'protocol.uart.documentation.summary':
+    "UART kendi başına bir gerilim seviyesi ya da kablo standardı değildir: aynı bit akışı CMOS, TTL, RS-232, RS-422 ya da RS-485 üzerinden taşınabilir. Yakalanan her bayt karakter hattına açılır — Start(0) · veri bitleri LSB-first · Stop(1) — ve 8N1 varsayılır (çözümleyicinin baud/parity girdisi yoktur). Yakalamanın sonundaki CR, LF ya da CRLF baytları ayrı bir Satır Sonu alanına toplanır; yükün ASCII karşılığı da çıkarılır. Parity, framing, overrun ve break hataları bit seviyesinde ya da donanım bayrağında görünür, yakalanmış baytlarda izi yoktur. Baud, bit süresi, karakter/paket süresi, oversampling ve baud hatası Zamanlama sekmesindeki hazır hesaplayıcıda.",
+  'protocol.uart.example.helloCrlf.name': 'Hello + CRLF (spec canlı görünüm örneği)',
+  'protocol.uart.example.helloCrlf.description':
+    'Spec özetinin kendi canlı görünüm satırı: 48 65 6C 6C 6F 0D 0A — beş karakterlik yük ve ardından CRLF satır sonu.',
+  'protocol.uart.example.bitView.name': 'Tek karakter 0x53 (spec bit görünümü)',
+  'protocol.uart.example.bitView.description':
+    "Spec özetinin bit görünümü örneği: 0x53 = 0101 0011, LSB-first aktarımla hat 0 11001010 1 olur.",
+  'protocol.uart.example.binaryPayload.name': 'İkilik yük (satır sonu yok)',
+  'protocol.uart.example.binaryPayload.description':
+    'Basılamayan baytlar ve satır sonu içermeyen bir yakalama — Satır Sonu alanı hiç görünmez, ASCII karşılığı nokta ile dolar.',
+  'protocol.rs232.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.rs232.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rs232.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi',
+  'protocol.rs232.documentation.summary':
+    "UART ile RS-232 aynı şey değildir: biri çerçeveleme, öteki elektriksel katmandır ve RS-232 katmanı UART çerçevesini değiştirmez. Yakalanan her bayt karakter hattına açılır (Start(0) · veri bitleri LSB-first · Stop(1), 8N1 varsayılır) ve yanında RS-232 mark/space karşılığı gösterilir: Mark logic 1 ve negatif hat gerilimi, Space logic 0 ve pozitif. UART boşta logic 1 olduğu için RS-232 TX hattı boştayken negatiftir. Gerçek gerilim aralığı kaynakta verilmediği için sayı üretilmez, yalnız polarite adı gösterilir. DTE/DCE, null modem, DB9 pinout ve donanım akış denetimi kablolama konularıdır, bayt akışında izi yoktur.",
+  'protocol.rs232.example.specCharacter.name': "9600 8N1 · 'A' (spec örneği)",
+  'protocol.rs232.example.specCharacter.description':
+    'Spec özetinin kendi örneği: Data 0x41, hat 0 10000010 1, RS-232 tarafında Space/Mark dizisi olarak gösterilir.',
+  'protocol.rs232.example.twoCharacters.name': 'İki karakter (Hi)',
+  'protocol.rs232.example.twoCharacters.description':
+    'Ardışık iki karakterin hat ve mark/space karşılığı — spec çok karakterli RS-232 örneği vermiyor, temsili.',
 } as const;
 
 /**

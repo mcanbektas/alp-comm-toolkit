@@ -447,4 +447,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'rs-422', () =>
     import('./serial/serial-interfaces/rs422').then((module) => module.rs422Plugin),
   );
+  // UART / RS-232 — Faz 10 dalga 11e: aynı `uartLineCore.ts` karakter açılımı.
+  // UART sayfası satır sonu (CR/LF/CRLF) ayrımını ve ASCII karşılığını ekler;
+  // RS-232 sayfası mark/space polaritesini (logic 1 → Mark, negatif hat).
+  // Baud/karakter süresi `timing/uart.ts`te (Faz 5) zaten vardı.
+  registerOnce(registry, 'uart', () =>
+    import('./serial/serial-interfaces/uart').then((module) => module.uartPlugin),
+  );
+  registerOnce(registry, 'rs-232', () =>
+    import('./serial/serial-interfaces/rs232').then((module) => module.rs232Plugin),
+  );
 }

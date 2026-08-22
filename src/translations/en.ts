@@ -3849,4 +3849,31 @@ export const en: TranslationDictionary = {
   'protocol.rs422.example.multiCharacter.name': 'Multi-character transmission',
   'protocol.rs422.example.multiCharacter.description':
     'Four characters (OK + CR + LF) — a representative payload, since the spec gives no concrete byte example for RS-422. It also shows that the ASCII column is filled only for printable bytes.',
+
+  // --- UART / RS-232 (phase 10 wave 11e) ---
+  'protocol.uart.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.uart.error.aborted': 'Parsing was cancelled.',
+  'protocol.uart.summary.transmission': '{characters} characters · {bitTimes} bit times',
+  'protocol.uart.documentation.summary':
+    'UART is not a voltage level or cabling standard on its own: the same bit stream can travel over CMOS, TTL, RS-232, RS-422 or RS-485. Every captured byte is expanded into its character line view — Start(0) · data bits LSB-first · Stop(1) — assuming 8N1, because the decoder has no baud/parity input. Trailing CR, LF or CRLF bytes are collected into a separate Line Ending field, and the ASCII rendering of the payload is derived as well. Parity, framing, overrun and break errors live at bit level or in a hardware status flag and leave no trace in captured bytes. Baud, bit time, character/packet time, oversampling and baud error are in the existing calculator behind the Timing tab.',
+  'protocol.uart.example.helloCrlf.name': 'Hello + CRLF (spec live view example)',
+  'protocol.uart.example.helloCrlf.description':
+    "The spec summary's own live view line: 48 65 6C 6C 6F 0D 0A — a five-character payload followed by a CRLF line ending.",
+  'protocol.uart.example.bitView.name': 'Single character 0x53 (spec bit view)',
+  'protocol.uart.example.bitView.description':
+    "The spec summary's bit view example: 0x53 = 0101 0011, transmitted LSB-first the line reads 0 11001010 1.",
+  'protocol.uart.example.binaryPayload.name': 'Binary payload (no line ending)',
+  'protocol.uart.example.binaryPayload.description':
+    'A capture of non-printable bytes with no line ending — the Line Ending field never appears and the ASCII rendering is filled with dots.',
+  'protocol.rs232.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.rs232.error.aborted': 'Parsing was cancelled.',
+  'protocol.rs232.summary.transmission': '{characters} characters · {bitTimes} bit times',
+  'protocol.rs232.documentation.summary':
+    'UART and RS-232 are not the same thing: one is framing, the other an electrical layer, and the RS-232 layer never changes the UART frame. Every captured byte is expanded into its character line view (Start(0) · data bits LSB-first · Stop(1), assuming 8N1) and shown next to its RS-232 mark/space counterpart: Mark is logic 1 and a negative line voltage, Space is logic 0 and positive. Because UART idles at logic 1, an RS-232 TX line idles negative. The source gives no voltage range, so no numbers are invented — only the polarity name is shown. DTE/DCE, null modem, DB9 pinout and hardware flow control are wiring topics with no trace in a byte stream.',
+  'protocol.rs232.example.specCharacter.name': "9600 8N1 · 'A' (spec example)",
+  'protocol.rs232.example.specCharacter.description':
+    "The spec summary's own example: Data 0x41, line 0 10000010 1, shown as a Space/Mark sequence on the RS-232 side.",
+  'protocol.rs232.example.twoCharacters.name': 'Two characters (Hi)',
+  'protocol.rs232.example.twoCharacters.description':
+    'The line and mark/space view of two consecutive characters — representative, since the spec gives no multi-character RS-232 example.',
 };
