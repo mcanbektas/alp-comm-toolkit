@@ -3806,6 +3806,37 @@ export const tr = {
   'protocol.i2c.example.busProbe.name': 'Bus tarama (yalnız adres)',
   'protocol.i2c.example.busProbe.description':
     'Yalnız Address baytı (0x1E yazma) — cihaz var/yok kontrolü, spec özetinin magnetometer örneği.',
+
+  // --- RS-485 / RS-422 (faz 10 dalga 11d) ---
+  'protocol.rs485.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.rs485.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rs485.warning.echoSuspected':
+    "Yakalanan dizinin iki yarısı birebir aynı — half-duplex sürücü echo'su olabilir (kendi gönderdiğini geri okuma). Aynı çerçevenin bilerek iki kez gönderilmesi de bu deseni üretir, bu yüzden hata değil uyarıdır.",
+  'protocol.rs485.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi DE penceresi',
+  'protocol.rs485.summary.echo':
+    '{characters} karakter · {bitTimes} bit-süresi DE penceresi · echo şüphesi',
+  'protocol.rs485.documentation.summary':
+    "Yakalanan her bayt bir UART karakteri olarak hat seviyelerine açılır — Start(0) · veri bitleri LSB-first · Stop(1) — ve 8N1 varsayılır (çözümleyicinin baud/parity girdisi yoktur). Diferansiyel karşılık V_AB olarak hesaplanır: logic 1 pozitif, logic 0 negatif. RS-485 üst seviye bir protokol değildir, taşınan baytların içeriği (Modbus RTU adres/fonksiyon/CRC alanları gibi) burada yorumlanmaz — ilgili protokol sayfalarına bağlantılar kayıtta duruyor. Half-duplex sürücü echo'su, dizinin iki yarısı birebir aynıysa uyarıyla işaretlenir. Termination, bias/fail-safe, unit load ve kablo gecikmesi hesapları Zamanlama sekmesindeki hazır motorda; DE/RE zamanlaması ve turnaround ölçümü sinyal seviyesindedir, bayt akışında görünmez.",
+  'protocol.rs485.example.modbusRtu.name': 'Modbus RTU çerçevesi taşıyan DE penceresi',
+  'protocol.rs485.example.modbusRtu.description':
+    'Spec özetinin kendi bus görünümü örneği (01 03 00 00 00 02 C4 0B). RS-485 bu baytların içeriğini yorumlamaz — alan anlamları Modbus RTU sayfasında.',
+  'protocol.rs485.example.halfDuplexEcho.name': 'Half-duplex echo şüphesi',
+  'protocol.rs485.example.halfDuplexEcho.description':
+    'Aynı çerçeve arka arkaya iki kez: sürücünün kendi gönderdiğini geri okuması bu deseni üretir, ikinci yarı Echo alanları olarak ayrılır ve uyarı basılır.',
+  'protocol.rs485.example.singleCharacter.name': 'Tek karakter (hat görünümü)',
+  'protocol.rs485.example.singleCharacter.description':
+    "0x41 = 'A' — spec özetinin bit görünümü örneğinin baytı: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.rs422.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.rs422.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rs422.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi',
+  'protocol.rs422.documentation.summary':
+    'Yakalanan her bayt bir UART karakteri olarak hat seviyelerine açılır — Start(0) · veri bitleri LSB-first · Stop(1) — ve 8N1 varsayılır (çözümleyicinin baud/parity girdisi yoktur). Diferansiyel karşılık V_AB olarak hesaplanır: logic 1 pozitif, logic 0 negatif. RS-422 dört telli full-duplex, tek sürücü çok alıcılı bir elektriksel katmandır; taşınan baytların içeriğini yorumlamaz. Termination ve yayılım gecikmesi hesapları RS-485 adıyla yayınlanmış motorda durduğu için bu sayfaya bilerek bağlanmadı; karakter/paket süresi UART zamanlama hesaplayıcısında.',
+  'protocol.rs422.example.singleCharacter.name': 'Tek karakter (hat görünümü)',
+  'protocol.rs422.example.singleCharacter.description':
+    "0x41 = 'A' — spec özetinin bit görünümü örneğinin baytı: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.rs422.example.multiCharacter.name': 'Çok karakterli aktarım',
+  'protocol.rs422.example.multiCharacter.description':
+    'Dört karakter (OK + CR + LF) — temsili bir yük, spec RS-422 için somut bayt örneği vermiyor. ASCII sütununun yalnız basılabilir aralıkta dolduğunu da gösterir.',
 } as const;
 
 /**

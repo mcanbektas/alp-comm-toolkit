@@ -436,4 +436,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'i2c', () =>
     import('./serial/peripheral-buses/i2c').then((module) => module.i2cPlugin),
   );
+  // RS-485 / RS-422 — Faz 10 dalga 11d: elektriksel katmanlar, decode'ları
+  // ortak `uartLineCore.ts` üzerinden UART karakter hattı görünümü (8N1
+  // varsayımı orada gerekçeli). RS-485 ayrıca half-duplex echo şüphesini
+  // uyarıyla işaretler. Termination/bias/unit-load/propagation motorları
+  // `timing/rs485.ts`te (Faz 5) zaten vardı, tekrar yazılmadı.
+  registerOnce(registry, 'rs-485', () =>
+    import('./serial/serial-interfaces/rs485').then((module) => module.rs485Plugin),
+  );
+  registerOnce(registry, 'rs-422', () =>
+    import('./serial/serial-interfaces/rs422').then((module) => module.rs422Plugin),
+  );
 }

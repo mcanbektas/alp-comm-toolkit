@@ -3818,4 +3818,35 @@ export const en: TranslationDictionary = {
   'protocol.i2c.example.busProbe.name': 'Bus scan (address only)',
   'protocol.i2c.example.busProbe.description':
     "Just the Address byte (0x1E write) — a present/absent probe, the spec summary's magnetometer example.",
+
+  // --- RS-485 / RS-422 (phase 10 wave 11d) ---
+  'protocol.rs485.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.rs485.error.aborted': 'Parsing was cancelled.',
+  'protocol.rs485.warning.echoSuspected':
+    'The two halves of the capture are byte-for-byte identical — this looks like half-duplex driver echo (the transmitter reading back its own frame). Deliberately sending the same frame twice produces the same pattern, so this is a warning rather than an error.',
+  'protocol.rs485.summary.transmission': '{characters} characters · {bitTimes} bit times of DE window',
+  'protocol.rs485.summary.echo':
+    '{characters} characters · {bitTimes} bit times of DE window · echo suspected',
+  'protocol.rs485.documentation.summary':
+    'Expands every captured byte into its UART character line view — Start(0) · data bits LSB-first · Stop(1) — assuming 8N1, because the decoder has no baud/parity input. The differential counterpart is derived as V_AB: logic 1 positive, logic 0 negative. RS-485 is not a higher-level protocol, so the content of the carried bytes (Modbus RTU address/function/CRC fields and the like) is never interpreted here — the record links to those protocol pages instead. Half-duplex driver echo is flagged with a warning when the two halves of the capture are identical. Termination, bias/fail-safe, unit load and cable delay live in the existing engine behind the Timing tab; DE/RE timing and turnaround measurement are signal-level and never appear in a byte stream.',
+  'protocol.rs485.example.modbusRtu.name': 'DE window carrying a Modbus RTU frame',
+  'protocol.rs485.example.modbusRtu.description':
+    "The spec summary's own bus view example (01 03 00 00 00 02 C4 0B). RS-485 does not interpret the content of these bytes — the field meanings belong to the Modbus RTU page.",
+  'protocol.rs485.example.halfDuplexEcho.name': 'Half-duplex echo suspected',
+  'protocol.rs485.example.halfDuplexEcho.description':
+    'The same frame twice in a row: a transmitter reading back its own frame produces this pattern, the second half is split out as Echo fields and a warning is raised.',
+  'protocol.rs485.example.singleCharacter.name': 'Single character (line view)',
+  'protocol.rs485.example.singleCharacter.description':
+    "0x41 = 'A' — the byte from the spec summary's bit view example: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.rs422.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.rs422.error.aborted': 'Parsing was cancelled.',
+  'protocol.rs422.summary.transmission': '{characters} characters · {bitTimes} bit times',
+  'protocol.rs422.documentation.summary':
+    'Expands every captured byte into its UART character line view — Start(0) · data bits LSB-first · Stop(1) — assuming 8N1, because the decoder has no baud/parity input. The differential counterpart is derived as V_AB: logic 1 positive, logic 0 negative. RS-422 is a four-wire full-duplex, single-driver multi-receiver electrical layer and never interprets the content of the carried bytes. Termination and propagation delay live in an engine published under the RS-485 name, so it is deliberately not linked from this page; character and packet time are in the UART timing calculator.',
+  'protocol.rs422.example.singleCharacter.name': 'Single character (line view)',
+  'protocol.rs422.example.singleCharacter.description':
+    "0x41 = 'A' — the byte from the spec summary's bit view example: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.rs422.example.multiCharacter.name': 'Multi-character transmission',
+  'protocol.rs422.example.multiCharacter.description':
+    'Four characters (OK + CR + LF) — a representative payload, since the spec gives no concrete byte example for RS-422. It also shows that the ASCII column is filled only for printable bytes.',
 };

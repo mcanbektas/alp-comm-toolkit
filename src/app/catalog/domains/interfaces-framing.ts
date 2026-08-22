@@ -115,8 +115,20 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Balanced differential point-to-multipoint link with one driver and up to ten receivers, used for encoders, navigation sensors and long-distance telemetry.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rs-422',
+          // `rs485-timing` BİLEREK eklenmedi: termination/propagation matematiği
+          // aynı olsa da araç RS-485 adıyla yayınlanmış, RS-422 sayfasında
+          // göstermek yanıltır (bkz. rs422.ts dosya başı).
+          calculatorIds: ['uart-timing'],
           tabs: ['overview', 'live', 'decode', 'timing', 'diagnostics', 'examples'],
+          // Taşıyıcı ↔ komşu taşıyıcı bağı: RS-422 ile RS-485 aynı diferansiyel
+          // aileden, ayrım full-duplex/multipoint; UART ise ikisinin de taşıdığı
+          // çerçeveleme (spec'in "UART ≠ RS-232" uyarısıyla aynı ders).
+          related: [
+            'interfaces-framing/serial-interfaces/rs-485',
+            'interfaces-framing/serial-interfaces/uart',
+          ],
           tools: [
             'Differential Signal View',
             'TX+/TX- View',
@@ -135,7 +147,14 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Balanced differential multipoint bus used by most industrial field networks, where driver enable turnaround, termination, biasing and unit load budget decide whether the bus works at all.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rs-485',
+          // İki motor da Faz 5'te yazılmıştı: karakter/paket süresi UART'ta,
+          // termination/bias/unit-load/propagation RS-485'e özel dosyada.
+          calculatorIds: ['uart-timing', 'rs485-timing'],
+          // 'live' burada KALIYOR (I²C'den farkı): USB-RS485/RS422 dönüştürücü
+          // tarayıcıya seri port olarak görünür, `connection/` Web Serial'i
+          // zaten destekliyor — köprü cihaz gerektirmez.
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Physical Layer View',
