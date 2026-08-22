@@ -35,6 +35,10 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   // bu motorla üretilip reveng'in yayımlı check değeriyle çapraz doğrulandı
   // (crcCatalogue.ts'teki CRC16_KERMIT girdisinin dosya başı notuna bak).
   CRC16_KERMIT: 0x2189n,
+  // CRC-16/USB (dalga 11j) — reveng kataloğunun yayımlı check değeri; ayrıca
+  // USB 2.0 §8.3.5'in metnine sadık bit-serial referans uygulamayla bağımsızca
+  // üretildi (crcCatalogue.ts'teki CRC16_USB girdisinin notuna bak).
+  CRC16_USB: 0xb4c8n,
   CRC24: 0x21cf02n,
   // CRC-24/Q (RTCM SC-104 / ITU-T H.224): CRC24 (OpenPGP) ile AYNI polinom
   // (0x864CFB), yalnız init 0x000000 — bu yüzden check değeri de farklı

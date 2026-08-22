@@ -552,8 +552,23 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Host-driven layered bus whose enumeration sequence, descriptor tree and four transfer types explain most "device not recognised" failures long before any payload is inspected.',
           layer: 'multi-layer',
-          status: 'planned',
-          tabs: ['overview', 'live', 'decode', 'data', 'diagnostics', 'examples'],
+          // dalga 11j: paket seviyesi (PID + token/SOF/veri/handshake, CRC5 ve
+          // CRC16 doğrulaması) ve veri yükünün Chapter 9 çözümü (SETUP isteği,
+          // Device/Configuration/Interface/Endpoint/String tanımlayıcı zinciri)
+          // bağlandı. Veri CRC16'sı USB 2.0 §8.3.5.2'den doğrulandı ve
+          // `CRC16_USB` olarak kataloğa açıldı — brief'in `CRC16_ARC` adayı
+          // TUTMUYORDU. Transaction/transfer seviyeleri ve enumeration timeline
+          // KAPSAM DIŞI (paket sınırını veren SYNC/EOP bayt akışında yok;
+          // gerekçe usb.ts dosya başında). Bu yüzden aşağıdaki araç listesinin
+          // "Enumeration"/"Transfer" kalemleri hâlâ aspirasyonel.
+          status: 'ready',
+          pluginId: 'usb',
+          // USB-UART köprüsü spec özetinin kendi kullanım örneği
+          // (`01-fiziksel-arayuzler.md:93`).
+          related: ['interfaces-framing/serial-interfaces/uart'],
+          // `'live'` ÇIKARILDI: `connection/` yalnız serial+mock taşıyor,
+          // WebUSB yok — I²C'de (11c) verilen kararın aynısı.
+          tabs: ['overview', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'Device Enumeration',
             'Descriptor Decoder',

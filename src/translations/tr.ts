@@ -3958,6 +3958,48 @@ export const tr = {
   'protocol.pmbus.example.coefficients.description':
     'Yazma tarafı komut 0x8B için okuma katsayılarını ister, okuma tarafı m=1, b=-100, R=3 döner.',
 
+  // --- USB (faz 10 dalga 11j) ---
+  'protocol.usb.error.emptyFrame': 'Arabellek en az 1 bayt (PID) içermeli.',
+  'protocol.usb.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.usb.error.pidCheckFailed':
+    'PID check alanı paket türünün bire tümleyeni değil (USB 2.0 §8.3.1) — alıcı bu paketi yok sayar. Yapısal çözüm yine gösteriliyor.',
+  'protocol.usb.error.crc5Mismatch':
+    'Token CRC5 tutmuyor: adres/endpoint (ya da frame number) alanları bozulmuş olabilir.',
+  'protocol.usb.error.crc16Mismatch': 'Veri paketinin CRC16 değeri hesaplananla uyuşmuyor.',
+  'protocol.usb.error.tokenTruncated':
+    'Token paketi 3 bayt olmalı (PID + iki alan baytı); eksik baytlar CRC5 konumunu da kaydırdığı için alanlar güvenilir çözülemez.',
+  'protocol.usb.warning.setupInferred':
+    'Yük 8 bayt olduğu için SETUP isteği (Table 9-2) varsayılarak açıldı. Bunu kesinleştiren şey önceki SETUP token paketidir; tek paketlik yakalamada o yok, bu yüzden yorum ÇIKARIMDIR.',
+  'protocol.usb.warning.descriptorInferred':
+    'İlk iki bayt (bLength, bDescriptorType) tutarlı olduğu için yük tanımlayıcı zinciri varsayılarak açıldı — kesin değil, çıkarım.',
+  'protocol.usb.warning.trailingBytes':
+    'Paketin beklenen uzunluğunu aşan baytlar hiçbir alana düşmedi; ayrı bir alanda gösteriliyorlar. Art arda yapıştırılmış paketler bu deseni üretir (paket sınırını veren SYNC/EOP bayt akışında yoktur).',
+  'protocol.usb.warning.reservedPid': 'PID rezerve edilmiş değer (0000b) — Table 8-1de tanımlı bir paket türü değil.',
+  'protocol.usb.warning.specialPid':
+    'Özel PID (PRE/ERR, SPLIT, PING). PRE ve ERR aynı kodu paylaşır ve tek paketten ayrılamaz; SPLIT/PING alan çözümü bu dalgada yok.',
+  'protocol.usb.documentation.summary':
+    'USB 2.0 paket seviyesi: PID türü ve check alanı, token adres/endpoint çözümü, SOF frame number, veri yükü ve CRC16 doğrulaması, handshake paketleri. Veri yükü 8 baytsa SETUP isteği, tanımlayıcı başlığı taşıyorsa Device/Configuration/Interface/Endpoint/String zinciri olarak açılır. CRC5 ve CRC16 spec §8.3.5ten doğrulanmış parametrelerle hesaplanır.',
+  'protocol.usb.example.setupToken.name': 'SETUP token (adres 0, endpoint 0)',
+  'protocol.usb.example.setupToken.description':
+    'Enumeration başındaki varsayılan adres. Hat dizisi 2D 00 10 — CRC5 spec algoritmasıyla bağımsızca hesaplandı.',
+  'protocol.usb.example.inToken.name': 'IN token (adres 0x3A, endpoint 10)',
+  'protocol.usb.example.inToken.description': 'Cihazdan hosta veri isteyen token; adres ve endpoint alanları 11 bitin içinde bölünür.',
+  'protocol.usb.example.sof.name': 'SOF (frame 100)',
+  'protocol.usb.example.sof.description': 'Start-of-Frame işaretçisi 11 bitlik frame number taşır, adres/endpoint taşımaz.',
+  'protocol.usb.example.setupData.name': 'DATA0 · GET_DESCRIPTOR(Device)',
+  'protocol.usb.example.setupData.description':
+    'SETUP token peşinden gelen 8 baytlık istek: bmRequestType 0x80 (cihazdan hosta, standart, cihaz), bRequest 6, wValue 0x0100 (DEVICE #0), wLength 18.',
+  'protocol.usb.example.deviceDescriptor.name': 'DATA1 · Device Descriptor (0x0483 / 0x5740)',
+  'protocol.usb.example.deviceDescriptor.description':
+    'Spec özetinin kendi örneği: VID 0x0483, PID 0x5740, CDC sınıfı, USB 2.00, endpoint 0 için 64 baytlık paket boyu.',
+  'protocol.usb.example.configurationDescriptor.name': 'DATA0 · Configuration zinciri',
+  'protocol.usb.example.configurationDescriptor.description':
+    'Tek yükte Configuration + Interface + Endpoint IN 0x81 + Endpoint OUT 0x01; toplam 32 bayt, 100 mA bus-powered.',
+  'protocol.usb.example.ack.name': 'ACK handshake',
+  'protocol.usb.example.ack.description': 'Tek baytlık paket: yalnız PID. Handshake paketlerinde CRC yoktur.',
+  'protocol.usb.example.badCrc.name': 'DATA0 · bozuk CRC16',
+  'protocol.usb.example.badCrc.description': 'Aynı SETUP yükünün son CRC baytı kasten bozuldu — hata yolunun nasıl göründüğünü gösterir.',
+
   // --- RS-485 / RS-422 (faz 10 dalga 11d) ---
   'protocol.rs485.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
   'protocol.rs485.error.aborted': 'Çözümleme iptal edildi.',

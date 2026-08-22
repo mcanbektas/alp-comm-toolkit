@@ -27,6 +27,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_X25',
   'CRC16_DNP',
   'CRC16_KERMIT',
+  'CRC16_USB',
   'CRC24',
   'CRC24_Q',
   'CRC32',
@@ -150,6 +151,38 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     refin: true,
     refout: true,
     xorout: 0x0000n,
+  },
+  /**
+   * USB 2.0 veri paketi CRC'si (dalga 11j) — reveng kataloğunun "CRC-16/USB"
+   * girdisi. **`CRC16_ARC` DEĞİL:** brief-faz10-dalga11.md:88 bunu "aday ama
+   * doğrulanmadı" diye işaretlemişti, doğrulama sonucu ARC'nin TUTMADIĞI
+   * çıktı — aynı polinom (0x8005), aynı yansıtma, ama `init`/`xorout`
+   * farklı; check değerleri de ayrışıyor (ARC 0xBB3D ↔ USB 0xB4C8).
+   *
+   * Birincil kaynak: **USB 2.0 Specification Revision 2.0 §8.3.5 + §8.3.5.2**
+   * (usb.org'un kendi `usb_20.zip` yayını, `usb_20.pdf`):
+   *   - §8.3.5: "the shift registers in the generator and checker are seeded
+   *     with an all-ones pattern" → `init: 0xFFFF`
+   *   - §8.3.5: "the CRC in the generator is inverted and sent to the checker
+   *     MSb first" → `xorout: 0xFFFF`
+   *   - §8.3.5.2: "G(X) = X^16 + X^15 + X^2 + 1 … 1000000000000101B"
+   *     → `poly: 0x8005`
+   *   - §8.1: "Bits are sent out onto the bus least-significant bit (LSb)
+   *     first" → `refin`/`refout` true
+   * Bağımsız doğrulama (1-Wire/PEC turlarındaki disiplin): spec metnine
+   * BİREBİR sadık bit-serial referans uygulama yazıldı ve §8.3.5.2'nin
+   * yayımladığı alıcı residual'ı (1000000000001101B = 0x800D) birebir
+   * üretti; aynı uygulamanın hat baytları (0xC8 0xB4) buradaki parametrik
+   * modelin little-endian çıktısıyla (check 0xB4C8) örtüştü. Yani parametre
+   * kümesi spec'ten TÜRETİLDİ, bir tablodan kopyalanmadı.
+   */
+  CRC16_USB: {
+    width: 16,
+    poly: 0x8005n,
+    init: 0xffffn,
+    refin: true,
+    refout: true,
+    xorout: 0xffffn,
   },
   CRC24: {
     width: 24,

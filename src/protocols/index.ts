@@ -450,6 +450,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'pmbus', () =>
     import('./serial/peripheral-buses/pmbus').then((module) => module.pmbusPlugin),
   );
+  // USB — Faz 10 dalga 11j: TEK paket seviyesi (PID + token/SOF/veri/handshake
+  // + CRC5/CRC16) ve veri yükünün Chapter 9 çözümü (SETUP isteği, tanımlayıcı
+  // zinciri). Veri CRC16'sı `CRC16_ARC` DEĞİL: USB 2.0 §8.3.5.2'den doğrulanıp
+  // katalogda `CRC16_USB` olarak açıldı (crcCatalogue.ts girdisinin notu).
+  // Transaction/transfer/enumeration seviyeleri ve `'live'` sekmesi KAPSAM DIŞI
+  // (usb.ts dosya başı; connection/ yalnız serial+mock).
+  registerOnce(registry, 'usb', () =>
+    import('./serial/host-network-interfaces/usb').then((module) => module.usbPlugin),
+  );
   // RS-485 / RS-422 — Faz 10 dalga 11d: elektriksel katmanlar, decode'ları
   // ortak `uartLineCore.ts` üzerinden UART karakter hattı görünümü (8N1
   // varsayımı orada gerekçeli). RS-485 ayrıca half-duplex echo şüphesini

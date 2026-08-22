@@ -63,6 +63,7 @@ export const CHECKSUM_ALGORITHMS = [
   'CRC16_CCITT_FALSE',
   'CRC16_DNP',
   'CRC16_MODBUS',
+  'CRC16_USB',
   'CRC16_X25',
   'CRC16_XMODEM',
   // CRC — 3 bayt

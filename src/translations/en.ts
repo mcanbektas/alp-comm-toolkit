@@ -3970,6 +3970,48 @@ export const en: TranslationDictionary = {
   'protocol.pmbus.example.coefficients.description':
     'The write side asks for the read coefficients of command 0x8B; the read side returns m=1, b=-100, R=3.',
 
+  // --- USB (phase 10 wave 11j) ---
+  'protocol.usb.error.emptyFrame': 'The buffer must contain at least 1 byte (PID).',
+  'protocol.usb.error.aborted': 'Parsing was cancelled.',
+  'protocol.usb.error.pidCheckFailed':
+    'The PID check field is not the ones complement of the packet type (USB 2.0 §8.3.1) — a receiver ignores this packet. The structural decode is still shown.',
+  'protocol.usb.error.crc5Mismatch':
+    'Token CRC5 mismatch: the address/endpoint (or frame number) fields may be corrupted.',
+  'protocol.usb.error.crc16Mismatch': 'The data packet CRC16 does not match the calculated value.',
+  'protocol.usb.error.tokenTruncated':
+    'A token packet must be 3 bytes (PID plus two field bytes); missing bytes also shift the CRC5 position, so the fields cannot be decoded reliably.',
+  'protocol.usb.warning.setupInferred':
+    'The payload is 8 bytes, so it was opened as a SETUP request (Table 9-2). What would make this certain is the preceding SETUP token, which a single-packet capture does not contain — the reading is an inference.',
+  'protocol.usb.warning.descriptorInferred':
+    'The first two bytes (bLength, bDescriptorType) are consistent, so the payload was opened as a descriptor chain — an inference, not a certainty.',
+  'protocol.usb.warning.trailingBytes':
+    'Bytes beyond the expected packet length did not land in any field and are shown separately. Back-to-back packets produce this pattern (the SYNC/EOP delimiters that mark packet boundaries are not present in a byte stream).',
+  'protocol.usb.warning.reservedPid': 'The PID is the reserved value (0000b) — not a packet type defined in Table 8-1.',
+  'protocol.usb.warning.specialPid':
+    'Special PID (PRE/ERR, SPLIT, PING). PRE and ERR share the same code and cannot be told apart from a single packet; SPLIT/PING field decoding is out of scope for this wave.',
+  'protocol.usb.documentation.summary':
+    'USB 2.0 at packet level: PID type and check field, token address/endpoint decode, SOF frame number, data payload with CRC16 verification and handshake packets. An 8-byte payload is opened as a SETUP request; a payload carrying a descriptor header is opened as a Device/Configuration/Interface/Endpoint/String chain. CRC5 and CRC16 use parameters verified against spec §8.3.5.',
+  'protocol.usb.example.setupToken.name': 'SETUP token (address 0, endpoint 0)',
+  'protocol.usb.example.setupToken.description':
+    'The default address at the start of enumeration. Wire bytes 2D 00 10 — the CRC5 is computed independently with the spec algorithm.',
+  'protocol.usb.example.inToken.name': 'IN token (address 0x3A, endpoint 10)',
+  'protocol.usb.example.inToken.description': 'A token requesting data from device to host; address and endpoint are split inside the same 11 bits.',
+  'protocol.usb.example.sof.name': 'SOF (frame 100)',
+  'protocol.usb.example.sof.description': 'The Start-of-Frame marker carries an 11-bit frame number, not an address or endpoint.',
+  'protocol.usb.example.setupData.name': 'DATA0 · GET_DESCRIPTOR(Device)',
+  'protocol.usb.example.setupData.description':
+    'The 8-byte request that follows a SETUP token: bmRequestType 0x80 (device-to-host, standard, device), bRequest 6, wValue 0x0100 (DEVICE #0), wLength 18.',
+  'protocol.usb.example.deviceDescriptor.name': 'DATA1 · Device Descriptor (0x0483 / 0x5740)',
+  'protocol.usb.example.deviceDescriptor.description':
+    'The specification summary example: VID 0x0483, PID 0x5740, CDC class, USB 2.00, 64-byte packet size for endpoint 0.',
+  'protocol.usb.example.configurationDescriptor.name': 'DATA0 · Configuration chain',
+  'protocol.usb.example.configurationDescriptor.description':
+    'Configuration + Interface + Endpoint IN 0x81 + Endpoint OUT 0x01 in one payload; 32 bytes total, 100 mA bus-powered.',
+  'protocol.usb.example.ack.name': 'ACK handshake',
+  'protocol.usb.example.ack.description': 'A single-byte packet: the PID only. Handshake packets carry no CRC.',
+  'protocol.usb.example.badCrc.name': 'DATA0 · corrupted CRC16',
+  'protocol.usb.example.badCrc.description': 'The last CRC byte of the same SETUP payload was deliberately corrupted — it shows what the error path looks like.',
+
   // --- RS-485 / RS-422 (phase 10 wave 11d) ---
   'protocol.rs485.error.emptyFrame': 'The buffer must contain at least 1 byte.',
   'protocol.rs485.error.aborted': 'Parsing was cancelled.',
