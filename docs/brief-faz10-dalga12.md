@@ -75,7 +75,8 @@ test dosyasını buluyor — **hiçbir UI'a bağlı değil**. Domain yorumu (`:6
 **Öneri:** WebSocket burada özel — tarayıcının **yerleşik** `WebSocket` API'si var,
 Web Serial gibi izin/donanım gerektirmiyor, ve Comm gizlilik kuralını da çiğnemiyor
 (cihaz↔tarayıcı doğrudan). Yani `connection/websocket` bu domain'de gerçekten
-yapılabilir tek `live`. Yine de **12f'de kapsam dışı tut**, `live` sekmesini
+yapılabilir tek `live`. **12f'de KARAR UYGULANDI: `live` sekmesi katalogdan
+KALDIRILDI** (boş kart basmak yasak, CLAUDE.md). Özgün not: kapsam dışı tut, `live` sekmesini
 "planlandı" rozetiyle bırak (Faz 7'nin §10 WebSocket maddesinde kurulan presedan).
 
 ## Alt dalga sıralaması önerisi
@@ -90,7 +91,7 @@ bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
 | **12c** | dns, mdns, dhcp | `addressing-discovery` kapanır. dns↔mdns aynı tel biçimi (mDNS = multicast DNS + `.local`), **name compression** tek yerde yazılır; dhcp 12b'nin TLV'sini yer | `dnsWire` (compression pointer dâhil) | orta |
 | ~~**12d**~~ | ~~ntp, ptp~~ | **BİTTİ (`b149e76`).** Öngörülen ortak kaldıraç YANLIŞ ÇIKTI: NTP damgası 64 bit (32 s + 32 bit 2^-32 kesir, epoch 1900 UTC), PTP damgası 80 bit (48 bit s + 32 bit tam sayı ns, epoch 1970 TAI). Paylaşılan motor kesrin birimini tek seçip diğerini 4295 kat yanlış ölçeklerdi — 12b'nin LLDP/DHCP "TLV" hatasının aynı cinsi | ~~`networkTimestamp`~~ → `ntpTimestamp.ts` + `ptpTimestamp.ts` AYRI | orta (ptp zor) |
 | ~~**12e**~~ | ~~snmp, syslog~~ | **BİTTİ (`b35cbbd`).** `time-management` KAPANDI. berReader gerçekten hazır bulundu; `oidCodec` AYRI MODÜL OLARAK açılmadı — OID ve işaretsiz tam sayı çözücüleri X.690'ın kendi tanımları olduğu için `berReader.ts`in İÇİNE kondu | ~~`oidCodec`~~ → `berReader.ts`e iki kardeş | orta |
-| **12f** | http, websocket, mqtt-sn | `web-messaging` kapanır. HTTP CRLF framing + body framing (`spec:391`, Content-Length vs chunked); WS maskeleme + fragmentation; mqtt-sn mqtt komşusu | — | orta–zor |
+| ~~**12f**~~ | ~~http, websocket, mqtt-sn~~ | **BİTTİ (`39b7491`).** "mqtt-sn mqtt komşusu" varsayımı KOD PAYLAŞIMI anlamına GELMİYOR: `mqttVbi.ts` uygulanamaz (MQTT-SN Length'i ya 1 bayt ya `0x01`+16 bit ve KENDİNİ DE sayar), QoS 0b11 MQTT'de hata burada −1. HTTP body framing'de iki smuggling vektörü çerçeve hatası basıyor. WS el sıkışması HTTP'ye YÖNLENDİRİLİR, zincir kurulmaz | — (paylaşım yok) | orta–zor |
 | **12g** | rtp, rtcp | `real-time-media` kapanır. Ortak başlık kavramları, `bitCursor` hazır; jitter hesabı (`spec:558`) calculator adayı | — | orta |
 | **12h** | tftp, ftp, telnet | `file-terminal` kapanır. tftp opcode tabanlı ikili, ftp metin, telnet IAC kaçışlama — üçü de küçük | — | kolay–orta |
 
