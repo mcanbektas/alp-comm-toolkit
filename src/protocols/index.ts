@@ -206,6 +206,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'rtcp', () =>
     import('./network/rtp/rtcp').then((module) => module.rtcpPlugin),
   );
+  // TFTP/FTP/Telnet — dalga 12h: `file-terminal` ailesi kapanır, domain
+  // biter. Üçü de küçük ve birbirinden bağımsız; TFTP tek UDP paketi, FTP
+  // yapıştırılan çok satırlık control oturumu, Telnet düz metin + IAC
+  // komutlarının iç içe geçtiği tek TCP payload'u.
+  registerOnce(registry, 'tftp', () => import('./network/tftp/tftp').then((module) => module.tftpPlugin));
+  registerOnce(registry, 'ftp', () => import('./network/ftp/ftp').then((module) => module.ftpPlugin));
+  registerOnce(registry, 'telnet', () =>
+    import('./network/telnet/telnet').then((module) => module.telnetPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>

@@ -698,7 +698,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A lock-step file transfer over UDP where every data block is acknowledged individually, widely used for embedded firmware and boot images.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'tftp',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Packet Decoder (RRQ / WRQ / DATA / ACK / ERROR)',
@@ -717,7 +718,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A text-command file transfer protocol that separates a TCP control session from the data connection it negotiates in active or passive mode.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ftp',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Control Session Viewer',
@@ -736,7 +738,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A byte-oriented terminal protocol that interleaves plaintext console traffic with IAC option negotiation on the same TCP stream.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'telnet',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Text Stream Viewer',

@@ -4844,4 +4844,80 @@ export const en: TranslationDictionary = {
   'protocol.rtcp.example.lengthExceedsBuffer.name': 'Length runs past the buffer',
   'protocol.rtcp.example.lengthExceedsBuffer.description':
     "The RR packet claims to be 24 bytes but the buffer only has 8 — a FATAL error, since the next sub-packet's start cannot be determined.",
+
+  // --- TFTP / FTP / Telnet (phase 10 wave 12h) ---
+  'protocol.tftp.error.headerTruncated': 'The frame is shorter than the 2-byte Opcode.',
+  'protocol.tftp.error.unsupportedOpcode':
+    'The Opcode is not in the 1-6 range recognized by RFC 1350/2347.',
+  'protocol.tftp.error.stringUnterminated':
+    'A NUL-terminated field (Filename/Mode/Option/Error Message) runs out of buffer before its terminator.',
+  'protocol.tftp.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.tftp.error.aborted': 'Parsing was cancelled.',
+  'protocol.tftp.warning.unsupportedMode': 'Mode is not one of netascii/octet/mail.',
+  'protocol.tftp.warning.unknownErrorCode':
+    'The Error Code is outside the 0-7 range defined by RFC 1350 §5.',
+  'protocol.tftp.warning.blockSizeAssumed':
+    'The Final Block decision assumes the classic 512-byte default block size; OACK may have negotiated a different one.',
+  'protocol.tftp.documentation.summary':
+    'TFTP (RFC 1350) is a simple UDP file-transfer protocol where every data block is acknowledged individually. This page decodes a single TFTP packet (RRQ/WRQ/DATA/ACK/ERROR/OACK).',
+  'protocol.tftp.example.readRequest.name': 'Read Request (RRQ)',
+  'protocol.tftp.example.readRequest.description':
+    'A classic RRQ for "firmware.bin" in octet mode, with no option negotiation.',
+  'protocol.tftp.example.readRequestWithOptions.name': 'RRQ + blksize option',
+  'protocol.tftp.example.readRequestWithOptions.description':
+    'An RRQ negotiating a 1024-byte block size via the RFC 2347/2348 option extension.',
+  'protocol.tftp.example.dataContinue.name': 'DATA — full 512-byte block',
+  'protocol.tftp.example.dataContinue.description':
+    'Block 1, exactly 512 bytes — "Continue" under the classic default block size (warned, since OACK may differ).',
+  'protocol.tftp.example.dataFinalBlock.name': 'DATA — short (final) block',
+  'protocol.tftp.example.dataFinalBlock.description':
+    'Block 2, only 3 bytes — an unambiguous end-of-transfer signal under any block size.',
+  'protocol.tftp.example.ack.name': 'ACK',
+  'protocol.tftp.example.ack.description': 'A plain ACK packet acknowledging block 1.',
+  'protocol.tftp.example.errorFileNotFound.name': 'ERROR — File not found',
+  'protocol.tftp.example.errorFileNotFound.description':
+    "RFC 1350 §5's error code 1, with a descriptive message.",
+
+  'protocol.ftp.error.emptyFrame': 'The buffer is empty; at least 1 byte is required.',
+  'protocol.ftp.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.ftp.error.aborted': 'Parsing was cancelled.',
+  'protocol.ftp.documentation.summary':
+    'FTP (RFC 959) is a line-based control connection over TCP. This page decodes control messages (commands/responses) — a pasted transcript of an entire session is processed by classifying each CRLF-separated line on its own; the file carried by the data connection itself is not decoded.',
+  'protocol.ftp.example.loginAndRetrieve.name': 'Login + file retrieval session',
+  'protocol.ftp.example.loginAndRetrieve.description':
+    'An end-to-end control-session slice covering the welcome banner, USER/PASS, PASV, RETR and transfer completion. The PASS argument is redacted in the default view.',
+  'protocol.ftp.example.multilineResponse.name': 'Multi-line response',
+  'protocol.ftp.example.multilineResponse.description':
+    "RFC 959 §4.2's multi-line response format: continuation lines use a dash, the final line closes with a space.",
+  'protocol.ftp.example.unclassifiedLine.name': 'Unclassified line',
+  'protocol.ftp.example.unclassifiedLine.description':
+    'A line matching neither a 3-digit response code nor a verb token — shown raw, without a warning.',
+
+  'protocol.telnet.error.emptyFrame': 'The buffer is empty; at least 1 byte is required.',
+  'protocol.telnet.error.trailingIac':
+    'The frame ends with a lone IAC (0xFF) with no following command byte.',
+  'protocol.telnet.error.negotiationTruncated':
+    'WILL/WONT/DO/DONT or SB reaches the end of the buffer before its option byte.',
+  'protocol.telnet.error.subnegotiationUnterminated':
+    'IAC SB was opened but the closing IAC SE was never found in the buffer.',
+  'protocol.telnet.error.unknownCommand':
+    "The byte after IAC is not in RFC 854's 240-255 command set.",
+  'protocol.telnet.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.telnet.error.aborted': 'Parsing was cancelled.',
+  'protocol.telnet.warning.plaintextProtocol':
+    'The base Telnet protocol provides no encryption; usernames, passwords and other data may appear in the clear in a capture.',
+  'protocol.telnet.documentation.summary':
+    "Telnet (RFC 854) carries plaintext terminal traffic on the same TCP stream as IAC (0xFF)-prefixed option negotiation commands. This page walks a pasted stream in one pass as a sequence of text runs and IAC commands; it does not cross-interpret WILL/WONT/DO/DONT pairs (e.g. 'request accepted') — each command is shown with its own RFC 854 meaning.",
+  'protocol.telnet.example.echoNegotiation.name': 'ECHO negotiation + prompt',
+  'protocol.telnet.example.echoNegotiation.description':
+    'An IAC DO ECHO requesting the server enable ECHO, followed by a plaintext prompt.',
+  'protocol.telnet.example.terminalTypeSubnegotiation.name': 'Terminal Type subnegotiation',
+  'protocol.telnet.example.terminalTypeSubnegotiation.description':
+    'IAC WILL TERMINAL-TYPE followed by the "VT100" value carried between IAC SB … IAC SE.',
+  'protocol.telnet.example.escapedLiteralFf.name': 'Escaped literal 0xFF',
+  'protocol.telnet.example.escapedLiteralFf.description':
+    'A raw 0xFF byte escaped as IAC IAC inside plain text — a byte-transparency example.',
+  'protocol.telnet.example.unterminatedSubnegotiation.name': 'Unterminated subnegotiation',
+  'protocol.telnet.example.unterminatedSubnegotiation.description':
+    'IAC SB is opened but IAC SE never arrives — represents a truncated capture.',
 };

@@ -4829,6 +4829,82 @@ export const tr = {
   'protocol.rtcp.example.lengthExceedsBuffer.name': 'Length tampon dışına taşıyor',
   'protocol.rtcp.example.lengthExceedsBuffer.description':
     'RR paketi 24 bayt olduğunu iddia ediyor ama tamponda yalnız 8 bayt var — bir sonraki alt paketin başlangıcı bilinemediği için FATAL hata.',
+
+  // --- TFTP / FTP / Telnet (faz 10 dalga 12h) ---
+  'protocol.tftp.error.headerTruncated': 'Çerçeve 2 baytlık Opcode kadar bile uzun değil.',
+  'protocol.tftp.error.unsupportedOpcode':
+    'Opcode, RFC 1350/2347’nin tanıdığı 1-6 aralığında değil.',
+  'protocol.tftp.error.stringUnterminated':
+    'NUL ile sonlanması gereken bir alan (Filename/Mode/Option/Error Message) tamponda sonlanmadan bitiyor.',
+  'protocol.tftp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.tftp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.tftp.warning.unsupportedMode': 'Mode netascii/octet/mail kümesinde değil.',
+  'protocol.tftp.warning.unknownErrorCode':
+    'Error Code, RFC 1350 §5’in tanımladığı 0-7 aralığında değil.',
+  'protocol.tftp.warning.blockSizeAssumed':
+    'Final Block kararı klasik 512 baytlık varsayılan block size’a dayanır; OACK farklı bir boyut pazarlık etmiş olabilir.',
+  'protocol.tftp.documentation.summary':
+    'TFTP (RFC 1350), UDP üzerinde her veri bloğunun ayrı ACK ile onaylandığı basit bir dosya aktarım protokolüdür. Bu sayfa tek bir TFTP paketini (RRQ/WRQ/DATA/ACK/ERROR/OACK) çözer.',
+  'protocol.tftp.example.readRequest.name': 'Read Request (RRQ)',
+  'protocol.tftp.example.readRequest.description':
+    '"firmware.bin" dosyasını octet modunda isteyen, seçenek pazarlığı olmayan klasik RRQ.',
+  'protocol.tftp.example.readRequestWithOptions.name': 'RRQ + blksize seçeneği',
+  'protocol.tftp.example.readRequestWithOptions.description':
+    'RFC 2347/2348 option extension’ıyla 1024 baytlık block size pazarlığı isteyen RRQ.',
+  'protocol.tftp.example.dataContinue.name': 'DATA — 512 baytlık tam blok',
+  'protocol.tftp.example.dataContinue.description':
+    'Blok 1, tam 512 bayt — klasik varsayılan block size’a göre "Continue" (uyarılı, çünkü OACK farklı olabilir).',
+  'protocol.tftp.example.dataFinalBlock.name': 'DATA — kısa (son) blok',
+  'protocol.tftp.example.dataFinalBlock.description':
+    'Blok 2, yalnız 3 bayt — her block size’da transferin bittiğini gösteren kesin işaret.',
+  'protocol.tftp.example.ack.name': 'ACK',
+  'protocol.tftp.example.ack.description': 'Blok 1’i onaylayan basit ACK paketi.',
+  'protocol.tftp.example.errorFileNotFound.name': 'ERROR — File not found',
+  'protocol.tftp.example.errorFileNotFound.description':
+    'RFC 1350 §5’in 1 numaralı hata kodu, açıklayıcı bir mesajla birlikte.',
+
+  'protocol.ftp.error.emptyFrame': 'Arabellek boş; en az 1 bayt gerekir.',
+  'protocol.ftp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ftp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ftp.documentation.summary':
+    'FTP (RFC 959) TCP üzerinde satır tabanlı bir kontrol bağlantısıdır. Bu sayfa kontrol mesajlarını (komut/yanıt) çözer — yapıştırılan tüm oturum, CRLF ile ayrılan her satır kendi başına sınıflandırılarak işlenir; veri bağlantısının taşıdığı dosyanın kendisi çözülmez.',
+  'protocol.ftp.example.loginAndRetrieve.name': 'Giriş + dosya indirme oturumu',
+  'protocol.ftp.example.loginAndRetrieve.description':
+    'Karşılama, USER/PASS, PASV, RETR ve transfer tamamlanışını içeren uçtan uca bir kontrol oturumu dilimi. PASS’ın argümanı varsayılan görünümde redakte edilir.',
+  'protocol.ftp.example.multilineResponse.name': 'Çok satırlı yanıt',
+  'protocol.ftp.example.multilineResponse.description':
+    'RFC 959 §4.2’nin çok satırlı yanıt biçimi: ara satırlar "-" ile sürer, son satır boşlukla kapanır.',
+  'protocol.ftp.example.unclassifiedLine.name': 'Sınıflandırılamayan satır',
+  'protocol.ftp.example.unclassifiedLine.description':
+    'Ne 3 haneli yanıt koduna ne fiil dizisine uyan bir satır — ham gösterilir, uyarı basılmaz.',
+
+  'protocol.telnet.error.emptyFrame': 'Arabellek boş; en az 1 bayt gerekir.',
+  'protocol.telnet.error.trailingIac':
+    'Çerçeve tek bir IAC (0xFF) ile bitiyor; ardından komut baytı yok.',
+  'protocol.telnet.error.negotiationTruncated':
+    'WILL/WONT/DO/DONT ya da SB, option baytı gelmeden tamponun sonuna geliyor.',
+  'protocol.telnet.error.subnegotiationUnterminated':
+    'IAC SB açıldı ama kapatan IAC SE tamponda hiç bulunamadı.',
+  'protocol.telnet.error.unknownCommand':
+    'IAC sonrası bayt RFC 854’ün 240-255 komut kümesinde değil.',
+  'protocol.telnet.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.telnet.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.telnet.warning.plaintextProtocol':
+    'Telnet temel protokolü şifreleme sağlamaz; yakalamada kullanıcı adı/şifre gibi bilgiler açık metin görünebilir.',
+  'protocol.telnet.documentation.summary':
+    'Telnet (RFC 854) düz metin terminal trafiğini IAC (0xFF) ile başlayan option negotiation komutlarıyla aynı TCP akışında taşır. Bu sayfa yapıştırılan tüm akışı tek geçişte metin koşuları ve IAC dizileri olarak sıralar; WILL/WONT/DO/DONT çiftlerinin çapraz yorumu (ör. "istek kabul edildi") yapılmaz, her komut kendi RFC 854 anlamıyla gösterilir.',
+  'protocol.telnet.example.echoNegotiation.name': 'ECHO negotiation + bilgi istemi',
+  'protocol.telnet.example.echoNegotiation.description':
+    'Sunucunun ECHO’yu etkinleştirmesini isteyen IAC DO ECHO, ardından düz metin bir bilgi istemi.',
+  'protocol.telnet.example.terminalTypeSubnegotiation.name': 'Terminal Type subnegotiation',
+  'protocol.telnet.example.terminalTypeSubnegotiation.description':
+    'IAC WILL TERMINAL-TYPE ardından IAC SB … IAC SE arasında taşınan "VT100" değeri.',
+  'protocol.telnet.example.escapedLiteralFf.name': 'Kaçışlı literal 0xFF',
+  'protocol.telnet.example.escapedLiteralFf.description':
+    'Düz metin içinde IAC IAC ile kaçışlanmış ham bir 0xFF baytı — byte-transparency örneği.',
+  'protocol.telnet.example.unterminatedSubnegotiation.name': 'Kapatılmamış subnegotiation',
+  'protocol.telnet.example.unterminatedSubnegotiation.description':
+    'IAC SB açılıyor ama IAC SE hiç gelmiyor — kesilmiş bir yakalamayı gösterir.',
 } as const;
 
 /**
