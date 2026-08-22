@@ -92,7 +92,7 @@ bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
 | ~~**12d**~~ | ~~ntp, ptp~~ | **BİTTİ (`b149e76`).** Öngörülen ortak kaldıraç YANLIŞ ÇIKTI: NTP damgası 64 bit (32 s + 32 bit 2^-32 kesir, epoch 1900 UTC), PTP damgası 80 bit (48 bit s + 32 bit tam sayı ns, epoch 1970 TAI). Paylaşılan motor kesrin birimini tek seçip diğerini 4295 kat yanlış ölçeklerdi — 12b'nin LLDP/DHCP "TLV" hatasının aynı cinsi | ~~`networkTimestamp`~~ → `ntpTimestamp.ts` + `ptpTimestamp.ts` AYRI | orta (ptp zor) |
 | ~~**12e**~~ | ~~snmp, syslog~~ | **BİTTİ (`b35cbbd`).** `time-management` KAPANDI. berReader gerçekten hazır bulundu; `oidCodec` AYRI MODÜL OLARAK açılmadı — OID ve işaretsiz tam sayı çözücüleri X.690'ın kendi tanımları olduğu için `berReader.ts`in İÇİNE kondu | ~~`oidCodec`~~ → `berReader.ts`e iki kardeş | orta |
 | ~~**12f**~~ | ~~http, websocket, mqtt-sn~~ | **BİTTİ (`39b7491`).** "mqtt-sn mqtt komşusu" varsayımı KOD PAYLAŞIMI anlamına GELMİYOR: `mqttVbi.ts` uygulanamaz (MQTT-SN Length'i ya 1 bayt ya `0x01`+16 bit ve KENDİNİ DE sayar), QoS 0b11 MQTT'de hata burada −1. HTTP body framing'de iki smuggling vektörü çerçeve hatası basıyor. WS el sıkışması HTTP'ye YÖNLENDİRİLİR, zincir kurulmaz | — (paylaşım yok) | orta–zor |
-| **12g** | rtp, rtcp | `real-time-media` kapanır. Ortak başlık kavramları, `bitCursor` hazır; jitter hesabı (`spec:558`) calculator adayı | — | orta |
+| ~~**12g**~~ | ~~rtp, rtcp~~ | **BİTTİ.** `real-time-media` kapandı. `bitCursor` V/P/X/CC/M/PT için kullanıldı; jitter/loss/gap analizi calculator'a bırakıldı (12c/12d'nin çok-paketli korelasyon precedent'i). SR'nin NTP Timestamp'i `ntpTimestamp.ts`yi GERÇEKTEN paylaştı (DLSR için `readNtpShortMilliseconds` dâhil) — 12b/12d'nin ters yönü | `ntpTimestamp.ts` (paylaşım GERÇEK, yeni motor açılmadı) | orta |
 | **12h** | tftp, ftp, telnet | `file-terminal` kapanır. tftp opcode tabanlı ikili, ftp metin, telnet IAC kaçışlama — üçü de küçük | — | kolay–orta |
 
 **Toplam 8 alt dalga / 19 kayıt.** 12a ve 12b bilerek en başta: ucuz, hızlı yeşil,
@@ -119,7 +119,12 @@ Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
   RFC 9112 §6.3). Çerçeveden ÇIKARILAMAYAN tek şey isteğin **HEAD** olup
   olmadığıdır: HEAD yanıtı `Content-Length` taşır ama gövde TAŞIMAZ
   (RFC 9110 §9.3.2). Kanal bu tek soruya indirgendi.
-- **rtp** — payload type → codec eşlemesi (SDP dışarıda kalır, tabloda yok).
+- ~~**rtp** — payload type → codec eşlemesi~~ → **12g: KANAL AÇILMADI.** "SDP
+  dışarıda kalır, tabloda yok" notu harfiyen uygulandı: RFC 3551 sabit tablosu
+  (0-95) doğrudan gösterilir, dinamik (96-127) ve atanmamış aralık spec'in
+  kendi örneğiyle (`:566`, "Unknown unless SDP/profile supplied") uyarıya
+  bırakılır — kullanıcıdan codec sorup tabloya yazmak aynı tahmini dolaylı
+  yoldan yapmak olurdu.
 - **icmpv6** — pseudo-header için kaynak/hedef IPv6 adresi (checksum ZORUNLU,
   UDP'deki "0 = kapalı" kısayolu yok).
 - **snmp** — sürüm (v1/v2c/v3); v3 tamamen farklı zarf (`spec:376`).

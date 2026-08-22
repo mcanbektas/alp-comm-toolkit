@@ -175,7 +175,26 @@ bitini yönün kendisi yapar, kanal açılmadı. WebSocket el sıkışması HTTP
 mesajıdır ve HTTP sayfasına yönlendiriliyor; `Sec-WebSocket-Accept` asenkron
 kripto istediği için (parse senkron sözleşme) hesap aracı olarak ayrı iş.
 **websocket kaydının `live` sekmesi KALDIRILDI** — dalga 12'nin karar 3'ü.
-Sıradaki: **12g rtp/rtcp** (Sonnet·high).
+
+**12g (2026-08-22 bitti) — rtp + rtcp.** `real-time-media` ailesi KAPANDI.
+RTCP'nin Sender Report'undaki NTP Timestamp'i `ntpTimestamp.ts`nin 64-bit tel
+biçimiyle BİREBİR AYNI (RFC 3550 §6.4.1) — 12b/12d'nin "paylaşılan kaldıraç
+yanlış çıktı" derslerinin TERSİ, gerçek bir paylaşım (`readNtpTimestamp`,
+`readNtpShortMilliseconds` DLSR için de kullanıldı). RTP tarafında Payload
+Type için brief'in "SDP dışarıda kalır, tabloda yok" notu harfiyen uygulandı:
+RFC 3551'in sabit tablosu (0-95 arası atanmış değerler) gösterilir, dinamik
+(96-127) ve atanmamış aralık codec adı UYDURULMADAN uyarıyla bırakılır —
+`decodeOptions` kanalı bilerek AÇILMADI. RTCP compound paket döngüsü kendi
+`length` alanına güvenir: bir alt paketin İÇERİĞİ (rapor bloğu/SDES chunk'ı)
+declared uzunluğa sığmasa bile `length` bozulmadıkça döngü SONRAKİ alt pakete
+geçer — yalnız `length`in kendisi tampon dışına taşarsa FATAL olur, çünkü o
+zaman bir sonraki paketin nerede başladığı bilinemez. SDES'in PRIV item'ı
+(prefix uzunluğu + prefix + değer) ayrı ele alındı; `ParsedField` düz olduğu
+için "her alt paket ayrı tree node" isteği (spec `:571`) alan adlarına
+(`SR SSRC`, `RTCP Packet 1 Packet Type`) taşınarak karşılandı, şema
+değişikliği YAPILMADI (dalga 10/11 kararı burada da geçerli). 43 birim testi
++ 13 e2e (gerçek tarayıcı) + 4199 toplam test + build yeşil.
+Sıradaki: **12h tftp/ftp/telnet** (Sonnet·medium-high).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
