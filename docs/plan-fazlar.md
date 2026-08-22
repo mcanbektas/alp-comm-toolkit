@@ -93,9 +93,17 @@ ICMP'yi hazır karşıladı (tam PASS/FAIL, pseudo-header istemez). ICMPv6 check
 Discovery ailesi (RFC 4861) spec'in kendi kararıyla ADLANDIRILDI ama gövdesi
 ÇÖZÜLMEDİ ("ileride ayrı decoder modülleri" — spec 08-ag-ethernet.md:176-178);
 gerçek ND alan çözümü (Target Address, Flags, Options TLV) ayrı bir iş.
-`berReader` (GOOSE'dan) henüz kullanılmadı — 12e'de SNMP'nin işi. Sıradaki:
-**12b arp/lldp** — `walkTypeLengthChain` taşıyıcı bağlamını kullanır, LLDP
-jenerik bir TLV yürüyücüsü açar (12c'nin DHCP option'ları aynısını isteyecek).
+`berReader` (GOOSE'dan) henüz kullanılmadı — 12e'de SNMP'nin işi.
+
+**12b (2026-08-22 bitti, `f42c390`) — arp + lldp.** `data-link` ailesi kapandı.
+ARP'ta Hardware/Protocol Length teldeki değerden okunur, 6/4 sabitlenmez.
+LLDP'nin TLV yürüyücüsü **LLDP'ye özel** yazıldı — 7+9 bit paketli başlık DHCP'nin
+klasik TLV8 biçimiyle AYNI DEĞİL; 12a'nın "12c'nin DHCP option'ları aynısını
+isteyecek" varsayımı bit düzeyinde YANLIŞ çıktı, `protocol-core/decoding`'e
+paylaşılan bir modül AÇILMADI. Organizationally Specific TLV'ler OUI/Subtype
+düzeyinde bırakıldı, vendor adı çözümü `definitions:['vendor-map']` kanalının
+işi (henüz yok). Sıradaki: **12c dns/mdns/dhcp** — DHCP'nin option TLV'si
+KENDİ (klasik TLV8) yürüyücüsünü ister, LLDP'ninkini miras almaz.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
