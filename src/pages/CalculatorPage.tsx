@@ -18,6 +18,7 @@ import {
   SignedUnsignedTool,
   UnixTimestampTool,
 } from '@/features/calculators/tools/numericTools';
+import { CurrentLoopTool } from '@/features/calculators/tools/currentLoopTools';
 import { LogicLevelCompatibilityTool } from '@/features/calculators/tools/logicLevelTools';
 import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
 import { BytesEncodingTool, HexAsciiTool, HexBinaryTool, UrlEncodingTool, Utf8ByteViewerTool } from '@/features/calculators/tools/textBytesTools';
@@ -68,6 +69,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'lora-link-budget': () => <LoraLinkBudgetTool />,
   'lora-battery': () => <LoraBatteryTool />,
   'logic-level-compat': () => <LogicLevelCompatibilityTool />,
+  'current-loop': () => <CurrentLoopTool />,
   'crc-calculator': () => <CrcCalculatorTool />,
   'checksum-finder': () => <ChecksumFinderTool />,
 };

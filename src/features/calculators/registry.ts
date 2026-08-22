@@ -67,6 +67,9 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   // bias/unit-load taşıyor. Ayrı bir kategori açmak taksonomiyi spec §12/§13/
   // §11 üçlüsünden koparırdı.
   { id: 'logic-level-compat', category: 'timing', nameKey: 'calc.logicLevelCompat.name', summaryKey: 'calc.logicLevelCompat.summary' },
+  // Current Loop / 4-20 mA kayıtlarının TEK motoru: o iki sayfanın decode'u
+  // yok (LoRa paterni), hesap buraya bağlanıyor.
+  { id: 'current-loop', category: 'timing', nameKey: 'calc.currentLoop.name', summaryKey: 'calc.currentLoop.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

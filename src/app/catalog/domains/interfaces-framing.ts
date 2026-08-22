@@ -221,8 +221,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Interface class that carries information as loop current rather than line voltage, so long cable resistance does not corrupt the value as long as compliance voltage holds.',
           layer: 'physical',
-          status: 'planned',
-          tabs: ['overview', 'data', 'diagnostics', 'examples'],
+          // LoRa paterni (`wireless-iot.ts` lora kaydı, Faz 10 dalga 9a): bilgi
+          // hat AKIMI üzerinden taşınır, ortada çözülecek bayt akışı YOKTUR —
+          // `pluginId` bu yüzden hiç verilmedi ve `ready` demek yalan olurdu.
+          // Motor YAZILDI (`protocol-core/timing/currentLoop.ts`: Ohm kanunu,
+          // ölçekleme, shunt, compliance bütçesi, durum sınıfı) ve `current-loop`
+          // hesap aracı olarak koşuyor; 'timing' sekmesi ProtocolPage'in
+          // hesaplayıcı bağlantılarını bastığı tek sekme olduğu için eklendi.
+          status: 'partial',
+          calculatorIds: ['current-loop'],
+          tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          related: ['interfaces-framing/serial-interfaces/4-20-ma'],
           tools: [
             'Digital Current Loop View',
             'Loop Voltage',
@@ -239,8 +248,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Process automation analog current loop where 4 mA and 20 mA bracket the sensor range, and the live zero at 4 mA makes an open loop distinguishable from a real minimum reading.',
           layer: 'physical',
-          status: 'planned',
-          tabs: ['overview', 'data', 'diagnostics', 'examples'],
+          // Current Loop ile aynı gerekçe: analog akım arayüzü, decode yok,
+          // motor `current-loop` hesap aracında (LoRa paterni).
+          status: 'partial',
+          calculatorIds: ['current-loop'],
+          tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          // HART, 4–20 mA döngüsünün ÜSTÜNE bindirilmiş dijital katmandır
+          // (`layer: 'multi-layer'`); brief'in saptadığı eksik çapraz-link.
+          related: [
+            'interfaces-framing/serial-interfaces/current-loop',
+            'industrial-automation/process-instrumentation/hart',
+          ],
           tools: [
             'Current→Engineering Value',
             'Engineering Value→Current',
