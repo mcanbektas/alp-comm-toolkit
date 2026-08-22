@@ -2939,6 +2939,77 @@ export const tr = {
   'protocol.lldp.example.truncatedTlv.description':
     'TTL TLV\'si 2 bayt bildiriyor ama tamponda yalnız 1 bayt var — truncated-frame basar.',
 
+  // --- DNS Wire (dns.ts + mdns.ts paylaşır) ---
+  'protocol.dnsWire.error.frameTooShort': 'Çerçeve en az 12 baytlık sabit DNS başlığı kadar uzun olmalı.',
+  'protocol.dnsWire.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.dnsWire.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dnsWire.error.nameTruncated': 'Bir isim (NAME/QNAME) tamponun sonuna kesildi.',
+  'protocol.dnsWire.error.nameLoop':
+    'Bir isim pointer\'ı kendi kendine (ya da bir döngüye) işaret ediyor — çözümleme durduruldu.',
+  'protocol.dnsWire.error.recordTruncated':
+    'Bir kaydın (question/answer/authority/additional) sabit alanları ya da RDATA\'sı tampona sığmıyor.',
+  'protocol.dnsWire.warning.unknownType': 'TYPE dar kümenin (A/NS/CNAME/SOA/PTR/MX/TXT/AAAA/SRV) dışında.',
+  'protocol.dnsWire.warning.unknownClass': 'CLASS dar kümenin (yalnız IN) dışında.',
+  'protocol.dnsWire.warning.tooManyRecords':
+    'Bir bölümün bildirdiği kayıt sayısı güvenlik tavanını aşıyor — kalanı işlenmedi.',
+
+  // --- DNS ---
+  'protocol.dns.documentation.summary':
+    'Unicast resolver sorgu/yanıt protokolü (RFC 1035). Header/Question/Answer/Authority/Additional bölümleri alan alana çözülür, isim sıkıştırması döngü korumalı çözülür; transaction eşleştirme/response time ayrı bir araçtır.',
+  'protocol.dns.example.simpleQuery.name': 'Basit sorgu (A kaydı)',
+  'protocol.dns.example.simpleQuery.description': 'QR=0, RD=1 — example.com için A kaydı sorgusu.',
+  'protocol.dns.example.responseWithAnswer.name': 'Yanıt + sıkıştırılmış isim',
+  'protocol.dns.example.responseWithAnswer.description':
+    'Spec\'in kendi örneği: Flags 0x8180, Answer NAME\'i soru adını 0xC00C pointer\'ıyla sıkıştırır.',
+  'protocol.dns.example.cnameChain.name': 'CNAME kaydı',
+  'protocol.dns.example.cnameChain.description': 'www.example.com → example.com (CNAME, TTL 60s).',
+  'protocol.dns.example.nxdomain.name': 'NXDOMAIN yanıtı',
+  'protocol.dns.example.nxdomain.description': 'RCODE=3 (NXDOMAIN) — kayıt yok.',
+  'protocol.dns.example.nameLoop.name': 'İsim döngüsü (hata yolu)',
+  'protocol.dns.example.nameLoop.description':
+    'Soru adı kendi kendini gösteren bir pointer — spec\'in "parser\'ı kilitlememeli" uyarısının en dar örneği.',
+
+  // --- mDNS ---
+  'protocol.mdns.documentation.summary':
+    'DNS tel biçimini UDP multicast üzerinden (port 5353) .local namespace\'inde kullanan isim çözümü (RFC 6762). Tek fark CLASS alanının üst biti: soruda "unicast tercih edilir", yanıtta "cache flush". mDNS ≠ DNS-SD.',
+  'protocol.mdns.example.queryLocal.name': 'Sorgu (.local)',
+  'protocol.mdns.example.queryLocal.description': 'device.local için A kaydı sorgusu — spec\'in örneği.',
+  'protocol.mdns.example.unicastResponseRequested.name': 'Unicast yanıt tercihi (QU biti)',
+  'protocol.mdns.example.unicastResponseRequested.description':
+    'QCLASS\'ın üst biti set — sorgulayıcı unicast yanıt tercih ediyor (RFC 6762 §5.4).',
+  'protocol.mdns.example.responseCacheFlush.name': 'Yanıt + cache flush biti',
+  'protocol.mdns.example.responseCacheFlush.description':
+    'CLASS\'ın üst biti set — bu kayıt öncekilerin yerine geçer (RFC 6762 §10.2).',
+  'protocol.mdns.example.queryWithAnswerCompressed.name': 'Sorgu + sıkıştırılmış yanıt',
+  'protocol.mdns.example.queryWithAnswerCompressed.description':
+    'Answer NAME\'i soru adını pointer\'la sıkıştırır — dns.ts\'teki örneğin mDNS emsali.',
+
+  // --- DHCP ---
+  'protocol.dhcp.error.frameTooShort':
+    'Çerçeve en az 236 baytlık sabit BOOTP gövdesi kadar uzun olmalı.',
+  'protocol.dhcp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.dhcp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dhcp.error.magicCookieMismatch': 'Magic Cookie beklenen 0x63825363 değerini taşımıyor.',
+  'protocol.dhcp.error.optionTruncated': 'Bir option\'ın bildirdiği uzunluk tampondan büyük.',
+  'protocol.dhcp.warning.unknownOp': 'op dar kümenin (BOOTREQUEST/BOOTREPLY) dışında.',
+  'protocol.dhcp.warning.missingEndOption':
+    'End option\'ı (255) bulunamadı — mesaj tamponun sonunda eksik bitmiş olabilir.',
+  'protocol.dhcp.warning.unknownMessageType':
+    'DHCP Message Type (option 53) dar kümenin (DISCOVER/OFFER/REQUEST/DECLINE/ACK/NAK/RELEASE/INFORM) dışında.',
+  'protocol.dhcp.documentation.summary':
+    'BOOTP mesaj yapısı üstüne kurulu host konfigürasyon protokolü (RFC 2131), DORA akışının (Discover/Offer/Request/Acknowledge) temeli. Options klasik TLV8\'dir; spec\'in adlandırdığı yedi kod alan alana çözülür, kalanı ham gösterilir. DORA eşleştirme/lease takibi ayrı bir araçtır.',
+  'protocol.dhcp.example.discover.name': 'DHCPDISCOVER',
+  'protocol.dhcp.example.discover.description': 'DORA akışının ilk adımı — BOOTREQUEST, Message Type=DISCOVER.',
+  'protocol.dhcp.example.offer.name': 'DHCPOFFER',
+  'protocol.dhcp.example.offer.description':
+    'BOOTREPLY, Subnet Mask/Router/Lease Time/Server Identifier option\'larıyla birlikte.',
+  'protocol.dhcp.example.unknownMessageType.name': 'Tanınmayan Message Type',
+  'protocol.dhcp.example.unknownMessageType.description':
+    'Option 53 değeri 99, dar kümenin dışında — HATA değil UYARI basar.',
+  'protocol.dhcp.example.badMagicCookie.name': 'Bozuk Magic Cookie (hata yolu)',
+  'protocol.dhcp.example.badMagicCookie.description':
+    'Cookie\'nin ilk baytı bilerek bozuldu — value-out-of-range basar, options işlenmez.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

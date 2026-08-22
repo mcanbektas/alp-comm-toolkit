@@ -145,6 +145,20 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'lldp', () =>
     import('./network/lldp/lldp').then((module) => module.lldpPlugin),
   );
+  // DHCP/DNS/mDNS — dalga 12c: `addressing-discovery` ailesini kapatır. DNS ve
+  // mDNS `dnsWire.ts`teki AYNI tel biçimi motorunu paylaşır (mDNS "DNS message
+  // structure ile UDP multicast üzerinden çalışır", spec:715) — DHCP'nin
+  // klasik TLV8 option'ları ise kendi yürüyücüsünü ister (12b'nin LLDP/DHCP
+  // ayrımının aynı gerekçesi, `dhcp.ts` dosya başı).
+  registerOnce(registry, 'dhcp', () =>
+    import('./network/dhcp/dhcp').then((module) => module.dhcpPlugin),
+  );
+  registerOnce(registry, 'dns', () =>
+    import('./network/dns/dns').then((module) => module.dnsPlugin),
+  );
+  registerOnce(registry, 'mdns', () =>
+    import('./network/dns/mdns').then((module) => module.mdnsPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>

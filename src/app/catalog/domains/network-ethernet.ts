@@ -326,7 +326,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The client/server exchange that leases an IP address and network configuration options to a booting host via the DORA flow.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dhcp',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'DORA Flow Tracker',
@@ -348,7 +349,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The unicast resolver query/response protocol whose header, question and resource-record layout is reused by several link-local variants.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dns',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Header / Flags Decoder',
@@ -371,7 +373,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'DNS-shaped name resolution over UDP multicast on port 5353 within the .local namespace, used by printers, cameras and IoT devices without any DNS server.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'mdns',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Query / Response Decoder',

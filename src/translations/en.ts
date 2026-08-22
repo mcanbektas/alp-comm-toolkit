@@ -2933,6 +2933,78 @@ export const en: TranslationDictionary = {
   'protocol.lldp.example.truncatedTlv.description':
     'The TTL TLV declares 2 bytes but only 1 byte is in the buffer — reports truncated-frame.',
 
+  // --- DNS Wire (shared by dns.ts + mdns.ts) ---
+  'protocol.dnsWire.error.frameTooShort': 'The message must be at least as long as the 12-byte fixed DNS header.',
+  'protocol.dnsWire.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.dnsWire.error.aborted': 'Parsing was aborted.',
+  'protocol.dnsWire.error.nameTruncated': 'A name (NAME/QNAME) was cut off at the end of the buffer.',
+  'protocol.dnsWire.error.nameLoop':
+    "A name pointer points at itself (or forms a loop) — parsing was stopped.",
+  'protocol.dnsWire.error.recordTruncated':
+    "A record's (question/answer/authority/additional) fixed fields or RDATA do not fit in the buffer.",
+  'protocol.dnsWire.warning.unknownType':
+    'TYPE is outside the narrow set (A/NS/CNAME/SOA/PTR/MX/TXT/AAAA/SRV).',
+  'protocol.dnsWire.warning.unknownClass': 'CLASS is outside the narrow set (IN only).',
+  'protocol.dnsWire.warning.tooManyRecords':
+    "A section's declared record count exceeds the safety cap — the rest was not processed.",
+
+  // --- DNS ---
+  'protocol.dns.documentation.summary':
+    'The unicast resolver query/response protocol (RFC 1035). Header/Question/Answer/Authority/Additional sections are decoded field by field, name compression is resolved with loop protection; transaction matching/response time is a separate tool.',
+  'protocol.dns.example.simpleQuery.name': 'Simple query (A record)',
+  'protocol.dns.example.simpleQuery.description': 'QR=0, RD=1 — an A record query for example.com.',
+  'protocol.dns.example.responseWithAnswer.name': 'Response + compressed name',
+  'protocol.dns.example.responseWithAnswer.description':
+    "The spec's own example: Flags 0x8180, the Answer NAME compresses the question name with a 0xC00C pointer.",
+  'protocol.dns.example.cnameChain.name': 'CNAME record',
+  'protocol.dns.example.cnameChain.description': 'www.example.com → example.com (CNAME, TTL 60s).',
+  'protocol.dns.example.nxdomain.name': 'NXDOMAIN response',
+  'protocol.dns.example.nxdomain.description': 'RCODE=3 (NXDOMAIN) — no record.',
+  'protocol.dns.example.nameLoop.name': 'Name loop (error path)',
+  'protocol.dns.example.nameLoop.description':
+    "The question name is a pointer to itself — the narrowest example of the spec's \"must not lock up the parser\" warning.",
+
+  // --- mDNS ---
+  'protocol.mdns.documentation.summary':
+    "Name resolution using the DNS wire format over UDP multicast (port 5353) within the .local namespace (RFC 6762). The only difference is the top bit of the CLASS field: \"unicast preferred\" in a question, \"cache flush\" in a response. mDNS ≠ DNS-SD.",
+  'protocol.mdns.example.queryLocal.name': 'Query (.local)',
+  'protocol.mdns.example.queryLocal.description': "An A record query for device.local — the spec's example.",
+  'protocol.mdns.example.unicastResponseRequested.name': 'Unicast response preferred (QU bit)',
+  'protocol.mdns.example.unicastResponseRequested.description':
+    'The top bit of QCLASS is set — the querier prefers a unicast response (RFC 6762 §5.4).',
+  'protocol.mdns.example.responseCacheFlush.name': 'Response + cache-flush bit',
+  'protocol.mdns.example.responseCacheFlush.description':
+    'The top bit of CLASS is set — this record replaces prior ones (RFC 6762 §10.2).',
+  'protocol.mdns.example.queryWithAnswerCompressed.name': 'Query + compressed answer',
+  'protocol.mdns.example.queryWithAnswerCompressed.description':
+    "The Answer NAME compresses the question name with a pointer — the mDNS counterpart of dns.ts's example.",
+
+  // --- DHCP ---
+  'protocol.dhcp.error.frameTooShort':
+    'The frame must be at least as long as the 236-byte fixed BOOTP body.',
+  'protocol.dhcp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.dhcp.error.aborted': 'Parsing was aborted.',
+  'protocol.dhcp.error.magicCookieMismatch': 'The Magic Cookie does not carry the expected 0x63825363 value.',
+  'protocol.dhcp.error.optionTruncated': "An option's declared length exceeds the buffer.",
+  'protocol.dhcp.warning.unknownOp': 'op is outside the narrow set (BOOTREQUEST/BOOTREPLY).',
+  'protocol.dhcp.warning.missingEndOption':
+    'No End option (255) was found — the message may be cut off at the end of the buffer.',
+  'protocol.dhcp.warning.unknownMessageType':
+    'DHCP Message Type (option 53) is outside the narrow set (DISCOVER/OFFER/REQUEST/DECLINE/ACK/NAK/RELEASE/INFORM).',
+  'protocol.dhcp.documentation.summary':
+    'The host configuration protocol built on the BOOTP message structure (RFC 2131), the foundation of the DORA flow (Discover/Offer/Request/Acknowledge). Options are classic TLV8; the seven codes the spec names are decoded field by field, the rest are shown raw. DORA matching/lease tracking is a separate tool.',
+  'protocol.dhcp.example.discover.name': 'DHCPDISCOVER',
+  'protocol.dhcp.example.discover.description': 'The first step of the DORA flow — BOOTREQUEST, Message Type=DISCOVER.',
+  'protocol.dhcp.example.offer.name': 'DHCPOFFER',
+  'protocol.dhcp.example.offer.description':
+    'A BOOTREPLY carrying Subnet Mask/Router/Lease Time/Server Identifier options.',
+  'protocol.dhcp.example.unknownMessageType.name': 'Unrecognized Message Type',
+  'protocol.dhcp.example.unknownMessageType.description':
+    'Option 53 value is 99, outside the narrow set — reports a warning, not an error.',
+  'protocol.dhcp.example.badMagicCookie.name': 'Broken Magic Cookie (error path)',
+  'protocol.dhcp.example.badMagicCookie.description':
+    "The cookie's first byte is deliberately corrupted — reports value-out-of-range, options are not processed.",
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',
