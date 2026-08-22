@@ -633,7 +633,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The UDP-borne transport for real-time audio, video and simulation data, providing payload-type identification, sequence numbering and media timestamps.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rtp',
           tabs: [
             'overview',
             'decode',
@@ -668,7 +669,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The companion control channel that reports delivery quality for an RTP session and maps RTP timestamps onto absolute NTP time.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'rtcp',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Common Header Decoder',

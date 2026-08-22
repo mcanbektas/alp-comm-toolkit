@@ -4765,6 +4765,70 @@ export const tr = {
   'protocol.cmosUart.example.singleCharacter.name': 'Tek karakter (hat görünümü)',
   'protocol.cmosUart.example.singleCharacter.description':
     "0x41 = 'A' — hattın en yalın hâli: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+
+  // --- RTP / RTCP (faz 10 dalga 12g) ---
+  'protocol.rtp.error.headerTruncated': 'Çerçeve 12 baytlık sabit başlık kadar bile uzun değil.',
+  'protocol.rtp.error.csrcTruncated':
+    'CSRC Count’un bildirdiği katkı kaynağı listesi tamponda eksik.',
+  'protocol.rtp.error.extensionTruncated':
+    'Header Extension’ın bildirdiği uzunluk tamponda eksik.',
+  'protocol.rtp.error.paddingInvalid':
+    'Son bayttaki dolgu sayısı (kendisi dâhil) sıfır ya da kalan alandan büyük.',
+  'protocol.rtp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.rtp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rtp.warning.versionUnexpected':
+    'Version alanı 2 değil; RTP her zaman versiyon 2 kullanır.',
+  'protocol.rtp.warning.payloadTypeUnresolved':
+    'Payload Type sabit tabloda yok; codec ancak SDP/profil bilgisiyle çözülür, burada tahmin edilmedi.',
+  'protocol.rtp.documentation.summary':
+    'RTP (RFC 3550), gerçek zamanlı ses/video/simülasyon verisini payload-type kimliği, sıra numarası, zaman damgası ve SSRC ile taşır. Genellikle UDP üzerinde çalışır ama bu sayfa tek bir RTP paketini çözer — UDP sarmalayıcısı ayrı bir sayfadır.',
+  'protocol.rtp.example.basicAudio.name': 'Temel ses akışı (PCMU)',
+  'protocol.rtp.example.basicAudio.description':
+    'CC=0, X=0, P=0, Payload Type 0 (PCMU) — RFC 3551 sabit tablosundan bilinen bir codec.',
+  'protocol.rtp.example.videoMarkerCsrc.name': 'Video, Marker ve iki CSRC (mixer)',
+  'protocol.rtp.example.videoMarkerCsrc.description':
+    'Marker biti kare sonunu işaretler, iki katkı kaynağı bir mixer senaryosunu gösterir; Payload Type 96 dinamik olduğu için codec adı ÇÖZÜLMEZ.',
+  'protocol.rtp.example.extensionAndPadding.name': 'Header Extension ve dolgu',
+  'protocol.rtp.example.extensionAndPadding.description':
+    'RFC 8285 profil imzası (0xBEDE) taşıyan bir header extension ile birlikte, son baytı kendini de sayan 3 baytlık dolgu.',
+  'protocol.rtp.example.invalidPaddingCount.name': 'Geçersiz dolgu sayısı',
+  'protocol.rtp.example.invalidPaddingCount.description':
+    'Padding biti set ama son bayt kalan alandan büyük bir dolgu sayısı bildiriyor — RFC 3550 §5.1 ihlali.',
+
+  'protocol.rtcp.error.headerTruncated': 'Çerçeve 4 baytlık ortak başlık kadar bile uzun değil.',
+  'protocol.rtcp.error.lengthTruncated':
+    'Alt paketin Length alanı tamponun dışına taşıyor; bir sonraki alt paketin nerede başladığı bilinemiyor.',
+  'protocol.rtcp.error.bodyTruncated':
+    'Alt paketin gövdesi (rapor bloğu/chunk/kaynak listesi) Length alanının sınırladığı alana sığmıyor.',
+  'protocol.rtcp.error.paddingInvalid':
+    'Son bayttaki dolgu sayısı (kendisi dâhil) sıfır ya da kalan alandan büyük.',
+  'protocol.rtcp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.rtcp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.rtcp.warning.versionUnexpected':
+    'Version alanı 2 değil; RTCP her zaman versiyon 2 kullanır.',
+  'protocol.rtcp.warning.unknownPacketType':
+    'Packet Type, RFC 3550’nin beş temel türünde (SR/RR/SDES/BYE/APP) yok; gövde ham gösterildi.',
+  'protocol.rtcp.warning.compoundMustStartWithReport':
+    'Compound RTCP paketi SR ya da RR ile başlamalıdır (RFC 3550 §6.1); bu paket öyle başlamıyor.',
+  'protocol.rtcp.warning.paddingNotLast':
+    'Padding biti compound paketin son alt paketi OLMAYAN bir pakette set; RFC 3550 §6.1 dolguyu yalnız son pakette geçerli sayar.',
+  'protocol.rtcp.documentation.summary':
+    'RTCP (RFC 3550), bir RTP oturumunun teslim kalitesini ve katılımcı bilgisini raporlayan kontrol kanalıdır. Girdi tek bir mesaj değil, en az SR ya da RR ile başlayan compound bir paket dizisidir; her alt paket kendi Length alanıyla çerçevelenir.',
+  'protocol.rtcp.example.srWithOneReportBlock.name': 'Sender Report + tek rapor bloğu',
+  'protocol.rtcp.example.srWithOneReportBlock.description':
+    'SSRC, NTP/RTP zaman damgaları, gönderici sayaçları ve tek bir alıcı rapor bloğu (Fraction Lost, Cumulative Lost, Jitter, LSR, DLSR).',
+  'protocol.rtcp.example.compoundRrSdes.name': 'Compound: RR + SDES',
+  'protocol.rtcp.example.compoundRrSdes.description':
+    'RFC 3550 §6.1’in istediği asgari compound biçimi — Receiver Report’un ardından tek bir CNAME item’ı taşıyan SDES paketi.',
+  'protocol.rtcp.example.byeWithReason.name': 'BYE, sebep metniyle',
+  'protocol.rtcp.example.byeWithReason.description':
+    'Oturumdan ayrılan SSRC ile birlikte kısa bir "bye" sebep metni.',
+  'protocol.rtcp.example.unknownPacketType.name': 'Tanınmayan Packet Type',
+  'protocol.rtcp.example.unknownPacketType.description':
+    'Packet Type 210 — RFC 3550’nin beş temel türünde yok; gövde ham gösterilip uyarı basılır, çerçeve yine geçerli sayılır.',
+  'protocol.rtcp.example.lengthExceedsBuffer.name': 'Length tampon dışına taşıyor',
+  'protocol.rtcp.example.lengthExceedsBuffer.description':
+    'RR paketi 24 bayt olduğunu iddia ediyor ama tamponda yalnız 8 bayt var — bir sonraki alt paketin başlangıcı bilinemediği için FATAL hata.',
 } as const;
 
 /**

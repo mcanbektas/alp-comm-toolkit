@@ -199,6 +199,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mqtt-sn', () =>
     import('./network/mqtt/mqttSn').then((module) => module.mqttSnPlugin),
   );
+  // RTP/RTCP — dalga 12g: `real-time-media` ailesi kapanır. RTCP'nin SR'si
+  // `ntp.ts`teki 64-bit NTP damgasını (`ntpTimestamp.ts`) GERÇEKTEN paylaşır —
+  // dalga 12b/12d'nin yanlış çıkan öngörülerinin tersi, gerçek bir kaldıraç.
+  registerOnce(registry, 'rtp', () => import('./network/rtp/rtp').then((module) => module.rtpPlugin));
+  registerOnce(registry, 'rtcp', () =>
+    import('./network/rtp/rtcp').then((module) => module.rtcpPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>

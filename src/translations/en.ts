@@ -4782,4 +4782,66 @@ export const en: TranslationDictionary = {
   'protocol.cmosUart.example.singleCharacter.name': 'Single character (line view)',
   'protocol.cmosUart.example.singleCharacter.description':
     "0x41 = 'A' — the simplest possible line: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+
+  // --- RTP / RTCP (phase 10 wave 12g) ---
+  'protocol.rtp.error.headerTruncated': 'The frame is shorter than the 12-byte fixed header.',
+  'protocol.rtp.error.csrcTruncated':
+    'The contributing-source list declared by CSRC Count is missing from the buffer.',
+  'protocol.rtp.error.extensionTruncated':
+    'The length declared by Header Extension is missing from the buffer.',
+  'protocol.rtp.error.paddingInvalid':
+    'The padding count in the last byte (counting itself) is zero or exceeds the remaining space.',
+  'protocol.rtp.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.rtp.error.aborted': 'Parsing was cancelled.',
+  'protocol.rtp.warning.versionUnexpected': 'Version is not 2; RTP always uses version 2.',
+  'protocol.rtp.warning.payloadTypeUnresolved':
+    'Payload Type is not in the static table; the codec can only be resolved with SDP/profile information, which was not guessed here.',
+  'protocol.rtp.documentation.summary':
+    'RTP (RFC 3550) carries real-time audio/video/simulation data with payload-type identification, sequence numbering, timestamps and an SSRC. It typically rides over UDP, but this page decodes a single RTP packet — the UDP wrapper is a separate page.',
+  'protocol.rtp.example.basicAudio.name': 'Basic audio stream (PCMU)',
+  'protocol.rtp.example.basicAudio.description':
+    'CC=0, X=0, P=0, Payload Type 0 (PCMU) — a codec known from the RFC 3551 static table.',
+  'protocol.rtp.example.videoMarkerCsrc.name': 'Video, marker and two CSRCs (mixer)',
+  'protocol.rtp.example.videoMarkerCsrc.description':
+    'The marker bit flags a frame boundary and two contributing sources show a mixer scenario; Payload Type 96 is dynamic, so the codec name is NOT resolved.',
+  'protocol.rtp.example.extensionAndPadding.name': 'Header extension and padding',
+  'protocol.rtp.example.extensionAndPadding.description':
+    'A header extension carrying the RFC 8285 profile signature (0xBEDE), followed by 3 bytes of padding whose last byte counts itself.',
+  'protocol.rtp.example.invalidPaddingCount.name': 'Invalid padding count',
+  'protocol.rtp.example.invalidPaddingCount.description':
+    'The padding bit is set but the last byte declares a padding count larger than the remaining space — a violation of RFC 3550 §5.1.',
+
+  'protocol.rtcp.error.headerTruncated': 'The frame is shorter than the 4-byte common header.',
+  'protocol.rtcp.error.lengthTruncated':
+    "A sub-packet's Length field runs past the end of the buffer; where the next sub-packet starts cannot be known.",
+  'protocol.rtcp.error.bodyTruncated':
+    "A sub-packet's body (report block / chunk / source list) does not fit within the region bounded by its Length field.",
+  'protocol.rtcp.error.paddingInvalid':
+    'The padding count in the last byte (counting itself) is zero or exceeds the remaining space.',
+  'protocol.rtcp.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.rtcp.error.aborted': 'Parsing was cancelled.',
+  'protocol.rtcp.warning.versionUnexpected': 'Version is not 2; RTCP always uses version 2.',
+  'protocol.rtcp.warning.unknownPacketType':
+    "Packet Type is not one of RFC 3550's five core types (SR/RR/SDES/BYE/APP); the body is shown raw.",
+  'protocol.rtcp.warning.compoundMustStartWithReport':
+    'A compound RTCP packet must start with SR or RR (RFC 3550 §6.1); this one does not.',
+  'protocol.rtcp.warning.paddingNotLast':
+    'The padding bit is set on a sub-packet that is NOT the last one in the compound packet; RFC 3550 §6.1 only allows padding on the last sub-packet.',
+  'protocol.rtcp.documentation.summary':
+    'RTCP (RFC 3550) is the control channel that reports delivery quality and participant information for an RTP session. The input is not a single message but a compound packet of at least an SR or RR followed by others; each sub-packet is framed by its own Length field.',
+  'protocol.rtcp.example.srWithOneReportBlock.name': 'Sender Report + one report block',
+  'protocol.rtcp.example.srWithOneReportBlock.description':
+    'SSRC, NTP/RTP timestamps, sender counters, and a single receiver report block (Fraction Lost, Cumulative Lost, Jitter, LSR, DLSR).',
+  'protocol.rtcp.example.compoundRrSdes.name': 'Compound: RR + SDES',
+  'protocol.rtcp.example.compoundRrSdes.description':
+    'The minimal compound shape RFC 3550 §6.1 requires — a Receiver Report followed by an SDES packet carrying a single CNAME item.',
+  'protocol.rtcp.example.byeWithReason.name': 'BYE with a reason',
+  'protocol.rtcp.example.byeWithReason.description':
+    'The departing SSRC together with a short "bye" reason string.',
+  'protocol.rtcp.example.unknownPacketType.name': 'Unknown Packet Type',
+  'protocol.rtcp.example.unknownPacketType.description':
+    "Packet Type 210 — not one of RFC 3550's five core types; the body is shown raw with a warning, but the frame is still valid.",
+  'protocol.rtcp.example.lengthExceedsBuffer.name': 'Length runs past the buffer',
+  'protocol.rtcp.example.lengthExceedsBuffer.description':
+    "The RR packet claims to be 24 bytes but the buffer only has 8 — a FATAL error, since the next sub-packet's start cannot be determined.",
 };
