@@ -427,4 +427,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'octal-spi', () =>
     import('./serial/peripheral-buses/octalSpi').then((module) => module.octalSpiPlugin),
   );
+  // I²C — Faz 10 dalga 11c: 4 transaction şekli (address-only/write/read/
+  // repeated-start register-read, spec'in ana örneğine sadık). CPOL/CPHA gibi
+  // `timing/i2c.ts`taki transfer süresi/7-bit encode/rise-time (Faz 5) zaten
+  // vardı, motor tekrar yazılmadı. ACK/NACK/10-bit addressing KAPSAM DIŞI
+  // (i2c.ts dosya başı notu); `'live'` tab katalogdan çıkarıldı (connection/
+  // yalnız serial+mock, I2C köprü cihazı yok).
+  registerOnce(registry, 'i2c', () =>
+    import('./serial/peripheral-buses/i2c').then((module) => module.i2cPlugin),
+  );
 }

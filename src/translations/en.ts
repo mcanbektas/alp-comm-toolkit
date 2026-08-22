@@ -3796,4 +3796,26 @@ export const en: TranslationDictionary = {
   'protocol.octalSpi.example.commandOnly.name': 'Command only (no address)',
   'protocol.octalSpi.example.commandOnly.description':
     'An addressless command example, like Write Enable — the Address and Data fields never appear.',
+
+  // --- I²C (phase 10 wave 11c) ---
+  'protocol.i2c.error.emptyFrame': 'The buffer must contain at least 1 byte (Address).',
+  'protocol.i2c.error.aborted': 'Parsing was cancelled.',
+  'protocol.i2c.summary.probe': 'Bus Probe {address}',
+  'protocol.i2c.summary.write': 'Write {address} · Register {register}',
+  'protocol.i2c.summary.read': 'Read {address}',
+  'protocol.i2c.summary.registerRead': 'Register Read {address} · Register {register}',
+  'protocol.i2c.documentation.summary':
+    "Decodes four transaction shapes by looking at the first byte's R/W bit and, when present, whether the third byte repeats the same address with the R/W bit flipped to read: address-only (bus probe), Address+Register+Data (write), Address+Data with no repeated start (read), and Address+Register+repeated-START Address+Data (the spec summary's main example). ACK/NACK, clock stretching and arbitration are bit-level electrical signals and never appear in the decoded bytes. The transfer-time/7-bit-address/pull-up calculator (Timing tab) already existed in a separate engine.",
+  'protocol.i2c.example.registerRead.name': 'Register read (spec main example, repeated START)',
+  'protocol.i2c.example.registerRead.description':
+    'Address 0x68 write (0xD0), Register 0x75, repeated START then Address 0x68 read (0xD1), returned value 0x71.',
+  'protocol.i2c.example.registerWrite.name': 'Register write',
+  'protocol.i2c.example.registerWrite.description':
+    'Symmetric with the register-read example: no repeated start, the written value follows the register directly.',
+  'protocol.i2c.example.readOnly.name': 'Direct read (no repeated START)',
+  'protocol.i2c.example.readOnly.description':
+    'Starts directly with Address 0x68 read (0xD1) — no register concept, similar to an SMBus Receive Byte.',
+  'protocol.i2c.example.busProbe.name': 'Bus scan (address only)',
+  'protocol.i2c.example.busProbe.description':
+    "Just the Address byte (0x1E write) — a present/absent probe, the spec summary's magnetometer example.",
 };

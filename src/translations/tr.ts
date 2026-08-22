@@ -3784,6 +3784,28 @@ export const tr = {
   'protocol.octalSpi.example.commandOnly.name': 'Yalnız komut (adressiz)',
   'protocol.octalSpi.example.commandOnly.description':
     'Write Enable gibi adres taşımayan bir komut örneği — Address ve Data alanı hiç görünmez.',
+
+  // --- I²C (faz 10 dalga 11c) ---
+  'protocol.i2c.error.emptyFrame': 'Arabellek en az 1 bayt (Address) içermeli.',
+  'protocol.i2c.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.i2c.summary.probe': 'Bus Probe {address}',
+  'protocol.i2c.summary.write': 'Write {address} · Register {register}',
+  'protocol.i2c.summary.read': 'Read {address}',
+  'protocol.i2c.summary.registerRead': 'Register Read {address} · Register {register}',
+  'protocol.i2c.documentation.summary':
+    'İlk baytın R/W bitine ve (varsa) üçüncü baytın adres+R/W eşleşmesine bakılarak dört transaction şekli çözülür: yalnız adres (bus probe), Address+Register+Data (write), Address+Data (repeated-start olmadan read) ve Address+Register+Repeated START Address+Data (spec özetinin ana örneği). ACK/NACK, clock stretching ve arbitration bit-seviyeli elektriksel sinyallerdir, decode baytlarında görünmez. Transfer süresi/7-bit adres kodlama/pull-up hesaplayıcısı (Zamanlama sekmesi) ayrı bir motorda zaten hazırdı.',
+  'protocol.i2c.example.registerRead.name': 'Register okuma (spec ana örneği, repeated START)',
+  'protocol.i2c.example.registerRead.description':
+    'Address 0x68 yazma (0xD0), Register 0x75, Repeated START ile Address 0x68 okuma (0xD1), dönen değer 0x71.',
+  'protocol.i2c.example.registerWrite.name': 'Register yazma',
+  'protocol.i2c.example.registerWrite.description':
+    'Register okuma örneğiyle simetrik: repeated START yok, register sonrası yazılan değer doğrudan gelir.',
+  'protocol.i2c.example.readOnly.name': 'Doğrudan okuma (repeated START yok)',
+  'protocol.i2c.example.readOnly.description':
+    'Address 0x68 okuma (0xD1) ile doğrudan başlar — register kavramı yok, SMBus Receive Byte tarzına benzer.',
+  'protocol.i2c.example.busProbe.name': 'Bus tarama (yalnız adres)',
+  'protocol.i2c.example.busProbe.description':
+    'Yalnız Address baytı (0x1E yazma) — cihaz var/yok kontrolü, spec özetinin magnetometer örneği.',
 } as const;
 
 /**

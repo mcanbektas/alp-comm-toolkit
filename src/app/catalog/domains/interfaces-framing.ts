@@ -318,8 +318,10 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Two-wire open-drain addressed bus between a controller and multiple targets, where START/STOP conditions, the ACK bit and pull-up sizing govern every register transaction.',
           layer: 'physical',
-          status: 'planned',
-          tabs: ['overview', 'live', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
+          status: 'ready',
+          pluginId: 'i2c',
+          calculatorIds: ['i2c-timing'],
+          tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Signal View',
             'START/STOP Detector',
