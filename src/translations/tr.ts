@@ -2828,6 +2828,64 @@ export const tr = {
   'protocol.tcp.example.truncatedOptions.description':
     'Data Offset=8 (32 bayt bildiriyor) ama tamponda yalnız 24 bayt var — truncated-frame basar.',
 
+  // --- ICMP ---
+  'protocol.icmp.error.frameTooShort': 'Çerçeve en az 8 baytlık ortak ICMP başlığı kadar uzun olmalı.',
+  'protocol.icmp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.icmp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.icmp.error.checksumMismatch': 'Checksum hesaplanan değerle uyuşmuyor.',
+  'protocol.icmp.warning.unknownType':
+    'Type dar kümenin (Echo Reply/Request, Destination Unreachable, Time Exceeded) dışında — gövde çözülmez.',
+  'protocol.icmp.warning.unknownCode': 'Code, bu Type için bilinen değerler kümesinde değil.',
+  'protocol.icmp.documentation.summary':
+    'IPv4 üzerinde kontrol ve hata bildirimi — ping/traceroute\'un temeli. Echo, Destination Unreachable ve Time Exceeded mesajları alan alana çözülür; eşleştirme/RTT/hop analizi ayrı bir araçtır.',
+  'protocol.icmp.example.echoRequest.name': 'Echo Request (ping)',
+  'protocol.icmp.example.echoRequest.description':
+    'Type=8, Code=0, Identifier/Sequence=1, 4 baytlık veri — checksum bağımsız hesaplandı.',
+  'protocol.icmp.example.echoReply.name': 'Echo Reply (ping yanıtı)',
+  'protocol.icmp.example.echoReply.description':
+    'Type=0, Code=0, Echo Request ile aynı Identifier/Sequence/veri — checksum bağımsız hesaplandı.',
+  'protocol.icmp.example.destinationUnreachablePort.name': 'Destination Unreachable — Port Unreachable',
+  'protocol.icmp.example.destinationUnreachablePort.description':
+    'Type=3, Code=3, original datagram olarak kısmi bir IPv4 başlığı taşır.',
+  'protocol.icmp.example.timeExceededTtl.name': 'Time Exceeded — TTL Exceeded in Transit',
+  'protocol.icmp.example.timeExceededTtl.description':
+    'Type=11, Code=0 — traceroute\'un temelindeki mesaj.',
+  'protocol.icmp.example.checksumFail.name': 'Bozuk checksum (hata yolu)',
+  'protocol.icmp.example.checksumFail.description':
+    'Checksum alanı bilerek 0x0000 yazıldı — checksum-mismatch basar.',
+  'protocol.icmp.example.unknownType.name': 'Tanınmayan Type',
+  'protocol.icmp.example.unknownType.description':
+    'Type=30, dar kümenin dışında — gövde çözülmeden ham gösterilir.',
+
+  // --- ICMPv6 ---
+  'protocol.icmpv6.error.frameTooShort': 'Çerçeve en az 8 baytlık ortak ICMPv6 başlığı kadar uzun olmalı.',
+  'protocol.icmpv6.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.icmpv6.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.icmpv6.warning.unknownType':
+    'Type, RFC 4443 çekirdeği ve Neighbor Discovery ailesinin dışında — gövde çözülmez.',
+  'protocol.icmpv6.warning.unknownCode': 'Code, bu Type için bilinen değerler kümesinde değil.',
+  'protocol.icmpv6.warning.neighborDiscoveryDeferred':
+    'Neighbor Discovery mesajı (RFC 4861) — Type adlandırılır ama alan alana çözümü ayrı bir iş; gövde ham gösterilir.',
+  'protocol.icmpv6.warning.checksumNeedsPseudoHeader':
+    'Checksum IPv6 pseudo-header (kaynak/hedef adres) ister — tek başına doğrulanamaz, ham gösterilir.',
+  'protocol.icmpv6.documentation.summary':
+    'IPv6 üzerinde kontrol ve hata bildirimi (Next Header 58). Destination Unreachable, Packet Too Big, Time Exceeded, Parameter Problem ve Echo alan alana çözülür; Neighbor Discovery ailesi adlandırılır, gövdesi ayrı bir işte çözülecek.',
+  'protocol.icmpv6.example.echoRequest.name': 'Echo Request (ping)',
+  'protocol.icmpv6.example.echoRequest.description':
+    'Type=128, Code=0, Identifier/Sequence=1, 4 baytlık veri.',
+  'protocol.icmpv6.example.packetTooBig.name': 'Packet Too Big — Path MTU Discovery',
+  'protocol.icmpv6.example.packetTooBig.description':
+    'Type=2, MTU=1280 (IPv6\'nın asgari zorunlu MTU\'su) — PMTUD\'nin klasik örneği.',
+  'protocol.icmpv6.example.destinationUnreachablePort.name': 'Destination Unreachable — Port Unreachable',
+  'protocol.icmpv6.example.destinationUnreachablePort.description':
+    'Type=1, Code=4, invoking packet olarak kısmi bir IPv6 başlığı taşır.',
+  'protocol.icmpv6.example.routerSolicitationDeferred.name': 'Router Solicitation (Neighbor Discovery, ertelendi)',
+  'protocol.icmpv6.example.routerSolicitationDeferred.description':
+    'Type=133 adlandırılır ama gövdesi bu motorda çözülmez — ayrı bir işin kapsamı.',
+  'protocol.icmpv6.example.unknownType.name': 'Tanınmayan Type',
+  'protocol.icmpv6.example.unknownType.description':
+    'Type=200, dar kümenin dışında — gövde çözülmeden ham gösterilir.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

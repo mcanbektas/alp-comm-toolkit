@@ -2825,6 +2825,63 @@ export const en: TranslationDictionary = {
   'protocol.tcp.example.truncatedOptions.description':
     'Data Offset=8 declares 32 bytes but only 24 bytes are in the buffer — reports truncated-frame.',
 
+  // --- ICMP ---
+  'protocol.icmp.error.frameTooShort': 'The frame must be at least as long as the 8-byte common ICMP header.',
+  'protocol.icmp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.icmp.error.aborted': 'Parsing was aborted.',
+  'protocol.icmp.error.checksumMismatch': 'The checksum does not match the computed value.',
+  'protocol.icmp.warning.unknownType':
+    'Type is outside the narrow set (Echo Reply/Request, Destination Unreachable, Time Exceeded) — the body is not decoded.',
+  'protocol.icmp.warning.unknownCode': 'Code is not in the set of known values for this Type.',
+  'protocol.icmp.documentation.summary':
+    'Control and error reporting over IPv4 — the foundation of ping/traceroute. Echo, Destination Unreachable and Time Exceeded messages are decoded field by field; matching/RTT/hop analysis is a separate tool.',
+  'protocol.icmp.example.echoRequest.name': 'Echo Request (ping)',
+  'protocol.icmp.example.echoRequest.description':
+    'Type=8, Code=0, Identifier/Sequence=1, 4 bytes of data — checksum computed independently.',
+  'protocol.icmp.example.echoReply.name': 'Echo Reply (ping response)',
+  'protocol.icmp.example.echoReply.description':
+    'Type=0, Code=0, same Identifier/Sequence/data as the Echo Request — checksum computed independently.',
+  'protocol.icmp.example.destinationUnreachablePort.name': 'Destination Unreachable — Port Unreachable',
+  'protocol.icmp.example.destinationUnreachablePort.description':
+    'Type=3, Code=3, carries a partial IPv4 header as the original datagram.',
+  'protocol.icmp.example.timeExceededTtl.name': 'Time Exceeded — TTL Exceeded in Transit',
+  'protocol.icmp.example.timeExceededTtl.description': 'Type=11, Code=0 — the message behind traceroute.',
+  'protocol.icmp.example.checksumFail.name': 'Broken checksum (error path)',
+  'protocol.icmp.example.checksumFail.description':
+    'The checksum field is deliberately set to 0x0000 — reports checksum-mismatch.',
+  'protocol.icmp.example.unknownType.name': 'Unrecognized Type',
+  'protocol.icmp.example.unknownType.description':
+    'Type=30, outside the narrow set — the body is shown raw, undecoded.',
+
+  // --- ICMPv6 ---
+  'protocol.icmpv6.error.frameTooShort': 'The frame must be at least as long as the 8-byte common ICMPv6 header.',
+  'protocol.icmpv6.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.icmpv6.error.aborted': 'Parsing was aborted.',
+  'protocol.icmpv6.warning.unknownType':
+    'Type is outside the RFC 4443 core set and the Neighbor Discovery family — the body is not decoded.',
+  'protocol.icmpv6.warning.unknownCode': 'Code is not in the set of known values for this Type.',
+  'protocol.icmpv6.warning.neighborDiscoveryDeferred':
+    'A Neighbor Discovery message (RFC 4861) — the Type is named but field-by-field decoding is separate work; the body is shown raw.',
+  'protocol.icmpv6.warning.checksumNeedsPseudoHeader':
+    'The checksum requires the IPv6 pseudo-header (source/destination address) — it cannot be verified on its own and is shown raw.',
+  'protocol.icmpv6.documentation.summary':
+    'Control and error reporting over IPv6 (Next Header 58). Destination Unreachable, Packet Too Big, Time Exceeded, Parameter Problem and Echo are decoded field by field; the Neighbor Discovery family is named, its body to be decoded in a separate pass.',
+  'protocol.icmpv6.example.echoRequest.name': 'Echo Request (ping)',
+  'protocol.icmpv6.example.echoRequest.description':
+    'Type=128, Code=0, Identifier/Sequence=1, 4 bytes of data.',
+  'protocol.icmpv6.example.packetTooBig.name': 'Packet Too Big — Path MTU Discovery',
+  'protocol.icmpv6.example.packetTooBig.description':
+    "Type=2, MTU=1280 (IPv6's minimum mandatory MTU) — the classic PMTUD example.",
+  'protocol.icmpv6.example.destinationUnreachablePort.name': 'Destination Unreachable — Port Unreachable',
+  'protocol.icmpv6.example.destinationUnreachablePort.description':
+    'Type=1, Code=4, carries a partial IPv6 header as the invoking packet.',
+  'protocol.icmpv6.example.routerSolicitationDeferred.name': 'Router Solicitation (Neighbor Discovery, deferred)',
+  'protocol.icmpv6.example.routerSolicitationDeferred.description':
+    "Type=133 is named but its body is not decoded by this engine — separate work's scope.",
+  'protocol.icmpv6.example.unknownType.name': 'Unrecognized Type',
+  'protocol.icmpv6.example.unknownType.description':
+    'Type=200, outside the narrow set — the body is shown raw, undecoded.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',

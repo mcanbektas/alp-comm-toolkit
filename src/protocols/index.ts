@@ -129,6 +129,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'tcp', () =>
     import('./network/transport/tcp').then((module) => module.tcpPlugin),
   );
+  // ICMP/ICMPv6 — dalga 12a: ipv4.ts/ipv6.ts'in PROTOCOL_NAMES/UPPER_LAYER_NAMES
+  // tablolarında zaten adlandırılan üst katman, kendi motoruna kavuştu.
+  registerOnce(registry, 'icmp', () =>
+    import('./network/icmp/icmp').then((module) => module.icmpPlugin),
+  );
+  registerOnce(registry, 'icmpv6', () =>
+    import('./network/icmp/icmpv6').then((module) => module.icmpv6Plugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>

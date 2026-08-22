@@ -209,7 +209,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The IPv4 control and error-reporting protocol behind ping and traceroute, carrying echo, unreachable and time-exceeded messages.',
           layer: 'network',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'icmp',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Type / Code Decoder',
@@ -234,7 +235,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The IPv6 control protocol (Next Header 58) that adds Packet Too Big for Path MTU Discovery and carries the Neighbor Discovery message family.',
           layer: 'network',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'icmpv6',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Type / Code Decoder',
