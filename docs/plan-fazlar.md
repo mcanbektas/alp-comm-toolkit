@@ -102,8 +102,17 @@ klasik TLV8 biçimiyle AYNI DEĞİL; 12a'nın "12c'nin DHCP option'ları aynıs�
 isteyecek" varsayımı bit düzeyinde YANLIŞ çıktı, `protocol-core/decoding`'e
 paylaşılan bir modül AÇILMADI. Organizationally Specific TLV'ler OUI/Subtype
 düzeyinde bırakıldı, vendor adı çözümü `definitions:['vendor-map']` kanalının
-işi (henüz yok). Sıradaki: **12c dns/mdns/dhcp** — DHCP'nin option TLV'si
-KENDİ (klasik TLV8) yürüyücüsünü ister, LLDP'ninkini miras almaz.
+işi (henüz yok).
+
+**12c (2026-08-22 bitti, `51338f4`) — dhcp + dns + mdns.** `addressing-
+discovery` ailesi kapandı. `dnsWire.ts` (RFC 1035) `dns.ts` VE `mdns.ts`
+tarafından PAYLAŞILDI — bu ikisi 12b'nin LLDP/DHCP durumunun TERSİ: mDNS
+gerçekten DNS'in aynı telini okur (spec:715), tek fark CLASS alanının üst
+biti (`variant:'dns'|'mdns'`). İsim sıkıştırması ziyaret edilen pointer
+offset'leriyle döngü korumalı çözüldü. DHCP'nin TLV8 option yürüyücüsü
+BİLEREK ayrı yazıldı (LLDP'ninkiyle PAYLAŞILMADI — 12b'nin düzeltmesinin
+doğrulanmış devamı). Sıradaki: **12d ntp/ptp** (Opus·high — PTP saat
+modelinde görünmez değişmezler).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
