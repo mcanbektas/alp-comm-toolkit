@@ -99,7 +99,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The broadcast request/reply exchange that resolves an IPv4 address to a MAC address on the local link.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'arp',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Request / Reply Decoder',
@@ -120,7 +121,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A periodic TLV advertisement by which adjacent switches, PLCs and cameras announce their identity, enabling topology discovery from a capture.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'lldp',
           tabs: [
             'overview',
             'decode',

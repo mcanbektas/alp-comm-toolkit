@@ -2886,6 +2886,59 @@ export const tr = {
   'protocol.icmpv6.example.unknownType.description':
     'Type=200, dar kümenin dışında — gövde çözülmeden ham gösterilir.',
 
+  // --- ARP ---
+  'protocol.arp.error.frameTooShort': 'Çerçeve en az 8 baytlık sabit ARP başlığı kadar uzun olmalı.',
+  'protocol.arp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.arp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.arp.error.addressesTruncated':
+    'Hardware/Protocol Length alanlarının bildirdiği toplam uzunluk tampondan büyük.',
+  'protocol.arp.warning.unknownOperation':
+    'Operation dar kümenin (Request/Reply) dışında.',
+  'protocol.arp.documentation.summary':
+    'IPv4 adresini yerel bağlantıdaki MAC adresine çözen broadcast request/reply akışı. Adres uzunlukları telden okunur, sabitlenmez; IP↔MAC tablosu ve conflict detector ayrı bir araçtır.',
+  'protocol.arp.example.request.name': 'ARP Request',
+  'protocol.arp.example.request.description':
+    'Spec\'in "Who has 192.168.1.20? Tell 192.168.1.10" örneği — Target Hardware Address sıfır (henüz bilinmiyor).',
+  'protocol.arp.example.reply.name': 'ARP Reply',
+  'protocol.arp.example.reply.description':
+    '"192.168.1.20 is at AA:BB:CC:DD:EE:FF" — Sender/Target rolleri Request\'e göre ters döner.',
+  'protocol.arp.example.padded.name': 'Ethernet dolgusuyla (Padding)',
+  'protocol.arp.example.padded.description':
+    'Ethernet asgari 64 baytlık çerçeve kuralı 28 baytlık ARP\'a 32 bayt dolgu ekletir — hata değil, saha gerçeği.',
+  'protocol.arp.example.unknownOperation.name': 'Tanınmayan Operation',
+  'protocol.arp.example.unknownOperation.description':
+    'Operation=5, dar kümenin (Request/Reply) dışında — HATA değil UYARI basar.',
+
+  // --- LLDP ---
+  'protocol.lldp.error.frameTooShort': 'Çerçeve en az bir TLV başlığı (2 bayt) kadar uzun olmalı.',
+  'protocol.lldp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.lldp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.lldp.error.tlvTruncated':
+    'Bir TLV\'nin bildirdiği uzunluk tampondan büyük — yürüyüş burada durur.',
+  'protocol.lldp.warning.missingEndTlv':
+    'End Of LLDPDU TLV\'si (Type 0) bulunamadı — LLDPDU tamponun sonunda eksik bitmiş olabilir.',
+  'protocol.lldp.warning.endTlvLengthNotZero':
+    'End Of LLDPDU TLV\'sinin Length alanı 0 olmalı.',
+  'protocol.lldp.warning.unrecognizedTlvType':
+    'TLV türü bilinen kümenin (Chassis/Port ID, TTL, açıklamalar, Capabilities, Management Address, Organizationally Specific) dışında — ham gösterilir.',
+  'protocol.lldp.documentation.summary':
+    'Komşu cihazların kimlik/topoloji bilgisini TLV dizisi olarak duyurduğu protokol (IEEE 802.1AB). Zorunlu TLV\'ler (Chassis ID, Port ID, TTL) ve isteğe bağlı olanların çoğu alan alana çözülür; Organizationally Specific TLV\'ler OUI/Subtype düzeyinde bırakılır, vendor adı çözümü ayrı bir tanım kaynağıdır.',
+  'protocol.lldp.example.switchNeighbor.name': 'Switch komşuluğu (Chassis/Port ID + Capabilities)',
+  'protocol.lldp.example.switchNeighbor.description':
+    'Chassis ID (MAC) + Port ID (arayüz adı) + TTL 120s + System Name + System Capabilities (Bridge/Router duyurulur, yalnız Bridge etkin).',
+  'protocol.lldp.example.managementAddressIpv4.name': 'Management Address (IPv4)',
+  'protocol.lldp.example.managementAddressIpv4.description':
+    'Address Subtype=IPv4, adres 192.168.1.1, Interface Number=1.',
+  'protocol.lldp.example.organizationallySpecific.name': 'Organizationally Specific TLV',
+  'protocol.lldp.example.organizationallySpecific.description':
+    'OUI/Subtype ayrıştırılır, veri ham bırakılır — vendor adı çözümü katalogdaki tanım kaynağının işi.',
+  'protocol.lldp.example.missingEndTlv.name': 'End TLV eksik (uyarı yolu)',
+  'protocol.lldp.example.missingEndTlv.description':
+    'Yalnız TTL TLV\'si var, End Of LLDPDU yok — HATA değil UYARI basar.',
+  'protocol.lldp.example.truncatedTlv.name': 'Kesik TLV (hata yolu)',
+  'protocol.lldp.example.truncatedTlv.description':
+    'TTL TLV\'si 2 bayt bildiriyor ama tamponda yalnız 1 bayt var — truncated-frame basar.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

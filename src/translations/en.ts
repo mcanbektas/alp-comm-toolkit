@@ -2882,6 +2882,57 @@ export const en: TranslationDictionary = {
   'protocol.icmpv6.example.unknownType.description':
     'Type=200, outside the narrow set — the body is shown raw, undecoded.',
 
+  // --- ARP ---
+  'protocol.arp.error.frameTooShort': 'The frame must be at least as long as the 8-byte fixed ARP header.',
+  'protocol.arp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.arp.error.aborted': 'Parsing was aborted.',
+  'protocol.arp.error.addressesTruncated':
+    'The total length declared by the Hardware/Protocol Length fields exceeds the buffer.',
+  'protocol.arp.warning.unknownOperation': 'Operation is outside the narrow set (Request/Reply).',
+  'protocol.arp.documentation.summary':
+    'The broadcast request/reply exchange that resolves an IPv4 address to a MAC address on the local link. Address lengths are read from the wire, not assumed; the IP-to-MAC table and conflict detector are a separate tool.',
+  'protocol.arp.example.request.name': 'ARP Request',
+  'protocol.arp.example.request.description':
+    "The spec's \"Who has 192.168.1.20? Tell 192.168.1.10\" example — Target Hardware Address is zero (not yet known).",
+  'protocol.arp.example.reply.name': 'ARP Reply',
+  'protocol.arp.example.reply.description':
+    '"192.168.1.20 is at AA:BB:CC:DD:EE:FF" — Sender/Target roles are reversed from the Request.',
+  'protocol.arp.example.padded.name': 'With Ethernet padding',
+  'protocol.arp.example.padded.description':
+    "Ethernet's 64-byte minimum frame rule pads the 28-byte ARP message with 32 bytes — not an error, just field reality.",
+  'protocol.arp.example.unknownOperation.name': 'Unrecognized Operation',
+  'protocol.arp.example.unknownOperation.description':
+    'Operation=5, outside the narrow set (Request/Reply) — reports a warning, not an error.',
+
+  // --- LLDP ---
+  'protocol.lldp.error.frameTooShort': 'The frame must be at least as long as one TLV header (2 bytes).',
+  'protocol.lldp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.lldp.error.aborted': 'Parsing was aborted.',
+  'protocol.lldp.error.tlvTruncated':
+    "A TLV's declared length exceeds the buffer — the walk stops here.",
+  'protocol.lldp.warning.missingEndTlv':
+    'No End Of LLDPDU TLV (Type 0) was found — the LLDPDU may be cut off at the end of the buffer.',
+  'protocol.lldp.warning.endTlvLengthNotZero': "The End Of LLDPDU TLV's Length field must be 0.",
+  'protocol.lldp.warning.unrecognizedTlvType':
+    'The TLV type is outside the known set (Chassis/Port ID, TTL, descriptions, Capabilities, Management Address, Organizationally Specific) — shown raw.',
+  'protocol.lldp.documentation.summary':
+    "The protocol by which adjacent devices advertise identity/topology information as a TLV sequence (IEEE 802.1AB). The mandatory TLVs (Chassis ID, Port ID, TTL) and most optional ones are decoded field by field; Organizationally Specific TLVs are left at the OUI/Subtype level — vendor name resolution is a separate definitions source.",
+  'protocol.lldp.example.switchNeighbor.name': 'Switch neighbor (Chassis/Port ID + Capabilities)',
+  'protocol.lldp.example.switchNeighbor.description':
+    'Chassis ID (MAC) + Port ID (interface name) + TTL 120s + System Name + System Capabilities (Bridge/Router advertised, only Bridge enabled).',
+  'protocol.lldp.example.managementAddressIpv4.name': 'Management Address (IPv4)',
+  'protocol.lldp.example.managementAddressIpv4.description':
+    'Address Subtype=IPv4, address 192.168.1.1, Interface Number=1.',
+  'protocol.lldp.example.organizationallySpecific.name': 'Organizationally Specific TLV',
+  'protocol.lldp.example.organizationallySpecific.description':
+    'OUI/Subtype are parsed out, the data is left raw — vendor name resolution is the job of the catalog definitions source.',
+  'protocol.lldp.example.missingEndTlv.name': 'Missing End TLV (warning path)',
+  'protocol.lldp.example.missingEndTlv.description':
+    'Only a TTL TLV is present, no End Of LLDPDU — reports a warning, not an error.',
+  'protocol.lldp.example.truncatedTlv.name': 'Truncated TLV (error path)',
+  'protocol.lldp.example.truncatedTlv.description':
+    'The TTL TLV declares 2 bytes but only 1 byte is in the buffer — reports truncated-frame.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',

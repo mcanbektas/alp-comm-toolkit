@@ -6,6 +6,7 @@ import { registerBuiltInProtocols } from './index';
 /** `registeredProtocolIds()` ALFABETİK döner; liste o sırayla yazılır. */
 const BUILT_IN_IDS = [
   'ais',
+  'arp',
   'art-net',
   'ascii-protocol',
   'at-commands',
@@ -51,6 +52,7 @@ const BUILT_IN_IDS = [
   'knx',
   'length-based-protocol',
   'lin',
+  'lldp',
   'lorawan',
   'lte-modem-at',
   'm-bus',
@@ -94,6 +96,7 @@ const BUILT_IN_IDS = [
 
 const EXPECTED_CATEGORY: Record<string, string> = {
   ais: 'marine-navigation',
+  arp: 'network-ethernet',
   'art-net': 'building-automation',
   'ascii-protocol': 'interfaces-framing',
   'at-commands': 'interfaces-framing',
@@ -137,6 +140,7 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   kiss: 'interfaces-framing',
   knx: 'building-automation',
   'length-based-protocol': 'interfaces-framing',
+  lldp: 'network-ethernet',
   lin: 'automotive',
   lorawan: 'wireless-iot',
   'lte-modem-at': 'wireless-iot',

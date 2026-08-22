@@ -137,6 +137,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'icmpv6', () =>
     import('./network/icmp/icmpv6').then((module) => module.icmpv6Plugin),
   );
+  // ARP/LLDP — dalga 12b: `data-link` ailesini kapatır. `ethernetFrame.ts`teki
+  // EtherType zinciri (0x0806/0x88CC) zaten buraya işaret ediyordu.
+  registerOnce(registry, 'arp', () =>
+    import('./network/arp/arp').then((module) => module.arpPlugin),
+  );
+  registerOnce(registry, 'lldp', () =>
+    import('./network/lldp/lldp').then((module) => module.lldpPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>
