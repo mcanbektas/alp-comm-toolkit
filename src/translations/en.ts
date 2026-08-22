@@ -3097,6 +3097,99 @@ export const en: TranslationDictionary = {
   'protocol.ptp.example.truncatedBody.name': 'Announce with a missing body (error path)',
   'protocol.ptp.example.truncatedBody.description': 'The header is present, the 30-byte Announce body is not.',
 
+  // --- SNMP ---
+  'protocol.snmp.error.frameTooShort': 'The message must be at least as long as a SEQUENCE header plus a version field.',
+  'protocol.snmp.error.frameTooLong': 'The message exceeds the configured maximum length.',
+  'protocol.snmp.error.aborted': 'Parsing was cancelled.',
+  'protocol.snmp.error.notASequence': 'The outer TLV is not a SEQUENCE — every SNMP message starts with one.',
+  'protocol.snmp.error.ber': 'The BER encoding could not be read; the detail is in the error code.',
+  'protocol.snmp.warning.unknownVersion':
+    'The version field is neither 0 (v1), 1 (v2c) nor 3 (v3). The body was left undecoded because the applicable schema is unknown.',
+  'protocol.snmp.warning.unknownPduType': 'The PDU tag matches none of the nine defined operations.',
+  'protocol.snmp.warning.trapV1Only':
+    'Trap-PDU (0xA4) is defined only in SNMPv1; seeing it in a v2c/v3 message is out of spec.',
+  'protocol.snmp.warning.unknownErrorStatus': 'Error Status is outside the set named by RFC 1157/3416.',
+  'protocol.snmp.warning.unknownGenericTrap': 'Generic Trap is outside the 0-6 range.',
+  'protocol.snmp.warning.communityInClear':
+    'The community string is plain text and is the only authentication in v1/v2c — readable on the wire.',
+  'protocol.snmp.warning.unknownValueTag': 'The VarBind value tag is not in the recognised type set; it is shown raw.',
+  'protocol.snmp.warning.oidNotInTable':
+    'One or more OIDs are absent from the built-in table. Full resolution needs a MIB import (the Definitions channel is still empty).',
+  'protocol.snmp.warning.varbindException':
+    'The VarBind carries a v2c exception (noSuchObject / noSuchInstance / endOfMibView) — no value, only a status.',
+  'protocol.snmp.warning.encryptedScopedPdu':
+    'The ScopedPDU is encrypted. Decoding it needs the USM key, and this tool holds no keys.',
+  'protocol.snmp.warning.unknownSecurityModel':
+    'Security Model is outside 1/2/3; the internal shape of the security parameters is unknown.',
+  'protocol.snmp.warning.varbindLimit': 'The VarBind count hit the upper bound and the list walk stopped.',
+  'protocol.snmp.warning.ipAddressLength': 'IpAddress must be 4 bytes; it was not formatted as an address.',
+  'protocol.snmp.documentation.summary':
+    'The BER-encoded network management protocol (RFC 1157 v1 · RFC 3416 v2c · RFC 3412 v3). Messages are walked TLV by TLV on top of `berReader.ts`; OIDs are unpacked from the X.690 base-128 encoding, Counter32/Gauge32/TimeTicks/Counter64 are read unsigned, and TimeTicks is formatted as hundredths of a second. The v1 Trap-PDU body and the GetBulk non-repeaters/max-repetitions fields are handled separately. In v3 the envelope and USM parameters are decoded while an encrypted ScopedPDU is not. MIB import belongs to the Definitions channel.',
+  'protocol.snmp.example.getRequestV2c.name': 'GetRequest (v2c)',
+  'protocol.snmp.example.getRequestV2c.description': 'A sysUpTime.0 query; the value slot is NULL.',
+  'protocol.snmp.example.responseTimeticks.name': 'Response — TimeTicks',
+  'protocol.snmp.example.responseTimeticks.description':
+    '360,000 ticks is one hour. Read as seconds the raw number would show 100 hours.',
+  'protocol.snmp.example.responseCounter32High.name': 'Response — high Counter32',
+  'protocol.snmp.example.responseCounter32High.description':
+    'Counter32 = 3,000,000,000; read as signed it would come out as −1,294,967,296.',
+  'protocol.snmp.example.getBulkRequest.name': 'GetBulkRequest',
+  'protocol.snmp.example.getBulkRequest.description':
+    'The second and third INTEGERs are not error fields: non-repeaters = 0, max-repetitions = 10.',
+  'protocol.snmp.example.trapV1.name': 'Trap (v1)',
+  'protocol.snmp.example.trapV1.description':
+    'A linkDown trap — its body is enterprise/agent-addr/generic/specific/timestamp and shares no field with the standard PDU.',
+  'protocol.snmp.example.responseNoSuchObject.name': 'Response — noSuchObject',
+  'protocol.snmp.example.responseNoSuchObject.description':
+    'A v2c exception: tag 0x80 with zero length — the information is the tag itself.',
+  'protocol.snmp.example.v3Encrypted.name': 'SNMPv3 — authPriv',
+  'protocol.snmp.example.v3Encrypted.description':
+    'The envelope and USM parameters (Engine ID, user) are read without keys; the ScopedPDU stays encrypted.',
+  'protocol.snmp.example.notASequence.name': 'Non-SEQUENCE input (error path)',
+  'protocol.snmp.example.notASequence.description': 'The outer TLV is an INTEGER — rejected before decoding starts.',
+
+  // --- Syslog ---
+  'protocol.syslog.error.frameTooShort': 'The message must be at least as long as `<0>1`.',
+  'protocol.syslog.error.frameTooLong': 'The message exceeds the configured maximum length.',
+  'protocol.syslog.error.aborted': 'Parsing was cancelled.',
+  'protocol.syslog.error.priMissing': 'The message does not start with `<` — there is no PRI field.',
+  'protocol.syslog.error.priMalformed':
+    'Malformed PRI: it must be 1-3 digits, carry no leading zero (RFC 5424 §6.2.1) and close with `>`.',
+  'protocol.syslog.error.headerTruncated': 'One of the header fields is cut off at the end of the message.',
+  'protocol.syslog.error.structuredDataUnterminated': 'The message ended before a Structured Data element closed.',
+  'protocol.syslog.warning.priOutOfRange':
+    'PRI exceeds 191. The maximum is 23 × 8 + 7; there is no defined Facility above it.',
+  'protocol.syslog.warning.legacyBsdFormat':
+    'The message looks like RFC 3164 (BSD): no version digit and an `Mmm dd hh:mm:ss` timestamp. The RFC 5424 schema was not applied.',
+  'protocol.syslog.warning.unexpectedVersion': 'The VERSION field is not 1; RFC 5424 defines only version 1.',
+  'protocol.syslog.warning.nilValue': 'The field is NILVALUE (`-`): there is no value. A literal dash was not printed.',
+  'protocol.syslog.warning.timestampNotRfc3339': 'The timestamp is not in RFC 3339 form.',
+  'protocol.syslog.warning.msgWithoutBom':
+    'MSG does not start with a byte order mark — per RFC 5424 §6.4 the body encoding is unknown.',
+  'protocol.syslog.warning.severityDashboardNeedsStream':
+    'Severity counts and the errors/minute trend belong to a set of messages; they cannot come from a single one.',
+  'protocol.syslog.warning.structuredDataMalformed':
+    'Structured Data does not follow the `NAME="VALUE"` pattern; the remainder was left undecoded.',
+  'protocol.syslog.documentation.summary':
+    'The transport-independent event message format (RFC 5424). The PRI byte packs facility and severity; header fields may be NILVALUE (`-`), which means the value is absent. Structured Data is split with escape awareness (`\\]` does not end an element). A byte order mark at the start of MSG declares the body as UTF-8. The RFC 3164 (BSD) form is recognised but not decoded, and the severity dashboard is a multi-message job.',
+  'protocol.syslog.example.headerOnly.name': 'Basic header (PRI 34)',
+  'protocol.syslog.example.headerOnly.description': 'Facility 4, Severity 2 (Critical) — the spec example.',
+  'protocol.syslog.example.structuredData.name': 'Structured Data',
+  'protocol.syslog.example.structuredData.description':
+    '`[temperature sensor="1" value="85.2"]` — the SD-ID and both parameters are decoded separately.',
+  'protocol.syslog.example.escapedBracket.name': 'Escaped `]` (the trap)',
+  'protocol.syslog.example.escapedBracket.description':
+    'A `\\]` inside PARAM-VALUE does not end the element; a naive split would cut the message in half.',
+  'protocol.syslog.example.nilValues.name': 'Header full of NILVALUEs',
+  'protocol.syslog.example.nilValues.description': 'All six fields are `-`: no "host named dash" should be shown.',
+  'protocol.syslog.example.utf8Bom.name': 'Message with a UTF-8 BOM',
+  'protocol.syslog.example.utf8Bom.description': 'The body is declared UTF-8 by a byte order mark (§6.4).',
+  'protocol.syslog.example.legacyBsd.name': 'RFC 3164 (BSD) form',
+  'protocol.syslog.example.legacyBsd.description':
+    'No version digit and an `Oct 11 22:14:15` timestamp — recognised, not decoded with the 5424 schema.',
+  'protocol.syslog.example.leadingZeroPri.name': 'PRI with a leading zero (error path)',
+  'protocol.syslog.example.leadingZeroPri.description': '`<034>` — RFC 5424 §6.2.1 forbids leading zeros.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',

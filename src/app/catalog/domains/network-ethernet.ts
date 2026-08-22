@@ -445,7 +445,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The BER-encoded management protocol that reads and writes named object values on switches, UPSs and industrial gateways over GET, SET and TRAP operations.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'snmp',
           tabs: [
             'overview',
             'decode',
@@ -476,7 +477,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The transport-independent event message format whose PRI byte packs facility and severity, used to collect device logs across a plant network.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'syslog',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Message Decoder',

@@ -3102,6 +3102,98 @@ export const tr = {
   'protocol.ptp.example.truncatedBody.name': 'Gövdesi eksik Announce (hata yolu)',
   'protocol.ptp.example.truncatedBody.description': 'Başlık var, 30 baytlık Announce gövdesi yok.',
 
+  // --- SNMP ---
+  'protocol.snmp.error.frameTooShort': 'Çerçeve en az bir SEQUENCE başlığı ve sürüm alanı kadar uzun olmalı.',
+  'protocol.snmp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.snmp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.snmp.error.notASequence': 'Dış TLV bir SEQUENCE değil — her SNMP mesajı SEQUENCE ile başlar.',
+  'protocol.snmp.error.ber': 'BER kodlaması okunamadı; ayrıntı hata kodundadır.',
+  'protocol.snmp.warning.unknownVersion':
+    'Sürüm alanı 0 (v1), 1 (v2c) ya da 3 (v3) değil. Hangi şemanın uygulanacağı bilinmediği için gövde çözülmedi.',
+  'protocol.snmp.warning.unknownPduType': 'PDU etiketi tanımlı dokuz işlemden hiçbiri değil.',
+  'protocol.snmp.warning.trapV1Only':
+    'Trap-PDU (0xA4) yalnız SNMPv1’de tanımlıdır; v2c/v3 mesajında görülmesi spec dışıdır.',
+  'protocol.snmp.warning.unknownErrorStatus': 'Error Status RFC 1157/3416’nın adlandırdığı kümenin dışında.',
+  'protocol.snmp.warning.unknownGenericTrap': 'Generic Trap 0-6 aralığının dışında.',
+  'protocol.snmp.warning.communityInClear':
+    'Community düz metindir ve v1/v2c’de tek kimlik denetimidir — hat üzerinde okunabilir.',
+  'protocol.snmp.warning.unknownValueTag': 'VarBind değerinin etiketi tanınan tipler kümesinde değil; ham gösterildi.',
+  'protocol.snmp.warning.oidNotInTable':
+    'Bir ya da daha çok OID yerleşik tabloda yok. Tam çözüm MIB importunu gerektirir (Tanımlar kanalı henüz boş).',
+  'protocol.snmp.warning.varbindException':
+    'VarBind bir v2c istisnası taşıyor (noSuchObject / noSuchInstance / endOfMibView) — değer yok, durum var.',
+  'protocol.snmp.warning.encryptedScopedPdu':
+    'ScopedPDU şifreli. Çözmek USM anahtarını gerektirir; bu araç anahtar tutmaz.',
+  'protocol.snmp.warning.unknownSecurityModel': 'Security Model 1/2/3 dışında; güvenlik parametrelerinin iç yapısı bilinmiyor.',
+  'protocol.snmp.warning.varbindLimit': 'VarBind sayısı üst sınıra dayandı, liste okunmayı bıraktı.',
+  'protocol.snmp.warning.ipAddressLength': 'IpAddress 4 bayt olmak zorundadır; adres olarak biçimlenmedi.',
+  'protocol.snmp.documentation.summary':
+    'BER kodlu ağ yönetim protokolü (RFC 1157 v1 · RFC 3416 v2c · RFC 3412 v3). Mesaj `berReader.ts` üstünde TLV TLV çözülür; OID’ler X.690 base-128 kodlamasından açılır, Counter32/Gauge32/TimeTicks/Counter64 işaretsiz okunur ve TimeTicks saniyenin yüzde biri olarak biçimlenir. v1 Trap-PDU’nun ayrı gövdesi ve GetBulk’un non-repeaters/max-repetitions alanları ayrı ele alınır. v3’te zarf ve USM parametreleri çözülür, şifreli ScopedPDU çözülmez. MIB importu Tanımlar kanalının işidir.',
+  'protocol.snmp.example.getRequestV2c.name': 'GetRequest (v2c)',
+  'protocol.snmp.example.getRequestV2c.description': 'sysUpTime.0 sorgusu; değer alanı NULL.',
+  'protocol.snmp.example.responseTimeticks.name': 'Response — TimeTicks',
+  'protocol.snmp.example.responseTimeticks.description':
+    '360 000 tick = 1 saat. Ham sayı saniye sanılsaydı 100 saat görünürdü.',
+  'protocol.snmp.example.responseCounter32High.name': 'Response — yüksek Counter32',
+  'protocol.snmp.example.responseCounter32High.description':
+    'Counter32 = 3 000 000 000; işaretli okunsaydı −1 294 967 296 çıkardı.',
+  'protocol.snmp.example.getBulkRequest.name': 'GetBulkRequest',
+  'protocol.snmp.example.getBulkRequest.description':
+    'İkinci ve üçüncü INTEGER hata alanı değil: non-repeaters = 0, max-repetitions = 10.',
+  'protocol.snmp.example.trapV1.name': 'Trap (v1)',
+  'protocol.snmp.example.trapV1.description':
+    'linkDown trap’i — gövdesi enterprise/agent-addr/generic/specific/timestamp, standart PDU’yla hiç ortak alanı yok.',
+  'protocol.snmp.example.responseNoSuchObject.name': 'Response — noSuchObject',
+  'protocol.snmp.example.responseNoSuchObject.description':
+    'v2c istisnası: etiket 0x80, uzunluk sıfır — bilgi etiketin kendisindedir.',
+  'protocol.snmp.example.v3Encrypted.name': 'SNMPv3 — authPriv',
+  'protocol.snmp.example.v3Encrypted.description':
+    'Zarf ve USM parametreleri (Engine ID, kullanıcı) anahtarsız okunur; ScopedPDU şifreli kalır.',
+  'protocol.snmp.example.notASequence.name': 'SEQUENCE olmayan girdi (hata yolu)',
+  'protocol.snmp.example.notASequence.description': 'Dış TLV bir INTEGER — çözüm başlamadan reddedilir.',
+
+  // --- Syslog ---
+  'protocol.syslog.error.frameTooShort': 'Mesaj en az `<0>1` kadar uzun olmalı.',
+  'protocol.syslog.error.frameTooLong': 'Mesaj izin verilen azami uzunluğu aşıyor.',
+  'protocol.syslog.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.syslog.error.priMissing': 'Mesaj `<` ile başlamıyor — PRI alanı yok.',
+  'protocol.syslog.error.priMalformed':
+    'PRI biçimsiz: 1-3 basamak olmalı, başta sıfır taşımamalı (RFC 5424 §6.2.1) ve `>` ile kapanmalı.',
+  'protocol.syslog.error.headerTruncated': 'Başlık alanlarından biri mesajın sonuna kesilmiş.',
+  'protocol.syslog.error.structuredDataUnterminated': 'Structured Data elemanı kapanmadan mesaj bitti.',
+  'protocol.syslog.warning.priOutOfRange':
+    'PRI 191’i aşıyor. Azami değer 23 × 8 + 7’dir; üstünde tanımlı bir Facility yok.',
+  'protocol.syslog.warning.legacyBsdFormat':
+    'Mesaj RFC 3164 (BSD) biçiminde görünüyor: sürüm basamağı yok ve damga `Mmm dd hh:mm:ss`. RFC 5424 şeması uygulanmadı.',
+  'protocol.syslog.warning.unexpectedVersion': 'VERSION alanı 1 değil; RFC 5424 yalnız sürüm 1’i tanımlar.',
+  'protocol.syslog.warning.nilValue': 'Alan NILVALUE (`-`): değer yok. Metin olarak tire basılmadı.',
+  'protocol.syslog.warning.timestampNotRfc3339': 'Zaman damgası RFC 3339 biçiminde değil.',
+  'protocol.syslog.warning.msgWithoutBom':
+    'MSG bayt sırası imiyle başlamıyor — RFC 5424 §6.4’e göre gövdenin kodlaması bilinmez.',
+  'protocol.syslog.warning.severityDashboardNeedsStream':
+    'Severity sayımı ve errors/minute trendi bir mesaj kümesinin işidir; tek mesajdan çıkmaz.',
+  'protocol.syslog.warning.structuredDataMalformed':
+    'Structured Data `NAME="VALUE"` kalıbına uymuyor; kalan kısım çözülmedi.',
+  'protocol.syslog.documentation.summary':
+    'Taşıyıcıdan bağımsız olay mesajı biçimi (RFC 5424). PRI baytı Facility ve Severity’yi paketler; başlık alanları NILVALUE (`-`) olabilir ve bu "değer yok" demektir. Structured Data kaçış farkındalığıyla ayrıştırılır (`\\]` eleman sonu değildir). MSG’in başındaki bayt sırası imi gövdenin UTF-8 olduğunu bildirir. RFC 3164 (BSD) biçimi tanınır ama çözülmez; Severity dashboard çok-mesaj işidir.',
+  'protocol.syslog.example.headerOnly.name': 'Temel başlık (PRI 34)',
+  'protocol.syslog.example.headerOnly.description': 'Facility 4, Severity 2 (Critical) — spec’in örneği.',
+  'protocol.syslog.example.structuredData.name': 'Structured Data',
+  'protocol.syslog.example.structuredData.description':
+    '`[temperature sensor="1" value="85.2"]` — SD-ID ve iki parametre ayrı ayrı çözülür.',
+  'protocol.syslog.example.escapedBracket.name': 'Kaçırılmış `]` (tuzak)',
+  'protocol.syslog.example.escapedBracket.description':
+    'PARAM-VALUE içindeki `\\]` eleman sonu değildir; naif bölme mesajı ortadan keserdi.',
+  'protocol.syslog.example.nilValues.name': 'NILVALUE dolu başlık',
+  'protocol.syslog.example.nilValues.description': 'Altı alan da `-`: "tire adlı host" gösterilmemeli.',
+  'protocol.syslog.example.utf8Bom.name': 'UTF-8 BOM’lu mesaj',
+  'protocol.syslog.example.utf8Bom.description': 'Gövde bayt sırası imiyle UTF-8 ilan edilmiş (§6.4).',
+  'protocol.syslog.example.legacyBsd.name': 'RFC 3164 (BSD) biçimi',
+  'protocol.syslog.example.legacyBsd.description':
+    'Sürüm basamağı yok, damga `Oct 11 22:14:15` — tanınır, 5424 şemasıyla çözülmez.',
+  'protocol.syslog.example.leadingZeroPri.name': 'Başta sıfırlı PRI (hata yolu)',
+  'protocol.syslog.example.leadingZeroPri.description': '`<034>` — RFC 5424 §6.2.1 başta sıfırı yasaklar.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

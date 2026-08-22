@@ -4,6 +4,8 @@ import {
   MAX_BER_LENGTH_OCTETS,
   decodeBerBoolean,
   decodeBerInteger,
+  decodeBerObjectIdentifier,
+  decodeBerUnsignedInteger,
   decodeBerVisibleString,
   readBerLength,
   readBerTag,
@@ -23,6 +25,13 @@ function bytes(hex: string): Uint8Array {
     result[index] = Number.parseInt(cleaned.slice(index * 2, index * 2 + 2), 16);
   }
   return result;
+}
+
+function expectOid(result: ReturnType<typeof decodeBerObjectIdentifier>): string {
+  if (!result.ok) {
+    throw new Error(`expected an OID, got failure "${result.error}"`);
+  }
+  return result.text;
 }
 
 function expectFailure(result: { ok: boolean }): BerFailure {
@@ -330,5 +339,82 @@ describe('decodeBerVisibleString', () => {
 
   it('fails when the value runs off the buffer', () => {
     expect(expectFailure(decodeBerVisibleString(bytes('41 42'), 0, 5)).error).toBe('truncated');
+  });
+});
+
+describe('decodeBerObjectIdentifier', () => {
+  it('decodes the classic 1.3.6.1.2.1.1.3.0 (sysUpTime.0)', () => {
+    // 0x2B = 43 = 40 × 1 + 3 → arcs 1 and 3.
+    const result = decodeBerObjectIdentifier(bytes('2b 06 01 02 01 01 03 00'), 0, 8);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.text).toBe('1.3.6.1.2.1.1.3.0');
+    expect(result.arcs).toHaveLength(9);
+  });
+
+  it('splits the first two arcs by threshold, not by division', () => {
+    // 0x00 → 0.0 · 0x28 (40) → 1.0 · 0x50 (80) → 2.0.
+    expect(expectOid(decodeBerObjectIdentifier(bytes('00'), 0, 1))).toBe('0.0');
+    expect(expectOid(decodeBerObjectIdentifier(bytes('28'), 0, 1))).toBe('1.0');
+    expect(expectOid(decodeBerObjectIdentifier(bytes('50'), 0, 1))).toBe('2.0');
+  });
+
+  it('lets the second arc exceed 39 when the first arc is 2', () => {
+    // 2.100 = 40 × 2 + 100 = 180 → base-128: 0x81 0x34.
+    expect(expectOid(decodeBerObjectIdentifier(bytes('81 34'), 0, 2))).toBe('2.100');
+    // Saf bölme burada "4.20" derdi — 180/40 = 4, 180%40 = 20.
+  });
+
+  it('decodes multi-byte base-128 arcs', () => {
+    // 1.2.840 → 0x2A, then 840 = 0x86 0x48.
+    expect(expectOid(decodeBerObjectIdentifier(bytes('2a 86 48'), 0, 3))).toBe('1.2.840');
+  });
+
+  it('keeps arcs beyond 2^53 exact', () => {
+    // 18 446 744 073 709 551 615 (2^64 − 1) base-128 kodlaması.
+    const encoded = bytes('2b 81 ff ff ff ff ff ff ff ff 7f');
+    const result = decodeBerObjectIdentifier(encoded, 0, encoded.length);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.arcs[2]).toBe(18_446_744_073_709_551_615n);
+  });
+
+  it('rejects an empty value and a dangling continuation bit', () => {
+    expect(expectFailure(decodeBerObjectIdentifier(bytes('2b'), 0, 0)).error).toBe('unexpected-value-length');
+    // Son bayt devam biti taşıyor: kodlama yarım kalmış.
+    expect(expectFailure(decodeBerObjectIdentifier(bytes('2b 86'), 0, 2)).error).toBe('unexpected-value-length');
+  });
+
+  it('fails when the value runs off the buffer', () => {
+    expect(expectFailure(decodeBerObjectIdentifier(bytes('2b'), 0, 4)).error).toBe('truncated');
+  });
+});
+
+describe('decodeBerUnsignedInteger', () => {
+  it('keeps a high-bit value positive where the signed reader would go negative', () => {
+    const raw = bytes('b2 d0 5e 00'); // 3 000 000 000
+    const unsigned = decodeBerUnsignedInteger(raw, 0, 4);
+    const signed = decodeBerInteger(raw, 0, 4);
+
+    expect(unsigned.ok).toBe(true);
+    expect(signed.ok).toBe(true);
+    if (!unsigned.ok || !signed.ok) return;
+    expect(unsigned.value).toBe(3_000_000_000n);
+    expect(signed.value).toBe(-1_294_967_296n);
+  });
+
+  it('decodes a 64-bit counter without rounding', () => {
+    const result = decodeBerUnsignedInteger(bytes('ff ff ff ff ff ff ff ff'), 0, 8);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toBe(18_446_744_073_709_551_615n);
+  });
+
+  it('rejects an empty value and a value past the buffer', () => {
+    expect(expectFailure(decodeBerUnsignedInteger(bytes('01'), 0, 0)).error).toBe('unexpected-value-length');
+    expect(expectFailure(decodeBerUnsignedInteger(bytes('01'), 0, 4)).error).toBe('truncated');
   });
 });

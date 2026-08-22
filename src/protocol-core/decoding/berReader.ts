@@ -420,3 +420,142 @@ export function decodeBerVisibleString(
 
   return { ok: true, text: characters.join(''), printable };
 }
+
+export interface BerOidRead {
+  /** Nokta ayrılmış metin gösterimi (ör. `1.3.6.1.2.1.1.3.0`). */
+  readonly text: string;
+  /** Ayrı ayrı arc'lar; `bigint` çünkü tek bir arc 2^53'ü aşabilir. */
+  readonly arcs: readonly bigint[];
+}
+
+/** X.690 §8.19.4: ilk iki arc TEK bayta paketlenir, `40 × arc1 + arc2`. */
+const OID_FIRST_ARC_DIVISOR = 40n;
+/** Base-128 devam biti. */
+const OID_CONTINUATION_MASK = 0x80;
+const OID_ARC_VALUE_MASK = 0x7f;
+const OID_ARC_SHIFT = 7n;
+
+/**
+ * OBJECT IDENTIFIER içerik oktetlerini çözer (X.690 §8.19).
+ *
+ * ── İLK İKİ ARC'IN AYRIŞTIRILMASI SAF BÖLME **DEĞİLDİR** ────────────────────
+ * İlk bayt `40 × arc1 + arc2` taşır ve `arc1 ∈ {0,1,2}`dir. `arc1 = 2` olduğunda
+ * `arc2` 39'u AŞABİLİR (ör. `2.100.3` geçerlidir), bu yüzden `first / 40` ve
+ * `first % 40` yazmak `2.x` ağacının tamamını yanlış çözer — `1.3.6.1…` gibi
+ * yaygın OID'lerde doğru çalıştığı için hata sahada geç fark edilir. Doğrusu
+ * eşiklerle ayırmaktır: <40 → `0.n`, <80 → `1.(n-40)`, aksi hâlde `2.(n-80)`.
+ *
+ * ── ARC'LAR `bigint` ─────────────────────────────────────────────────────────
+ * Base-128 kodlaması arc başına sınır koymaz; MIB'lerde 32 bitin üstüne çıkan
+ * arc'lar (ör. IPv6 adresi taşıyan index'ler) görülür. `number`da sessizce
+ * yuvarlanırlardı — `decodeBerInteger`ın aynı gerekçesi.
+ *
+ * ── EN AZ BİR BAYT, VE SON BAYT DEVAM BİTİ TAŞIYAMAZ ────────────────────────
+ * Uzunluk 0 geçersizdir; son arc'ın devam biti açıksa kodlama yarım kalmıştır.
+ * İkisi de `unexpected-value-length` ile reddedilir — "yarısı okundu" diye
+ * göstermek uydurma bir OID üretirdi.
+ */
+export function decodeBerObjectIdentifier(
+  bytes: Uint8Array,
+  offset: number,
+  length: number,
+): BerResult<BerOidRead> {
+  if (length < 1) {
+    return failure('unexpected-value-length', offset);
+  }
+  if (offset + length > bytes.length) {
+    return failure('truncated', offset);
+  }
+
+  const firstOctet = bytes[offset];
+  if (firstOctet === undefined) {
+    return failure('truncated', offset);
+  }
+
+  const arcs: bigint[] = [];
+  let index = 0;
+
+  // İlk bayt aslında base-128'in de ilk baytıdır: 0x80'i aşan paketli değerler
+  // (ör. `2.999`) birden çok bayta yayılır, bu yüzden önce tam sayı okunur.
+  let packed = 0n;
+  let packedComplete = false;
+  while (index < length) {
+    const octet = bytes[offset + index];
+    if (octet === undefined) {
+      return failure('truncated', offset + index);
+    }
+    index += 1;
+    packed = (packed << OID_ARC_SHIFT) | BigInt(octet & OID_ARC_VALUE_MASK);
+    if ((octet & OID_CONTINUATION_MASK) === 0) {
+      packedComplete = true;
+      break;
+    }
+  }
+  if (!packedComplete) {
+    return failure('unexpected-value-length', offset + length - 1);
+  }
+
+  if (packed < OID_FIRST_ARC_DIVISOR) {
+    arcs.push(0n, packed);
+  } else if (packed < OID_FIRST_ARC_DIVISOR * 2n) {
+    arcs.push(1n, packed - OID_FIRST_ARC_DIVISOR);
+  } else {
+    arcs.push(2n, packed - OID_FIRST_ARC_DIVISOR * 2n);
+  }
+
+  while (index < length) {
+    let arc = 0n;
+    let complete = false;
+    while (index < length) {
+      const octet = bytes[offset + index];
+      if (octet === undefined) {
+        return failure('truncated', offset + index);
+      }
+      index += 1;
+      arc = (arc << OID_ARC_SHIFT) | BigInt(octet & OID_ARC_VALUE_MASK);
+      if ((octet & OID_CONTINUATION_MASK) === 0) {
+        complete = true;
+        break;
+      }
+    }
+    if (!complete) {
+      return failure('unexpected-value-length', offset + length - 1);
+    }
+    arcs.push(arc);
+  }
+
+  return { ok: true, text: arcs.join('.'), arcs };
+}
+
+/**
+ * İçerik oktetlerini İŞARETSİZ tam sayı olarak okur.
+ *
+ * `decodeBerInteger` X.690'ın INTEGER'ını, yani iki tümleyeni çözer. SNMP'nin
+ * uygulama tipleri (`Counter32`, `Gauge32`, `TimeTicks`, `Counter64` — RFC 2578)
+ * ise İŞARETSİZDİR: en anlamlı biti 1 olan bir Counter32'yi işaretli okumak
+ * 3 000 000 000 yerine −1 294 967 296 verir ve sayaç "geri saymış" görünür.
+ * Ayrı fonksiyon şart — aynı baytlar iki farklı sayı demektir.
+ */
+export function decodeBerUnsignedInteger(
+  bytes: Uint8Array,
+  offset: number,
+  length: number,
+): BerResult<BerIntegerRead> {
+  if (length < 1) {
+    return failure('unexpected-value-length', offset);
+  }
+  if (offset + length > bytes.length) {
+    return failure('truncated', offset);
+  }
+
+  let value = 0n;
+  for (let index = 0; index < length; index += 1) {
+    const octet = bytes[offset + index];
+    if (octet === undefined) {
+      return failure('truncated', offset + index);
+    }
+    value = (value << 8n) | BigInt(octet);
+  }
+
+  return { ok: true, value };
+}

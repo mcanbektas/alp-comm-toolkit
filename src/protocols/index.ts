@@ -172,6 +172,18 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'ptp', () =>
     import('./network/time/ptp').then((module) => module.ptpPlugin),
   );
+  // SNMP/Syslog — dalga 12e: `time-management` ailesini kapatır. SNMP,
+  // `berReader.ts`i (GOOSE için yazılmıştı, dalga 12 boyunca beklemişti)
+  // NİHAYET KULLANIR; ona X.690'ın kendi tanımları olan iki kardeş eklendi
+  // (`decodeBerObjectIdentifier`, `decodeBerUnsignedInteger`). Syslog ise saf
+  // metindir ve hiçbir ikili kaldıraç kullanmaz — ikisi aynı ailede olsa da
+  // hiçbir kodu paylaşmazlar.
+  registerOnce(registry, 'snmp', () =>
+    import('./network/snmp/snmp').then((module) => module.snmpPlugin),
+  );
+  registerOnce(registry, 'syslog', () =>
+    import('./network/syslog/syslog').then((module) => module.syslogPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>
