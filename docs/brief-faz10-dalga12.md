@@ -89,7 +89,7 @@ bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
 | **12b** | arp, lldp | `data-link` kapanır. LLDP jenerik **TLV yürüyücüsü**nü açar (12c'nin DHCP option'ları aynısını ister) | `tlvWalker` | kolay–orta |
 | **12c** | dns, mdns, dhcp | `addressing-discovery` kapanır. dns↔mdns aynı tel biçimi (mDNS = multicast DNS + `.local`), **name compression** tek yerde yazılır; dhcp 12b'nin TLV'sini yer | `dnsWire` (compression pointer dâhil) | orta |
 | ~~**12d**~~ | ~~ntp, ptp~~ | **BİTTİ (`b149e76`).** Öngörülen ortak kaldıraç YANLIŞ ÇIKTI: NTP damgası 64 bit (32 s + 32 bit 2^-32 kesir, epoch 1900 UTC), PTP damgası 80 bit (48 bit s + 32 bit tam sayı ns, epoch 1970 TAI). Paylaşılan motor kesrin birimini tek seçip diğerini 4295 kat yanlış ölçeklerdi — 12b'nin LLDP/DHCP "TLV" hatasının aynı cinsi | ~~`networkTimestamp`~~ → `ntpTimestamp.ts` + `ptpTimestamp.ts` AYRI | orta (ptp zor) |
-| **12e** | snmp, syslog | `time-management` kapanır. SNMP **berReader'ı hazır bulur** (asıl iş OID/VarBind katmanı); syslog saf metin, ucuz | `oidCodec` | orta |
+| ~~**12e**~~ | ~~snmp, syslog~~ | **BİTTİ (`b35cbbd`).** `time-management` KAPANDI. berReader gerçekten hazır bulundu; `oidCodec` AYRI MODÜL OLARAK açılmadı — OID ve işaretsiz tam sayı çözücüleri X.690'ın kendi tanımları olduğu için `berReader.ts`in İÇİNE kondu | ~~`oidCodec`~~ → `berReader.ts`e iki kardeş | orta |
 | **12f** | http, websocket, mqtt-sn | `web-messaging` kapanır. HTTP CRLF framing + body framing (`spec:391`, Content-Length vs chunked); WS maskeleme + fragmentation; mqtt-sn mqtt komşusu | — | orta–zor |
 | **12g** | rtp, rtcp | `real-time-media` kapanır. Ortak başlık kavramları, `bitCursor` hazır; jitter hesabı (`spec:558`) calculator adayı | — | orta |
 | **12h** | tftp, ftp, telnet | `file-terminal` kapanır. tftp opcode tabanlı ikili, ftp metin, telnet IAC kaçışlama — üçü de küçük | — | kolay–orta |
@@ -128,8 +128,14 @@ Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
    orada parser HİÇ YOKTU ve kaydın bütün değeri hesap aracındaydı. PTP'de
    Announce'un BMCA veri kümesi alan alan çözülüyor, eksik olan yalnız
    Announce'ları KARŞILAŞTIRMA kararı — o da uyarıyla bildiriliyor.
-2. **SNMPv3** kapsamda mı? Zarf farklı, USM güvenlik parametreleri var. Öneri:
-   12e'de v1/v2c `ready`, v3 uyarıyla dışarıda.
+2. ~~**SNMPv3** kapsamda mı?~~ → **12e'de KARARA BAĞLANDI: v3 DE KAPSAMDA,
+   ama yalnız zarf düzeyinde.** Öneri "v3 uyarıyla dışarıda"ydı; kapsam
+   GENİŞLETİLDİ çünkü spec `:376` açıkça "Security Model, Security Level,
+   Engine ID, User" istiyor ve bunların hiçbiri ANAHTAR GEREKTİRMİYOR —
+   msgGlobalData ile USM güvenlik parametreleri düz BER'dir. Anahtar isteyen
+   tek şey şifreli ScopedPDU'dur ve o da spec `:377`nin dediği gibi
+   "Encrypted / Unable to decode payload" bırakıldı. Kimlik doğrulama ve şifre
+   çözme YAPILMIYOR (`ntp.ts`in MD5 özetini doğrulamama kararının aynı cinsi).
 3. **`ipv4.ts` PROTOCOL_NAMES tablosu genişletilecek mi, ayrı modüle mi taşınacak?**
    12a iki numara ekliyor; 12c/12g daha fazlasını isteyecek. Öneri: 12a'da
    `ipProtocolNumbers.ts`'e taşı, ipv4+ipv6 ortak kullansın.

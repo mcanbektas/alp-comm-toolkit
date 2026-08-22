@@ -132,8 +132,29 @@ farklı; paylaşılan yürüyücü üçüncü kez açılmadı. Brief'in **açık
 karara bağlandı: PTP `ready`** — 12c'de DNS'in Transaction Matching / Response
 Time / TTL Simulation araçları aynı gerekçeyle analyzer'a bırakılmışken `ready`
 verilmişti; LoRa'nın `partial`ı parser'ı HİÇ OLMAYAN kayda aitti. Sıradaki:
-**12e snmp/syslog** (Sonnet·high — `berReader.ts` hazır bekliyor, asıl iş
-OID/VarBind katmanı; syslog saf metin).
+**12e snmp/syslog**.
+
+**12e (2026-08-22 bitti, `b35cbbd`) — snmp + syslog.** `time-management` ailesi
+KAPANDI. `berReader.ts` (GOOSE için yazılmış, dalga 12 boyunca beklemişti)
+NİHAYET KULLANILDI ve ona X.690'ın kendi tanımları olan iki kardeş eklendi:
+`decodeBerObjectIdentifier` + `decodeBerUnsignedInteger`. **Bu, 12b/12c/12d'nin
+"paylaşılan modülü speküle etme" dersinin TERS yönü** — burada paylaşım gerçek,
+çünkü kodlama standardı ortak; SNMP'ye özel yeni bir modül açılmadı. OID'in ilk
+iki arc'ı SAF BÖLMEYLE ayrılmaz (`40 × arc1 + arc2`, arc1=2 iken arc2 39'u
+aşabilir — `first/40` yazmak 2.x ağacını yanlış çözer ve `1.3.6.1…`de doğru
+çalıştığı için geç fark edilir). SNMP tarafında çözülen değişmezler: v1
+Trap-PDU'nun gövdesi standart PDU'yla HİÇ ortak alan taşımaz ve yalnız v1'dedir;
+GetBulk'un ikinci/üçüncü INTEGER'ı error-status/index DEĞİL non-repeaters/
+max-repetitions'tır; sürüm alanı sıfır tabanlı ve 2 yoktur; Counter/Gauge/
+TimeTicks işaretsizdir ve TimeTicks saniyenin yüzde biridir. Syslog tarafında:
+PRI'da başta sıfır yasak, tavan 191; STRUCTURED-DATA'da `]` kaçışlı olabilir
+(naif bölme mesajı ortadan keser); NILVALUE `-` "boş metin" değil "değer yok";
+MSG'in BOM'u UTF-8 bildirimidir; RFC 3164 (BSD) biçimi tanınır ama ÇÖZÜLMEZ.
+Brief'in **açık sorusu 2 kapatıldı — kapsam GENİŞLETİLEREK**: v3 zarfı ve USM
+parametreleri (Engine ID, kullanıcı, Security Level) anahtar gerektirmediği ve
+spec `:376` bunları açıkça istediği için çözülür; yalnız şifreli ScopedPDU
+`:377`nin dediği gibi "Encrypted" bırakılır. Sıradaki: **12f http/websocket/
+mqtt-sn** (Opus·high — chunked encoding + Content-Length çelişkisi).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
