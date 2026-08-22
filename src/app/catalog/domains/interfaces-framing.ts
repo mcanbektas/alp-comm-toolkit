@@ -594,8 +594,20 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'ISO 11898-2 differential layer where the dominant/recessive wired-AND behaviour, 120 Ω end termination and total propagation budget set the achievable bit rate and sample point.',
           layer: 'physical',
-          status: 'planned',
+          // LoRa paterni (dalga 11g'deki Current Loop kararının aynısı): çerçeve
+          // çözümü Automotive alanında (`protocols/automotive/can/*`), bu sayfa
+          // transceiver seviyesini anlatır — yakalanmış baytta karşılığı yok,
+          // bu yüzden `pluginId` verilmedi. Motor `timing/vehiclePhy.ts`te,
+          // sayfaya `can-phy-timing` hesaplayıcısı olarak bağlı.
+          status: 'partial',
+          calculatorIds: ['can-phy-timing'],
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          // Brief'in saptadığı eksik çapraz-link: taşıyıcı ↔ üstündeki çerçeve.
+          related: [
+            'automotive/can-family/can-2-0a',
+            'automotive/can-family/can-fd',
+            'interfaces-framing/serial-interfaces/rs-485',
+          ],
           tools: [
             'CANH/CANL Signal View',
             'Differential Voltage',
@@ -614,8 +626,11 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Single-wire 12 V automotive subnet layer for low-cost switches and actuators, where break, sync and wake-up patterns sit around an otherwise UART-like byte format.',
           layer: 'physical',
-          status: 'planned',
+          status: 'partial',
+          calculatorIds: ['lin-phy-timing'],
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          // LIN'in bayt aktarımı UART benzeridir (spec), çerçevesi Automotive'de.
+          related: ['automotive/vehicle-network-protocols/lin', 'interfaces-framing/serial-interfaces/uart'],
           tools: [
             'Single-Wire Signal View',
             'Dominant/Recessive View',
@@ -631,8 +646,10 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Dual-channel differential layer for deterministic automotive networks, covering passive bus, active star and hybrid topologies plus the A/B skew that breaks redundancy.',
           layer: 'physical',
-          status: 'planned',
+          status: 'partial',
+          calculatorIds: ['flexray-phy-timing'],
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          related: ['automotive/vehicle-network-protocols/flexray'],
           tools: [
             'Channel A View',
             'Channel B View',

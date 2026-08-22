@@ -70,6 +70,12 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   // Current Loop / 4-20 mA kayıtlarının TEK motoru: o iki sayfanın decode'u
   // yok (LoRa paterni), hesap buraya bağlanıyor.
   { id: 'current-loop', category: 'timing', nameKey: 'calc.currentLoop.name', summaryKey: 'calc.currentLoop.summary' },
+  // Araç içi PHY üçlüsü: üç katalog kaydının (can-phy/lin-phy/flexray-phy)
+  // decode'u yok, motor burada. Üçü AYNI bileşeni `variant` ile paylaşır;
+  // ayrı id'ler derin bağlantı ve sayfa-başına `calculatorIds` içindir.
+  { id: 'can-phy-timing', category: 'timing', nameKey: 'calc.canPhy.name', summaryKey: 'calc.canPhy.summary' },
+  { id: 'lin-phy-timing', category: 'timing', nameKey: 'calc.linPhy.name', summaryKey: 'calc.linPhy.summary' },
+  { id: 'flexray-phy-timing', category: 'timing', nameKey: 'calc.flexrayPhy.name', summaryKey: 'calc.flexrayPhy.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

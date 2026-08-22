@@ -19,6 +19,7 @@ import {
   UnixTimestampTool,
 } from '@/features/calculators/tools/numericTools';
 import { CurrentLoopTool } from '@/features/calculators/tools/currentLoopTools';
+import { VehiclePhyTool } from '@/features/calculators/tools/vehiclePhyTools';
 import { LogicLevelCompatibilityTool } from '@/features/calculators/tools/logicLevelTools';
 import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
 import { BytesEncodingTool, HexAsciiTool, HexBinaryTool, UrlEncodingTool, Utf8ByteViewerTool } from '@/features/calculators/tools/textBytesTools';
@@ -70,6 +71,9 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'lora-battery': () => <LoraBatteryTool />,
   'logic-level-compat': () => <LogicLevelCompatibilityTool />,
   'current-loop': () => <CurrentLoopTool />,
+  'can-phy-timing': () => <VehiclePhyTool variant="can" />,
+  'lin-phy-timing': () => <VehiclePhyTool variant="lin" />,
+  'flexray-phy-timing': () => <VehiclePhyTool variant="flexray" />,
   'crc-calculator': () => <CrcCalculatorTool />,
   'checksum-finder': () => <ChecksumFinderTool />,
 };
