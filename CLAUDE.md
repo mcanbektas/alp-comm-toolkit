@@ -125,11 +125,13 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı 75 `ready` / 82 `planned` / 15 `partial`**,
-  ama ham sayı yanıltıcı: 15 alias kaydın 14'ünde `status` `planned` yazarken kanonik
-  kayıt `ready`. Alias zinciri çözülünce **89 `ready` / 68 `planned` / 15 `partial`**;
-  gerçekten yapılacak iş **67 kanonik kayıt** (network-ethernet 19, industrial-automation 16,
-  automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1).
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-22, dalga 12 kapandıktan sonra)
+  94 `ready` / 63 `planned` / 15 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+  14'ünde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
+  **108 `ready` / 49 `planned` / 15 `partial`**; gerçekten yapılacak iş **48 kanonik
+  kayıt** (industrial-automation 16, automotive 12, aerospace-uav 12, wireless-iot 4,
+  marine-navigation 3, building-automation 1). **`network-ethernet` (19 kayıt) dalga
+  12 ile TAMAMEN KAPANDI** (12a-12h, `docs/plan-fazlar.md`).
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

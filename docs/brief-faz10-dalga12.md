@@ -93,7 +93,7 @@ bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
 | ~~**12e**~~ | ~~snmp, syslog~~ | **BİTTİ (`b35cbbd`).** `time-management` KAPANDI. berReader gerçekten hazır bulundu; `oidCodec` AYRI MODÜL OLARAK açılmadı — OID ve işaretsiz tam sayı çözücüleri X.690'ın kendi tanımları olduğu için `berReader.ts`in İÇİNE kondu | ~~`oidCodec`~~ → `berReader.ts`e iki kardeş | orta |
 | ~~**12f**~~ | ~~http, websocket, mqtt-sn~~ | **BİTTİ (`39b7491`).** "mqtt-sn mqtt komşusu" varsayımı KOD PAYLAŞIMI anlamına GELMİYOR: `mqttVbi.ts` uygulanamaz (MQTT-SN Length'i ya 1 bayt ya `0x01`+16 bit ve KENDİNİ DE sayar), QoS 0b11 MQTT'de hata burada −1. HTTP body framing'de iki smuggling vektörü çerçeve hatası basıyor. WS el sıkışması HTTP'ye YÖNLENDİRİLİR, zincir kurulmaz | — (paylaşım yok) | orta–zor |
 | ~~**12g**~~ | ~~rtp, rtcp~~ | **BİTTİ.** `real-time-media` kapandı. `bitCursor` V/P/X/CC/M/PT için kullanıldı; jitter/loss/gap analizi calculator'a bırakıldı (12c/12d'nin çok-paketli korelasyon precedent'i). SR'nin NTP Timestamp'i `ntpTimestamp.ts`yi GERÇEKTEN paylaştı (DLSR için `readNtpShortMilliseconds` dâhil) — 12b/12d'nin ters yönü | `ntpTimestamp.ts` (paylaşım GERÇEK, yeni motor açılmadı) | orta |
-| **12h** | tftp, ftp, telnet | `file-terminal` kapanır. tftp opcode tabanlı ikili, ftp metin, telnet IAC kaçışlama — üçü de küçük | — | kolay–orta |
+| ~~**12h**~~ | ~~tftp, ftp, telnet~~ | **BİTTİ. `file-terminal` kapandı — dalga 12'nin TAMAMI bitti, `network-ethernet` domain'i kapandı.** Üçü gerçekten bağımsız çıktı (öngörülen "küçük" doğruydu); FTP/Telnet TCP'nin mesaj sınırı olmaması yüzünden `rtp.ts`nin "tek paket" kararından bilerek ayrıldı — FTP çok satırlı oturumu satır satır, Telnet tüm payload'u tek geçişte metin+IAC dizisi olarak işler | tftp'nin RRQ/WRQ↔OACK option-pair döngüsü (GERÇEK paylaşım) | kolay–orta |
 
 **Toplam 8 alt dalga / 19 kayıt.** 12a ve 12b bilerek en başta: ucuz, hızlı yeşil,
 ve 12c'nin ihtiyacı olan TLV motorunu getiriyor.
@@ -150,8 +150,11 @@ Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
 3. **`ipv4.ts` PROTOCOL_NAMES tablosu genişletilecek mi, ayrı modüle mi taşınacak?**
    12a iki numara ekliyor; 12c/12g daha fazlasını isteyecek. Öneri: 12a'da
    `ipProtocolNumbers.ts`'e taşı, ipv4+ipv6 ortak kullansın.
-4. **Telnet `live`?** `tabs`ında yok, doğru. Ama telnet TCP üstü — decode'u
-   "yapıştırılan TCP payload'u" varsayacak. 12h'de bu varsayım kayda yazılsın.
+4. ~~**Telnet `live`?**~~ → **12h: KARARA BAĞLANDI.** `tabs`ında `live` yok,
+   doğru kalıyor. Decode girdisi "yapıştırılan TCP payload'u" varsayıldı —
+   `telnet.ts` dosya başı yorumunda yazılı; düz metin ile IAC komutları tek
+   geçişte, satır kavramı OLMADAN (FTP'nin satırlarından farklı olarak)
+   ayrıştırılıyor.
 
 ## Kaynak satır haritası (spec `08-ag-ethernet.md`)
 

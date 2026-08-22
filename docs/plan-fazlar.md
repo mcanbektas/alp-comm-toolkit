@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-22 itibarıyla dalga 11 KAPANDI — `interfaces-framing` domain'i tamamen bitti: dalga 9 AT-komut zinciri, dalga 10 framing/stream ailesi, dalga 11 dört arayüz ailesi). Kalan iş **67 kanonik kayıt**: network-ethernet 19, industrial-automation 16, automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-22 itibarıyla dalga 12 KAPANDI — `network-ethernet` domain'i de tamamen bitti, `interfaces-framing`ten sonra ikinci kapanan domain). Kalan iş **48 kanonik kayıt**: industrial-automation 16, automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -41,10 +41,19 @@
 ## Sıradaki adım
 
 Comm SPA'sında **Faz 9 bitti; Faz 10 (protokol dalgaları) SÜRÜYOR** —
-`interfaces-framing` domain'i bitti, öteki yedi domain'de 67 kanonik kayıt
-duruyor. (Bu başlık 2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle
-`interfaces-framing`in bittiğini kastediyordu ama fazın tamamı gibi
-okunuyordu — 2026-08-22'de düzeltildi.)
+`interfaces-framing` VE `network-ethernet` domain'leri bitti, öteki altı
+domain'de 48 kanonik kayıt duruyor. (Bu başlık 2026-08-21'de "Faz 10
+TAMAMEN BİTTİ" diyordu; o cümle `interfaces-framing`in bittiğini
+kastediyordu ama fazın tamamı gibi okunuyordu — 2026-08-22'de düzeltildi.)
+
+**Dalga 12 (network-ethernet, 19 kayıt) 2026-08-22'de TAMAMEN KAPANDI**
+(12a icmp/icmpv6 · 12b arp/lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e
+snmp/syslog · 12f http/websocket/mqtt-sn · 12g rtp/rtcp · 12h
+tftp/ftp/telnet — hepsi ayrı commit+push, ayrıntılar aşağıda ve
+`docs/brief-faz10-dalga12.md`de). Sıradaki domain seçimi henüz YAPILMADI —
+altı domain arasından (industrial-automation 16 · automotive 12 ·
+aerospace-uav 12 · wireless-iot 4 · marine-navigation 3 ·
+building-automation 1) bir keşif turuyla karara bağlanacak.
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
@@ -194,7 +203,43 @@ için "her alt paket ayrı tree node" isteği (spec `:571`) alan adlarına
 (`SR SSRC`, `RTCP Packet 1 Packet Type`) taşınarak karşılandı, şema
 değişikliği YAPILMADI (dalga 10/11 kararı burada da geçerli). 43 birim testi
 + 13 e2e (gerçek tarayıcı) + 4199 toplam test + build yeşil.
-Sıradaki: **12h tftp/ftp/telnet** (Sonnet·medium-high).
+
+**12h (2026-08-22 bitti) — tftp + ftp + telnet.** `file-terminal` ailesi
+KAPANDI ve onunla birlikte **`network-ethernet` domain'inin 19 kaydı da
+TAMAMEN BİTTİ** (dalga 12 kapandı). Üçü de birbirinden bağımsız, hiçbir kod
+paylaşmıyor — dalganın "küçük ve bağımsız" öngörüsü doğru çıktı, 12b/12d'nin
+yanlış çıkan paylaşım öngörülerinin aksine burada zaten baştan paylaşım
+ADAY BİLE DEĞİLDİ.
+TFTP tek UDP paketi (`rtp.ts`/`icmpv6.ts` ile aynı "girdi tek mesaj"
+çizgisi): RRQ/WRQ'nun Filename+Mode SONRASI ve OACK'ın BAŞTAN İTİBAREN
+paylaştığı RFC 2347 option-pair döngüsü GERÇEK bir paylaşım (tek yardımcı
+fonksiyon ikisine hizmet etti). "Final Block" kararı klasik 512 baytlık
+varsayılana dayanır ve OACK farklı negotiate etmiş olabileceği için bunu
+açıkça uyarır — yalnız 512'den KISA bloklar her block size'da kesin.
+FTP ve Telnet ise TCP'nin doğal mesaj sınırı OLMAMASI yüzünden `rtp.ts`nin
+"girdi tek paket" kararından bilerek AYRILDI: FTP girdiyi yapıştırılan çok
+satırlık bir control oturumu sayıp HER CRLF satırını (yanıt kodu mu, komut
+mu, sınıflandırılamayan mı) kendi başına işler — RFC 959'un çok satırlı
+yanıt devam satırlarını (öndeki boşluklu serbest metin) "şüpheli" diye
+uyarmak her normal çok satırlı yanıtta yanlış alarm üretirdi, bu yüzden
+sınıflandırılamayan satırlar SESSİZCE ham gösterilir. `PASS`ın argümanı
+`physicalValue`de redakte edilir (`********`), `rawBytes` gerçek baytı
+korur — kullanıcı verisi zaten yerelde kalıyor, maskeleme omuz sörfüne karşı
+varsayılan ekran temkini, güvenlik kontrolü değil.
+Telnet girdiyi "yapıştırılan TCP payload'u" sayar (brief'in açık sorusu 4
+KARARA BAĞLANDI) ve düz metin ile IAC komutlarını TEK GEÇİŞTE ayrı alanlara
+böler; `IAC IAC` kaçışlı literal 0xFF, komşu metin koşularıyla SESSİZCE
+birleştirilmez — spec'in "byte-transparency" istediği yer tam burası, kaçışın
+nerede geçtiği kendi alanında görünür kalır. `WILL/WONT/DO/DONT` spec'in
+"DO ECHO → WILL ECHO → Accepted" örneğindeki gibi ÇAPRAZ yorumlanmaz (RTCP'nin
+SR-RR eşleşmemesi, DNS Transaction Matching'in aynı cinsi) — her komut kendi
+RFC 854 anlamıyla tek başına gösterilir. Plaintext güvenlik uyarısı (spec
+`:676`) her başarılı çözümde SABİT basılır, çünkü temel protokolün şifresiz
+olması içeriğe bakılmaksızın hep doğrudur.
+60 birim testi + 19 e2e (gerçek tarayıcı) + 4259 toplam test + build yeşil.
+**`network-ethernet` domain'i KAPANDI — dalga 12'de açık iş kalmadı.**
+Sıradaki: yeni bir domain seçimi (keşif turu gerekiyor, `docs/brief-faz10-
+dalga12.md`nin dalga başı yaptığı gibi).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
