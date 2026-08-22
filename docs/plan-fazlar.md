@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-20 itibarıyla dalga 9 — beş kayıtlık AT-komut zinciri + Karar 6 + Cellular Dashboard TAMAM). Kalan protokol dalgaları (spec Phase 7-10: CANopen/LIN/ISO-TP/UDS/OBD → NMEA2000/AIS/MAVLink/UBX/RTCM → Ethernet/TCP/MQTT/CoAP/PCAP → industrial/wireless/RE/test-automation) | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-22 itibarıyla dalga 11 KAPANDI — `interfaces-framing` domain'i tamamen bitti: dalga 9 AT-komut zinciri, dalga 10 framing/stream ailesi, dalga 11 dört arayüz ailesi). Kalan iş **67 kanonik kayıt**: network-ethernet 19, industrial-automation 16, automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -40,8 +40,13 @@
 
 ## Sıradaki adım
 
-Comm SPA'sında **Faz 9 bitti, Faz 10 (protokol dalgaları) TAMAMEN BİTTİ**
-— dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
+Comm SPA'sında **Faz 9 bitti; Faz 10 (protokol dalgaları) SÜRÜYOR** —
+`interfaces-framing` domain'i bitti, öteki yedi domain'de 67 kanonik kayıt
+duruyor. (Bu başlık 2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle
+`interfaces-framing`in bittiğini kastediyordu ama fazın tamamı gibi
+okunuyordu — 2026-08-22'de düzeltildi.)
+
+Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
 Initialization Dashboard), dalga 10'un 2026-08-21'de biten alt-dalgaları:
 10a (SLIP + COBS), 10b (KISS + PPP), 10c (HDLC + SDLC), 10d (XMODEM +
@@ -53,10 +58,25 @@ Delimiter-Based/Length-Based Protocol — kullanıcı kararıyla
 `ProtocolFramingSchema` GENİŞLETİLMEDİ, 3'ü mevcut 5 framing türüyle,
 Delimiter-Based Faz 6'nın hazır `hdlc-flag` motoruyla çözüldü).
 `framing-stream-protocols` ailesindeki 17 kaydın tamamı artık `ready`/
-alias. Katalogdaki **172 kaydın 58'i `ready`, 9'u `partial`, 105'i hâlâ
-`planned`**; registry 66 kayıt taşıyor. Dalga brifleri
-`docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü
-`brief-faz10-dalga10.md`de.
+alias.
+
+**Dalga 11 (2026-08-22 kapandı)** — `interfaces-framing`in kalan dört ailesi,
+23 protokol: 11a one-wire · 11b spi/quad-spi/octal-spi · 11c i2c · 11d
+rs-485/rs-422 · 11e uart/rs-232 · 11f ttl-uart/cmos-uart · 11g current-loop/
+4-20-ma · 11h can-phy/lin-phy/flexray-phy · 11i smbus/pmbus · 11j usb ·
+11k ethernet-interface/single-pair-ethernet · #11 microwire/i3c. Son alt-dalga
+paylaşılan bir kanal açtı: **`ProtocolPlugin.decodeOptions`** — çerçeveden
+çıkarılamayan parametre (Microwire'ın opcode/adres/word genişlikleri, I3C'nin
+çerçeve türü) artık kullanıcıdan alınıyor, tahmin edilmiyor. Kanal PMBus
+VOUT_MODE üssü, quad-spi dummy cycle ve 1-Wire endianness için de açık duruyor.
+
+**Katalog sayıları (alias'lar çözülmüş hâliyle):** 172 kaydın **89'u `ready`,
+15'i `partial`, 68'i `planned`**. Ham `status` alanı 75/15/82 gösterir — aradaki
+fark, kanonik kaydı `ready` olan 14 alias kaydından gelir. Durum rozeti her
+zaman `resolveStatus()`ten okunur.
+
+Dalga brifleri `docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü
+`brief-faz10-dalga10.md`de, dalga 11'inki `brief-faz10-dalga11.md`de.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

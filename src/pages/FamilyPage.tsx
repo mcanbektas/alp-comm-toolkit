@@ -6,6 +6,7 @@ import type { ImplementationStatus, ProtocolLayer } from '@/app/catalog';
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import type { TranslationKey } from '@/translations';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { resolveStatus } from '@/protocols/pluginBinding';
 import { NotFoundPage } from './NotFoundPage';
 
 /**
@@ -94,7 +95,16 @@ export function FamilyPage(): ReactElement {
               className="flex h-full flex-col gap-2 rounded-token border border-line bg-surface p-4 hover:border-line-strong hover:bg-raised focus-visible:ring-2 focus-visible:ring-accent"
             >
               <span className="font-display text-base font-semibold text-text">{protocol.name}</span>
-              <ProtocolBadges layer={protocol.layer} status={protocol.status} />
+              {/*
+                Rozet alias zincirinin SONUNDAN gelir, kaydın ham `status`undan
+                değil — `ProtocolPage` (`resolveStatus`) zaten böyle yapıyordu
+                ve ikisi ayrışmıştı: alias kartı listede "Planlandı", tek tık
+                sonra kendi sayfasında "Hazır" gösteriyordu. 15 alias kaydın
+                14'ü bu durumdaydı (ubx, rtcm, canopen, mqtt, coap, m-bus,
+                modbus-rtu/tcp, nmea, j1939 …) — hepsinin çalışan bir motoru
+                var, yalnız kanonik kayıt başka domain'de duruyor.
+              */}
+              <ProtocolBadges layer={protocol.layer} status={resolveStatus(protocol)} />
               <span className="text-sm text-muted">{protocol.summary}</span>
             </Link>
           </li>

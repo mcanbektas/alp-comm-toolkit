@@ -125,8 +125,13 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **82'si hâlâ `status: 'planned'`** (75 `ready`, 15 `partial`).
-  Sayı Faz 10 dalga 11'in sonunda (Peripheral Buses ailesinin son iki kaydı
-  microwire + i3c bağlanınca) güncellendi; dalga 11a–11k boyunca güncellenmemişti.
+- Katalogdaki 172 kaydın **ham `status` dağılımı 75 `ready` / 82 `planned` / 15 `partial`**,
+  ama ham sayı yanıltıcı: 15 alias kaydın 14'ünde `status` `planned` yazarken kanonik
+  kayıt `ready`. Alias zinciri çözülünce **89 `ready` / 68 `planned` / 15 `partial`**;
+  gerçekten yapılacak iş **67 kanonik kayıt** (network-ethernet 19, industrial-automation 16,
+  automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1).
+  **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
+  aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
+  dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).
   O sekmeler görünür ama içleri "planlandı" bildirimi taşır. **Boş kart basmak yasak** —
   bir sekme açılıyorsa ya gerçek bir motoru vardır ya da neyin geleceğini söyler.
