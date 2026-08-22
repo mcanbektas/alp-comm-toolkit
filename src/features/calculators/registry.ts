@@ -56,6 +56,10 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'spi-timing', category: 'timing', nameKey: 'calc.spiTiming.name', summaryKey: 'calc.spiTiming.summary' },
   { id: 'i2c-timing', category: 'timing', nameKey: 'calc.i2cTiming.name', summaryKey: 'calc.i2cTiming.summary' },
   { id: 'pmbus-linear', category: 'timing', nameKey: 'calc.pmbusLinear.name', summaryKey: 'calc.pmbusLinear.summary' },
+  // DIRECT format AYRI kayıt: Linear11/16 çerçeveden çözülebilir, DIRECT ise
+  // cihazın m/b/R katsayılarını gerektirir (PMBus Part II §7.4.3). Tek forma
+  // sıkıştırmak "katsayı nereden geliyor" sorusunu gizlerdi.
+  { id: 'pmbus-direct', category: 'timing', nameKey: 'calc.pmbusDirect.name', summaryKey: 'calc.pmbusDirect.summary' },
   // LoRa PHY: katalogdaki `wireless-iot/lora-lpwan/lora` kaydı çerçeve ÇÖZMEZ,
   // hesap makinesidir (`tabs` içinde `decode` yok) — motoru bu yüzden protokol
   // eklentisi olarak değil, buradaki zamanlama araçlarının yanında yaşar.

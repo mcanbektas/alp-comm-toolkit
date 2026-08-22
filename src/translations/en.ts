@@ -232,6 +232,16 @@ export const en: TranslationDictionary = {
   'calc.field.readByte': 'Read byte',
   'calc.field.riseTime': 'Rise time',
   'calc.field.pmbusDecode': 'Decode',
+  'calc.field.directFormat': 'DIRECT format',
+  'calc.field.directWord': 'Raw Y word (hex/decimal)',
+  'calc.field.directSlope': 'm (slope)',
+  'calc.field.directOffset': 'b (offset)',
+  'calc.field.directExponent': 'R (decimal exponent)',
+  'calc.field.coefficientBytes': 'COEFFICIENTS response (5 hex bytes: m low, m high, b low, b high, R)',
+  'calc.field.voutModeByte': 'VOUT_MODE byte (hex/decimal)',
+  'calc.field.voutModeMode': 'Mode',
+  'calc.field.voutModeRelative': 'Absolute / Relative',
+  'calc.field.voutModeExponent': 'ULINEAR16 exponent',
   'calc.field.pmbusEncode': 'Encode',
   'calc.field.linear11Word': 'Linear11 word (hex/decimal)',
   'calc.field.decodedValue': 'Decoded value',
@@ -407,6 +417,9 @@ export const en: TranslationDictionary = {
   'calc.i2cTiming.summary': 'Computes transfer time, 7-bit address bytes and pull-up rise time.',
   'calc.pmbusLinear.name': 'PMBus Linear11 / Linear16',
   'calc.pmbusLinear.summary': 'Decodes and encodes PMBus Linear11 and Linear16 telemetry codes.',
+  'calc.pmbusDirect.name': 'PMBus DIRECT format',
+  'calc.pmbusDirect.summary':
+    "Decodes and encodes the PMBus DIRECT format with the device's m/b/R coefficients; also parses a COEFFICIENTS response and the VOUT_MODE byte.",
   'calc.loraAirtime.name': 'LoRa Time on Air / airtime',
   'calc.loraAirtime.summary':
     'Computes symbol time, Time on Air, bit rate and duty cycle budget from the PHY parameter set (Semtech SX1276 datasheet Rev.7).',
@@ -3908,6 +3921,54 @@ export const en: TranslationDictionary = {
   'protocol.i2c.example.busProbe.name': 'Bus scan (address only)',
   'protocol.i2c.example.busProbe.description':
     "Just the Address byte (0x1E write) — a present/absent probe, the spec summary's magnetometer example.",
+
+  // --- SMBus / PMBus (phase 10 wave 11i) ---
+  'protocol.smbus.error.emptyFrame': 'The buffer must contain at least 1 byte (Address).',
+  'protocol.smbus.error.aborted': 'Parsing was cancelled.',
+  'protocol.smbus.warning.pecInferred':
+    'The last byte matched the CRC-8 of the preceding bytes and was taken as the PEC. SMBus defines every protocol both with and without a PEC, so the match may be a coincidence (1 in 256).',
+  'protocol.smbus.warning.ambiguousShape':
+    'These bytes fit more than one transaction type. The fixed-size reading was chosen; the alternative is listed under the field table.',
+  'protocol.smbus.warning.unknownShape':
+    "The byte sequence matches none of the transaction types the spec lists — it may be a partial capture or a different device convention.",
+  'protocol.smbus.documentation.summary':
+    'A closed set of transactions on top of the I²C electrical layer: eleven types from Quick Command to Block Write-Block Read Process Call, each optionally carrying a CRC-8 PEC computed over every byte including the addresses. Timeout and clock-LOW monitoring are bit-level and are not decoded here.',
+  'protocol.smbus.example.readWordPec.name': 'Read Word + PEC (spec example)',
+  'protocol.smbus.example.readWordPec.description':
+    'Address+W, command 0x8B, repeated START, address+R, two data bytes and the PEC. The checksum covers the address bytes too.',
+  'protocol.smbus.example.writeByte.name': 'Write Byte (no PEC)',
+  'protocol.smbus.example.writeByte.description':
+    'Address+W, command 0x00, one data byte. The PEC-less form of the same skeleton — the panel still shows the calculated PEC.',
+  'protocol.smbus.example.quickCommand.name': 'Quick Command',
+  'protocol.smbus.example.quickCommand.description':
+    'Address byte only: no command, no data — the R/W bit itself triggers the device.',
+  'protocol.smbus.example.blockReadPec.name': 'Block Read + PEC',
+  'protocol.smbus.example.blockReadPec.description':
+    'After the repeated START a count byte (0x04) and four data bytes; the count matches the byte total, so it is classified as a block read.',
+
+  'protocol.pmbus.error.tooShort': 'The buffer must contain at least 2 bytes (Address + Command Code).',
+  'protocol.pmbus.error.aborted': 'Parsing was cancelled.',
+  'protocol.pmbus.warning.unknownCommand':
+    'The command code is not in the built-in map. The PMBus command set extends per device; the data bytes are shown raw.',
+  'protocol.pmbus.warning.voutModeRequired':
+    'The exponent for output voltage commands is not carried in the frame; it comes from VOUT_MODE. No exponent was invented — the raw mantissa is shown.',
+  'protocol.pmbus.warning.faultSet': 'At least one fault or warning bit is set in the STATUS register.',
+  'protocol.pmbus.warning.pecInferred':
+    'The last byte matched the CRC-8 of the preceding bytes and was taken as the PEC (1 in 256 chance of coincidence).',
+  'protocol.pmbus.documentation.summary':
+    'The command protocol of digital power devices on top of the SMBus packet skeleton: command codes resolve to names, telemetry unfolds from Linear11 into volts, amps and degrees, STATUS_BYTE/STATUS_WORD expand into a bit tree, and a COEFFICIENTS response resolves into the m/b/R coefficients of the DIRECT format.',
+  'protocol.pmbus.example.readVin.name': 'READ_VIN (Linear11, 12 V)',
+  'protocol.pmbus.example.readVin.description':
+    'Read Word: command 0x88, data low byte first (0x00 0xD3 → 0xD300) → N=-6, Y=768, i.e. 12 V. A PEC closes the frame.',
+  'protocol.pmbus.example.statusWord.name': 'STATUS_WORD 0x0840 (spec example)',
+  'protocol.pmbus.example.statusWord.description':
+    "Low byte 0x40 → OFF, high byte 0x08 → PG_STATUS#. The bit-tree reading of the spec summary's own example.",
+  'protocol.pmbus.example.voutMode.name': 'VOUT_MODE 0x17',
+  'protocol.pmbus.example.voutMode.description':
+    'Read Byte: mode bits 00b (ULINEAR16), parameter 10111b → exponent -9. Output voltage readings take their exponent from here.',
+  'protocol.pmbus.example.coefficients.name': 'COEFFICIENTS (Block Write-Block Read)',
+  'protocol.pmbus.example.coefficients.description':
+    'The write side asks for the read coefficients of command 0x8B; the read side returns m=1, b=-100, R=3.',
 
   // --- RS-485 / RS-422 (phase 10 wave 11d) ---
   'protocol.rs485.error.emptyFrame': 'The buffer must contain at least 1 byte.',

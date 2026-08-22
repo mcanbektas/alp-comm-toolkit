@@ -234,6 +234,16 @@ export const tr = {
   'calc.field.readByte': 'Okuma baytı',
   'calc.field.riseTime': 'Yükselme süresi',
   'calc.field.pmbusDecode': 'Çöz',
+  'calc.field.directFormat': 'DIRECT format',
+  'calc.field.directWord': 'Ham Y sözcüğü (hex/ondalık)',
+  'calc.field.directSlope': 'm (eğim)',
+  'calc.field.directOffset': 'b (ofset)',
+  'calc.field.directExponent': 'R (onluk üs)',
+  'calc.field.coefficientBytes': 'COEFFICIENTS yanıtı (5 bayt hex: m alt, m üst, b alt, b üst, R)',
+  'calc.field.voutModeByte': 'VOUT_MODE baytı (hex/ondalık)',
+  'calc.field.voutModeMode': 'Mod',
+  'calc.field.voutModeRelative': 'Absolute / Relative',
+  'calc.field.voutModeExponent': 'ULINEAR16 üssü',
   'calc.field.pmbusEncode': 'Kodla',
   'calc.field.linear11Word': 'Linear11 sözcüğü (hex/ondalık)',
   'calc.field.decodedValue': 'Çözülen değer',
@@ -409,6 +419,9 @@ export const tr = {
   'calc.i2cTiming.summary': 'Aktarım süresini, 7-bit adres baytlarını ve pull-up yükselme süresini hesaplar.',
   'calc.pmbusLinear.name': 'PMBus Linear11 / Linear16',
   'calc.pmbusLinear.summary': 'PMBus Linear11 ve Linear16 telemetri kodlarını çözer ve kodlar.',
+  'calc.pmbusDirect.name': 'PMBus DIRECT format',
+  'calc.pmbusDirect.summary':
+    'PMBus DIRECT formatını cihazın m/b/R katsayılarıyla çözer ve kodlar; COEFFICIENTS yanıtını ve VOUT_MODE baytını da ayrıştırır.',
   'calc.loraAirtime.name': 'LoRa Time on Air / airtime',
   'calc.loraAirtime.summary':
     'PHY parametre setinden sembol süresini, Time on Air’ı, bit hızını ve duty cycle bütçesini hesaplar (Semtech SX1276 datasheet Rev.7).',
@@ -3896,6 +3909,54 @@ export const tr = {
   'protocol.i2c.example.busProbe.name': 'Bus tarama (yalnız adres)',
   'protocol.i2c.example.busProbe.description':
     'Yalnız Address baytı (0x1E yazma) — cihaz var/yok kontrolü, spec özetinin magnetometer örneği.',
+
+  // --- SMBus / PMBus (faz 10 dalga 11i) ---
+  'protocol.smbus.error.emptyFrame': 'Arabellek en az 1 bayt (Address) içermeli.',
+  'protocol.smbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.smbus.warning.pecInferred':
+    'Son bayt gövdenin CRC-8 sağlamasıyla eşleşti ve PEC kabul edildi. SMBus her protokolü PEC\'li ve PEC\'siz tanımlar; eşleşme tesadüf de olabilir (1/256).',
+  'protocol.smbus.warning.ambiguousShape':
+    'Bu bayt dizisi birden çok transaction türüne uyuyor. Sabit boyutlu yorum seçildi, alternatifi alan tablosunun altında.',
+  'protocol.smbus.warning.unknownShape':
+    'Bayt dizisi spec\'in saydığı transaction türlerinden hiçbirine uymuyor — kısmi yakalama ya da farklı bir cihaz konvansiyonu olabilir.',
+  'protocol.smbus.documentation.summary':
+    'I²C elektriksel altyapısı üzerine kapalı bir transaction kümesi: Quick Command\'dan Block Write-Block Read Process Call\'a kadar 11 tür, adres baytları dahil hesaplanan CRC-8 PEC ile. Timeout ve clock-LOW izleme bit seviyesindedir, bu sayfada çözülmez.',
+  'protocol.smbus.example.readWordPec.name': 'Read Word + PEC (spec örneği)',
+  'protocol.smbus.example.readWordPec.description':
+    'Adres+W, komut 0x8B, repeated START, adres+R, iki veri baytı ve PEC. Sağlama adres baytları dahil hesaplanır.',
+  'protocol.smbus.example.writeByte.name': 'Write Byte (PEC yok)',
+  'protocol.smbus.example.writeByte.description':
+    'Adres+W, komut 0x00, tek veri baytı. Aynı iskeletin PEC\'siz biçimi — panel yine de hesaplanan PEC\'i gösterir.',
+  'protocol.smbus.example.quickCommand.name': 'Quick Command',
+  'protocol.smbus.example.quickCommand.description':
+    'Yalnız adres baytı: veri yok, komut yok — cihazı R/W bitiyle tetikler.',
+  'protocol.smbus.example.blockReadPec.name': 'Block Read + PEC',
+  'protocol.smbus.example.blockReadPec.description':
+    'Repeated START sonrası sayaç baytı (0x04) ve dört veri baytı; sayaç veri sayısını doğruladığı için blok okuması olarak sınıflanır.',
+
+  'protocol.pmbus.error.tooShort': 'Arabellek en az 2 bayt (Address + Command Code) içermeli.',
+  'protocol.pmbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.pmbus.warning.unknownCommand':
+    'Komut kodu yerleşik haritada yok. PMBus komut kümesi cihaz başına genişler; veri baytları ham gösteriliyor.',
+  'protocol.pmbus.warning.voutModeRequired':
+    'Çıkış gerilimi komutlarının üssü çerçevede taşınmaz, VOUT_MODE komutundan bilinir. Üs uydurulmadı — ham mantissa gösteriliyor.',
+  'protocol.pmbus.warning.faultSet': 'STATUS kaydında en az bir arıza/uyarı biti set.',
+  'protocol.pmbus.warning.pecInferred':
+    'Son bayt gövdenin CRC-8 sağlamasıyla eşleşti ve PEC kabul edildi (1/256 tesadüf payı).',
+  'protocol.pmbus.documentation.summary':
+    'SMBus paket iskeleti üzerine güç cihazlarının komut protokolü: komut kodu adına çevrilir, telemetri Linear11 olarak volt/amper/dereceye açılır, STATUS_BYTE/STATUS_WORD bit ağacına dökülür ve COEFFICIENTS yanıtı DIRECT formatın m/b/R katsayılarına ayrıştırılır.',
+  'protocol.pmbus.example.readVin.name': 'READ_VIN (Linear11, 12 V)',
+  'protocol.pmbus.example.readVin.description':
+    'Read Word: komut 0x88, veri düşük bayt önce (0x00 0xD3 → 0xD300) → N=-6, Y=768, yani 12 V. Sonda PEC var.',
+  'protocol.pmbus.example.statusWord.name': 'STATUS_WORD 0x0840 (spec örneği)',
+  'protocol.pmbus.example.statusWord.description':
+    'Alt bayt 0x40 → OFF, üst bayt 0x08 → PG_STATUS#. Spec özetinin kendi örneğinin bit ağacı karşılığı.',
+  'protocol.pmbus.example.voutMode.name': 'VOUT_MODE 0x17',
+  'protocol.pmbus.example.voutMode.description':
+    'Read Byte: mod bitleri 00b (ULINEAR16), parametre 10111b → -9 üssü. Çıkış gerilimi okumalarının üssü buradan gelir.',
+  'protocol.pmbus.example.coefficients.name': 'COEFFICIENTS (Block Write-Block Read)',
+  'protocol.pmbus.example.coefficients.description':
+    'Yazma tarafı komut 0x8B için okuma katsayılarını ister, okuma tarafı m=1, b=-100, R=3 döner.',
 
   // --- RS-485 / RS-422 (faz 10 dalga 11d) ---
   'protocol.rs485.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',

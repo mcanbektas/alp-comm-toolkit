@@ -23,7 +23,14 @@ import { VehiclePhyTool } from '@/features/calculators/tools/vehiclePhyTools';
 import { LogicLevelCompatibilityTool } from '@/features/calculators/tools/logicLevelTools';
 import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
 import { BytesEncodingTool, HexAsciiTool, HexBinaryTool, UrlEncodingTool, Utf8ByteViewerTool } from '@/features/calculators/tools/textBytesTools';
-import { I2cTimingTool, PmbusLinearTool, Rs485TimingTool, SpiTimingTool, UartTimingTool } from '@/features/calculators/tools/timingTools';
+import {
+  I2cTimingTool,
+  PmbusDirectTool,
+  PmbusLinearTool,
+  Rs485TimingTool,
+  SpiTimingTool,
+  UartTimingTool,
+} from '@/features/calculators/tools/timingTools';
 import { NotFoundPage } from './NotFoundPage';
 
 /**
@@ -66,6 +73,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'spi-timing': () => <SpiTimingTool />,
   'i2c-timing': () => <I2cTimingTool />,
   'pmbus-linear': () => <PmbusLinearTool />,
+  'pmbus-direct': () => <PmbusDirectTool />,
   'lora-airtime': () => <LoraAirtimeTool />,
   'lora-link-budget': () => <LoraLinkBudgetTool />,
   'lora-battery': () => <LoraBatteryTool />,

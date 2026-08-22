@@ -12,13 +12,17 @@ import {
   calculateRs485UnitLoad,
   calculateSpiTransferTime,
   calculateUartTiming,
+  decodeDirect,
   decodeLinear11,
   decodeLinear16,
+  decodeVoutMode,
+  encodeDirect,
   encodeI2c7BitAddress,
   encodeLinear11,
+  parseDirectCoefficients,
   qspiThroughput,
 } from '@/protocol-core';
-import type { UartParity } from '@/protocol-core';
+import type { DirectCoefficients, UartParity } from '@/protocol-core';
 import { ErrorNotice, SectionSwitch, StatTable, formatSeconds } from './shared';
 
 const PARITY_OPTIONS = [
@@ -429,6 +433,158 @@ export function PmbusLinearTool(): ReactElement {
           <NumberField id="calc-linear16exponent" label={t('calc.field.exponent')} value={linear16Exponent} onChange={setLinear16Exponent} />
         </div>
         {decoded16 === null ? <ErrorNotice message={t('calc.error.invalidInput')} /> : <StatTable rows={[[t('calc.field.decodedValue'), String(decoded16)]]} />}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PMBus DIRECT format aracı — Faz 10 dalga 11i. `PmbusLinearTool`dan AYRI bir
+ * kayıt olmasının sebebi: Linear11/16 çerçevenin kendisinden çözülebilir,
+ * DIRECT ise cihazın m/b/R katsayılarını GEREKTİRİR (spec Part II §7.4.3:
+ * katsayılar ya COEFFICIENTS komutuyla okunur ya datasheet'ten girilir).
+ * İkisini tek forma sıkıştırmak "katsayı nereden geliyor" sorusunu gizlerdi.
+ *
+ * Üç bölüm: ham word → gerçek değer, gerçek değer → word, COEFFICIENTS (30h)
+ * yanıtının 5 baytı → m/b/R.
+ */
+export function PmbusDirectTool(): ReactElement {
+  const { t } = useTranslation();
+  const [direction, setDirection] = useState<PmbusDirection>('decode');
+  const [word, setWord] = useState('0x2EE0');
+  const [realValue, setRealValue] = useState('12');
+  const [slope, setSlope] = useState('1');
+  const [offset, setOffset] = useState('0');
+  const [exponent, setExponent] = useState('3');
+  const [coefficientBytes, setCoefficientBytes] = useState('01 00 9C FF 03');
+  const [voutModeByte, setVoutModeByte] = useState('0x17');
+
+  const coefficients: DirectCoefficients = {
+    m: Number(slope),
+    b: Number(offset),
+    r: Number(exponent),
+  };
+
+  const decoded = useMemo(() => {
+    if (direction !== 'decode') return undefined;
+    try {
+      return decodeDirect(Number(word), coefficients);
+    } catch {
+      return null;
+    }
+  }, [direction, word, slope, offset, exponent]);
+
+  const encoded = useMemo(() => {
+    if (direction !== 'encode') return undefined;
+    try {
+      return encodeDirect(Number(realValue), coefficients);
+    } catch {
+      return null;
+    }
+  }, [direction, realValue, slope, offset, exponent]);
+
+  const parsedCoefficients = useMemo(() => {
+    try {
+      const bytes = Uint8Array.from(
+        coefficientBytes
+          .trim()
+          .split(/[\s,]+/)
+          .filter((token) => token.length > 0)
+          .map((token) => Number.parseInt(token, 16)),
+      );
+      if (bytes.some((byte) => Number.isNaN(byte))) return null;
+      return parseDirectCoefficients(bytes);
+    } catch {
+      return null;
+    }
+  }, [coefficientBytes]);
+
+  const voutMode = useMemo(() => {
+    const value = Number(voutModeByte);
+    if (!Number.isInteger(value) || value < 0 || value > 0xff) return null;
+    return decodeVoutMode(value);
+  }, [voutModeByte]);
+
+  const directionOptions: Array<{ value: PmbusDirection; label: string }> = [
+    { value: 'decode', label: t('calc.field.pmbusDecode') },
+    { value: 'encode', label: t('calc.field.pmbusEncode') },
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
+          {t('calc.field.directFormat')}
+        </h2>
+        <SectionSwitch value={direction} onChange={setDirection} options={directionOptions} />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <NumberField id="calc-direct-m" label={t('calc.field.directSlope')} value={slope} onChange={setSlope} />
+          <NumberField id="calc-direct-b" label={t('calc.field.directOffset')} value={offset} onChange={setOffset} />
+          <NumberField id="calc-direct-r" label={t('calc.field.directExponent')} value={exponent} onChange={setExponent} />
+        </div>
+        {direction === 'decode' ? (
+          <>
+            <TextField id="calc-direct-word" label={t('calc.field.directWord')} value={word} onChange={setWord} monospace />
+            {decoded === null ? (
+              <ErrorNotice message={t('calc.error.invalidInput')} />
+            ) : (
+              decoded !== undefined && <StatTable rows={[[t('calc.field.decodedValue'), String(Number(decoded.toPrecision(6)))]]} />
+            )}
+          </>
+        ) : (
+          <>
+            <NumberField id="calc-direct-value" label={t('calc.field.value')} value={realValue} onChange={setRealValue} />
+            {encoded === null ? (
+              <ErrorNotice message={t('calc.error.invalidInput')} />
+            ) : (
+              encoded !== undefined && (
+                <StatTable rows={[[t('calc.field.encodedWord'), `0x${encoded.toString(16).toUpperCase().padStart(4, '0')}`]]} />
+              )
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">COEFFICIENTS (30h)</h2>
+        <TextField
+          id="calc-direct-coefficients"
+          label={t('calc.field.coefficientBytes')}
+          value={coefficientBytes}
+          onChange={setCoefficientBytes}
+          monospace
+        />
+        {parsedCoefficients === null ? (
+          <ErrorNotice message={t('calc.error.invalidInput')} />
+        ) : (
+          <StatTable
+            rows={[
+              [t('calc.field.directSlope'), String(parsedCoefficients.m)],
+              [t('calc.field.directOffset'), String(parsedCoefficients.b)],
+              [t('calc.field.directExponent'), String(parsedCoefficients.r)],
+            ]}
+          />
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">VOUT_MODE (20h)</h2>
+        <TextField id="calc-direct-voutmode" label={t('calc.field.voutModeByte')} value={voutModeByte} onChange={setVoutModeByte} monospace />
+        {voutMode === null ? (
+          <ErrorNotice message={t('calc.error.invalidInput')} />
+        ) : (
+          <StatTable
+            rows={[
+              [t('calc.field.voutModeMode'), voutMode.mode.toUpperCase()],
+              [t('calc.field.voutModeRelative'), voutMode.relative ? 'Relative' : 'Absolute'],
+              [
+                t('calc.field.voutModeExponent'),
+                // ULINEAR16 dışındaki modlarda parametre EXPONENT DEĞİLDİR — sayı basılmaz.
+                voutMode.exponent === undefined ? '—' : String(voutMode.exponent),
+              ],
+            ]}
+          />
+        )}
       </div>
     </div>
   );

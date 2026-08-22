@@ -441,7 +441,20 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'System management bus built on I²C electricals that fixes a closed set of transaction types plus PEC error checking and explicit bus timeout behaviour.',
           layer: 'data-link',
-          status: 'planned',
+          // dalga 11i: spec özetinin saydığı 11 transaction türü bayt sayısı +
+          // repeated-START konumundan ayrılıyor, PEC paneli (kapsam/hesaplanan/
+          // alınan/PASS) dolu. PEC'in düz CRC-8 olduğu SMBus 3.1 §5.4'ten
+          // doğrulandı. Timeout/clock-LOW izleme KAPSAM DIŞI — "Timeout
+          // Monitor" aracının motoru yok (onewire'ın aspirasyonel tools
+          // listesiyle aynı durum).
+          status: 'ready',
+          pluginId: 'smbus',
+          // I²C elektriksel temeli: SMBus aynı hatları kullanır.
+          calculatorIds: ['i2c-timing'],
+          related: [
+            'interfaces-framing/peripheral-buses/i2c',
+            'interfaces-framing/peripheral-buses/pmbus',
+          ],
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Quick Command',
@@ -464,8 +477,23 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'SMBus-based command protocol for digital power devices, turning raw Linear11/Linear16/Direct words from converters and PSUs into volts, amps, degrees and fault bits.',
           layer: 'application',
-          status: 'planned',
-          tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'definitions', 'examples'],
+          // dalga 11i: SMBus iskeleti (`smbusCore.ts`) + komut haritası
+          // (Table 31'den, spec özetinin "Yaygın komutlar" listesi) +
+          // Linear11 / ULINEAR16 / STATUS bit ağacı / COEFFICIENTS→m,b,R.
+          // DIRECT format motoru `timing/pmbus.ts`e eklendi (PMBus Part II
+          // Rev 1.3.1 §7.4). ULINEAR16 üssü tek çerçeveden BİLİNEMEZ, o yüzden
+          // uydurulmuyor — sayfa "VOUT_MODE gerekli" diyor.
+          status: 'ready',
+          pluginId: 'pmbus',
+          calculatorIds: ['pmbus-linear', 'pmbus-direct'],
+          related: [
+            'interfaces-framing/peripheral-buses/smbus',
+            'interfaces-framing/peripheral-buses/i2c',
+          ],
+          // 'timing' sekmesi hesaplayıcı bağlantılarının TEK görünme yeri
+          // (ProtocolPage kuralı, dalga 11g'de öğrenildi) — Linear/Direct
+          // araçları bu yüzden buradan asılı.
+          tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'definitions', 'examples'],
           tools: [
             'Device Explorer',
             'Command Browser',

@@ -436,6 +436,20 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'i2c', () =>
     import('./serial/peripheral-buses/i2c').then((module) => module.i2cPlugin),
   );
+  // SMBus / PMBus — Faz 10 dalga 11i: ikisi de `smbusCore.ts` paylaşılan
+  // iskeletini kullanır (adres + repeated START + PEC). SMBus sayfası spec
+  // özetinin saydığı 11 transaction türünü ayırır ve PEC panelini besler
+  // (PEC'in düz CRC-8 olduğu SMBus 3.1 §5.4'ten DOĞRULANDI, varsayılmadı —
+  // smbusCore.ts dosya başı). PMBus sayfası bunun üstüne komut haritasını,
+  // Linear11/ULINEAR16/STATUS bit ağacını ve COEFFICIENTS→m/b/R çözümünü
+  // ekler; DIRECT format motoru `timing/pmbus.ts`e eklendi (PMBus Part II
+  // Rev 1.3.1 §7.4, dış kaynak). Timeout/bus-stuck izleme KAPSAM DIŞI.
+  registerOnce(registry, 'smbus', () =>
+    import('./serial/peripheral-buses/smbus').then((module) => module.smbusPlugin),
+  );
+  registerOnce(registry, 'pmbus', () =>
+    import('./serial/peripheral-buses/pmbus').then((module) => module.pmbusPlugin),
+  );
   // RS-485 / RS-422 — Faz 10 dalga 11d: elektriksel katmanlar, decode'ları
   // ortak `uartLineCore.ts` üzerinden UART karakter hattı görünümü (8N1
   // varsayımı orada gerekçeli). RS-485 ayrıca half-duplex echo şüphesini
