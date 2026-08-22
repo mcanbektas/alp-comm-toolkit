@@ -159,6 +159,19 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mdns', () =>
     import('./network/dns/mdns').then((module) => module.mdnsPlugin),
   );
+  // NTP/PTP — dalga 12d: `time-management` ailesinin saat yarısı. Brief ortak
+  // bir `networkTimestamp` kaldıracı öngörmüştü ama iki damga biçimi BİT
+  // DÜZEYİNDE farklı çıktı (NTP 64 bit / 2^-32 kesir / epoch 1900 UTC · PTP
+  // 80 bit / tam sayı nanosaniye / epoch 1970 TAI) — 12b'deki LLDP/DHCP "TLV"
+  // durumunun aynısı. İki ayrı okuyucu yazıldı (`ntpTimestamp.ts`,
+  // `ptpTimestamp.ts`), paylaşılan modül AÇILMADI; gerekçe iki dosyanın
+  // başında.
+  registerOnce(registry, 'ntp', () =>
+    import('./network/time/ntp').then((module) => module.ntpPlugin),
+  );
+  registerOnce(registry, 'ptp', () =>
+    import('./network/time/ptp').then((module) => module.ptpPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>

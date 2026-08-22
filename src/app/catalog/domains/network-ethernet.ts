@@ -403,7 +403,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The four-timestamp client/server time protocol that derives round-trip delay and clock offset from a single request/response pair.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ntp',
           tabs: ['overview', 'decode', 'build', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Packet Decoder',
@@ -422,7 +423,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'IEEE 1588 hardware-assisted synchronisation reaching sub-microsecond accuracy in well-designed networks, used for motion control, power and audio-video bridging.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ptp',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Message Type Decoder',

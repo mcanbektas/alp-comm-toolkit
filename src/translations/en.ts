@@ -3005,6 +3005,98 @@ export const en: TranslationDictionary = {
   'protocol.dhcp.example.badMagicCookie.description':
     "The cookie's first byte is deliberately corrupted — reports value-out-of-range, options are not processed.",
 
+  // --- NTP ---
+  'protocol.ntp.error.frameTooShort': 'The frame must be at least as long as the fixed 48-byte NTP header.',
+  'protocol.ntp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.ntp.error.aborted': 'Parsing was cancelled.',
+  'protocol.ntp.warning.leapAlarm':
+    'Leap Indicator 3 (alarm): the server is unsynchronised, its timestamps should not be trusted.',
+  'protocol.ntp.warning.unknownMode': 'Mode is outside the narrow set (1-6) — 0 is reserved, 7 is vendor-private.',
+  'protocol.ntp.warning.unexpectedVersion':
+    'Version is not 4. The header layout matches v3, so parsing continued; field names follow v4.',
+  'protocol.ntp.warning.kissOfDeath':
+    'Stratum 0: the Reference ID is a kiss code (DENY/RATE/RSTR…), the server is refusing the request.',
+  'protocol.ntp.warning.stratumUnsynchronized': 'Stratum 16: the clock is unsynchronised.',
+  'protocol.ntp.warning.stratumReserved': 'Stratum 17-255 is reserved and carries no defined meaning.',
+  'protocol.ntp.warning.referenceIdMayNotBeAddress':
+    'The Reference ID is shown as an IPv4 address, but in IPv6 deployments these four bytes are the first four bytes of the address MD5 digest, not an address (RFC 5905 §7.3).',
+  'protocol.ntp.warning.timestampEra1':
+    'The most significant bit of the seconds field is clear — per the RFC rule, era 1 (after 2036-02-07) was assumed. The era cannot be proven from the frame.',
+  'protocol.ntp.warning.timestampUnset': 'All 64 bits are zero: the field is unset, not the year 1900.',
+  'protocol.ntp.warning.unknownAuthenticator':
+    'The trailing byte count matches none of the recognised authenticator lengths (4 / 20 / 24).',
+  'protocol.ntp.warning.serverTimeNegative':
+    'The Transmit timestamp precedes the Receive timestamp: the server clock stepped backwards, or this is not a response.',
+  'protocol.ntp.warning.fourTimestampNeedsT4':
+    'Round Trip Delay and Clock Offset were not derived: T4 is the client local clock at reception and is never written into the packet. The four-timestamp model needs multi-packet analysis.',
+  'protocol.ntp.documentation.summary':
+    'The four-timestamp client/server time protocol (RFC 5905, NTPv4). The fixed 48-byte header is decoded field by field; the meaning of the Reference ID depends on the stratum (kiss code / reference clock identifier / upstream address). T3−T2 is derived from a single frame; delay and offset need T4 and therefore belong to an analyzer.',
+  'protocol.ntp.example.clientRequest.name': 'Client request (Mode 3)',
+  'protocol.ntp.example.clientRequest.description':
+    'Origin and Receive timestamps are zero — the unset path; only Transmit is filled.',
+  'protocol.ntp.example.serverResponse.name': 'Server response (Stratum 2)',
+  'protocol.ntp.example.serverResponse.description':
+    'The Reference ID is the upstream IPv4 address; T3−T2 ≈ 2 ms is derived.',
+  'protocol.ntp.example.stratum1Gps.name': 'Stratum 1 — GPS reference',
+  'protocol.ntp.example.stratum1Gps.description':
+    'The Reference ID is an ASCII reference clock identifier ("GPS"), not an address.',
+  'protocol.ntp.example.kissOfDeath.name': "Kiss-o'-Death (RATE)",
+  'protocol.ntp.example.kissOfDeath.description':
+    'Stratum 0 plus the "RATE" kiss code: the server is forcing the client to back off, with the leap alarm set.',
+  'protocol.ntp.example.truncated.name': 'Truncated frame (error path)',
+  'protocol.ntp.example.truncated.description': 'Shorter than 48 bytes — reports truncated-frame.',
+
+  // --- PTP ---
+  'protocol.ptp.error.frameTooShort': 'The frame must be at least as long as the common 34-byte PTP header.',
+  'protocol.ptp.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.ptp.error.aborted': 'Parsing was cancelled.',
+  'protocol.ptp.error.bodyTruncated': 'The body required by this message type is cut off at the end of the buffer.',
+  'protocol.ptp.warning.unknownMessageType':
+    'messageType matches none of the ten defined values — the body is shown raw.',
+  'protocol.ptp.warning.unexpectedVersion':
+    'versionPTP is not 2. The PTPv1 header layout is entirely different and this engine cannot decode it.',
+  'protocol.ptp.warning.messageLengthMismatch':
+    'messageLength disagrees with the actual frame length. Extra bytes may be transport padding; missing bytes are a real truncation.',
+  'protocol.ptp.warning.controlFieldMismatch':
+    'The legacy controlField contradicts the message type. The field is unused in v2, but the inconsistency signals a faulty implementation.',
+  'protocol.ptp.warning.twoStepIgnored':
+    'twoStepFlag is set but its behaviour is undefined for this message type — it was not interpreted as "Two-Step".',
+  'protocol.ptp.warning.timestampUnset':
+    'All 80 bits are zero: the field carries no timestamp. In two-step mode the real timestamp arrives in Follow_Up.',
+  'protocol.ptp.warning.timestampTai':
+    'The timestamp is on the TAI scale. Converting it to UTC requires the currentUtcOffset field carried in Announce.',
+  'protocol.ptp.warning.nanosecondsOutOfRange': 'nanosecondsField exceeds one second.',
+  'protocol.ptp.warning.unknownClockClass': 'clockClass is not one of the values named in IEEE 1588-2019 Table 4.',
+  'protocol.ptp.warning.unknownClockAccuracy': 'clockAccuracy is outside the Table 5 enumeration.',
+  'protocol.ptp.warning.unknownTimeSource': 'timeSource is outside the Table 6 enumeration.',
+  'protocol.ptp.warning.unknownTlvType': 'tlvType is outside the narrow set — its body was left raw.',
+  'protocol.ptp.warning.tlvOddLength': 'The TLV lengthField is odd; IEEE 1588-2019 §14.1.1 requires it to be even.',
+  'protocol.ptp.warning.tlvTruncated': 'A TLV declares a length larger than the bytes remaining in the buffer.',
+  'protocol.ptp.warning.tlvLimit': 'The TLV count hit the upper bound and the chain walk stopped.',
+  'protocol.ptp.warning.bmcaNeedsMultipleAnnounce':
+    'The BMCA data set (Priority1/ClockClass/ClockAccuracy/Variance/Priority2/ClockIdentity) was decoded, but deciding the Selected Grandmaster requires comparing Announce messages.',
+  'protocol.ptp.warning.pathDelayNeedsExchange':
+    'MeanPathDelay and OffsetFromMaster were not derived: t1/t2/t3/t4 travel in four separate messages and cannot come from a single frame.',
+  'protocol.ptp.documentation.summary':
+    'IEEE 1588-2019 (PTPv2.1) clock synchronisation. The common 34-byte header and the bodies of all ten message types are decoded field by field; correctionField is signed and scaled by nanoseconds × 2^16, and timestamps are 80 bits (48-bit seconds plus 32-bit nanoseconds, on the TAI scale). The TLV chain is walked at header level. BMCA selection and end-to-end delay are multi-message analyses.',
+  'protocol.ptp.example.syncTwoStep.name': 'Sync (two-step)',
+  'protocol.ptp.example.syncTwoStep.description':
+    'twoStepFlag is set and originTimestamp is zero — the real t1 arrives in Follow_Up.',
+  'protocol.ptp.example.followUp.name': 'Follow_Up with correctionField',
+  'protocol.ptp.example.followUp.description':
+    'preciseOriginTimestamp is filled; correctionField carries the 1250.5 ns accumulated by transparent clocks.',
+  'protocol.ptp.example.announce.name': 'Announce (BMCA data set)',
+  'protocol.ptp.example.announce.description':
+    'Priority1=128, clockClass=6 (locked to GNSS), timeSource=GNSS, currentUtcOffset=37 s.',
+  'protocol.ptp.example.delayRespNegativeCorrection.name': 'Delay_Resp — negative correctionField',
+  'protocol.ptp.example.delayRespNegativeCorrection.description':
+    'correctionField is −500 ns; read as unsigned it would become an astronomical number.',
+  'protocol.ptp.example.signalingWithTlv.name': 'Signaling with a TLV16',
+  'protocol.ptp.example.signalingWithTlv.description':
+    'A REQUEST_UNICAST_TRANSMISSION TLV (type 0x0004, 6-byte body) — a third TLV dialect, distinct from the LLDP and DHCP ones.',
+  'protocol.ptp.example.truncatedBody.name': 'Announce with a missing body (error path)',
+  'protocol.ptp.example.truncatedBody.description': 'The header is present, the 30-byte Announce body is not.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',

@@ -3010,6 +3010,98 @@ export const tr = {
   'protocol.dhcp.example.badMagicCookie.description':
     'Cookie\'nin ilk baytı bilerek bozuldu — value-out-of-range basar, options işlenmez.',
 
+  // --- NTP ---
+  'protocol.ntp.error.frameTooShort': 'Çerçeve en az 48 baytlık sabit NTP başlığı kadar uzun olmalı.',
+  'protocol.ntp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ntp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ntp.warning.leapAlarm':
+    'Leap Indicator 3 (alarm): sunucu senkronize değil, damgalarına güvenilmemeli.',
+  'protocol.ntp.warning.unknownMode': 'Mode dar kümenin (1-6) dışında — 0 rezerve, 7 üreticiye özel.',
+  'protocol.ntp.warning.unexpectedVersion':
+    'Version 4 değil. Başlık düzeni v3 ile aynı olduğu için çözüme devam edildi, alan adları v4’e göre verildi.',
+  'protocol.ntp.warning.kissOfDeath':
+    'Stratum 0: Reference ID bir “kiss code”dur (DENY/RATE/RSTR…), sunucu isteği reddediyor.',
+  'protocol.ntp.warning.stratumUnsynchronized': 'Stratum 16: saat senkronize değil.',
+  'protocol.ntp.warning.stratumReserved': 'Stratum 17-255 aralığı rezervedir, tanımlı bir anlamı yok.',
+  'protocol.ntp.warning.referenceIdMayNotBeAddress':
+    'Reference ID IPv4 adresi olarak gösterildi, ama IPv6 kurulumlarında bu dört bayt adres değil adresin MD5 özetinin ilk dört baytıdır (RFC 5905 §7.3).',
+  'protocol.ntp.warning.timestampEra1':
+    'Damganın en anlamlı biti temiz — RFC kuralına göre era 1 (2036-02-07 sonrası) varsayıldı. Era çerçeveden kanıtlanamaz.',
+  'protocol.ntp.warning.timestampUnset': 'Damganın 64 bitinin tamamı sıfır: alan ayarlanmamış, 1900 tarihi değil.',
+  'protocol.ntp.warning.unknownAuthenticator':
+    'Başlıktan sonraki bayt sayısı tanınan authenticator uzunluklarından (4 / 20 / 24) hiçbiri değil.',
+  'protocol.ntp.warning.serverTimeNegative':
+    'Transmit damgası Receive damgasından küçük: sunucu saati geri gitmiş ya da bu bir yanıt değil.',
+  'protocol.ntp.warning.fourTimestampNeedsT4':
+    'Round Trip Delay ve Clock Offset basılmadı: T4 istemcinin yanıtı aldığı andaki kendi saatidir ve pakete yazılmaz. Dört damga modeli çok-paket analizi ister.',
+  'protocol.ntp.documentation.summary':
+    'Dört damgalı istemci/sunucu zaman protokolü (RFC 5905, NTPv4). 48 baytlık sabit başlık alan alana çözülür; Reference ID’nin anlamı stratum’a göre değişir (kiss code / referans saat kimliği / yukarı akış adresi). Tek çerçeveden T3−T2 türetilir; delay ve offset T4’ü gerektirdiği için analyzer işidir.',
+  'protocol.ntp.example.clientRequest.name': 'İstemci isteği (Mode 3)',
+  'protocol.ntp.example.clientRequest.description':
+    'Origin/Receive damgaları sıfır — “ayarlanmamış” yolu; yalnız Transmit dolu.',
+  'protocol.ntp.example.serverResponse.name': 'Sunucu yanıtı (Stratum 2)',
+  'protocol.ntp.example.serverResponse.description':
+    'Reference ID yukarı akış IPv4 adresi; T3−T2 ≈ 2 ms türetilir.',
+  'protocol.ntp.example.stratum1Gps.name': 'Stratum 1 — GPS referansı',
+  'protocol.ntp.example.stratum1Gps.description':
+    'Reference ID ASCII referans saat kimliğidir (“GPS”), adres değil.',
+  'protocol.ntp.example.kissOfDeath.name': 'Kiss-o’-Death (RATE)',
+  'protocol.ntp.example.kissOfDeath.description':
+    'Stratum 0 + “RATE” kiss code: sunucu istemciyi yavaşlamaya zorluyor, LI alarm.',
+  'protocol.ntp.example.truncated.name': 'Kesilmiş çerçeve (hata yolu)',
+  'protocol.ntp.example.truncated.description': '48 baytın altı — truncated-frame basar.',
+
+  // --- PTP ---
+  'protocol.ptp.error.frameTooShort': 'Çerçeve en az 34 baytlık ortak PTP başlığı kadar uzun olmalı.',
+  'protocol.ptp.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ptp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ptp.error.bodyTruncated': 'Mesaj tipinin gerektirdiği gövde tamponun sonuna kesilmiş.',
+  'protocol.ptp.warning.unknownMessageType':
+    'messageType tanımlı on değerden hiçbiri değil — gövde ham gösterildi.',
+  'protocol.ptp.warning.unexpectedVersion':
+    'versionPTP 2 değil. PTPv1 başlık düzeni tamamen farklıdır, bu motor onu çözemez.',
+  'protocol.ptp.warning.messageLengthMismatch':
+    'messageLength gerçek çerçeve uzunluğuyla uyuşmuyor. Fazlalık taşıyıcı dolgusu olabilir; eksiklik gerçek kesilmedir.',
+  'protocol.ptp.warning.controlFieldMismatch':
+    'Legacy controlField mesaj tipiyle çelişiyor. Alan v2’de kullanım dışıdır ama tutarsızlık bozuk üretici işaretidir.',
+  'protocol.ptp.warning.twoStepIgnored':
+    'twoStepFlag set ama bu mesaj tipinde davranışı tanımsız — “Two-Step” diye yorumlanmadı.',
+  'protocol.ptp.warning.timestampUnset':
+    'Damganın 80 bitinin tamamı sıfır: alan taşınmamış. Two-step Sync’te asıl damga Follow_Up’ta gelir.',
+  'protocol.ptp.warning.timestampTai':
+    'Damga TAI ölçeğindedir. UTC’ye çevirmek Announce’un currentUtcOffset alanını gerektirir.',
+  'protocol.ptp.warning.nanosecondsOutOfRange': 'nanosecondsField bir saniyeyi aşıyor.',
+  'protocol.ptp.warning.unknownClockClass': 'clockClass IEEE 1588-2019 Tablo 4’ün adlandırdığı değerlerden değil.',
+  'protocol.ptp.warning.unknownClockAccuracy': 'clockAccuracy Tablo 5 enumerasyonunun dışında.',
+  'protocol.ptp.warning.unknownTimeSource': 'timeSource Tablo 6 enumerasyonunun dışında.',
+  'protocol.ptp.warning.unknownTlvType': 'tlvType dar kümenin dışında — gövdesi ham bırakıldı.',
+  'protocol.ptp.warning.tlvOddLength': 'TLV lengthField’i tek sayı; IEEE 1588-2019 §14.1.1 çift olmasını şart koşar.',
+  'protocol.ptp.warning.tlvTruncated': 'Bir TLV’nin bildirdiği uzunluk tamponda kalan bayttan büyük.',
+  'protocol.ptp.warning.tlvLimit': 'TLV sayısı üst sınıra dayandı, zincir okunmayı bıraktı.',
+  'protocol.ptp.warning.bmcaNeedsMultipleAnnounce':
+    'BMCA veri kümesi (Priority1/ClockClass/ClockAccuracy/Variance/Priority2/ClockIdentity) çözüldü, ama “Selected Grandmaster” kararı Announce mesajlarını karşılaştırmayı gerektirir.',
+  'protocol.ptp.warning.pathDelayNeedsExchange':
+    'MeanPathDelay ve OffsetFromMaster basılmadı: t1/t2/t3/t4 dört ayrı mesajda taşınır, tek çerçeveden çıkmaz.',
+  'protocol.ptp.documentation.summary':
+    'IEEE 1588-2019 (PTPv2.1) saat senkronizasyonu. 34 baytlık ortak başlık ve on mesaj tipinin gövdesi alan alana çözülür; correctionField işaretli ve nanosaniye × 2^16 ölçeğindedir, damgalar 80 bittir (48 bit saniye + 32 bit nanosaniye, TAI). TLV zinciri başlık düzeyinde yürünür. BMCA kararı ve E2E gecikme çok-mesaj analizidir.',
+  'protocol.ptp.example.syncTwoStep.name': 'Sync (two-step)',
+  'protocol.ptp.example.syncTwoStep.description':
+    'twoStepFlag set, originTimestamp sıfır — asıl t1 Follow_Up’ta gelir.',
+  'protocol.ptp.example.followUp.name': 'Follow_Up + correctionField',
+  'protocol.ptp.example.followUp.description':
+    'preciseOriginTimestamp dolu; correctionField transparent clock’un biriktirdiği 1250,5 ns.',
+  'protocol.ptp.example.announce.name': 'Announce (BMCA veri kümesi)',
+  'protocol.ptp.example.announce.description':
+    'Priority1=128, clockClass=6 (GNSS’e kilitli), timeSource=GNSS, currentUtcOffset=37 s.',
+  'protocol.ptp.example.delayRespNegativeCorrection.name': 'Delay_Resp — negatif correctionField',
+  'protocol.ptp.example.delayRespNegativeCorrection.description':
+    'correctionField −500 ns; işaretsiz okunursa astronomik bir sayıya dönüşürdü.',
+  'protocol.ptp.example.signalingWithTlv.name': 'Signaling + TLV16',
+  'protocol.ptp.example.signalingWithTlv.description':
+    'REQUEST_UNICAST_TRANSMISSION TLV’si (tip 0x0004, 6 baytlık gövde) — LLDP ve DHCP’ninkinden farklı üçüncü TLV lehçesi.',
+  'protocol.ptp.example.truncatedBody.name': 'Gövdesi eksik Announce (hata yolu)',
+  'protocol.ptp.example.truncatedBody.description': 'Başlık var, 30 baytlık Announce gövdesi yok.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
