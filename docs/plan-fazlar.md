@@ -78,15 +78,24 @@ zaman `resolveStatus()`ten okunur.
 Dalga brifleri `docs/brief-faz10-dalga*.md` altında; dalga 10'un tam dökümü
 `brief-faz10-dalga10.md`de, dalga 11'inki `brief-faz10-dalga11.md`de.
 
-**Sıradaki dalga 12 — `network-ethernet` (19 kayıt).** Keşif turu 2026-08-22'de
+**Dalga 12 — `network-ethernet` (19 kayıt) SÜRÜYOR.** Keşif turu 2026-08-22'de
 yapıldı, brief `brief-faz10-dalga12.md`de: 8 alt dalga (12a icmp/icmpv6 · 12b arp/
 lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e snmp/syslog · 12f http/websocket/
 mqtt-sn · 12g rtp/rtcp · 12h tftp/ftp/telnet), aile aile kapatma sırasıyla. Üç
 mimari bulgu karara bağlandı: (1) `ParsedFrame` DÜZ — katman içiçeliği bu dalgada
 ÇÖZÜLMEYECEK, "Network Packet Tree" ayrı iş; (2) `parsePcapFile` yazılmış ama
 hiçbir UI'a bağlı değil, dalga sonrası `connection/file` işi; (3) `websocket`
-kaydının `live` sekmesi kapsam dışı kalır. `berReader` (GOOSE'dan) SNMP'yi,
-`internetChecksum` ICMP'yi hazır karşılıyor.
+kaydının `live` sekmesi kapsam dışı kalır.
+
+**12a (2026-08-22 bitti, `5155650`) — icmp + icmpv6.** `internetChecksum.ts`
+ICMP'yi hazır karşıladı (tam PASS/FAIL, pseudo-header istemez). ICMPv6 checksum'ı
+`udp.ts`nin "pseudo-header olmadan doğrulanamaz" desenini izliyor. Neighbor
+Discovery ailesi (RFC 4861) spec'in kendi kararıyla ADLANDIRILDI ama gövdesi
+ÇÖZÜLMEDİ ("ileride ayrı decoder modülleri" — spec 08-ag-ethernet.md:176-178);
+gerçek ND alan çözümü (Target Address, Flags, Options TLV) ayrı bir iş.
+`berReader` (GOOSE'dan) henüz kullanılmadı — 12e'de SNMP'nin işi. Sıradaki:
+**12b arp/lldp** — `walkTypeLengthChain` taşıyıcı bağlamını kullanır, LLDP
+jenerik bir TLV yürüyücüsü açar (12c'nin DHCP option'ları aynısını isteyecek).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
