@@ -68,8 +68,16 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'UART framing carried over TTL-compatible logic levels, where the real question is whether two boards can drive each other without a level translator.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ttl-uart',
+          // Decode UART'la aynı (aynı modül iki eklenti üretiyor); sayfanın asıl
+          // motoru seviye uyumluluğu hesaplayıcısı.
+          calculatorIds: ['uart-timing', 'logic-level-compat'],
           tabs: ['overview', 'live', 'decode', 'diagnostics', 'examples'],
+          related: [
+            'interfaces-framing/serial-interfaces/uart',
+            'interfaces-framing/serial-interfaces/cmos-uart',
+          ],
           // Kaynağın ısrarı: 3.3V/5V seçtirip "uyumlu" demek yanlış — karar
           // datasheet'teki VIH/VIL/VOH/VOL değerleriyle verilir.
           tools: [
@@ -87,8 +95,14 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'UART framing at CMOS supply levels between SoCs and peripherals, where each direction has to be evaluated separately because output and input characteristics are rarely symmetric.',
           layer: 'physical',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'cmos-uart',
+          calculatorIds: ['uart-timing', 'logic-level-compat'],
           tabs: ['overview', 'live', 'decode', 'diagnostics', 'examples'],
+          related: [
+            'interfaces-framing/serial-interfaces/uart',
+            'interfaces-framing/serial-interfaces/ttl-uart',
+          ],
           tools: [
             'Supply Voltage',
             'Logic Thresholds',

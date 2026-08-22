@@ -416,6 +416,28 @@ export const en: TranslationDictionary = {
   'calc.loraLinkBudget.name': 'LoRa link budget',
   'calc.loraLinkBudget.summary':
     'Estimates receiver sensitivity from SF/BW, then reports maximum path loss, free-space range and measured margin.',
+  'calc.logicLevelCompat.name': 'Logic level compatibility',
+  'calc.logicLevelCompat.summary':
+    'Evaluates both directions separately from the datasheet thresholds (V_OH/V_OL/V_IH/V_IL) of two devices, reports the noise margins and says whether a level translator is needed.',
+  'calc.field.deviceA': 'Device A',
+  'calc.field.deviceB': 'Device B',
+  'calc.field.vohMin': 'V_OH (min) — output HIGH',
+  'calc.field.volMax': 'V_OL (max) — output LOW',
+  'calc.field.vihMin': 'V_IH (min) — input HIGH threshold',
+  'calc.field.vilMax': 'V_IL (max) — input LOW threshold',
+  'calc.field.absoluteMaxOptional': 'Absolute maximum input (optional)',
+  'calc.field.directionAToB': 'Direction A → B',
+  'calc.field.directionBToA': 'Direction B → A',
+  'calc.field.logicVerdict': 'Verdict',
+  'calc.field.highNoiseMargin': 'HIGH noise margin',
+  'calc.field.lowNoiseMargin': 'LOW noise margin',
+  'calc.field.overvoltage': 'Overvoltage',
+  'calc.logicLevel.pass': 'Compatible',
+  'calc.logicLevel.warning': 'Level translation may be required',
+  'calc.logicLevel.overvoltage':
+    "The driver's HIGH output exceeds the receiver's absolute maximum input voltage — even when the levels look compatible, the receiver can be damaged.",
+  'calc.logicLevel.note':
+    'The decision comes from the four datasheet thresholds, not from picking 3.3V or 5V; each direction is evaluated separately because the output and input characteristics of two devices are rarely symmetric.',
   'calc.checksumFinder.name': 'CRC / checksum finder',
   'calc.checksumFinder.summary': 'Tries 27 algorithms (18 CRC + 9 simple) against a data/observed-checksum pair, including byte-order variants.',
   'calc.crcCalculator.name': 'CRC calculator',
@@ -3876,4 +3898,28 @@ export const en: TranslationDictionary = {
   'protocol.rs232.example.twoCharacters.name': 'Two characters (Hi)',
   'protocol.rs232.example.twoCharacters.description':
     'The line and mark/space view of two consecutive characters — representative, since the spec gives no multi-character RS-232 example.',
+
+  // --- TTL UART / CMOS UART (phase 10 wave 11f) ---
+  'protocol.ttlUart.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.ttlUart.error.aborted': 'Parsing was cancelled.',
+  'protocol.ttlUart.summary.transmission': '{characters} characters · {bitTimes} bit times',
+  'protocol.ttlUart.documentation.summary':
+    "TTL UART is not a separate frame protocol: it is UART data carried over TTL-compatible logic levels, so decoding is identical to UART — every byte is expanded into its character line view (Start(0) · data bits LSB-first · Stop(1), assuming 8N1). The real question on this page is electrical: can two devices drive each other without a level translator? That decision comes from the datasheet V_OH, V_OL, V_IH and V_IL values rather than from the supply voltage — the logic level compatibility calculator evaluates it separately for each direction.",
+  'protocol.ttlUart.example.debugConsole.name': 'Debug console reply (OK + CRLF)',
+  'protocol.ttlUart.example.debugConsole.description':
+    'The most common use of TTL UART: a four-character console or modem reply. Line-ending splitting belongs to the UART page; here the characters are shown as they are.',
+  'protocol.ttlUart.example.singleCharacter.name': 'Single character (line view)',
+  'protocol.ttlUart.example.singleCharacter.description':
+    "0x41 = 'A' — the simplest possible line: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.cmosUart.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.cmosUart.error.aborted': 'Parsing was cancelled.',
+  'protocol.cmosUart.summary.transmission': '{characters} characters · {bitTimes} bit times',
+  'protocol.cmosUart.documentation.summary':
+    'CMOS UART is the UART frame carried at CMOS supply levels (1.2V, 1.8V, 2.5V, 3.3V); decoding is identical to UART. The distinguishing problem is asymmetry: between a 1.8V processor and a 3.3V module one direction may work while the other does not, so A→B and B→A have to be evaluated separately. The logic level compatibility calculator computes both directions from the datasheet thresholds and reports the noise margins.',
+  'protocol.cmosUart.example.debugConsole.name': 'Module reply (OK + CRLF)',
+  'protocol.cmosUart.example.debugConsole.description':
+    'A typical four-character reply between an SoC and a peripheral. Level compatibility never shows up in the byte stream; it is evaluated in the logic level compatibility calculator.',
+  'protocol.cmosUart.example.singleCharacter.name': 'Single character (line view)',
+  'protocol.cmosUart.example.singleCharacter.description':
+    "0x41 = 'A' — the simplest possible line: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
 };

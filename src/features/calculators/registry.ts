@@ -62,6 +62,11 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'lora-airtime', category: 'timing', nameKey: 'calc.loraAirtime.name', summaryKey: 'calc.loraAirtime.summary' },
   { id: 'lora-link-budget', category: 'timing', nameKey: 'calc.loraLinkBudget.name', summaryKey: 'calc.loraLinkBudget.summary' },
   { id: 'lora-battery', category: 'timing', nameKey: 'calc.loraBattery.name', summaryKey: 'calc.loraBattery.summary' },
+  // Logic seviyesi uyumluluğu (TTL/CMOS UART) — zamanlama değil elektriksel
+  // hesap, ama rs485-timing emsaliyle aynı grupta: o kayıt da termination/
+  // bias/unit-load taşıyor. Ayrı bir kategori açmak taksonomiyi spec §12/§13/
+  // §11 üçlüsünden koparırdı.
+  { id: 'logic-level-compat', category: 'timing', nameKey: 'calc.logicLevelCompat.name', summaryKey: 'calc.logicLevelCompat.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

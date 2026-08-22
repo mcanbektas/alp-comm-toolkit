@@ -457,4 +457,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'rs-232', () =>
     import('./serial/serial-interfaces/rs232').then((module) => module.rs232Plugin),
   );
+  // TTL UART / CMOS UART — Faz 10 dalga 11f: bayt akışında ikisini ayıran iz
+  // YOK (ikisi de UART çerçevesi), ayrım tamamen elektriksel — bu yüzden TEK
+  // modül iki eklenti üretir (canClassic.ts/ethernet.ts emsali). Sayfaların
+  // asıl motoru `timing/logicLevels.ts` + `logic-level-compat` hesaplayıcısı.
+  registerOnce(registry, 'ttl-uart', () =>
+    import('./serial/serial-interfaces/logicLevelUart').then((module) => module.ttlUartPlugin),
+  );
+  registerOnce(registry, 'cmos-uart', () =>
+    import('./serial/serial-interfaces/logicLevelUart').then((module) => module.cmosUartPlugin),
+  );
 }

@@ -418,6 +418,28 @@ export const tr = {
   'calc.loraLinkBudget.name': 'LoRa link bütçesi',
   'calc.loraLinkBudget.summary':
     'SF/BW’den alıcı duyarlılığını tahmin eder, azami yol kaybını, serbest uzay menzilini ve ölçülen marjı verir.',
+  'calc.logicLevelCompat.name': 'Logic seviyesi uyumluluğu',
+  'calc.logicLevelCompat.summary':
+    'İki cihazın datasheet eşiklerinden (V_OH/V_OL/V_IH/V_IL) her iki yönü ayrı ayrı değerlendirir, gürültü paylarını verir ve seviye çevirici gerekip gerekmediğini söyler.',
+  'calc.field.deviceA': 'Cihaz A',
+  'calc.field.deviceB': 'Cihaz B',
+  'calc.field.vohMin': 'V_OH (min) — çıkış HIGH',
+  'calc.field.volMax': 'V_OL (max) — çıkış LOW',
+  'calc.field.vihMin': 'V_IH (min) — giriş HIGH eşiği',
+  'calc.field.vilMax': 'V_IL (max) — giriş LOW eşiği',
+  'calc.field.absoluteMaxOptional': 'Mutlak maksimum giriş (opsiyonel)',
+  'calc.field.directionAToB': 'Yön A → B',
+  'calc.field.directionBToA': 'Yön B → A',
+  'calc.field.logicVerdict': 'Sonuç',
+  'calc.field.highNoiseMargin': 'HIGH gürültü payı',
+  'calc.field.lowNoiseMargin': 'LOW gürültü payı',
+  'calc.field.overvoltage': 'Aşırı gerilim',
+  'calc.logicLevel.pass': 'Uyumlu',
+  'calc.logicLevel.warning': 'Seviye çevirici gerekebilir',
+  'calc.logicLevel.overvoltage':
+    'Sürücünün HIGH çıkışı alıcının mutlak maksimum giriş gerilimini aşıyor — seviyeler uyumlu görünse bile alıcı zarar görebilir.',
+  'calc.logicLevel.note':
+    'Karar besleme gerilimiyle (3.3V/5V) değil, datasheet\'teki dört eşikle verilir; her yön ayrı değerlendirilir çünkü iki cihazın çıkış/giriş karakteristikleri simetrik olmayabilir.',
   'calc.checksumFinder.name': 'CRC / checksum bulucu',
   'calc.checksumFinder.summary': 'Veri ve gözlenen checksum çiftinden 27 algoritmayı (18 CRC + 9 basit) dener, bayt sırası varyasyonlarını da kapsar.',
   'calc.crcCalculator.name': 'CRC hesaplayıcı',
@@ -3864,6 +3886,30 @@ export const tr = {
   'protocol.rs232.example.twoCharacters.name': 'İki karakter (Hi)',
   'protocol.rs232.example.twoCharacters.description':
     'Ardışık iki karakterin hat ve mark/space karşılığı — spec çok karakterli RS-232 örneği vermiyor, temsili.',
+
+  // --- TTL UART / CMOS UART (faz 10 dalga 11f) ---
+  'protocol.ttlUart.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.ttlUart.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ttlUart.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi',
+  'protocol.ttlUart.documentation.summary':
+    'TTL UART ayrı bir çerçeve protokolü değildir: UART verisinin TTL uyumlu logic seviyeleriyle taşınmasıdır. Bu yüzden çözümleme UART ile aynıdır — her bayt karakter hattına açılır (Start(0) · veri bitleri LSB-first · Stop(1), 8N1 varsayılır). Sayfanın asıl sorusu elektrikseldir: iki cihaz birbirini seviye çevirici olmadan sürebiliyor mu? Karar besleme gerilimiyle değil, datasheet\'teki V_OH, V_OL, V_IH ve V_IL değerleriyle verilir — Logic seviyesi uyumluluğu hesaplayıcısı bunu her iki yön için ayrı ayrı yapar.',
+  'protocol.ttlUart.example.debugConsole.name': 'Debug konsolu yanıtı (OK + CRLF)',
+  'protocol.ttlUart.example.debugConsole.description':
+    'TTL UART\'ın en yaygın kullanımı: dört karakterlik bir konsol/modem yanıtı. Satır sonu ayrımı UART sayfasının ekidir, burada karakterler olduğu gibi görünür.',
+  'protocol.ttlUart.example.singleCharacter.name': 'Tek karakter (hat görünümü)',
+  'protocol.ttlUart.example.singleCharacter.description':
+    "0x41 = 'A' — hattın en yalın hâli: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
+  'protocol.cmosUart.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.cmosUart.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.cmosUart.summary.transmission': '{characters} karakter · {bitTimes} bit-süresi',
+  'protocol.cmosUart.documentation.summary':
+    'CMOS UART, UART çerçevesinin CMOS besleme seviyeleriyle (1.2V, 1.8V, 2.5V, 3.3V) taşınmasıdır; çözümleme UART ile aynıdır. Ayırt edici sorun asimetridir: 1.8V bir işlemci ile 3.3V bir modül arasında bir yön çalışırken öteki çalışmayabilir, bu yüzden A→B ve B→A ayrı ayrı değerlendirilmelidir. Logic seviyesi uyumluluğu hesaplayıcısı iki yönü de datasheet eşiklerinden hesaplar ve gürültü paylarını verir.',
+  'protocol.cmosUart.example.debugConsole.name': 'Modül yanıtı (OK + CRLF)',
+  'protocol.cmosUart.example.debugConsole.description':
+    'SoC ile çevre birim arasındaki tipik dört karakterlik yanıt. Seviye uyumu bayt akışında görünmez; Logic seviyesi uyumluluğu hesaplayıcısında değerlendirilir.',
+  'protocol.cmosUart.example.singleCharacter.name': 'Tek karakter (hat görünümü)',
+  'protocol.cmosUart.example.singleCharacter.description':
+    "0x41 = 'A' — hattın en yalın hâli: 0 10000010 1 (Start · D0..D7 LSB-first · Stop).",
 } as const;
 
 /**
