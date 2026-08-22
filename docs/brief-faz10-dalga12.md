@@ -1,0 +1,144 @@
+# Faz 10, dalga 12 — Network & Ethernet (keşif, 2026-08-22)
+
+## Kapsam
+
+`network-ethernet` domain'inin kalan **19 kanonik kaydı**. Domain toplamı 8 aile /
+28 protokol (`src/app/catalog/domains/network-ethernet.ts:4`); **9'u zaten `ready`**,
+kalan 19'u `planned`. **Bu domain'de alias kaydı YOK** — 19 ham `planned` = 19 gerçek iş.
+(`resolveStatus()` bu domain'de ham `status` ile aynı sonucu verir; yine de rozet
+her zaman `resolveStatus()`ten okunur — dalga 11 kuralı.)
+
+Spec kaynağı: `docs/spec/ozet/08-ag-ethernet.md` (873 satır). Taksonomi doğrulayıcısı:
+`docs/spec/ozet/11-domain-taksonomisi.md §7`.
+
+### Aile aile döküm
+
+| Aile | `ready` | `planned` (bu dalga) |
+|---|---|---|
+| data-link | ethernet-ii, ieee-802-3, vlan-802-1q | **arp, lldp** |
+| internet-layer | ipv4, ipv6 | **icmp, icmpv6** |
+| transport | udp, tcp | — (aile bitti) |
+| addressing-discovery | — | **dhcp, dns, mdns** |
+| time-management | — | **ntp, ptp, snmp, syslog** |
+| web-messaging | mqtt, coap | **http, websocket, mqtt-sn** |
+| real-time-media | — | **rtp, rtcp** |
+| file-terminal | — | **tftp, ftp, telnet** |
+
+## Zaten var olan motorlar — bu dalganın yükünün büyük kısmı ödenmiş
+
+| Motor | Yol | Bu dalgada kimi taşır |
+|---|---|---|
+| Internet checksum | `protocol-core/checksums/internetChecksum.ts:55,65,81` (`computeInternetChecksum`, `...WithFieldZeroed`, `verify...`) | icmp, icmpv6, (dhcp/dns/tftp'nin UDP kabuğu) |
+| BER / ASN.1 okuyucu | `protocol-core/decoding/berReader.ts` (`readBerTlv:286`, `decodeBerInteger:343`, `decodeBerVisibleString:398`) — GOOSE için yazıldı | **snmp** — spec `:353` "SNMP ASN.1 / BER" tam karşılığı |
+| EtherType/Length zinciri | `protocols/network/ethernet/ethernetFrame.ts:197` `walkTypeLengthChain` (VLAN stack dâhil) | arp (0x0806), lldp (0x88cc) taşıyıcı bağlamı |
+| IP protokol tablosu | `protocols/network/ip/ipv4.ts:101-105` — **şu an sadece 1/6/17** | icmp (1) var; **icmpv6 (58) ve IPv6 Next Header YOK, eklenecek** |
+| Delimiter framing | `protocol-core/framing/delimiterFraming.ts` + `createExtractor.ts` | http (CRLF/CRLFCRLF), ftp, telnet satır kırma, syslog |
+| Bit cursor | `protocol-core/decoding/bitCursor.ts` | rtp/rtcp (2-bit V, 1-bit P/X, 4-bit CC), ptp (nibble alanlar), websocket (FIN/RSV/opcode) |
+| Değişken uzunluk tamsayı | `protocols/network/mqtt/mqttVbi.ts` | mqtt-sn'e **doğrudan uymaz** (MQTT-SN 1/3 bayt uzunluk kullanır, VBI değil) — komşu ama ayrı |
+| PCAP okuyucu | `protocol-core/capture/pcap.ts:320` `parsePcapFile` | **hiçbiri — aşağıya bak** |
+
+## Üç mimari bulgu — dalga başlamadan karara bağlanmalı
+
+### 1) `ParsedFrame` DÜZ; katman içiçeliği (nesting) yok
+
+`protocol-core/types.ts:61-69` → `fields: ParsedField[]`, ve `ParsedField` (`:38`)
+`children` taşımıyor. Var olan çözücüler içiçe geçmiyor, yalnız **uyarı** bırakıyor:
+`WARN_ETHERTYPE_HIGHER_LAYER` (ethernet), `WARN_PROTOCOL_HIGHER_LAYER` (ipv4).
+
+Spec `08-ag-ethernet.md:731` "Ortak Network Packet Tree" ve `:850` "Network Layer
+Drill-Down" bunun tersini istiyor (Ethernet→IP→TCP→HTTP tek ağaç).
+
+**Öneri: bu dalgada ÇÖZME.** Var olan 9 `ready` kaydın presedanı "kullanıcı o
+katmanın baytlarını yapıştırır, çözücü o katmanı çözer". 19 kaydın hepsi bu desenle
+yazılabilir. Nesting `ParsedFrame` şemasını, `protocol-decode` UI'ını, packet-builder'ı
+ve 172 kaydın tümünü ilgilendiren ayrı bir karardır — dalga 12'ye bağlanırsa dalga
+tek bir şema tartışmasında kilitlenir. Ayrı bir "Network Packet Tree" işi olarak
+planlansın.
+
+### 2) `parsePcapFile` yetim
+
+Motor yazılmış ve test edilmiş, ama `grep -rl parsePcapFile src/` yalnız kendi
+test dosyasını buluyor — **hiçbir UI'a bağlı değil**. Domain yorumu (`:6-9`) ise
+"varsayılan çalışma biçimi PCAP/HEX içe aktarımı üzerinden decode" diyor.
+`src/connection/` altında `file` yok (Faz 7 boşluk listesinde de yazılı).
+
+**Öneri:** dalgayı engellemiyor (HEX yapıştırma yolu çalışıyor). Ayrı küçük iş:
+`connection/file` + decode panelinde PCAP içe aktarma. Dalga 12 bittikten sonra,
+çünkü o zaman 28 kaydın hepsi çözücülü olur ve PCAP'in getirisi en yüksek olur.
+
+### 3) `websocket` kaydında `live` sekmesi var, `connection/websocket` YOK
+
+`src/connection/` = `serial` + `mock` + `types.ts`. `websocket` kaydının
+`tabs`ı `['overview','live','decode',...]`. Dalga 11'de `i2c`/`usb` için aynı
+şüphe not edilmişti ve çözülmemişti.
+
+**Öneri:** WebSocket burada özel — tarayıcının **yerleşik** `WebSocket` API'si var,
+Web Serial gibi izin/donanım gerektirmiyor, ve Comm gizlilik kuralını da çiğnemiyor
+(cihaz↔tarayıcı doğrudan). Yani `connection/websocket` bu domain'de gerçekten
+yapılabilir tek `live`. Yine de **12f'de kapsam dışı tut**, `live` sekmesini
+"planlandı" rozetiyle bırak (Faz 7'nin §10 WebSocket maddesinde kurulan presedan).
+
+## Alt dalga sıralaması önerisi
+
+Aile aile kapatma + motor kaldıracı. Her alt dalga bir aileyi ya bitirir ya da
+bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
+
+| # | Kayıtlar | Neden burada | Yeni paylaşılan motor | Zorluk |
+|---|---|---|---|---|
+| **12a** | icmp, icmpv6 | En ucuz giriş: IP katmanı + `internetChecksum` hazır, ikisi kardeş, `internet-layer` ailesi kapanır | — (ipv4 tablosuna 58, ipv6 Next Header eklenir) | kolay |
+| **12b** | arp, lldp | `data-link` kapanır. LLDP jenerik **TLV yürüyücüsü**nü açar (12c'nin DHCP option'ları aynısını ister) | `tlvWalker` | kolay–orta |
+| **12c** | dns, mdns, dhcp | `addressing-discovery` kapanır. dns↔mdns aynı tel biçimi (mDNS = multicast DNS + `.local`), **name compression** tek yerde yazılır; dhcp 12b'nin TLV'sini yer | `dnsWire` (compression pointer dâhil) | orta |
+| **12d** | ntp, ptp | Ortak 64-bit zaman damgası aritmetiği; NTP dört-damga modeli (`spec:324`) PTP E2E delay'in (`spec:594`) sadeleştirilmiş hâli | `networkTimestamp` | orta (ptp zor) |
+| **12e** | snmp, syslog | `time-management` kapanır. SNMP **berReader'ı hazır bulur** (asıl iş OID/VarBind katmanı); syslog saf metin, ucuz | `oidCodec` | orta |
+| **12f** | http, websocket, mqtt-sn | `web-messaging` kapanır. HTTP CRLF framing + body framing (`spec:391`, Content-Length vs chunked); WS maskeleme + fragmentation; mqtt-sn mqtt komşusu | — | orta–zor |
+| **12g** | rtp, rtcp | `real-time-media` kapanır. Ortak başlık kavramları, `bitCursor` hazır; jitter hesabı (`spec:558`) calculator adayı | — | orta |
+| **12h** | tftp, ftp, telnet | `file-terminal` kapanır. tftp opcode tabanlı ikili, ftp metin, telnet IAC kaçışlama — üçü de küçük | — | kolay–orta |
+
+**Toplam 8 alt dalga / 19 kayıt.** 12a ve 12b bilerek en başta: ucuz, hızlı yeşil,
+ve 12c'nin ihtiyacı olan TLV motorunu getiriyor.
+
+### Model önerisi (alt dalga başına)
+
+- **12a, 12b, 12h** → Sonnet · medium (desen kurulu, tarif net)
+- **12c, 12e, 12g** → Sonnet · high (paylaşılan motor tasarımı var, birkaç yol)
+- **12d, 12f** → Opus · high (PTP saat modeli ve HTTP body framing'de görünmez
+  değişmezler; chunked encoding + Content-Length çelişkisi klasik hata kaynağı)
+
+## `decodeOptions` kanalı — bu domain'deki adaylar
+
+Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
+çıkarılamayan parametreler:
+
+- **websocket** — yön (client→server maskeli, server→client maskesiz). Maskeleme
+  bitine bakıp tahmin etmek mümkün ama RFC 6455 yönü zorunlu kılıyor; sorulmalı.
+- **http** — gövde çerçeveleme kipi (Content-Length / chunked / kapanışa kadar).
+  İstek başlıkları olmadan yanıt gövdesi tek başına çözülemez.
+- **rtp** — payload type → codec eşlemesi (SDP dışarıda kalır, tabloda yok).
+- **icmpv6** — pseudo-header için kaynak/hedef IPv6 adresi (checksum ZORUNLU,
+  UDP'deki "0 = kapalı" kısayolu yok).
+- **snmp** — sürüm (v1/v2c/v3); v3 tamamen farklı zarf (`spec:376`).
+
+## Açık sorular
+
+1. **PTP `ready` olabilir mi?** BMCA (`spec:614`) ve PTP Analyzer (`:609`) çoklu
+   mesaj korelasyonu istiyor — tek çerçeve çözücüsü bunu vermez. LoRa presedanına
+   göre (`wireless-iot.ts:169-187`) tavan `partial` olabilir. 12d'de karara bağlanacak.
+2. **SNMPv3** kapsamda mı? Zarf farklı, USM güvenlik parametreleri var. Öneri:
+   12e'de v1/v2c `ready`, v3 uyarıyla dışarıda.
+3. **`ipv4.ts` PROTOCOL_NAMES tablosu genişletilecek mi, ayrı modüle mi taşınacak?**
+   12a iki numara ekliyor; 12c/12g daha fazlasını isteyecek. Öneri: 12a'da
+   `ipProtocolNumbers.ts`'e taşı, ipv4+ipv6 ortak kullansın.
+4. **Telnet `live`?** `tabs`ında yok, doğru. Ama telnet TCP üstü — decode'u
+   "yapıştırılan TCP payload'u" varsayacak. 12h'de bu varsayım kayda yazılsın.
+
+## Kaynak satır haritası (spec `08-ag-ethernet.md`)
+
+arp `:80-93` · lldp `:695-712` · icmp `:158-169` · icmpv6 `:170-178` ·
+dhcp `:270-290` · dns `:291-314` · mdns `:713-730` · ntp `:315-349` ·
+ptp `:582-616` · snmp `:350-378` · syslog `:677-694` · http `:379-401` ·
+websocket `:402-435` · mqtt-sn `:477-494` · rtp `:529-569` · rtcp `:570-581` ·
+tftp `:617-634` · ftp `:635-661` · telnet `:662-676`
+
+Domain geneli araçlar (kayıt başına değil, ileride ayrı iş): `:731` Packet Tree ·
+`:757` Flow Analyzer · `:773` Checksum Validation Engine · `:776` Pseudo-Header
+görünümü · `:824` TCP Stream Viewer · `:836` Topology Builder
