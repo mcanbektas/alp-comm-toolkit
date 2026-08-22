@@ -80,6 +80,10 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'can-phy-timing', category: 'timing', nameKey: 'calc.canPhy.name', summaryKey: 'calc.canPhy.summary' },
   { id: 'lin-phy-timing', category: 'timing', nameKey: 'calc.linPhy.name', summaryKey: 'calc.linPhy.summary' },
   { id: 'flexray-phy-timing', category: 'timing', nameKey: 'calc.flexrayPhy.name', summaryKey: 'calc.flexrayPhy.summary' },
+  // Single Pair Ethernet: `single-pair-ethernet` kaydının decode'u yok (LoRa
+  // paterni), PHY sınıfı + PLCA çevrim bütçesi burada. PLCA yalnız
+  // 10BASE-T1S'te tanımlı ama bit süresi hesabı dört sınıfı da kapsıyor.
+  { id: 'spe-plca', category: 'timing', nameKey: 'calc.spePlca.name', summaryKey: 'calc.spePlca.summary' },
 
   // --- CRC/checksum (spec §11 bulucu + §45 hesaplayıcı) ---
   // İleri yönlü hesaplayıcı ÖNCE: "bu baytların CRC'si nedir" sorusu, "bu değer

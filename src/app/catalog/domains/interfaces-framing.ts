@@ -588,7 +588,19 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'The MAC-to-PHY side of Ethernet — link status, speed, duplex, auto-negotiation and the MII/RMII/GMII/RGMII wiring plus MDIO register access that brings a link up.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11k: sayfanın kendi bayt akışı MDIO yönetim çerçevesi —
+          // Ethernet ÇERÇEVESİ zaten Network & Ethernet alanında çözülüyor.
+          // Clause 22 alanları (ST/OP/PHYAD/REGAD/TA/DATA) + BMCR/BMSR/ANAR/
+          // ANLPAR bit çözümü + "PHY cevap vermedi" (TA=11) teşhisi bağlandı.
+          // MII/RMII/GMII/RGMII pin arayüzleri ve Clause 45 op kodları KAPSAM
+          // DIŞI (gerekçeler mdio.ts dosya başında) — araç listesindeki o
+          // kalemler hâlâ aspirasyonel.
+          status: 'ready',
+          pluginId: 'ethernet-interface',
+          related: [
+            'network-ethernet/data-link/ethernet-ii',
+            'interfaces-framing/host-network-interfaces/single-pair-ethernet',
+          ],
           tabs: ['overview', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'Link Status',
@@ -610,7 +622,19 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Ethernet over one balanced twisted pair (10BASE-T1S/T1L, 100BASE-T1, 1000BASE-T1), including the PLCA scheme that makes a shared multidrop segment behave deterministically.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11k: LoRa paterni — hattaki çerçeve zaten Ethernet
+          // çerçevesidir, bu sayfanın konusu (PHY sınıfı, multidrop, PLCA)
+          // bayt akışında görünmez. Bu yüzden `pluginId` YOK, motor
+          // `calculatorIds` üzerinden: PHY bit süresi/çerçeve süresi + PLCA
+          // çevrim ve burst bütçesi. PLCA register varsayılanları OPEN
+          // Alliance'ın kamuya açık belgesinden; BEACON süresi hiçbir kaynakta
+          // olmadığı için çağırandan gelir (singlePairEthernet.ts dosya başı).
+          status: 'partial',
+          calculatorIds: ['spe-plca'],
+          related: [
+            'interfaces-framing/host-network-interfaces/ethernet-interface',
+            'network-ethernet/data-link/ethernet-ii',
+          ],
           tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             '10BASE-T1S',

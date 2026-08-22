@@ -4000,6 +4000,76 @@ export const tr = {
   'protocol.usb.example.badCrc.name': 'DATA0 · bozuk CRC16',
   'protocol.usb.example.badCrc.description': 'Aynı SETUP yükünün son CRC baytı kasten bozuldu — hata yolunun nasıl göründüğünü gösterir.',
 
+  // --- Ethernet Interface / MDIO (faz 10 dalga 11k) ---
+  'protocol.mdio.error.emptyFrame': 'Arabellek boş — MDIO çerçevesi 32 bit (4 bayt).',
+  'protocol.mdio.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mdio.error.truncated':
+    'MDIO çerçevesi için yeterli bayt yok: preamble sonrası en az 4 bayt gerekir. Tamamı 0xFF olan yakalama yalnız boşta kalan hattır, çerçeve taşımaz.',
+  'protocol.mdio.error.invalidStart':
+    'ST alanı ne 01 (Clause 22) ne 00 (Clause 45) — çerçeve hizası kaymış olabilir.',
+  'protocol.mdio.warning.invalidOpcode':
+    'OP alanı ne 10 (okuma) ne 01 (yazma). Alanlar yine gösteriliyor ama işlem türü bilinmiyor.',
+  'protocol.mdio.warning.turnaround':
+    'Turnaround alanı beklenen 10 değerinde değil; yazma işleminde bu değer sabittir.',
+  'protocol.mdio.warning.noPhyResponse':
+    'Okuma isteğine PHY cevap vermemiş: turnaround\'ın ikinci bitini adreslenen PHY 0\'a çeker, burada 1 kalmış (hat pull-up ile yüksek). Klasik "PHY not detected" / yanlış PHY adresi belirtisi — veri alanı da genelde 0xFFFF okunur.',
+  'protocol.mdio.warning.clause45':
+    'ST=00: Clause 45 (dolaylı adresleme) çerçevesi. Op kodu tablosu elimizdeki kamuya açık kaynaklarda olmadığı için alanlara AYRILMIYOR, ham 32 bit gösteriliyor.',
+  'protocol.mdio.warning.trailingBytes':
+    'Çerçevenin 4 baytından sonra artan baytlar hiçbir alana düşmedi; ayrı bir alanda gösteriliyorlar.',
+  'protocol.mdio.warning.preambleSuppressed':
+    'Preamble 32 bit (4 bayt 0xFF) değil. Bu hata değildir — PHY\'ler preamble bastırmayı destekler ve ilk senkronizasyondan sonra preamble göndermek gerekmez.',
+  'protocol.mdio.documentation.summary':
+    'MDIO/MDC yönetim çerçevesi (MII Serial Management Interface) çözümü: preamble, ST, OP, PHYAD, REGAD, turnaround ve 16 bitlik veri. Register 0/1/4/5 (BMCR/BMSR/ANAR/ANLPAR) bit bit açılır — link durumu, hız, duplex, auto-negotiation ve karşı tarafın yetenekleri buradan okunur. Cevapsız okuma turnaround bitinden ayırt edilir.',
+  'protocol.mdio.example.readBmsr.name': 'BMSR okuma (PHY 1, register 1)',
+  'protocol.mdio.example.readBmsr.description':
+    'Klasik link kontrolü: 0x782D → link UP, auto-negotiation tamam, 10/100 yarım ve tam dupleks yetenekli.',
+  'protocol.mdio.example.writeBmcr.name': 'BMCR yazma (0x3100)',
+  'protocol.mdio.example.writeBmcr.description':
+    'Auto-negotiation etkin + 100 Mb/s + full duplex bitleri. AN açıkken hız/duplex bitleri PHY tarafından yok sayılır; özet satırı bunu söyler.',
+  'protocol.mdio.example.readAnlpar.name': 'ANLPAR okuma (partner yetenekleri)',
+  'protocol.mdio.example.readAnlpar.description':
+    '0x45E1 → karşı taraf 10/100 yetenekli, acknowledge biti set, pause destekli. Spec özetinin "Partner 10/100 capable" satırının bayt karşılığı.',
+  'protocol.mdio.example.noPhy.name': 'Cevapsız okuma (PHY 7)',
+  'protocol.mdio.example.noPhy.description':
+    'Turnaround 11 ve veri 0xFFFF: o adreste PHY yok ya da adres yanlış. Uyarı bunu ayrıca söyler.',
+  'protocol.mdio.example.preambleSuppressed.name': 'Preamble bastırılmış okuma',
+  'protocol.mdio.example.preambleSuppressed.description':
+    'Senkronizasyon bir kez kurulduktan sonra preamble göndermek zorunlu değildir; çerçeve doğrudan ST ile başlar.',
+  'protocol.mdio.example.clause45.name': 'Clause 45 çerçevesi (ST=00)',
+  'protocol.mdio.example.clause45.description':
+    'PLCA gibi genişletilmiş register alanları bu yolla okunur (MMD 31 = Vendor Specific 2). Bu dalgada adlandırılır, alanlarına ayrılmaz.',
+
+  // --- Single Pair Ethernet / PLCA (faz 10 dalga 11k) ---
+  'calc.spePlca.name': 'Single Pair Ethernet / PLCA',
+  'calc.spePlca.summary':
+    '10BASE-T1S/T1L, 100BASE-T1 ve 1000BASE-T1 için bit ve çerçeve süresi; 10BASE-T1S multidrop hattında PLCA çevrim süresi, en kötü erişim gecikmesi ve burst penceresi.',
+  'calc.field.spePhySection': 'PHY ve çerçeve',
+  'calc.field.plcaSection': 'PLCA çevrimi',
+  'calc.field.spePhyType': 'PHY sınıfı',
+  'calc.field.frameBytes': 'Çerçeve boyu',
+  'calc.field.interFrameGapBits': 'Çerçeveler arası boşluk',
+  'calc.field.lineRate': 'Hat hızı',
+  'calc.field.frameBitTimes': 'Çerçeve uzunluğu',
+  'calc.field.frameTime': 'Çerçeve süresi',
+  'calc.field.frameTimeWithGap': 'Boşlukla birlikte',
+  'calc.field.plcaNodeCount': 'Node sayısı (NCNT)',
+  'calc.field.plcaTransmittingNodes': 'Gönderen node sayısı',
+  'calc.field.plcaToTimer': 'to_timer (TOTMR)',
+  'calc.field.plcaMaxBurstCount': 'Maks. burst sayısı (MAXBC)',
+  'calc.field.plcaBurstTimer': 'burst_timer (BTMR)',
+  'calc.field.plcaBeaconOptional': 'BEACON süresi (opsiyonel)',
+  'calc.field.plcaIdleBits': 'Susan node’ların payı',
+  'calc.field.plcaTransmitBits': 'İletim payı',
+  'calc.field.plcaCycleBits': 'Çevrim uzunluğu',
+  'calc.field.plcaCycleTime': 'Çevrim süresi',
+  'calc.field.plcaWorstCase': 'En kötü erişim gecikmesi',
+  'calc.field.plcaEfficiency': 'Veri verimi',
+  'calc.field.plcaBurstWindow': 'Burst penceresi',
+  'calc.field.plcaBurstDisabled': 'Kapalı (MAXBC = 0)',
+  'calc.field.plcaBeaconOmitted':
+    'BEACON süresi girilmedi, çevrime eklenmedi — kaynaklar bu değeri sayıyla vermiyor, uydurulmuyor.',
+
   // --- RS-485 / RS-422 (faz 10 dalga 11d) ---
   'protocol.rs485.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
   'protocol.rs485.error.aborted': 'Çözümleme iptal edildi.',

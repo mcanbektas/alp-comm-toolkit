@@ -13,3 +13,7 @@ export * from './currentLoop';
 // Araç içi fiziksel katmanlar (CAN/LIN/FlexRay PHY) — kablo gecikmesini
 // rs485.ts'ten ÇAĞIRIR, kopyalamaz (bkz. vehiclePhy.ts dosya başı).
 export * from './vehiclePhy';
+// Single Pair Ethernet (10BASE-T1S/T1L, 100BASE-T1, 1000BASE-T1) + PLCA çevrim
+// bütçesi — yine decode'u olmayan bir katalog kaydının motoru
+// (bkz. singlePairEthernet.ts dosya başı).
+export * from './singlePairEthernet';

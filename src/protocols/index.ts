@@ -459,6 +459,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'usb', () =>
     import('./serial/host-network-interfaces/usb').then((module) => module.usbPlugin),
   );
+  // Ethernet Interface — Faz 10 dalga 11k: sayfanın kendi bayt akışı MDIO
+  // yönetim çerçevesidir (Ethernet çerçevesini network/ethernet zaten çözer).
+  // Clause 22 alanları + BMCR/BMSR/ANAR/ANLPAR bit çözümü; Clause 45 yalnız
+  // ADLANIR (op kodu tablosu kamuya açık kaynaklarda bulunamadı, mdio.ts
+  // dosya başı). Cevapsız okuma (TA=11) "PHY not detected" uyarısı verir.
+  registerOnce(registry, 'ethernet-interface', () =>
+    import('./serial/host-network-interfaces/mdio').then((module) => module.mdioPlugin),
+  );
   // RS-485 / RS-422 — Faz 10 dalga 11d: elektriksel katmanlar, decode'ları
   // ortak `uartLineCore.ts` üzerinden UART karakter hattı görünümü (8N1
   // varsayımı orada gerekçeli). RS-485 ayrıca half-duplex echo şüphesini

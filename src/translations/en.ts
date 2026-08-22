@@ -4012,6 +4012,76 @@ export const en: TranslationDictionary = {
   'protocol.usb.example.badCrc.name': 'DATA0 · corrupted CRC16',
   'protocol.usb.example.badCrc.description': 'The last CRC byte of the same SETUP payload was deliberately corrupted — it shows what the error path looks like.',
 
+  // --- Ethernet Interface / MDIO (phase 10 wave 11k) ---
+  'protocol.mdio.error.emptyFrame': 'The buffer is empty — an MDIO frame is 32 bits (4 bytes).',
+  'protocol.mdio.error.aborted': 'Parsing was cancelled.',
+  'protocol.mdio.error.truncated':
+    'Not enough bytes for an MDIO frame: at least 4 bytes are required after the preamble. A capture that is all 0xFF is just an idle line and carries no frame.',
+  'protocol.mdio.error.invalidStart':
+    'The ST field is neither 01 (Clause 22) nor 00 (Clause 45) — the frame alignment may be off.',
+  'protocol.mdio.warning.invalidOpcode':
+    'The OP field is neither 10 (read) nor 01 (write). The fields are still shown, but the operation type is unknown.',
+  'protocol.mdio.warning.turnaround':
+    'The turnaround field is not the expected 10; on a write this value is fixed.',
+  'protocol.mdio.warning.noPhyResponse':
+    'No PHY answered the read: the addressed PHY drives the second turnaround bit low, and here it stayed high (the line is pulled up). This is the classic "PHY not detected" / wrong PHY address symptom — the data field usually reads 0xFFFF as well.',
+  'protocol.mdio.warning.clause45':
+    'ST=00: a Clause 45 (indirect addressing) frame. Its opcode table is not present in the public sources at hand, so the frame is NOT split into fields; the raw 32 bits are shown.',
+  'protocol.mdio.warning.trailingBytes':
+    'Bytes beyond the 4-byte frame did not land in any field and are shown separately.',
+  'protocol.mdio.warning.preambleSuppressed':
+    'The preamble is not 32 bits (4 bytes of 0xFF). This is not an error — PHYs support preamble suppression and no preamble is needed once synchronisation is established.',
+  'protocol.mdio.documentation.summary':
+    'MDIO/MDC management frame (MII Serial Management Interface) decoding: preamble, ST, OP, PHYAD, REGAD, turnaround and the 16-bit data word. Registers 0/1/4/5 (BMCR/BMSR/ANAR/ANLPAR) are opened bit by bit — link status, speed, duplex, auto-negotiation and link partner abilities are read from here. An unanswered read is told apart by the turnaround bit.',
+  'protocol.mdio.example.readBmsr.name': 'BMSR read (PHY 1, register 1)',
+  'protocol.mdio.example.readBmsr.description':
+    'The classic link check: 0x782D → link UP, auto-negotiation complete, 10/100 half and full duplex capable.',
+  'protocol.mdio.example.writeBmcr.name': 'BMCR write (0x3100)',
+  'protocol.mdio.example.writeBmcr.description':
+    'Auto-negotiation enabled plus the 100 Mb/s and full duplex bits. While AN is enabled the PHY ignores the speed/duplex bits; the summary line says so.',
+  'protocol.mdio.example.readAnlpar.name': 'ANLPAR read (partner abilities)',
+  'protocol.mdio.example.readAnlpar.description':
+    '0x45E1 → the link partner is 10/100 capable, the acknowledge bit is set and pause is supported. This is the byte-level form of the "Partner 10/100 capable" line in the specification summary.',
+  'protocol.mdio.example.noPhy.name': 'Unanswered read (PHY 7)',
+  'protocol.mdio.example.noPhy.description':
+    'Turnaround 11 and data 0xFFFF: there is no PHY at that address, or the address is wrong. The warning states this explicitly.',
+  'protocol.mdio.example.preambleSuppressed.name': 'Read with preamble suppressed',
+  'protocol.mdio.example.preambleSuppressed.description':
+    'Once synchronisation is established the preamble is optional; the frame starts directly with ST.',
+  'protocol.mdio.example.clause45.name': 'Clause 45 frame (ST=00)',
+  'protocol.mdio.example.clause45.description':
+    'Extended register spaces such as PLCA are reached this way (MMD 31 = Vendor Specific 2). This wave names the frame but does not split it into fields.',
+
+  // --- Single Pair Ethernet / PLCA (phase 10 wave 11k) ---
+  'calc.spePlca.name': 'Single Pair Ethernet / PLCA',
+  'calc.spePlca.summary':
+    'Bit and frame time for 10BASE-T1S/T1L, 100BASE-T1 and 1000BASE-T1; PLCA cycle time, worst-case access latency and burst window on a 10BASE-T1S multidrop segment.',
+  'calc.field.spePhySection': 'PHY and frame',
+  'calc.field.plcaSection': 'PLCA cycle',
+  'calc.field.spePhyType': 'PHY class',
+  'calc.field.frameBytes': 'Frame size',
+  'calc.field.interFrameGapBits': 'Inter-frame gap',
+  'calc.field.lineRate': 'Line rate',
+  'calc.field.frameBitTimes': 'Frame length',
+  'calc.field.frameTime': 'Frame time',
+  'calc.field.frameTimeWithGap': 'Including the gap',
+  'calc.field.plcaNodeCount': 'Node count (NCNT)',
+  'calc.field.plcaTransmittingNodes': 'Transmitting nodes',
+  'calc.field.plcaToTimer': 'to_timer (TOTMR)',
+  'calc.field.plcaMaxBurstCount': 'Max burst count (MAXBC)',
+  'calc.field.plcaBurstTimer': 'burst_timer (BTMR)',
+  'calc.field.plcaBeaconOptional': 'BEACON duration (optional)',
+  'calc.field.plcaIdleBits': 'Share of the silent nodes',
+  'calc.field.plcaTransmitBits': 'Transmission share',
+  'calc.field.plcaCycleBits': 'Cycle length',
+  'calc.field.plcaCycleTime': 'Cycle time',
+  'calc.field.plcaWorstCase': 'Worst-case access latency',
+  'calc.field.plcaEfficiency': 'Data efficiency',
+  'calc.field.plcaBurstWindow': 'Burst window',
+  'calc.field.plcaBurstDisabled': 'Disabled (MAXBC = 0)',
+  'calc.field.plcaBeaconOmitted':
+    'No BEACON duration was entered, so it is not part of the cycle — the sources do not publish this number and it is not invented here.',
+
   // --- RS-485 / RS-422 (phase 10 wave 11d) ---
   'protocol.rs485.error.emptyFrame': 'The buffer must contain at least 1 byte.',
   'protocol.rs485.error.aborted': 'Parsing was cancelled.',
