@@ -88,7 +88,7 @@ bir sonraki alt dalganın kullanacağı paylaşılan motoru açar.
 | **12a** | icmp, icmpv6 | En ucuz giriş: IP katmanı + `internetChecksum` hazır, ikisi kardeş, `internet-layer` ailesi kapanır | — (ipv4 tablosuna 58, ipv6 Next Header eklenir) | kolay |
 | **12b** | arp, lldp | `data-link` kapanır. LLDP jenerik **TLV yürüyücüsü**nü açar (12c'nin DHCP option'ları aynısını ister) | `tlvWalker` | kolay–orta |
 | **12c** | dns, mdns, dhcp | `addressing-discovery` kapanır. dns↔mdns aynı tel biçimi (mDNS = multicast DNS + `.local`), **name compression** tek yerde yazılır; dhcp 12b'nin TLV'sini yer | `dnsWire` (compression pointer dâhil) | orta |
-| **12d** | ntp, ptp | Ortak 64-bit zaman damgası aritmetiği; NTP dört-damga modeli (`spec:324`) PTP E2E delay'in (`spec:594`) sadeleştirilmiş hâli | `networkTimestamp` | orta (ptp zor) |
+| ~~**12d**~~ | ~~ntp, ptp~~ | **BİTTİ (`b149e76`).** Öngörülen ortak kaldıraç YANLIŞ ÇIKTI: NTP damgası 64 bit (32 s + 32 bit 2^-32 kesir, epoch 1900 UTC), PTP damgası 80 bit (48 bit s + 32 bit tam sayı ns, epoch 1970 TAI). Paylaşılan motor kesrin birimini tek seçip diğerini 4295 kat yanlış ölçeklerdi — 12b'nin LLDP/DHCP "TLV" hatasının aynı cinsi | ~~`networkTimestamp`~~ → `ntpTimestamp.ts` + `ptpTimestamp.ts` AYRI | orta (ptp zor) |
 | **12e** | snmp, syslog | `time-management` kapanır. SNMP **berReader'ı hazır bulur** (asıl iş OID/VarBind katmanı); syslog saf metin, ucuz | `oidCodec` | orta |
 | **12f** | http, websocket, mqtt-sn | `web-messaging` kapanır. HTTP CRLF framing + body framing (`spec:391`, Content-Length vs chunked); WS maskeleme + fragmentation; mqtt-sn mqtt komşusu | — | orta–zor |
 | **12g** | rtp, rtcp | `real-time-media` kapanır. Ortak başlık kavramları, `bitCursor` hazır; jitter hesabı (`spec:558`) calculator adayı | — | orta |
@@ -120,9 +120,14 @@ Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
 
 ## Açık sorular
 
-1. **PTP `ready` olabilir mi?** BMCA (`spec:614`) ve PTP Analyzer (`:609`) çoklu
-   mesaj korelasyonu istiyor — tek çerçeve çözücüsü bunu vermez. LoRa presedanına
-   göre (`wireless-iot.ts:169-187`) tavan `partial` olabilir. 12d'de karara bağlanacak.
+1. ~~**PTP `ready` olabilir mi?**~~ → **12d'de KARARA BAĞLANDI: EVET, `ready`.**
+   BMCA (`spec:614`) ve PTP Analyzer (`:609`) gerçekten çoklu mesaj korelasyonu
+   istiyor ve verilmedi — ama 12c'de DNS'in "Transaction Matching / Response Time /
+   TTL Simulation" araçları TAM AYNI gerekçeyle analyzer'a bırakılmışken kayda
+   `ready` verilmişti. LoRa presedanı (`wireless-iot.ts:169-187`) buraya UYMUYOR:
+   orada parser HİÇ YOKTU ve kaydın bütün değeri hesap aracındaydı. PTP'de
+   Announce'un BMCA veri kümesi alan alan çözülüyor, eksik olan yalnız
+   Announce'ları KARŞILAŞTIRMA kararı — o da uyarıyla bildiriliyor.
 2. **SNMPv3** kapsamda mı? Zarf farklı, USM güvenlik parametreleri var. Öneri:
    12e'de v1/v2c `ready`, v3 uyarıyla dışarıda.
 3. **`ipv4.ts` PROTOCOL_NAMES tablosu genişletilecek mi, ayrı modüle mi taşınacak?**

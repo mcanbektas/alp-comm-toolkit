@@ -111,8 +111,29 @@ gerçekten DNS'in aynı telini okur (spec:715), tek fark CLASS alanının üst
 biti (`variant:'dns'|'mdns'`). İsim sıkıştırması ziyaret edilen pointer
 offset'leriyle döngü korumalı çözüldü. DHCP'nin TLV8 option yürüyücüsü
 BİLEREK ayrı yazıldı (LLDP'ninkiyle PAYLAŞILMADI — 12b'nin düzeltmesinin
-doğrulanmış devamı). Sıradaki: **12d ntp/ptp** (Opus·high — PTP saat
-modelinde görünmez değişmezler).
+doğrulanmış devamı).
+
+**12d (2026-08-22 bitti, `b149e76`) — ntp + ptp.** `time-management` ailesinin
+saat yarısı kapandı. Brief'in öngördüğü ortak `networkTimestamp` kaldıracı
+AÇILMADI: öngörü 12b'nin LLDP/DHCP "TLV" varsayımıyla aynı cinsten, bit
+düzeyinde yanlış çıktı. NTP damgası 64 bit (32 bit saniye + 32 bit 2^-32
+kesir, epoch 1900 UTC), PTP damgası 80 bit (48 bit saniye + 32 bit TAM SAYI
+nanosaniye, epoch 1970 **TAI**) — paylaşılan motor kesrin birimini tek seçmek
+zorunda kalır ve diğerini sessizce 4295 kat yanlış ölçeklerdi. İki ayrı
+okuyucu (`ntpTimestamp.ts`, `ptpTimestamp.ts`) yan yana duruyor. NTP'de era
+sarmalı RFC 4330 kuralıyla çözülüp VARSAYIM olduğu uyarılır, sıfır damga
+"1900" değil "ayarlanmamış" basar, Reference ID'nin anlamı stratum'a göre üç
+ayrı okunur; dört damga modelinden yalnız **T3−T2** türetilir (δ/θ T4'ü ister,
+T4 pakete hiç yazılmaz). PTP'de messageType baytın **ALT** yarısıdır,
+correctionField işaretli ve nanosaniye × 2^16 ölçeğindedir, twoStepFlag yalnız
+Sync/Pdelay_Resp'te tanımlıdır. **PTP TLV'si ÜÇÜNCÜ lehçedir** — TLV16
+(2B tip + 2B çift uzunluk), LLDP'nin 7+9 bitinden ve DHCP'nin TLV8'inden
+farklı; paylaşılan yürüyücü üçüncü kez açılmadı. Brief'in **açık sorusu 1
+karara bağlandı: PTP `ready`** — 12c'de DNS'in Transaction Matching / Response
+Time / TTL Simulation araçları aynı gerekçeyle analyzer'a bırakılmışken `ready`
+verilmişti; LoRa'nın `partial`ı parser'ı HİÇ OLMAYAN kayda aitti. Sıradaki:
+**12e snmp/syslog** (Sonnet·high — `berReader.ts` hazır bekliyor, asıl iş
+OID/VarBind katmanı; syslog saf metin).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
