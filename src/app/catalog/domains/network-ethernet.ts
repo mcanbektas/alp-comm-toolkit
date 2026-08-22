@@ -503,7 +503,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The text-framed request/response protocol of the web and of most device REST APIs, framed either by Content-Length or by chunked transfer encoding.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'http',
           tabs: ['overview', 'decode', 'build', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Request Viewer',
@@ -526,8 +527,12 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'A bidirectional frame-based channel opened by an HTTP upgrade handshake, giving dashboards and gateways a persistent socket to a device.',
           layer: 'application',
-          status: 'planned',
-          tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
+          status: 'ready',
+          pluginId: 'websocket',
+          // `live` sekmesi KALDIRILDI, dalga 12'nin karar 3'ü: canlı soket
+          // oturumu `connection/websocket` katmanını ister ve o katman yok.
+          // Sekmeyi bırakmak boş kart basmak olurdu (CLAUDE.md yasağı).
+          tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Upgrade Handshake Validator',
             'Sec-WebSocket-Accept Check',
@@ -574,7 +579,8 @@ export const networkEthernetDomain: CatalogDomain = {
           summary:
             'The MQTT-related messaging protocol for constrained sensor networks, replacing topic strings with numeric topic IDs and reaching the broker through a gateway.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'mqtt-sn',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Message Decoder',

@@ -3194,6 +3194,161 @@ export const tr = {
   'protocol.syslog.example.leadingZeroPri.name': 'Başta sıfırlı PRI (hata yolu)',
   'protocol.syslog.example.leadingZeroPri.description': '`<034>` — RFC 5424 §6.2.1 başta sıfırı yasaklar.',
 
+  // --- HTTP ---
+  'protocol.http.error.frameTooShort': 'Mesaj anlamlı bir başlangıç satırı taşıyacak kadar uzun değil.',
+  'protocol.http.error.frameTooLong': 'Mesaj izin verilen azami uzunluğu aşıyor.',
+  'protocol.http.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.http.error.headersUnterminated': 'Başlık bölümü boş satırla (CRLF CRLF) kapanmıyor.',
+  'protocol.http.error.startLineMalformed': 'Başlangıç satırı ne bir istek satırı ne de bir durum satırı.',
+  'protocol.http.error.smugglingConflict':
+    'Content-Length ve Transfer-Encoding aynı mesajda. RFC 9112 §6.1 bunu reddetmeyi şart koşar — ara sunucular ikisini farklı önceliklendirdiğinde request smuggling doğar.',
+  'protocol.http.error.contentLengthConflict': 'Birden çok Content-Length başlığı çelişen değerler taşıyor.',
+  'protocol.http.error.contentLengthMalformed': 'Content-Length değeri ondalık bir sayı değil.',
+  'protocol.http.error.headerNameWhitespace':
+    'Başlık adıyla iki nokta arasında boşluk var. RFC 9112 §5.1 bunu reddetmeyi şart koşar; kabul eden aracılar smuggling vektörüdür.',
+  'protocol.http.error.bodyTruncated': 'Gövde, Content-Length’in bildirdiği uzunluktan kısa.',
+  'protocol.http.error.chunkSizeMalformed': 'Chunk boyutu onaltılık bir sayı değil.',
+  'protocol.http.error.chunkTruncated': 'Bir chunk’ın bildirdiği uzunluk tamponda kalan bayttan büyük.',
+  'protocol.http.warning.unknownMethod': 'Metot temel kümenin dışında; kayıtlı ek metotlar bulunur.',
+  'protocol.http.warning.unknownStatus': 'Durum kodu yerleşik tabloda yok.',
+  'protocol.http.warning.reasonMismatch': 'Reason phrase kayıtlı metinden farklı. Alan isteğe bağlıdır ve anlam taşımaz.',
+  'protocol.http.warning.binaryFramingVersion':
+    'HTTP/2 ve HTTP/3 ikili çerçeveleme kullanır; bu metin çözücüsü onları okuyamaz.',
+  'protocol.http.warning.unexpectedVersion': 'Sürüm alanı HTTP/1.0 ya da HTTP/1.1 değil.',
+  'protocol.http.warning.obsFold': 'Boşlukla başlayan devam satırı (obs-fold) kullanımdan kaldırıldı; birleştirilmedi.',
+  'protocol.http.warning.bareLf': 'Başlık bölümünde CR’siz LF var — smuggling vektörü.',
+  'protocol.http.warning.bodyLongerThanDeclared':
+    'Gövde Content-Length’ten uzun. Fazlalık büyük olasılıkla boru hattındaki bir sonraki mesaj.',
+  'protocol.http.warning.bodyUntilClose':
+    'Çerçeveleme başlığı yok: yanıtın gövdesi bağlantı kapanana kadar sürer.',
+  'protocol.http.warning.bodyForbiddenButPresent': 'Bu mesaj gövde taşıyamaz ama gövde baytları var.',
+  'protocol.http.warning.headResponseAssumed':
+    'İstek HEAD olarak bildirildi: Content-Length yalnız bilgidir, gövde beklenmez.',
+  'protocol.http.warning.transferEncodingNotChunked':
+    'Transfer-Encoding’in son kodlaması `chunked` değil; gövde uzunluğu bilinemez.',
+  'protocol.http.warning.chunkExtensionIgnored': 'Chunk uzantısı (`;` sonrası) okundu ama yok sayıldı.',
+  'protocol.http.warning.trailerPresent': 'Son chunk’tan sonra trailer bölümü var.',
+  'protocol.http.warning.headerLimit': 'Başlık sayısı üst sınıra dayandı, bölüm okunmayı bıraktı.',
+  'protocol.http.warning.transactionMatchingNeedsStream':
+    'İstek/yanıt eşleştirmesi ve süresi bir TCP akışının işidir; tek mesajdan çıkmaz.',
+  'protocol.http.option.requestMethod': 'İsteğin metodu',
+  'protocol.http.option.requestMethod.description':
+    'HEAD yanıtı Content-Length taşır ama gövde TAŞIMAZ ve bu yanıttan çıkarılamaz. Çerçeveleme kipinin kendisi başlıklardan okunur, sorulmaz.',
+  'protocol.http.option.requestMethod.unknown': 'Bilinmiyor',
+  'protocol.http.option.requestMethod.head': 'HEAD',
+  'protocol.http.documentation.summary':
+    'HTTP/1.1 metin çerçeveli istek/yanıt (RFC 9110 semantik, RFC 9112 sözdizimi). Başlangıç satırı, başlıklar ve gövde alan alana çözülür; gövde çerçevelemesi RFC 9112 §6.3 sırasıyla belirlenir (1xx/204/304 gövdesiz, HEAD yanıtı gövdesiz, Transfer-Encoding Content-Length’i geçersizler). Content-Length ile Transfer-Encoding birlikte geldiğinde ve başlık adında boşluk olduğunda request smuggling hatası basılır. Chunked gövde onaltılık boyutlarla birleştirilir. HTTP/2 ve HTTP/3 ikili çerçeveleme ayrı bir iştir; işlem eşleştirmesi akış işidir.',
+  'protocol.http.example.getRequest.name': 'GET isteği',
+  'protocol.http.example.getRequest.description': 'Spec’in `GET /api/status HTTP/1.1` örneği; gövde yok.',
+  'protocol.http.example.jsonResponse.name': 'JSON yanıtı (Content-Length)',
+  'protocol.http.example.jsonResponse.description': 'Gövde 27 bayt ve Content-Length onu tam karşılıyor.',
+  'protocol.http.example.chunkedResponse.name': 'Chunked yanıt',
+  'protocol.http.example.chunkedResponse.description':
+    'Spec’in örneği: 4 + 5 bayt iki chunk, birleştirilmiş gövde 9 bayt ("Wikipedia").',
+  'protocol.http.example.chunkedHexSize.name': 'Chunk boyutu onaltılık',
+  'protocol.http.example.chunkedHexSize.description':
+    '`10` = 16 bayt. Ondalık okuyan bir çözücü burada 10 bayt alır ve gövdeyi kaydırır.',
+  'protocol.http.example.noContent.name': '204 No Content',
+  'protocol.http.example.noContent.description': 'Content-Length yazsa bile 204 gövde taşıyamaz.',
+  'protocol.http.example.smugglingConflict.name': 'Content-Length + Transfer-Encoding (hata yolu)',
+  'protocol.http.example.smugglingConflict.description':
+    'İki çerçeveleme bildirimi bir arada — RFC 9112 §6.1 reddetmeyi şart koşar.',
+  'protocol.http.example.headerNameWhitespace.name': 'Başlık adında boşluk (hata yolu)',
+  'protocol.http.example.headerNameWhitespace.description':
+    '`Content-Length : 5` — ad ile iki nokta arasındaki boşluk smuggling vektörüdür.',
+
+  // --- WebSocket ---
+  'protocol.websocket.error.frameTooShort': 'Çerçeve iki baytlık asgari başlığı taşımıyor.',
+  'protocol.websocket.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.websocket.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.websocket.error.lengthTruncated': 'Uzunluk uzantısı ya da maske anahtarı tamponun sonuna kesilmiş.',
+  'protocol.websocket.error.payloadTruncated': 'Yük, uzunluk alanının bildirdiği kadar uzun değil.',
+  'protocol.websocket.error.extendedLengthMsb':
+    '64 bitlik uzunluğun en anlamlı biti 1. RFC 6455 §5.2 bunu 0 olmaya zorlar.',
+  'protocol.websocket.error.controlFrameTooLong':
+    'Kontrol çerçevesinin yükü 125 baytı aşıyor (RFC 6455 §5.5).',
+  'protocol.websocket.error.controlFrameFragmented':
+    'Kontrol çerçevesi parçalanamaz; FIN biti 1 olmak zorundadır (RFC 6455 §5.5).',
+  'protocol.websocket.error.handshakeNotAFrame':
+    'Bu bir WebSocket çerçevesi değil, açılış el sıkışması metni. HTTP sayfasında çözülür.',
+  'protocol.websocket.warning.reservedOpcode': 'Opcode tanımlı kümenin dışında; ayrılmış bir değer.',
+  'protocol.websocket.warning.rsvBitsSet':
+    'RSV bitlerinden biri set. Yalnız anlaşılmış bir uzantı varsa anlamlıdır ve el sıkışması burada değil.',
+  'protocol.websocket.warning.nonMinimalLength':
+    'Uzunluk için gereğinden uzun biçim kullanılmış; RFC 6455 §5.2 en kısasını şart koşar.',
+  'protocol.websocket.warning.payloadLongerThanFrame':
+    'Tamponda yükten fazla bayt var — büyük olasılıkla akıştaki bir sonraki çerçeve.',
+  'protocol.websocket.warning.closeStatusReserved':
+    'Close durum kodu 1005/1006/1015 yerel kullanım içindir ve telde görünemez (RFC 6455 §7.4.1).',
+  'protocol.websocket.warning.closeStatusUnknown': 'Close durum kodu yerleşik tabloda yok.',
+  'protocol.websocket.warning.closePayloadTooShort': 'Close yükü bir bayt; durum kodu 16 bittir.',
+  'protocol.websocket.warning.continuationOpcodeUnknown':
+    'Continuation çerçevesinin yük tipi ilk parçadaydı; burada yorumlanamaz.',
+  'protocol.websocket.warning.fragmentReassemblyNeedsStream':
+    'Parça birleştirme çok-çerçeve işidir; tek çerçeveden çıkmaz.',
+  'protocol.websocket.warning.textNotValidUtf8': 'Metin yükü geçerli UTF-8 değil (RFC 6455 §5.6).',
+  'protocol.websocket.documentation.summary':
+    'HTTP yükseltmesiyle açılan iki yönlü çerçeve kanalı (RFC 6455). FIN, RSV, opcode, MASK ve üç biçimli uzunluk alanı alan alana çözülür; maskeli yük XOR’la açılır ve yön MASK bitinden türetilir (istemci→sunucu maskeli, sunucu→istemci maskesiz). Kontrol çerçevelerinin 125 bayt ve parçalanmama sınırları denetlenir, Close yükü durum kodu ve UTF-8 gerekçeye ayrılır. Açılış el sıkışması HTTP mesajıdır ve HTTP sayfasında çözülür; parça birleştirme çok-çerçeve işidir.',
+  'protocol.websocket.example.serverText.name': 'Sunucu metin çerçevesi',
+  'protocol.websocket.example.serverText.description': 'Maskesiz — sunucu→istemci yönü (RFC 6455 §5.1).',
+  'protocol.websocket.example.clientMaskedText.name': 'İstemci maskeli metin',
+  'protocol.websocket.example.clientMaskedText.description': 'Maskeli — istemci→sunucu; yük XOR’la açılır.',
+  'protocol.websocket.example.fragmentStart.name': 'Parça başlangıcı (FIN=0)',
+  'protocol.websocket.example.fragmentStart.description': 'Birleştirme çok-çerçeve işidir, uyarıyla bildirilir.',
+  'protocol.websocket.example.closeNormal.name': 'Close 1000',
+  'protocol.websocket.example.closeNormal.description': 'Durum kodu + UTF-8 gerekçe ("bye").',
+  'protocol.websocket.example.ping.name': 'Ping',
+  'protocol.websocket.example.ping.description': 'Kontrol çerçevesi: 125 baytın altında ve FIN=1.',
+  'protocol.websocket.example.extendedLength.name': '16 bitlik uzunluk uzantısı',
+  'protocol.websocket.example.extendedLength.description': '200 baytlık yük: uzunluk kodu 126, gerçek uzunluk sonraki iki baytta.',
+  'protocol.websocket.example.controlFrameTooLong.name': 'Aşırı uzun Ping (hata yolu)',
+  'protocol.websocket.example.controlFrameTooLong.description': 'Kontrol çerçevesinin yükü 125 baytı aşamaz.',
+  'protocol.websocket.example.handshakeText.name': 'El sıkışma metni (hata yolu)',
+  'protocol.websocket.example.handshakeText.description': 'Bu bir HTTP mesajıdır; çerçeve çözücüsü onu okumaz.',
+
+  // --- MQTT-SN ---
+  'protocol.mqttSn.error.frameTooShort': 'Mesaj en az uzunluk ve tip baytlarını taşımalı.',
+  'protocol.mqttSn.error.frameTooLong': 'Mesaj izin verilen azami uzunluğu aşıyor.',
+  'protocol.mqttSn.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mqttSn.error.lengthTruncated': 'Üç baytlık uzunluk alanı tamponun sonuna kesilmiş.',
+  'protocol.mqttSn.error.bodyTruncated': 'Bildirilen uzunluk tamponda kalan bayttan büyük.',
+  'protocol.mqttSn.error.lengthTooSmall':
+    'Bildirilen uzunluk kendi alanını ve mesaj tipini bile karşılamıyor. MQTT-SN’de Length KENDİ baytlarını da sayar.',
+  'protocol.mqttSn.warning.unknownMessageType': 'Mesaj tipi tanımlı kümenin dışında; gövde ham gösterildi.',
+  'protocol.mqttSn.warning.lengthMismatch':
+    'Tamponda bildirilen uzunluktan fazla bayt var — büyük olasılıkla datagramdaki bir sonraki mesaj.',
+  'protocol.mqttSn.warning.qosMinusOne':
+    'QoS bitleri 0b11: MQTT’de rezerve ve geçersiz, MQTT-SN’de QoS −1 (bağlantısız yayın).',
+  'protocol.mqttSn.warning.topicIdTypeReserved': 'Topic ID tipi 0b11 rezervedir.',
+  'protocol.mqttSn.warning.unknownReturnCode': 'Return Code tanımlı dört değerden hiçbiri değil.',
+  'protocol.mqttSn.warning.topicMappingNeedsStream':
+    'Topic ID ↔ topic adı eşlemesi REGISTER/REGACK akışında kurulur; tek mesajdan çıkmaz.',
+  'protocol.mqttSn.warning.nonMinimalLength': 'Üç baytlık uzunluk biçimi yalnız 255 baytı aşan mesajlar için gerekir.',
+  'protocol.mqttSn.warning.encapsulatedOpaque': 'ENCAPSULATED mesajının içi ayrı bir MQTT-SN mesajıdır; çözülmedi.',
+  'protocol.mqttSn.warning.profileNotOasisStandard':
+    'Profil MQTT-SN 1.2: OASIS input specification’dır, MQTT 5 gibi onaylanmış bir OASIS Standard DEĞİLDİR.',
+  'protocol.mqttSn.documentation.summary':
+    'Kısıtlı sensör ağları için MQTT ile ilişkili mesajlaşma (MQTT-SN 1.2). Uzunluk alanı MQTT’nin Variable Byte Integer’ı DEĞİLDİR: ya tek bayttır ya `0x01` + 16 bittir, ve kendi baytlarını da sayar. QoS bitleri 0b11 burada geçersiz değil QoS −1 demektir; Topic ID tipi 0b10 iken iki bayt sayı değil kısa topic adıdır. Gateway keşfi, topic kaydı ve yayın/abonelik mesajları alan alana çözülür; topic id eşlemesi ve oturum görünümü çok-mesaj işidir.',
+  'protocol.mqttSn.example.advertise.name': 'ADVERTISE',
+  'protocol.mqttSn.example.advertise.description': 'Gateway 7, duyuru süresi 900 s.',
+  'protocol.mqttSn.example.connect.name': 'CONNECT',
+  'protocol.mqttSn.example.connect.description': 'CleanSession, keep-alive 60 s, client id `sensor-01`.',
+  'protocol.mqttSn.example.register.name': 'REGISTER',
+  'protocol.mqttSn.example.register.description': 'Spec’in örneği: `room/temperature ↔ 0x0012`.',
+  'protocol.mqttSn.example.publishQos1.name': 'PUBLISH (QoS 1)',
+  'protocol.mqttSn.example.publishQos1.description': 'Spec’in örneği: Topic ID 0x0012, Message ID 42.',
+  'protocol.mqttSn.example.publishQosMinusOne.name': 'PUBLISH (QoS −1)',
+  'protocol.mqttSn.example.publishQosMinusOne.description':
+    'QoS bitleri 0b11 — MQTT’de hata, MQTT-SN’de bağlantısız yayın.',
+  'protocol.mqttSn.example.publishShortTopic.name': 'PUBLISH (kısa topic adı)',
+  'protocol.mqttSn.example.publishShortTopic.description':
+    'Topic ID tipi 0b10: iki bayt sayı değil, iki ASCII karakter ("ab").',
+  'protocol.mqttSn.example.extendedLength.name': 'Üç baytlık uzunluk',
+  'protocol.mqttSn.example.extendedLength.description':
+    '`0x01` + 16 bit = 268 bayt. MQTT’nin VBI’ı olarak okunsaydı "1" çıkardı.',
+  'protocol.mqttSn.example.lengthTooSmall.name': 'Uzunluk kendi alanından küçük (hata yolu)',
+  'protocol.mqttSn.example.lengthTooSmall.description': 'Bildirilen 0, asgari 4 — Length kendini de sayar.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'Çerçeve en az Fixed Header baytı ve Remaining Length’in tek baytlık hâli kadar uzun olmalı.',
   'protocol.mqtt.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',

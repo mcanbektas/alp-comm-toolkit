@@ -3190,6 +3190,167 @@ export const en: TranslationDictionary = {
   'protocol.syslog.example.leadingZeroPri.name': 'PRI with a leading zero (error path)',
   'protocol.syslog.example.leadingZeroPri.description': '`<034>` — RFC 5424 §6.2.1 forbids leading zeros.',
 
+  // --- HTTP ---
+  'protocol.http.error.frameTooShort': 'The message is not long enough to carry a meaningful start line.',
+  'protocol.http.error.frameTooLong': 'The message exceeds the configured maximum length.',
+  'protocol.http.error.aborted': 'Parsing was cancelled.',
+  'protocol.http.error.headersUnterminated': 'The header section is not closed by a blank line (CRLF CRLF).',
+  'protocol.http.error.startLineMalformed': 'The start line is neither a request line nor a status line.',
+  'protocol.http.error.smugglingConflict':
+    'Content-Length and Transfer-Encoding appear in the same message. RFC 9112 §6.1 requires rejecting this — when intermediaries prioritise the two differently, request smuggling follows.',
+  'protocol.http.error.contentLengthConflict': 'Multiple Content-Length headers carry conflicting values.',
+  'protocol.http.error.contentLengthMalformed': 'The Content-Length value is not a decimal number.',
+  'protocol.http.error.headerNameWhitespace':
+    'There is whitespace between the header name and the colon. RFC 9112 §5.1 requires rejecting this; intermediaries that accept it are a smuggling vector.',
+  'protocol.http.error.bodyTruncated': 'The body is shorter than the length declared by Content-Length.',
+  'protocol.http.error.chunkSizeMalformed': 'The chunk size is not a hexadecimal number.',
+  'protocol.http.error.chunkTruncated': 'A chunk declares a length larger than the bytes remaining in the buffer.',
+  'protocol.http.warning.unknownMethod': 'The method is outside the base set; registered extension methods exist.',
+  'protocol.http.warning.unknownStatus': 'The status code is absent from the built-in table.',
+  'protocol.http.warning.reasonMismatch':
+    'The reason phrase differs from the registered text. The field is optional and carries no meaning.',
+  'protocol.http.warning.binaryFramingVersion':
+    'HTTP/2 and HTTP/3 use binary framing; this text decoder cannot read them.',
+  'protocol.http.warning.unexpectedVersion': 'The version field is neither HTTP/1.0 nor HTTP/1.1.',
+  'protocol.http.warning.obsFold':
+    'A continuation line starting with whitespace (obs-fold) is deprecated; it was not joined.',
+  'protocol.http.warning.bareLf': 'The header section contains an LF without a CR — a smuggling vector.',
+  'protocol.http.warning.bodyLongerThanDeclared':
+    'The body is longer than Content-Length. The excess is most likely the next pipelined message.',
+  'protocol.http.warning.bodyUntilClose':
+    'No framing header: the response body runs until the connection closes.',
+  'protocol.http.warning.bodyForbiddenButPresent': 'This message cannot carry a body, yet body bytes are present.',
+  'protocol.http.warning.headResponseAssumed':
+    'The request was declared as HEAD: Content-Length is informational only and no body is expected.',
+  'protocol.http.warning.transferEncodingNotChunked':
+    'The final Transfer-Encoding coding is not `chunked`; the body length cannot be known.',
+  'protocol.http.warning.chunkExtensionIgnored': 'The chunk extension (after `;`) was read but ignored.',
+  'protocol.http.warning.trailerPresent': 'A trailer section follows the last chunk.',
+  'protocol.http.warning.headerLimit': 'The header count hit the upper bound and the section walk stopped.',
+  'protocol.http.warning.transactionMatchingNeedsStream':
+    'Request/response matching and timing belong to a TCP stream; they cannot come from a single message.',
+  'protocol.http.option.requestMethod': 'Method of the request',
+  'protocol.http.option.requestMethod.description':
+    'A HEAD response carries Content-Length but no body, and that cannot be derived from the response. The framing mode itself is read from the headers, not asked.',
+  'protocol.http.option.requestMethod.unknown': 'Unknown',
+  'protocol.http.option.requestMethod.head': 'HEAD',
+  'protocol.http.documentation.summary':
+    'The HTTP/1.1 text-framed request/response (RFC 9110 semantics, RFC 9112 syntax). Start line, headers and body are decoded field by field; body framing follows the RFC 9112 §6.3 order (1xx/204/304 have no body, a HEAD response has no body, Transfer-Encoding overrides Content-Length). A request-smuggling error is reported when Content-Length and Transfer-Encoding appear together and when a header name carries trailing whitespace. Chunked bodies are reassembled from hexadecimal sizes. HTTP/2 and HTTP/3 binary framing is separate work, and transaction matching is a stream-level job.',
+  'protocol.http.example.getRequest.name': 'GET request',
+  'protocol.http.example.getRequest.description': 'The spec `GET /api/status HTTP/1.1` example; no body.',
+  'protocol.http.example.jsonResponse.name': 'JSON response (Content-Length)',
+  'protocol.http.example.jsonResponse.description': 'The body is 27 bytes and Content-Length matches it exactly.',
+  'protocol.http.example.chunkedResponse.name': 'Chunked response',
+  'protocol.http.example.chunkedResponse.description':
+    'The spec example: two chunks of 4 and 5 bytes, reassembled body 9 bytes ("Wikipedia").',
+  'protocol.http.example.chunkedHexSize.name': 'Hexadecimal chunk size',
+  'protocol.http.example.chunkedHexSize.description':
+    '`10` means 16 bytes. A decoder reading it as decimal takes 10 bytes and shifts the body.',
+  'protocol.http.example.noContent.name': '204 No Content',
+  'protocol.http.example.noContent.description': 'A 204 cannot carry a body even when Content-Length is present.',
+  'protocol.http.example.smugglingConflict.name': 'Content-Length + Transfer-Encoding (error path)',
+  'protocol.http.example.smugglingConflict.description':
+    'Two framing declarations at once — RFC 9112 §6.1 requires rejecting the message.',
+  'protocol.http.example.headerNameWhitespace.name': 'Whitespace in a header name (error path)',
+  'protocol.http.example.headerNameWhitespace.description':
+    '`Content-Length : 5` — whitespace between the name and the colon is a smuggling vector.',
+
+  // --- WebSocket ---
+  'protocol.websocket.error.frameTooShort': 'The frame does not carry the minimal two-byte header.',
+  'protocol.websocket.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.websocket.error.aborted': 'Parsing was cancelled.',
+  'protocol.websocket.error.lengthTruncated':
+    'The length extension or the masking key is cut off at the end of the buffer.',
+  'protocol.websocket.error.payloadTruncated': 'The payload is shorter than the length field declares.',
+  'protocol.websocket.error.extendedLengthMsb':
+    'The most significant bit of the 64-bit length is 1. RFC 6455 §5.2 forces it to 0.',
+  'protocol.websocket.error.controlFrameTooLong':
+    'The control frame payload exceeds 125 bytes (RFC 6455 §5.5).',
+  'protocol.websocket.error.controlFrameFragmented':
+    'A control frame cannot be fragmented; the FIN bit must be 1 (RFC 6455 §5.5).',
+  'protocol.websocket.error.handshakeNotAFrame':
+    'This is not a WebSocket frame but the opening handshake text. It is decoded on the HTTP page.',
+  'protocol.websocket.warning.reservedOpcode': 'The opcode is outside the defined set; it is a reserved value.',
+  'protocol.websocket.warning.rsvBitsSet':
+    'One of the RSV bits is set. It is meaningful only with a negotiated extension, and the handshake is not here.',
+  'protocol.websocket.warning.nonMinimalLength':
+    'A longer length form than needed was used; RFC 6455 §5.2 requires the shortest one.',
+  'protocol.websocket.warning.payloadLongerThanFrame':
+    'The buffer holds more bytes than the payload — most likely the next frame in the stream.',
+  'protocol.websocket.warning.closeStatusReserved':
+    'Close status codes 1005/1006/1015 are for local use and cannot appear on the wire (RFC 6455 §7.4.1).',
+  'protocol.websocket.warning.closeStatusUnknown': 'The close status code is absent from the built-in table.',
+  'protocol.websocket.warning.closePayloadTooShort': 'The close payload is one byte; the status code is 16 bits.',
+  'protocol.websocket.warning.continuationOpcodeUnknown':
+    'The payload type of a continuation frame was in the first fragment; it cannot be interpreted here.',
+  'protocol.websocket.warning.fragmentReassemblyNeedsStream':
+    'Fragment reassembly is a multi-frame job; it cannot come from a single frame.',
+  'protocol.websocket.warning.textNotValidUtf8': 'The text payload is not valid UTF-8 (RFC 6455 §5.6).',
+  'protocol.websocket.documentation.summary':
+    'The bidirectional frame channel opened by an HTTP upgrade (RFC 6455). FIN, RSV, opcode, MASK and the three-form length field are decoded field by field; a masked payload is unmasked with XOR and the direction follows from the MASK bit (client→server masked, server→client unmasked). The 125-byte and no-fragmentation limits on control frames are checked, and a close payload is split into a status code and a UTF-8 reason. The opening handshake is an HTTP message decoded on the HTTP page, and fragment reassembly is a multi-frame job.',
+  'protocol.websocket.example.serverText.name': 'Server text frame',
+  'protocol.websocket.example.serverText.description': 'Unmasked — the server→client direction (RFC 6455 §5.1).',
+  'protocol.websocket.example.clientMaskedText.name': 'Masked client text',
+  'protocol.websocket.example.clientMaskedText.description': 'Masked — client→server; the payload is unmasked with XOR.',
+  'protocol.websocket.example.fragmentStart.name': 'Fragment start (FIN=0)',
+  'protocol.websocket.example.fragmentStart.description': 'Reassembly is a multi-frame job, reported as a warning.',
+  'protocol.websocket.example.closeNormal.name': 'Close 1000',
+  'protocol.websocket.example.closeNormal.description': 'A status code plus a UTF-8 reason ("bye").',
+  'protocol.websocket.example.ping.name': 'Ping',
+  'protocol.websocket.example.ping.description': 'A control frame: under 125 bytes and FIN=1.',
+  'protocol.websocket.example.extendedLength.name': '16-bit length extension',
+  'protocol.websocket.example.extendedLength.description':
+    'A 200-byte payload: length code 126, with the real length in the next two bytes.',
+  'protocol.websocket.example.controlFrameTooLong.name': 'Oversized Ping (error path)',
+  'protocol.websocket.example.controlFrameTooLong.description': 'A control frame payload cannot exceed 125 bytes.',
+  'protocol.websocket.example.handshakeText.name': 'Handshake text (error path)',
+  'protocol.websocket.example.handshakeText.description': 'This is an HTTP message; the frame decoder does not read it.',
+
+  // --- MQTT-SN ---
+  'protocol.mqttSn.error.frameTooShort': 'The message must carry at least the length and type bytes.',
+  'protocol.mqttSn.error.frameTooLong': 'The message exceeds the configured maximum length.',
+  'protocol.mqttSn.error.aborted': 'Parsing was cancelled.',
+  'protocol.mqttSn.error.lengthTruncated': 'The three-byte length field is cut off at the end of the buffer.',
+  'protocol.mqttSn.error.bodyTruncated': 'The declared length is larger than the bytes remaining in the buffer.',
+  'protocol.mqttSn.error.lengthTooSmall':
+    'The declared length does not even cover its own field and the message type. In MQTT-SN, Length counts its own bytes.',
+  'protocol.mqttSn.warning.unknownMessageType': 'The message type is outside the defined set; the body is shown raw.',
+  'protocol.mqttSn.warning.lengthMismatch':
+    'The buffer holds more bytes than declared — most likely the next message in the datagram.',
+  'protocol.mqttSn.warning.qosMinusOne':
+    'QoS bits are 0b11: reserved and invalid in MQTT, QoS −1 (connectionless publish) in MQTT-SN.',
+  'protocol.mqttSn.warning.topicIdTypeReserved': 'Topic ID type 0b11 is reserved.',
+  'protocol.mqttSn.warning.unknownReturnCode': 'The return code matches none of the four defined values.',
+  'protocol.mqttSn.warning.topicMappingNeedsStream':
+    'The topic ID ↔ topic name mapping is established by the REGISTER/REGACK exchange; it cannot come from a single message.',
+  'protocol.mqttSn.warning.nonMinimalLength':
+    'The three-byte length form is needed only for messages longer than 255 bytes.',
+  'protocol.mqttSn.warning.encapsulatedOpaque':
+    'The inside of an ENCAPSULATED message is a separate MQTT-SN message; it was not decoded.',
+  'protocol.mqttSn.warning.profileNotOasisStandard':
+    'Profile MQTT-SN 1.2: an OASIS input specification, NOT an approved OASIS Standard like MQTT 5.',
+  'protocol.mqttSn.documentation.summary':
+    'MQTT-related messaging for constrained sensor networks (MQTT-SN 1.2). The length field is NOT the MQTT Variable Byte Integer: it is either a single byte or `0x01` plus 16 bits, and it counts its own bytes. QoS bits 0b11 do not mean invalid here but QoS −1, and when the topic ID type is 0b10 the two bytes are a short topic name rather than a number. Gateway discovery, topic registration and publish/subscribe messages are decoded field by field; topic ID mapping and the session view are multi-message jobs.',
+  'protocol.mqttSn.example.advertise.name': 'ADVERTISE',
+  'protocol.mqttSn.example.advertise.description': 'Gateway 7, advertisement duration 900 s.',
+  'protocol.mqttSn.example.connect.name': 'CONNECT',
+  'protocol.mqttSn.example.connect.description': 'CleanSession, keep-alive 60 s, client id `sensor-01`.',
+  'protocol.mqttSn.example.register.name': 'REGISTER',
+  'protocol.mqttSn.example.register.description': 'The spec example: `room/temperature ↔ 0x0012`.',
+  'protocol.mqttSn.example.publishQos1.name': 'PUBLISH (QoS 1)',
+  'protocol.mqttSn.example.publishQos1.description': 'The spec example: Topic ID 0x0012, Message ID 42.',
+  'protocol.mqttSn.example.publishQosMinusOne.name': 'PUBLISH (QoS −1)',
+  'protocol.mqttSn.example.publishQosMinusOne.description':
+    'QoS bits 0b11 — an error in MQTT, a connectionless publish in MQTT-SN.',
+  'protocol.mqttSn.example.publishShortTopic.name': 'PUBLISH (short topic name)',
+  'protocol.mqttSn.example.publishShortTopic.description':
+    'Topic ID type 0b10: the two bytes are two ASCII characters ("ab"), not a number.',
+  'protocol.mqttSn.example.extendedLength.name': 'Three-byte length',
+  'protocol.mqttSn.example.extendedLength.description':
+    '`0x01` plus 16 bits equals 268 bytes. Read as an MQTT VBI it would come out as "1".',
+  'protocol.mqttSn.example.lengthTooSmall.name': 'Length below its own field (error path)',
+  'protocol.mqttSn.example.lengthTooSmall.description': 'Declared 0, minimum 4 — Length counts itself.',
+
   // --- MQTT ---
   'protocol.mqtt.error.frameTooShort': 'The frame must be at least as long as the Fixed Header byte plus a single-byte Remaining Length.',
   'protocol.mqtt.error.frameTooLong': 'The frame exceeds the configured maximum length.',

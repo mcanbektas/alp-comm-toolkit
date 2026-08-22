@@ -184,6 +184,21 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'syslog', () =>
     import('./network/syslog/syslog').then((module) => module.syslogPlugin),
   );
+  // HTTP/WebSocket/MQTT-SN — dalga 12f: `web-messaging` ailesi. Üçü de aynı
+  // ailede ama HİÇBİR kodu paylaşmazlar. En sinsi tuzak MQTT-SN'de:
+  // `mqttVbi.ts` (MQTT'nin Variable Byte Integer'ı) BURAYA UYGULANAMAZ —
+  // MQTT-SN'in Length'i ya tek bayt ya `0x01` + 16 bittir ve KENDİNİ DE sayar
+  // (bkz. mqttSn.ts dosya başı). WebSocket el sıkışması ise düpedüz HTTP'dir;
+  // motorlar zincir kurmadığı için websocket.ts onu tanır ve HTTP'ye yollar.
+  registerOnce(registry, 'http', () =>
+    import('./network/http/http').then((module) => module.httpPlugin),
+  );
+  registerOnce(registry, 'websocket', () =>
+    import('./network/websocket/websocket').then((module) => module.webSocketPlugin),
+  );
+  registerOnce(registry, 'mqtt-sn', () =>
+    import('./network/mqtt/mqttSn').then((module) => module.mqttSnPlugin),
+  );
   // MQTT — dalga 4c: kendi VBI (Variable Byte Integer) yardımcısını doğurur
   // (mqttVbi.ts), TCP/IP ailesinden bağımsız chunk.
   registerOnce(registry, 'mqtt', () =>
