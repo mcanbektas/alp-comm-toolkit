@@ -153,8 +153,29 @@ MSG'in BOM'u UTF-8 bildirimidir; RFC 3164 (BSD) biçimi tanınır ama ÇÖZÜLME
 Brief'in **açık sorusu 2 kapatıldı — kapsam GENİŞLETİLEREK**: v3 zarfı ve USM
 parametreleri (Engine ID, kullanıcı, Security Level) anahtar gerektirmediği ve
 spec `:376` bunları açıkça istediği için çözülür; yalnız şifreli ScopedPDU
-`:377`nin dediği gibi "Encrypted" bırakılır. Sıradaki: **12f http/websocket/
-mqtt-sn** (Opus·high — chunked encoding + Content-Length çelişkisi).
+`:377`nin dediği gibi "Encrypted" bırakılır. Sıradaki: **12f http/websocket/mqtt-sn**.
+
+**12f (2026-08-22 bitti, `39b7491`) — http + websocket + mqtt-sn.**
+`web-messaging` ailesinin üç kaydı açıldı; üçü de aynı ailede ama HİÇBİR kodu
+paylaşmıyor. **DÖRDÜNCÜ "akraba görünen tel biçimi farklı çıktı" vakası, bu kez
+en sinsisi:** MQTT-SN'de `mqttVbi.ts` KULLANILAMAZ. MQTT'nin Remaining Length'i
+1-4 baytlık VBI'dır, MQTT-SN'in Length'i ya tek bayttır ya `0x01` + 16 bittir —
+`0x01` VBI'da "değer 1", MQTT-SN'de "uzunluk sonraki iki baytta" demektir.
+Üstelik MQTT-SN'in Length'i **kendi baytlarını da sayar**, MQTT'ninki saymaz.
+Aynı akrabalık QoS'ta da yanıltıyor: 0b11 MQTT'de rezerve/hata, MQTT-SN'de
+QoS −1. `mqttSn.ts` bilerek `mqtt.ts`in yanına kondu ki fark görünsün.
+HTTP'de gövde çerçevelemesi RFC 9112 §6.3 sırasıyla kararlaştırılıyor ve iki
+**request smuggling vektörü çerçeve hatası basıyor**: Content-Length ile
+Transfer-Encoding'in birlikte gelmesi, ve başlık adıyla `:` arasındaki boşluk.
+Chunk boyutu ONALTILIK okunuyor. **Brief'in iki `decodeOptions` adayı da
+düzeltildi:** HTTP'de "çerçeveleme kipi sorulmalı" yanlıştı — kip başlıklardan
+çıkar, çıkarılamayan tek şey isteğin HEAD olup olmadığıdır, kanal ona
+indirgendi; WebSocket'te "yön sorulmalı" ise GEREKSİZ — RFC 6455 §5.1 MASK
+bitini yönün kendisi yapar, kanal açılmadı. WebSocket el sıkışması HTTP
+mesajıdır ve HTTP sayfasına yönlendiriliyor; `Sec-WebSocket-Accept` asenkron
+kripto istediği için (parse senkron sözleşme) hesap aracı olarak ayrı iş.
+**websocket kaydının `live` sekmesi KALDIRILDI** — dalga 12'nin karar 3'ü.
+Sıradaki: **12g rtp/rtcp** (Sonnet·high).
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

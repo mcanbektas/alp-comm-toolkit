@@ -109,10 +109,15 @@ ve 12c'nin ihtiyacı olan TLV motorunu getiriyor.
 Dalga 11 sonunda açılan kanal (`protocol-core/types.ts:308`). Çerçeveden
 çıkarılamayan parametreler:
 
-- **websocket** — yön (client→server maskeli, server→client maskesiz). Maskeleme
-  bitine bakıp tahmin etmek mümkün ama RFC 6455 yönü zorunlu kılıyor; sorulmalı.
-- **http** — gövde çerçeveleme kipi (Content-Length / chunked / kapanışa kadar).
-  İstek başlıkları olmadan yanıt gövdesi tek başına çözülemez.
+- ~~**websocket** — yön~~ → **12f: KANAL AÇILMADI, GEREK YOK.** RFC 6455 §5.1
+  istemci→sunucu maskelemeyi ZORUNLU, sunucu→istemci maskelemeyi YASAK kılar;
+  yani `MASK` biti yönün KENDİSİDİR, tahmin değil. Türetilmiş `direction`
+  alanı bu kuralla üretiliyor ve dayanağı alan adında yazılı.
+- ~~**http** — gövde çerçeveleme kipi~~ → **12f: SORU YANLIŞ KONMUŞTU.** Kip
+  yanıtın KENDİ başlıklarından çıkar (`Transfer-Encoding`/`Content-Length`,
+  RFC 9112 §6.3). Çerçeveden ÇIKARILAMAYAN tek şey isteğin **HEAD** olup
+  olmadığıdır: HEAD yanıtı `Content-Length` taşır ama gövde TAŞIMAZ
+  (RFC 9110 §9.3.2). Kanal bu tek soruya indirgendi.
 - **rtp** — payload type → codec eşlemesi (SDP dışarıda kalır, tabloda yok).
 - **icmpv6** — pseudo-header için kaynak/hedef IPv6 adresi (checksum ZORUNLU,
   UDP'deki "0 = kapalı" kısayolu yok).
