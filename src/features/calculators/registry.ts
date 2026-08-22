@@ -60,6 +60,10 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   // cihazın m/b/R katsayılarını gerektirir (PMBus Part II §7.4.3). Tek forma
   // sıkıştırmak "katsayı nereden geliyor" sorusunu gizlerdi.
   { id: 'pmbus-direct', category: 'timing', nameKey: 'calc.pmbusDirect.name', summaryKey: 'calc.pmbusDirect.summary' },
+  // Microwire: `decode` sekmesindeki seçenek formu YAKALANMIŞ baytı çözer,
+  // bu araç ters soruyu cevaplar ("şu genişliklerle bir READ kaç clock").
+  // Parametre çerçevede olmadığı için kullanıcının onu SORDUĞU bir yer gerek.
+  { id: 'microwire-transaction', category: 'timing', nameKey: 'calc.microwireTransaction.name', summaryKey: 'calc.microwireTransaction.summary' },
   // LoRa PHY: katalogdaki `wireless-iot/lora-lpwan/lora` kaydı çerçeve ÇÖZMEZ,
   // hesap makinesidir (`tabs` içinde `decode` yok) — motoru bu yüzden protokol
   // eklentisi olarak değil, buradaki zamanlama araçlarının yanında yaşar.

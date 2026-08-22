@@ -17,3 +17,7 @@ export * from './vehiclePhy';
 // bütçesi — yine decode'u olmayan bir katalog kaydının motoru
 // (bkz. singlePairEthernet.ts dosya başı).
 export * from './singlePairEthernet';
+// Microwire — PARAMETRİK transaction motoru: profil (opcode/adres/word bit
+// genişlikleri) girdidir, sabit değil. Spec'in "SPI ile aynı kabul etme"
+// emrinin karşılığı (bkz. microwire.ts dosya başı).
+export * from './microwire';

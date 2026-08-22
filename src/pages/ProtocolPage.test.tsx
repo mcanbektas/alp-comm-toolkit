@@ -22,10 +22,14 @@ registerBuiltInProtocols();
 /** Motoru olan kayıt (katalogda `pluginId: 'modbus-rtu'`). */
 const PLUGGED_PATH = 'industrial-automation/modbus/modbus-rtu';
 /** Motoru olmayan ama `decode` sekmesi olan kayıt. */
-// Motoru OLMAYAN bir kayıt gerek: uart dalga 11e'de `ready` oldu, fixture
-// microwire'a taşındı (sıralama önerisinde en sondaki iş, #11 — en uzun
-// süre `planned` kalacak kayıt). O da bağlanınca başka bir planned kayda taşı.
-const PLANNED_PATH = 'interfaces-framing/peripheral-buses/microwire';
+// Motoru OLMAYAN bir kayıt gerek. Zincir: uart (dalga 11e'de `ready` oldu) →
+// microwire (dalga 11 #11'de `ready` oldu) → flexray. FlexRay seçildi çünkü
+// interfaces-framing dalgası bitti, otomotiv ailesindeki bu kayıt kardeşi
+// (`can`/`lin`) `ready` olduğu hâlde HENÜZ inşa edilmemiş tek üye — yani
+// yakın bir dalgada `ready` olma sırası yok. O da bağlanınca başka bir
+// planned kayda taşı (`status: 'planned'` olan 82 kayıttan `decode` sekmesi
+// olan herhangi biri iş görür).
+const PLANNED_PATH = 'automotive/vehicle-network-protocols/flexray';
 
 function renderAt(path: string): RenderResult {
   return render(

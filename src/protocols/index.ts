@@ -450,6 +450,25 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'pmbus', () =>
     import('./serial/peripheral-buses/pmbus').then((module) => module.pmbusPlugin),
   );
+  // Microwire / I3C — Faz 10 dalga 11 (#11), Peripheral Buses ailesinin SON
+  // iki kaydı. İkisi de bu dalgada açılan `ProtocolPlugin.decodeOptions`
+  // kanalını kullanır (`protocol-core/types.ts`): çerçeveden ÇIKARILAMAYAN
+  // parametre kullanıcıdan alınır, tahmin edilmez.
+  //   - Microwire'da parametre transaction'ın ŞEKLİDİR (opcode/adres/word bit
+  //     genişlikleri). Spec "SPI ile aynı kabul etme" diyor; motor
+  //     `timing/microwire.ts`te ve iki Microchip datasheet'inin clock-cycle
+  //     sütunuyla çapraz doğrulandı. 93xx66 preset'i tablosu doğrulanamadığı
+  //     için GÖNDERİLMEDİ.
+  //   - I3C'de parametre çerçevenin TÜRÜDÜR: yakalanmış baytlardan private
+  //     SDR read ile IBI ayırt EDİLEMEZ. Sabitler Linux çekirdeği I3C alt
+  //     sisteminden (MIPI spec'i kamuya açık değil). HDR/hot-join KAPSAM DIŞI,
+  //     hız rakamları versiyon-bağımlı olduğu için hiçbir yere yazılmadı.
+  registerOnce(registry, 'microwire', () =>
+    import('./serial/peripheral-buses/microwire').then((module) => module.microwirePlugin),
+  );
+  registerOnce(registry, 'i3c', () =>
+    import('./serial/peripheral-buses/i3c').then((module) => module.i3cPlugin),
+  );
   // USB — Faz 10 dalga 11j: TEK paket seviyesi (PID + token/SOF/veri/handshake
   // + CRC5/CRC16) ve veri yükünün Chapter 9 çözümü (SETUP isteği, tanımlayıcı
   // zinciri). Veri CRC16'sı `CRC16_ARC` DEĞİL: USB 2.0 §8.3.5.2'den doğrulanıp

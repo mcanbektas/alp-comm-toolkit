@@ -125,6 +125,8 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **105'i hâlâ `status: 'planned'`** (58 `ready`, 9 `partial`).
+- Katalogdaki 172 kaydın **82'si hâlâ `status: 'planned'`** (75 `ready`, 15 `partial`).
+  Sayı Faz 10 dalga 11'in sonunda (Peripheral Buses ailesinin son iki kaydı
+  microwire + i3c bağlanınca) güncellendi; dalga 11a–11k boyunca güncellenmemişti.
   O sekmeler görünür ama içleri "planlandı" bildirimi taşır. **Boş kart basmak yasak** —
   bir sekme açılıyorsa ya gerçek bir motoru vardır ya da neyin geleceğini söyler.

@@ -244,6 +244,17 @@ export const tr = {
   'calc.field.voutModeMode': 'Mod',
   'calc.field.voutModeRelative': 'Absolute / Relative',
   'calc.field.voutModeExponent': 'ULINEAR16 üssü',
+  'calc.field.microwireProfile': 'Cihaz profili',
+  'calc.field.microwireCustom': 'Serbest — datasheet\'ten gir',
+  'calc.field.microwireOpcodeBits': 'Opcode bit',
+  'calc.field.microwireAddressBits': 'Adres bit',
+  'calc.field.microwireWordBits': 'Sözcük bit',
+  'calc.field.microwireSource': 'Kaynak belge',
+  'calc.field.microwireCommand': 'Komut',
+  'calc.field.microwireClockKhz': 'SK frekansı',
+  'calc.field.microwireClockCycles': 'Gereken clock çevrimi',
+  'calc.field.microwireTransferTime': 'Transaction süresi',
+  'calc.field.microwireHasData': 'Veri sözcüğü taşır mı',
   'calc.field.pmbusEncode': 'Kodla',
   'calc.field.linear11Word': 'Linear11 sözcüğü (hex/ondalık)',
   'calc.field.decodedValue': 'Çözülen değer',
@@ -419,6 +430,9 @@ export const tr = {
   'calc.i2cTiming.summary': 'Aktarım süresini, 7-bit adres baytlarını ve pull-up yükselme süresini hesaplar.',
   'calc.pmbusLinear.name': 'PMBus Linear11 / Linear16',
   'calc.pmbusLinear.summary': 'PMBus Linear11 ve Linear16 telemetri kodlarını çözer ve kodlar.',
+  'calc.microwireTransaction.name': 'Microwire transaction',
+  'calc.microwireTransaction.summary':
+    'Cihaz profilinden (opcode/adres/sözcük bit genişlikleri) bir komutun kaç clock çevrimi sürdüğünü ve seçilen SK frekansında ne kadar zaman aldığını hesaplar.',
   'calc.pmbusDirect.name': 'PMBus DIRECT format',
   'calc.pmbusDirect.summary':
     'PMBus DIRECT formatını cihazın m/b/R katsayılarıyla çözer ve kodlar; COEFFICIENTS yanıtını ve VOUT_MODE baytını da ayrıştırır.',
@@ -1206,6 +1220,9 @@ export const tr = {
   'decode.hexInput.label': 'Çerçeve baytları (HEX)',
   'decode.error.invalidHex': 'Geçersiz onaltılık (hex) girdi',
   'decode.byteCount': 'Bayt sayısı',
+  'decode.options.legend': 'Çözümleme parametreleri',
+  'decode.options.hint':
+    'Bu protokolde çerçevenin bazı bilgileri baytların içinde yoktur; aşağıdaki değerler cihazın datasheet\'inden ya da yakalamanın bağlamından gelir.',
   'decode.noParser':
     'Bu eklentinin çözümleyicisi yok; yalnız kodlama ve örnek çerçeveler sunuyor. Baytlar aşağıda ham olarak gösteriliyor.',
   'decode.parserCrashed': 'Çözümleyici beklenmedik bir hatayla durdu; ham baytlar aşağıda.',
@@ -3931,6 +3948,82 @@ export const tr = {
   'protocol.smbus.example.quickCommand.description':
     'Yalnız adres baytı: veri yok, komut yok — cihazı R/W bitiyle tetikler.',
   'protocol.smbus.example.blockReadPec.name': 'Block Read + PEC',
+  'protocol.microwire.error.emptyFrame': 'Arabellek en az 1 bayt içermeli.',
+  'protocol.microwire.error.noStartBit':
+    'Start biti bulunamadı: yakalamada hiç 1 biti yok. Microwire çerçevesi CS ve DI yüksekken başlar.',
+  'protocol.microwire.error.truncated':
+    'Seçilen profilin gerektirdiği bit sayısı yakalamada yok; yarım okunan sözcük basılmaz.',
+  'protocol.microwire.warning.trailingBits':
+    'Komut bittikten sonra arabellekte bit kaldı. Beklenen durumdur (komut bit hizalı, bayta bölünmez) ama fazlalık bir sonraki transaction\'ın başı da olabilir.',
+  'protocol.microwire.warning.leadingIdle':
+    'Start bitinden önce boşta (sıfır) bitler atlandı. Datasheet\'e göre beklenen durumdur; sayısı çoksa yakalama yanlış yerden başlamış olabilir.',
+  'protocol.microwire.warning.addressDontCare':
+    'Bu profilde adres alanının üst biti don\'t-care\'dir; anlamlı adres maskelenerek basıldı.',
+  'protocol.microwire.option.profile': 'Cihaz profili',
+  'protocol.microwire.option.profile.description':
+    'Bir preset seçilirse aşağıdaki üç sayı yok sayılır; hangi değerlerin uygulandığı çözüm tablosunun ilk satırında görünür.',
+  'protocol.microwire.option.profile.custom': 'Serbest — datasheet\'ten gir',
+  'protocol.microwire.option.opcodeBits': 'Opcode bit',
+  'protocol.microwire.option.addressBits': 'Adres bit',
+  'protocol.microwire.option.wordBits': 'Sözcük bit',
+  'protocol.microwire.option.customOnly': 'Yalnız serbest profilde geçerli.',
+  'protocol.microwire.documentation.summary':
+    'Üç telli half-duplex EEPROM arayüzü. Çerçevenin şekli standart değil cihaz datasheet\'inden gelir; çözücü opcode/adres/sözcük genişliklerini parametre olarak alır.',
+  'protocol.microwire.example.readWord.name': 'READ (93xx46 x16)',
+  'protocol.microwire.example.readWord.description':
+    'Start biti, opcode 10, 6 bitlik adres 0x0A ve 16 bitlik veri 0xBEEF — datasheet tablosunda 25 clock çevrimi.',
+  'protocol.microwire.example.writeWord.name': 'WRITE (93xx46 x16)',
+  'protocol.microwire.example.writeWord.description':
+    'Opcode 01, adres 0x3F, yazılan sözcük 0x1234. Veri sözcüğünü master sürer (DI hattı).',
+  'protocol.microwire.example.erase.name': 'ERASE (veri yok)',
+  'protocol.microwire.example.erase.description':
+    'Opcode 11 ve adres; veri sözcüğü taşımaz, çerçeve 9 clock çevriminde biter.',
+  'protocol.microwire.example.ewen.name': 'EWEN (genişletilmiş komut)',
+  'protocol.microwire.example.ewen.description':
+    'Opcode 00 iken komutu adres alanının üst iki biti seçer; burada 11 → yazma/silme izni açılır.',
+  'protocol.i3c.error.emptyFrame': 'Arabellek en az 1 bayt (adres) içermeli.',
+  'protocol.i3c.error.cccMissingCode': 'Broadcast adresinden sonra CCC kodu baytı gelmiyor.',
+  'protocol.i3c.error.directMissingTarget':
+    'Direct CCC hedef adresi olmadan çözülemez; repeated START sonrası adres baytı eksik.',
+  'protocol.i3c.warning.ibiAmbiguous':
+    'Bu bir private SDR okuması da olabilir, bir IBI de: ikisi yakalanmış baytlarda AYNI görünür. Biliyorsanız çerçeve türünü yukarıdan seçin.',
+  'protocol.i3c.warning.daaParityAssumed':
+    'Atanan adres, adres-baytı konvansiyonuyla (adres üstte, parite altta) okundu. Parite bitinin kablodaki yeri açık kaynaklardan doğrulanamadı — bu bir varsayımdır.',
+  'protocol.i3c.warning.daaTruncated':
+    'Bir cihaz tanıtım bloğu (PID+BCR+DCR) yarım kaldı; kalan baytlar yorumlanmadan basıldı.',
+  'protocol.i3c.warning.unknownCcc': 'Bu CCC kodu bilinen kod uzayında yok; ad uydurulmadı.',
+  'protocol.i3c.warning.vendorCcc':
+    'Satıcı tanımlı CCC aralığında; anlamı cihaz üreticisinin belgesinden gelir.',
+  'protocol.i3c.warning.unknownDcr':
+    'DCR değeri adlandırılmadı: cihaz sınıfı kodlarının kayıt belgesi kamuya açık değil, ham bayt basıldı.',
+  'protocol.i3c.warning.entHdrOpaque':
+    'ENTHDR komutu tanındı ama sonrasındaki HDR trafiği çözülmez — kapsam dışı.',
+  'protocol.i3c.warning.pidRandom':
+    'PID\'in alt 32 biti rastgele işaretli; part ve instance kimliği taşımadığı için basılmadı.',
+  'protocol.i3c.option.frameKind': 'Çerçeve türü',
+  'protocol.i3c.option.frameKind.description':
+    'Yakalanmış baytlar private SDR okumasını IBI\'den ayırt etmeye yetmez; biliyorsanız burada söyleyin.',
+  'protocol.i3c.option.frameKind.auto': 'Otomatik',
+  'protocol.i3c.option.frameKind.ccc': 'CCC',
+  'protocol.i3c.option.frameKind.private': 'Private SDR',
+  'protocol.i3c.option.frameKind.ibi': 'IBI',
+  'protocol.i3c.documentation.summary':
+    'MIPI iki telli sensör bus\'ı: I²C hatlarını korur, üstüne dinamik adresleme, ortak komut kodları ve bant içi kesme ekler. Çözücü CCC kod uzayını, ENTDAA cihaz tablosunu ve BCR/DCR/PID bit alanlarını açar.',
+  'protocol.i3c.example.entdaa.name': 'ENTDAA — iki cihaz keşfi',
+  'protocol.i3c.example.entdaa.description':
+    'Ayrılmış broadcast adresi, ENTDAA komutu ve iki hedefin PID/BCR/DCR tanıtımı ile atanan dinamik adresleri (0x08 ve 0x09).',
+  'protocol.i3c.example.broadcastEnec.name': 'Broadcast ENEC',
+  'protocol.i3c.example.broadcastEnec.description':
+    'Tüm hedeflerde SIR, MR ve Hot-Join olaylarını açan yayın komutu.',
+  'protocol.i3c.example.directGetbcr.name': 'Direct GETBCR',
+  'protocol.i3c.example.directGetbcr.description':
+    'Komut baytından sonra repeated START ile hedef adresi gelir; yanıt baytı BCR yetenek bitlerine açılır.',
+  'protocol.i3c.example.privateSdrWrite.name': 'Private SDR yazma',
+  'protocol.i3c.example.privateSdrWrite.description':
+    'Broadcast adresi yok: doğrudan hedefin dinamik adresi ve ardından veri.',
+  'protocol.i3c.example.ibi.name': 'IBI (bant içi kesme)',
+  'protocol.i3c.example.ibi.description':
+    'Otomatik türde private SDR okuması gibi görünür; çerçeve türünü IBI seçince zorunlu veri baytı adlandırılır.',
   'protocol.smbus.example.blockReadPec.description':
     'Repeated START sonrası sayaç baytı (0x04) ve dört veri baytı; sayaç veri sayısını doğruladığı için blok okuması olarak sınıflanır.',
 

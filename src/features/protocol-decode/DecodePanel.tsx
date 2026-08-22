@@ -26,10 +26,11 @@ import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { ByteViewer, parsedFrameToRegions } from '@/components/byte-viewer';
 import type { ByteRegion } from '@/components/byte-viewer';
-import { SelectField } from '@/components/forms';
+import { NumberField, SelectField } from '@/components/forms';
 import { bytesToHex, hexToBytes } from '@/protocol-core/buffers/representation';
 import { loadProtocolPlugin } from '@/protocol-core/registry';
 import type {
+  DecodeOption,
   ParseResult,
   ParsedField,
   ProtocolError,
@@ -79,9 +80,43 @@ const EMPTY_GLYPH = '—';
  */
 const EMPTY_BYTES = new Uint8Array();
 
+/** `EMPTY_BYTES` ile aynı gerekçe: sabit referans, boşuna `useMemo` tazelemesi yok. */
+const EMPTY_DECODE_OPTIONS: readonly DecodeOption[] = [];
+
 const HEADER_CELL_CLASS =
   'border-b border-line px-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-muted';
 const BODY_CELL_CLASS = 'px-2 py-1.5 align-top text-sm text-text';
+
+/**
+ * Form metnini `ParseContext.options` değerlerine çevirir.
+ *
+ * Sayısal alanda GEÇERSİZ girdi (boş, harf, sınır dışı) sessizce varsayılana
+ * düşer — panel burada kullanıcıya hata göstermez, çünkü `parse` her tuş
+ * vuruşunda koşuyor ve yarım yazılmış "1" ile "16" arasındaki her ara adım
+ * "geçersiz" olurdu. Sınır ihlali gerçekten yanlış bir çözüm ürettiğinde bunu
+ * söylemek parser'ın işi (uyarı üretir), panelin değil: panel HESAP YAPMAZ.
+ */
+function resolveDecodeOptions(
+  options: readonly DecodeOption[],
+  text: Record<string, string>,
+): Record<string, unknown> {
+  const resolved: Record<string, unknown> = {};
+  for (const option of options) {
+    const raw = text[option.id] ?? String(option.defaultValue);
+    if (option.kind === 'select') {
+      resolved[option.id] = raw;
+      continue;
+    }
+    const parsed = Number(raw);
+    const withinBounds =
+      raw.trim() !== '' &&
+      Number.isFinite(parsed) &&
+      (option.min === undefined || parsed >= option.min) &&
+      (option.max === undefined || parsed <= option.max);
+    resolved[option.id] = withinBounds ? parsed : Number(option.defaultValue);
+  }
+  return resolved;
+}
 
 /**
  * `bytesToHex` ayraçsız üretir ("AA0510…"); girdi alanında bayt sınırları
@@ -318,7 +353,21 @@ function LoadedDecodeView({ plugin }: { plugin: ProtocolPlugin }): ReactNode {
   );
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
 
+  const decodeOptions = plugin.decodeOptions ?? EMPTY_DECODE_OPTIONS;
+  // Değerler METİN tutulur, sayı değil: `NumberField` boş girdiyi `''` olarak
+  // bildirir ve kullanıcı "6"yı silip "8" yazarken arada boş durumdan geçer.
+  // Erken sayıya çevirmek o ara adımı 0'a düşürür, alan kullanıcının altından
+  // kayar. Sayıya çevirme `parse`a geçmeden, tek yerde yapılır.
+  const [optionText, setOptionText] = useState<Record<string, string>>(() =>
+    Object.fromEntries(decodeOptions.map((option) => [option.id, String(option.defaultValue)])),
+  );
+
   const parser = plugin.parser;
+
+  const parseOptions = useMemo<Record<string, unknown>>(
+    () => resolveDecodeOptions(decodeOptions, optionText),
+    [decodeOptions, optionText],
+  );
 
   const outcome = useMemo<DecodeOutcome>(() => {
     let bytes: Uint8Array;
@@ -333,14 +382,25 @@ function LoadedDecodeView({ plugin }: { plugin: ProtocolPlugin }): ReactNode {
     if (parser === undefined) return { kind: 'raw', bytes };
 
     try {
-      return { kind: 'parsed', bytes, result: parser.parse(bytes) };
+      // Seçenek bildirmeyen eklentiye BOŞ nesne değil, hiç `context` geçilmez:
+      // bugünkü 171 kaydın çağrı biçimi bit birebir aynı kalsın.
+      const result =
+        decodeOptions.length === 0
+          ? parser.parse(bytes)
+          : parser.parse(bytes, { options: parseOptions });
+      return { kind: 'parsed', bytes, result };
     } catch (cause) {
       // Spec §47 "hatalı veride uygulamayı çökertme": sözleşme `parse`ın
       // fırlatmamasını söylüyor, ama fırlatan bir eklenti TÜM protokol sayfasını
       // beyaz ekrana çevirmemeli.
       return { kind: 'crashed', bytes, detail: toErrorDetail(cause) };
     }
-  }, [hexInput, parser]);
+  }, [hexInput, parser, decodeOptions, parseOptions]);
+
+  const handleOptionChange = useCallback((optionId: string, value: string): void => {
+    setOptionText((current) => ({ ...current, [optionId]: value }));
+    setSelectedRegionId(null);
+  }, []);
 
   const frame =
     outcome.kind === 'parsed' && outcome.result.success ? outcome.result.frame : undefined;
@@ -403,6 +463,56 @@ function LoadedDecodeView({ plugin }: { plugin: ProtocolPlugin }): ReactNode {
           {t('decode.example.empty')}
         </p>
       )}
+
+      {decodeOptions.length > 0 ? (
+        <fieldset
+          data-testid="decode-options"
+          className="flex flex-col gap-2 rounded-token border border-line bg-raised p-3"
+        >
+          <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+            {t('decode.options.legend')}
+          </legend>
+          <p className="text-xs text-muted" data-testid="decode-options-hint">
+            {t('decode.options.hint')}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {decodeOptions.map((option) => {
+              const fieldId = `decode-option-${option.id}`;
+              const value = optionText[option.id] ?? String(option.defaultValue);
+              return (
+                <div key={option.id} className="flex flex-col gap-1">
+                  {option.kind === 'select' ? (
+                    <SelectField
+                      id={fieldId}
+                      label={t(option.label as TranslationKey)}
+                      value={value}
+                      onChange={(next: string) => {
+                        handleOptionChange(option.id, next);
+                      }}
+                      options={(option.choices ?? []).map((choice) => ({
+                        value: choice.value,
+                        label: translatePluginText(t, choice.label),
+                      }))}
+                    />
+                  ) : (
+                    <NumberField
+                      id={fieldId}
+                      label={t(option.label as TranslationKey)}
+                      value={value}
+                      onChange={(next: string) => {
+                        handleOptionChange(option.id, next);
+                      }}
+                    />
+                  )}
+                  {option.description === undefined ? null : (
+                    <p className="text-xs text-muted">{t(option.description as TranslationKey)}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
+      ) : null}
 
       <div className="flex flex-col gap-1">
         <label htmlFor="decode-hex" className="text-xs font-medium text-muted">

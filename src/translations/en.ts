@@ -242,6 +242,17 @@ export const en: TranslationDictionary = {
   'calc.field.voutModeMode': 'Mode',
   'calc.field.voutModeRelative': 'Absolute / Relative',
   'calc.field.voutModeExponent': 'ULINEAR16 exponent',
+  'calc.field.microwireProfile': 'Device profile',
+  'calc.field.microwireCustom': 'Custom — from datasheet',
+  'calc.field.microwireOpcodeBits': 'Opcode bits',
+  'calc.field.microwireAddressBits': 'Address bits',
+  'calc.field.microwireWordBits': 'Word bits',
+  'calc.field.microwireSource': 'Source document',
+  'calc.field.microwireCommand': 'Command',
+  'calc.field.microwireClockKhz': 'SK frequency',
+  'calc.field.microwireClockCycles': 'Required clock cycles',
+  'calc.field.microwireTransferTime': 'Transaction time',
+  'calc.field.microwireHasData': 'Carries a data word',
   'calc.field.pmbusEncode': 'Encode',
   'calc.field.linear11Word': 'Linear11 word (hex/decimal)',
   'calc.field.decodedValue': 'Decoded value',
@@ -417,6 +428,9 @@ export const en: TranslationDictionary = {
   'calc.i2cTiming.summary': 'Computes transfer time, 7-bit address bytes and pull-up rise time.',
   'calc.pmbusLinear.name': 'PMBus Linear11 / Linear16',
   'calc.pmbusLinear.summary': 'Decodes and encodes PMBus Linear11 and Linear16 telemetry codes.',
+  'calc.microwireTransaction.name': 'Microwire transaction',
+  'calc.microwireTransaction.summary':
+    'Works out how many clock cycles a command needs from the device profile (opcode/address/word bit widths) and how long that takes at the chosen SK frequency.',
   'calc.pmbusDirect.name': 'PMBus DIRECT format',
   'calc.pmbusDirect.summary':
     "Decodes and encodes the PMBus DIRECT format with the device's m/b/R coefficients; also parses a COEFFICIENTS response and the VOUT_MODE byte.",
@@ -1205,6 +1219,9 @@ export const en: TranslationDictionary = {
   // Spec §42'nin birebir metni — `studio.output.parseError.code.invalidHexInput` ile aynı cümle.
   'decode.error.invalidHex': 'Invalid hexadecimal input',
   'decode.byteCount': 'Byte count',
+  'decode.options.legend': 'Decode parameters',
+  'decode.options.hint':
+    'Some of this protocol\'s framing is not carried in the bytes themselves; the values below come from the device datasheet or from the context of the capture.',
   'decode.noParser':
     'This plugin has no parser; it only provides encoding and example frames. The bytes are shown raw below.',
   'decode.parserCrashed': 'The parser stopped with an unexpected error; the raw bytes are below.',
@@ -3943,6 +3960,82 @@ export const en: TranslationDictionary = {
   'protocol.smbus.example.quickCommand.description':
     'Address byte only: no command, no data — the R/W bit itself triggers the device.',
   'protocol.smbus.example.blockReadPec.name': 'Block Read + PEC',
+  'protocol.microwire.error.emptyFrame': 'The buffer must contain at least 1 byte.',
+  'protocol.microwire.error.noStartBit':
+    'No start bit found: the capture contains no 1 bit. A Microwire frame begins with CS and DI both high.',
+  'protocol.microwire.error.truncated':
+    'The selected profile needs more bits than the capture holds; a half-read word is not printed.',
+  'protocol.microwire.warning.trailingBits':
+    'Bits remain in the buffer after the command ended. This is expected (the command is bit-aligned and does not fill whole bytes) but the surplus may also be the start of the next transaction.',
+  'protocol.microwire.warning.leadingIdle':
+    'Idle (zero) bits before the start bit were skipped. The datasheet expects this; a large count may mean the capture began at the wrong point.',
+  'protocol.microwire.warning.addressDontCare':
+    'In this profile the top address bit is a don\'t-care; the significant address was printed masked.',
+  'protocol.microwire.option.profile': 'Device profile',
+  'protocol.microwire.option.profile.description':
+    'Choosing a preset ignores the three numbers below; the first row of the field table shows which values were actually applied.',
+  'protocol.microwire.option.profile.custom': 'Custom — from datasheet',
+  'protocol.microwire.option.opcodeBits': 'Opcode bits',
+  'protocol.microwire.option.addressBits': 'Address bits',
+  'protocol.microwire.option.wordBits': 'Word bits',
+  'protocol.microwire.option.customOnly': 'Only applies to the custom profile.',
+  'protocol.microwire.documentation.summary':
+    'Three-wire half-duplex EEPROM interface. The frame shape is not a standard but comes from the device datasheet; the decoder takes opcode, address and word widths as parameters.',
+  'protocol.microwire.example.readWord.name': 'READ (93xx46 x16)',
+  'protocol.microwire.example.readWord.description':
+    'Start bit, opcode 10, 6-bit address 0x0A and a 16-bit word 0xBEEF — 25 clock cycles in the datasheet table.',
+  'protocol.microwire.example.writeWord.name': 'WRITE (93xx46 x16)',
+  'protocol.microwire.example.writeWord.description':
+    'Opcode 01, address 0x3F, word 0x1234 written. The master drives the data word on DI.',
+  'protocol.microwire.example.erase.name': 'ERASE (no data)',
+  'protocol.microwire.example.erase.description':
+    'Opcode 11 plus address; it carries no data word and the frame ends after 9 clock cycles.',
+  'protocol.microwire.example.ewen.name': 'EWEN (extended command)',
+  'protocol.microwire.example.ewen.description':
+    'With opcode 00 the top two address bits select the command; 11 here enables write and erase.',
+  'protocol.i3c.error.emptyFrame': 'The buffer must contain at least 1 byte (an address).',
+  'protocol.i3c.error.cccMissingCode': 'No CCC code byte follows the broadcast address.',
+  'protocol.i3c.error.directMissingTarget':
+    'A direct CCC cannot be decoded without its target; the address byte after the repeated START is missing.',
+  'protocol.i3c.warning.ibiAmbiguous':
+    'This may be a private SDR read or an IBI: the two look identical in captured bytes. If you know which, pick the frame kind above.',
+  'protocol.i3c.warning.daaParityAssumed':
+    'The assigned address was read using the address-byte convention (address on top, parity below). Where the parity bit sits on the wire could not be confirmed from open sources — this is an assumption.',
+  'protocol.i3c.warning.daaTruncated':
+    'A device descriptor (PID+BCR+DCR) was cut short; the remaining bytes were printed without interpretation.',
+  'protocol.i3c.warning.unknownCcc': 'This CCC code is not in the known code space; no name was invented.',
+  'protocol.i3c.warning.vendorCcc':
+    'Within the vendor-defined CCC range; its meaning comes from the device maker\'s document.',
+  'protocol.i3c.warning.unknownDcr':
+    'The DCR value was left unnamed: the device-class code registry is not public, so the raw byte was printed.',
+  'protocol.i3c.warning.entHdrOpaque':
+    'The ENTHDR command was recognised but the HDR traffic that follows is not decoded — out of scope.',
+  'protocol.i3c.warning.pidRandom':
+    'The lower 32 bits of the PID are flagged random; part and instance IDs were not printed because they carry no identity.',
+  'protocol.i3c.option.frameKind': 'Frame kind',
+  'protocol.i3c.option.frameKind.description':
+    'Captured bytes cannot separate a private SDR read from an IBI; say so here if you know.',
+  'protocol.i3c.option.frameKind.auto': 'Automatic',
+  'protocol.i3c.option.frameKind.ccc': 'CCC',
+  'protocol.i3c.option.frameKind.private': 'Private SDR',
+  'protocol.i3c.option.frameKind.ibi': 'IBI',
+  'protocol.i3c.documentation.summary':
+    'MIPI two-wire sensor bus: it keeps the I²C lines and adds dynamic addressing, common command codes and in-band interrupts. The decoder opens the CCC code space, the ENTDAA device table and the BCR/DCR/PID bit fields.',
+  'protocol.i3c.example.entdaa.name': 'ENTDAA — two-device discovery',
+  'protocol.i3c.example.entdaa.description':
+    'Reserved broadcast address, the ENTDAA command, then two targets reporting PID/BCR/DCR and receiving dynamic addresses 0x08 and 0x09.',
+  'protocol.i3c.example.broadcastEnec.name': 'Broadcast ENEC',
+  'protocol.i3c.example.broadcastEnec.description':
+    'Broadcast command enabling SIR, MR and Hot-Join events on every target.',
+  'protocol.i3c.example.directGetbcr.name': 'Direct GETBCR',
+  'protocol.i3c.example.directGetbcr.description':
+    'The target address follows the command byte after a repeated START; the reply byte opens into BCR capability bits.',
+  'protocol.i3c.example.privateSdrWrite.name': 'Private SDR write',
+  'protocol.i3c.example.privateSdrWrite.description':
+    'No broadcast address: the target dynamic address comes first, then the data.',
+  'protocol.i3c.example.ibi.name': 'IBI (in-band interrupt)',
+  'protocol.i3c.example.ibi.description':
+    'In automatic mode this looks like a private SDR read; picking the IBI frame kind names the mandatory data byte.',
   'protocol.smbus.example.blockReadPec.description':
     'After the repeated START a count byte (0x04) and four data bytes; the count matches the byte total, so it is classified as a block read.',
 

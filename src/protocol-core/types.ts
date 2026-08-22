@@ -244,6 +244,48 @@ export interface ExampleFrame {
   expectedValid?: boolean;
 }
 
+/** `decodeOptions` içindeki `'select'` alanının tek şıkkı. */
+export interface DecodeOptionChoice {
+  readonly value: string;
+  /** Çeviri anahtarı ya da düz veri metni — `translatePluginText` ikisini de kabul eder. */
+  readonly label: string;
+}
+
+/**
+ * Çözümlemenin ÇERÇEVEDEN ÇIKARILAMAYAN parametresi (Faz 10, dalga 11).
+ *
+ * `ParseContext.options` ilk günden beri tipte vardı ama hiçbir ekran onu
+ * DOLDURMUYORDU: `DecodePanel` `parser.parse(bytes)` diye çağırıyordu. Bunun
+ * bedeli somuttu — PMBus ULINEAR16'nın üssü VOUT_MODE'dan gelir, tek yakalamada
+ * bilinemez, o yüzden 11i'de ham mantissa basılıp volt değeri BASILMADI. Aynı
+ * boşluk quad-spi'ın dummy cycle sayısında ve 1-Wire seri numarası
+ * endianness'ında da duruyor.
+ *
+ * Microwire bu boşluğu kaçınılmaz kılıyor: spec (`:2383`) "SPI ile aynı kabul
+ * etme, datasheet'teki clock edge / command length / address length / word
+ * organization'a göre transaction oluştur" diyor. Bu parametreler baytların
+ * İÇİNDE YOKTUR; tahmin etmek uydurmaktır. Bu yüzden kanal veri olarak
+ * bildirilir, panel formu ondan üretir ve değerler `ParseContext.options`
+ * üzerinden parser'a iner.
+ *
+ * Alan BİLDİRİMDİR, kod değildir (`schemas/protocolSchema.ts` ile aynı
+ * disiplin): panel şıkları çalıştırmaz, yalnız okur ve çizer.
+ */
+export interface DecodeOption {
+  readonly id: string;
+  /** Çeviri anahtarı — alan etiketi arayüz metnidir, protokol verisi değil. */
+  readonly label: string;
+  readonly kind: 'select' | 'number';
+  /** `kind: 'select'` için ZORUNLU; sayısal alanda anlamsızdır. */
+  readonly choices?: readonly DecodeOptionChoice[];
+  /** `kind: 'number'` için kapsayıcı sınırlar; dışına çıkan değer panelde reddedilir. */
+  readonly min?: number;
+  readonly max?: number;
+  readonly defaultValue: string | number;
+  /** Çeviri anahtarı — alanın neden var olduğunu tek cümleyle söyler. */
+  readonly description?: string;
+}
+
 /**
  * Bir protokolün uygulamaya takıldığı tek nokta (spec §47). Parser, encoder ve
  * dokümantasyon opsiyoneldir — yalnız hesap aracı sunan protokoller de vardır —
@@ -258,6 +300,12 @@ export interface ProtocolPlugin {
   calculators?: CalculatorDefinition[];
   documentation?: ProtocolDocumentation;
   exampleFrames: ExampleFrame[];
+  /**
+   * Verilirse `decode` sekmesi bu alanlardan bir form basar ve değerleri
+   * `parse(bytes, { options })` ile geçirir. Verilmezse panel bugünkü gibi
+   * davranır — 172 kaydın 171'i bu alandan habersiz kalır.
+   */
+  decodeOptions?: readonly DecodeOption[];
 }
 
 /** Discriminated union daraltması — `if (isParseSuccess(r)) r.frame` çalışır. */

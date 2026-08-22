@@ -160,3 +160,69 @@ Model/effort önerisi: 1-6 Sonnet·medium-high (dalga10 profiliyle tutarlı, des
 - `docs/plan-fazlar.md:32` (Faz 10+ satırı) hâlâ 2026-08-20/dalga9 durumunda; `:43`
   "Faz 10 TAMAMEN BİTTİ" diyor ama katalogda 105 kayıt (bu 23 dahil) hâlâ `planned`.
   Güncellenmesi gerekiyor, bu dalganın implementasyon aşamasında ele alınabilir.
+
+---
+
+## Dalga 11 kapanışı (#11 — microwire + i3c)
+
+Sıralamadaki 11 işin tamamı bitti; `interfaces-framing`in dört ailesi de kapandı.
+
+**Mimari karar — `ProtocolPlugin.decodeOptions` kanalı açıldı.** Tuzak listesinin
+6. maddesi ("Microwire + one-wire'ın parametrik decoder ihtiyacı mimari karar
+gerektiriyor") iki seçenek karşılaştırılarak kapatıldı:
+
+- *Reddedilen:* parser içinde kapalı bir 93xx profil kataloğu + otomatik seçim.
+  2 bitlik opcode ve değişken adres genişliğinden otomatik seçim gerçekten zayıf;
+  yanlış profil sessizce makul görünürdü. PMBus VOUT_MODE boşluğu da açık kalırdı.
+- *Seçilen:* `ProtocolPlugin.decodeOptions` bildirimi + `DecodePanel`in ondan
+  ürettiği form + `ParseContext.options` üzerinden parser'a iniş.
+  `ParseContext.options` ilk günden tipte vardı ama hiçbir ekran DOLDURMUYORDU
+  (`DecodePanel.tsx:336` `parser.parse(bytes)` diyordu) — 11i'de PMBus ULINEAR16
+  üssünün basılmama sebebi tam olarak buydu. Kanal artık açık; PMBus VOUT_MODE,
+  quad-spi dummy cycle ve 1-Wire endianness aynı yoldan kapatılabilir (bu
+  dalganın konusu değil).
+
+Seçenek bildirmeyen 171 kayıt için çağrı biçimi bit birebir aynı kaldı.
+
+**Doğrulanan kaynaklar.** Microwire: Microchip **DS20001749K** (93xx46) ve
+**DS21794F** (93xx56), Tablo 1-3/1-4 tam okundu. Formül datasheet'ten
+türetilmedi, datasheet'in "Req. CLK Cycles" sütunundaki **sekiz bağımsız sayıyla
+sınandı** ve sekizi de tuttu. I3C: MIPI spec'i kamuya açık indirilebilir değil
+(PMBus 1.5 emsali), sabitler Linux çekirdeği I3C alt sisteminden alındı
+(`include/linux/i3c/{ccc,device,master}.h`).
+
+**Uydurulmayan üç şey.** (a) 93xx66 preset'i — komut tablosu iki PDF'in hiçbirinde
+yok, `custom` profiliyle girilir. (b) I3C DCR sınıf tablosu — çekirdek tek değer
+adlandırıyor, ötekiler ham bayt kalır. (c) ENTDAA'da atanan adresin parite
+bitinin kablodaki yeri — iki çekirdek sürücüsü iki ayrı yer gösteriyor
+(`dw-i3c-master.c:864` BIT(7) register formatı, `svc-i3c-master.c:1075` donanıma
+bırakıyor); adres-baytı konvansiyonu VARSAYILDI ve varsayım uyarı olarak basılıyor.
+
+**Kaçınılmaz belirsizlik.** Private SDR okuması ile IBI yakalanmış baytlarda
+AYNI görünür. Gizlenmedi: `auto`da uyarı basılıyor, kullanıcı biliyorsa
+`frameKind` şıkkından söylüyor. smbus'ın `alternativeKinds` kararının bir
+sonraki adımı — orada seçenek kanalı yoktu, artık var.
+
+**Tuzak listesinin kapanan öteki maddeleri:** #2 (`related` çapraz-linkleri
+microwire↔spi ve i3c↔i2c/smbus için kuruldu), #3 (`calculatorIds` microwire için
+eklendi), #8 (I3C hız rakamları versiyon-bağımlı olduğu için HİÇBİR YERE
+yazılmadı; `timing` sekmesi açılmadı).
+
+**Kapsam dışı bırakılanlar, gerekçeli:** HDR çerçeveleme ve hot-join el sıkışması
+(spec ikisini de yalnız adıyla sayıyor), Microwire self-timed write cycle /
+RDY-BSY yoklaması (DI hattında bit üretmez), clock edge (yakalamayı ÜRETEN aracın
+ayarı, aynı bitleri farklı yorumlatmaz).
+
+**Tarayıcı turunun yakaladığı kusur.** `unit: 'bit'` alanları panelde fiziksel
+değerin YANINA basılıyordu: ekranda "EWEN bit", "0x0A bit" yazıyordu. Bit olan
+alanın genişliği, değeri değil. Hiçbir birim test hücrenin bileşik metnine
+bakmıyordu — dalga 11'de bu, "test yeşil ama ekran yanlış" sınıfının dördüncü
+örneği (11c çeviri eksikliği, 11d zayıf assertion, 11i alan sırası, bu).
+
+**Fixture taşındı.** `ProtocolPage.test.tsx`in "motoru olmayan kayıt" fixture'ı
+microwire'dan `automotive/vehicle-network-protocols/flexray`e taşındı.
+
+**Doğrulama:** typecheck temiz, `npm test` 3835/3835, `npm run test:e2e` 644/644
+(build dahil). Tarayıcı turu: Microwire READ/EWEN, Microwire zamanlama sekmesi
+(hesaplayıcı bağlantısı görünüyor), Microwire hesaplayıcısı, I3C ENTDAA ve I3C
+IBI ekran görüntüsüyle incelendi, konsol hatasız.

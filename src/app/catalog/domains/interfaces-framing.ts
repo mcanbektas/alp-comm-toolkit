@@ -369,7 +369,17 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'Three-wire half-duplex master/slave interface found on legacy serial EEPROMs and converters, where opcode, address and word length come from the device datasheet rather than a fixed standard.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11 (#11): çözücü PARAMETRİK — transaction'ın şekli (opcode/
+          // adres/word bit genişlikleri) çerçevede YOK, `decodeOptions`
+          // kanalıyla kullanıcıdan alınır (spec'in "SPI ile aynı kabul etme"
+          // emri). 93xx46 ve 93xx56 preset'leri iki Microchip datasheet'inden
+          // doğrulandı; 93xx66 tablosu bulunamadığı için preset OLARAK
+          // GÖNDERİLMEDİ, `custom` şıkkıyla girilir. Self-timed write cycle
+          // (t_WC) ve RDY/BSY yoklaması KAPSAM DIŞI — DI hattında bit üretmez.
+          status: 'ready',
+          pluginId: 'microwire',
+          calculatorIds: ['microwire-transaction'],
+          related: ['interfaces-framing/peripheral-buses/spi'],
           tabs: ['overview', 'decode', 'timing', 'data', 'examples'],
           tools: [
             'Command Decoder',
@@ -418,7 +428,21 @@ export const interfacesFramingDomain: CatalogDomain = {
           summary:
             'MIPI two-wire sensor bus that keeps legacy I²C targets on the same lines while adding dynamic addressing, common command codes, in-band interrupts and hot-join.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 11 (#11): CCC kod uzayı, BCR/DCR/PID bit alanları ve ENTDAA
+          // cihaz tablosu çözülüyor. Sabitler Linux çekirdeği I3C alt
+          // sisteminden — MIPI spec'i kamuya açık indirilebilir DEĞİL (PMBus
+          // 1.5 emsali). Private SDR read ile IBI yakalanmış baytlardan AYIRT
+          // EDİLEMEZ; `decodeOptions` kanalı bunu kullanıcıya sorar.
+          // KAPSAM DIŞI: HDR çerçeveleme ve hot-join el sıkışması (spec ikisini
+          // de yalnız adıyla sayıyor), DCR sınıf tablosu (kernel tek değer
+          // adlandırıyor). `timing` sekmesi AÇILMADI: 12.5/33.3 Mbit/s
+          // rakamları MIPI versiyon-bağımlı ve doğrulanamadı.
+          status: 'ready',
+          pluginId: 'i3c',
+          related: [
+            'interfaces-framing/peripheral-buses/i2c',
+            'interfaces-framing/peripheral-buses/smbus',
+          ],
           tabs: ['overview', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'Device Discovery',

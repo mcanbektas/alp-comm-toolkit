@@ -4,8 +4,11 @@ import type { ReactElement } from 'react';
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { NumberField, SelectField, TextField } from '@/components/forms';
 import {
+  MICROWIRE_CUSTOM_PROFILE_ID,
+  MICROWIRE_PROFILE_PRESETS,
   calculateI2cRiseTime,
   calculateI2cTransferTime,
+  calculateMicrowireTransferTime,
   calculateRs485Bias,
   calculateRs485Propagation,
   calculateRs485Termination,
@@ -19,11 +22,28 @@ import {
   encodeDirect,
   encodeI2c7BitAddress,
   encodeLinear11,
+  microwireCommandHasData,
   parseDirectCoefficients,
   qspiThroughput,
 } from '@/protocol-core';
-import type { DirectCoefficients, UartParity } from '@/protocol-core';
+import type {
+  DirectCoefficients,
+  MicrowireCommand,
+  MicrowireProfile,
+  UartParity,
+} from '@/protocol-core';
 import { ErrorNotice, SectionSwitch, StatTable, formatSeconds } from './shared';
+
+/** Datasheet'in komut sütunu; ad veridir, çeviriye girmez. */
+const MICROWIRE_COMMAND_OPTIONS = [
+  { value: 'READ', label: 'READ' },
+  { value: 'WRITE', label: 'WRITE' },
+  { value: 'ERASE', label: 'ERASE' },
+  { value: 'EWEN', label: 'EWEN' },
+  { value: 'EWDS', label: 'EWDS' },
+  { value: 'ERAL', label: 'ERAL' },
+  { value: 'WRAL', label: 'WRAL' },
+];
 
 const PARITY_OPTIONS = [
   { value: 'none', label: 'None' },
@@ -586,6 +606,125 @@ export function PmbusDirectTool(): ReactElement {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Microwire transaction aracı — Faz 10 dalga 11 (#11).
+ *
+ * `decode` sekmesindeki seçenek formu YAKALANMIŞ baytları çözer; bu araç ters
+ * soruyu cevaplar: "datasheet'imde şu genişlikler var, bir READ kaç clock
+ * sürer, SK'yi şuraya kurarsam süre ne olur". `PmbusDirectTool`un
+ * `PmbusLinearTool`dan ayrılma gerekçesiyle aynı: parametre çerçevede yoksa
+ * kullanıcının onu SORDUĞU bir yer olmalı.
+ *
+ * Clock-cycle sütunu iki Microchip datasheet'inden doğrulandı; motor
+ * `protocol-core/timing/microwire.ts`te, burada HESAP YAPILMAZ.
+ */
+export function MicrowireTransactionTool(): ReactElement {
+  const { t } = useTranslation();
+  const [profileId, setProfileId] = useState<string>('93xx46-x16');
+  const [command, setCommand] = useState<MicrowireCommand>('READ');
+  const [clockKhz, setClockKhz] = useState('1000');
+  const [opcodeBits, setOpcodeBits] = useState('2');
+  const [addressBits, setAddressBits] = useState('6');
+  const [wordBits, setWordBits] = useState('16');
+
+  const isCustom = profileId === MICROWIRE_CUSTOM_PROFILE_ID;
+  const preset = MICROWIRE_PROFILE_PRESETS.find((candidate) => candidate.id === profileId);
+
+  // `noUncheckedIndexedAccess`: preset listesi boş olamaz ama tip bunu bilmez.
+  // Bulunamayan kimlik varsayılan genişliklere düşer, ekran boş kalmaz.
+  const profile: MicrowireProfile =
+    isCustom || preset === undefined
+      ? {
+          opcodeBits: Number(isCustom ? opcodeBits : 2),
+          addressBits: Number(isCustom ? addressBits : 6),
+          wordBits: Number(isCustom ? wordBits : 16),
+        }
+      : preset;
+
+  const result = useMemo(() => {
+    if (
+      !Number.isFinite(profile.opcodeBits) ||
+      !Number.isFinite(profile.addressBits) ||
+      !Number.isFinite(profile.wordBits) ||
+      profile.opcodeBits < 1 ||
+      profile.addressBits < 1 ||
+      profile.wordBits < 1
+    ) {
+      return null;
+    }
+    return calculateMicrowireTransferTime({
+      profile,
+      command,
+      clockHz: Number(clockKhz) * 1000,
+    });
+  }, [profile.opcodeBits, profile.addressBits, profile.wordBits, command, clockKhz]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <SelectField
+        id="calc-microwire-profile"
+        label={t('calc.field.microwireProfile')}
+        value={profileId}
+        onChange={setProfileId}
+        options={[
+          // Preset etiketi cihaz ailesinin ADI — veri, çeviriye girmez.
+          ...MICROWIRE_PROFILE_PRESETS.map((item) => ({ value: item.id, label: item.label })),
+          { value: MICROWIRE_CUSTOM_PROFILE_ID, label: t('calc.field.microwireCustom') },
+        ]}
+      />
+
+      {isCustom ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <NumberField id="calc-microwire-opcode" label={t('calc.field.microwireOpcodeBits')} value={opcodeBits} onChange={setOpcodeBits} />
+          <NumberField id="calc-microwire-address" label={t('calc.field.microwireAddressBits')} value={addressBits} onChange={setAddressBits} />
+          <NumberField id="calc-microwire-word" label={t('calc.field.microwireWordBits')} value={wordBits} onChange={setWordBits} />
+        </div>
+      ) : (
+        <StatTable
+          rows={[
+            [t('calc.field.microwireOpcodeBits'), String(profile.opcodeBits)],
+            [t('calc.field.microwireAddressBits'), String(profile.addressBits)],
+            [t('calc.field.microwireWordBits'), String(profile.wordBits)],
+            // Kaynak belgesi ekranda: sayının nereden geldiği gizlenmez.
+            [t('calc.field.microwireSource'), preset?.source ?? '—'],
+          ]}
+        />
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SelectField
+          id="calc-microwire-command"
+          label={t('calc.field.microwireCommand')}
+          value={command}
+          onChange={(next: string) => {
+            setCommand(next as MicrowireCommand);
+          }}
+          options={MICROWIRE_COMMAND_OPTIONS}
+        />
+        <NumberField id="calc-microwire-clock" label={t('calc.field.microwireClockKhz')} value={clockKhz} onChange={setClockKhz} suffix="kHz" />
+      </div>
+
+      {result === null ? (
+        <ErrorNotice message={t('calc.error.invalidInput')} />
+      ) : (
+        <StatTable
+          rows={[
+            [t('calc.field.microwireClockCycles'), String(result.clockCycles)],
+            [
+              t('calc.field.microwireTransferTime'),
+              Number.isFinite(result.transferSeconds) ? formatSeconds(result.transferSeconds) : '—',
+            ],
+            [
+              t('calc.field.microwireHasData'),
+              microwireCommandHasData(command) ? t('common.yes') : t('common.no'),
+            ],
+          ]}
+        />
+      )}
     </div>
   );
 }

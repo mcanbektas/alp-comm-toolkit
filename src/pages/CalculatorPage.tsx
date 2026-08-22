@@ -26,6 +26,7 @@ import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features
 import { BytesEncodingTool, HexAsciiTool, HexBinaryTool, UrlEncodingTool, Utf8ByteViewerTool } from '@/features/calculators/tools/textBytesTools';
 import {
   I2cTimingTool,
+  MicrowireTransactionTool,
   PmbusDirectTool,
   PmbusLinearTool,
   Rs485TimingTool,
@@ -75,6 +76,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'i2c-timing': () => <I2cTimingTool />,
   'pmbus-linear': () => <PmbusLinearTool />,
   'pmbus-direct': () => <PmbusDirectTool />,
+  'microwire-transaction': () => <MicrowireTransactionTool />,
   'lora-airtime': () => <LoraAirtimeTool />,
   'lora-link-budget': () => <LoraLinkBudgetTool />,
   'lora-battery': () => <LoraBatteryTool />,
