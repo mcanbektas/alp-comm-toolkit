@@ -3555,6 +3555,85 @@ export const tr = {
   'protocol.iec104.example.lengthMismatch.description':
     'Length=10 → 12 baytlık bir çerçeve vaat eder ama tampon yalnız 6 bayt — length-mismatch ile ParseFailure (modbusTcp emsali, kaydedilebilir).',
 
+  // --- IEC 60870-5-101 ---
+  'protocol.iec101.error.emptyFrame': 'Tampon boş — hiçbir çerçeve sınıfı okunamaz.',
+  'protocol.iec101.error.unrecognizedFrameClass':
+    'İlk bayt üç çerçeve sınıfından (0xE5/0x10/0x68) hiçbirine uymuyor.',
+  'protocol.iec101.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.iec101.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.iec101.error.fixedLengthTruncated':
+    'Sabit uzunluklu çerçeve (Start+Control+Address+Checksum+End) için yeterli bayt yok.',
+  'protocol.iec101.error.variableLengthHeaderTruncated':
+    'Değişken uzunluklu çerçeve başlığı (Start+L+L+Start, 4 bayt) için yeterli bayt yok.',
+  'protocol.iec101.error.lengthCopiesMismatch':
+    'L alanının iki kopyası birbirini tutmuyor — ilk kopya baz alınarak devam edildi.',
+  'protocol.iec101.error.secondStartInvalid': 'İkinci start baytı 0x68 değil.',
+  'protocol.iec101.error.stopByteInvalid': 'End baytı 0x16 değil.',
+  'protocol.iec101.error.checksumMismatch': 'Checksum (8-bit aritmetik toplam, mod 256) tutmuyor.',
+  'protocol.iec101.error.bodyTruncated':
+    'L alanının vaat ettiği toplam çerçeve uzunluğu tampondaki bayt sayısını aşıyor.',
+  'protocol.iec101.warning.unknownFunctionCode':
+    'Fonksiyon kodu dar ad kümesinde yok (bazı kodlar iki kaynak arasında çakıştığı ya da tek kaynaklı olduğu için bilerek ham bırakıldı) — ham gösteriliyor.',
+  'protocol.iec101.warning.trailingBytes': 'Çerçeve sınırından sonra fazladan bayt var.',
+  'protocol.iec101.summary.singleCharacter': 'Tek karakter onayı',
+  'protocol.iec101.summary.fixedLength': 'Sabit uzunluklu çerçeve — control field çözüldü',
+  'protocol.iec101.summary.variableLength': 'Değişken uzunluklu çerçeve — ASDU çözüldü',
+  'protocol.iec101.documentation.summary':
+    'IEC 60870-5-101: SERİ hat link katmanı (IEC 60870-5-1 FT1.2 — Tek Karakter Onayı 0xE5, Sabit Uzunluklu ve Değişken Uzunluklu çerçeve; sum8Checksum ile aritmetik toplam/mod 256 checksum) kendi kodunda çözülür. Control field bit bit ayrıştırılır (RES/DIR + PRM + FCB/ACD + FCV/DFC + fonksiyon kodu — aynı bit PRM yönüne göre farklı anlam taşır, iki ayrı fonksiyon kodu tablosu vardır). ASDU (Type Identification, Cause of Transmission, Common Address, Information Object Address + eleman) 104’ün decodeAsdu() çekirdeğine OLDUĞU GİBİ devredilir; Common Address/Information Object Address/Cause of Transmission genişlikleri ve Link Address genişliği (çerçeveden çıkarılamayan sistem parametreleri) decodeOptions formundan alınır. Alan adları Wireshark’ın IEC 60870 dissector’ı (packet-iec104.c) ve lib60870 dokümantasyonuyla çapraz teyitlidir; iki kaynak arasında çakışan ya da tek kaynaklı fonksiyon kodları (PRM=1 kod 2/7/8) ve broadcast link adresi bilerek ham bırakılmıştır.',
+  'protocol.iec101.example.singleCharacterConfirmation.name': 'Tek Karakter Onayı (0xE5)',
+  'protocol.iec101.example.singleCharacterConfirmation.description':
+    'Tek baytlık onay çerçevesi — Sabit/Değişken Uzunluklu (Send/Confirm) bir çerçevenin alındığını bildirir.',
+  'protocol.iec101.example.fixedLengthResetRemoteLink.name': 'Sabit Uzunluklu: link sıfırlama (PRM=1)',
+  'protocol.iec101.example.fixedLengthResetRemoteLink.description':
+    'Primary→secondary yönünde fonksiyon kodu 0 — Reset of remote link. Control=0x40, Address=1, checksum ve end doğru.',
+  'protocol.iec101.example.fixedLengthAck.name': 'Sabit Uzunluklu: ACK (PRM=0)',
+  'protocol.iec101.example.fixedLengthAck.description':
+    'Secondary→primary yönünde fonksiyon kodu 0 — bu yönde AYNI sayı ACK anlamına gelir (reset ile KARIŞTIRILMAZ).',
+  'protocol.iec101.example.fixedLengthBalancedDirBit.name': 'Sabit Uzunluklu: RES/DIR biti 1',
+  'protocol.iec101.example.fixedLengthBalancedDirBit.description':
+    'reset-remote-link ile aynı gövde, en üst bit (RES/DIR) kasten 1 — dengeli/dengesiz yorumu çerçeveden çıkarılamadığı için alan nötr gösterilir.',
+  'protocol.iec101.example.fixedLengthUnknownFunction.name': 'Sabit Uzunluklu: tanınmayan fonksiyon kodu (5)',
+  'protocol.iec101.example.fixedLengthUnknownFunction.description':
+    'PRM=1, fonksiyon kodu 5 — iki kaynakta da adlandırılmamış (Reserved) — uyarı yolu, çerçeve yine geçerli sayılır.',
+  'protocol.iec101.example.fixedLengthChecksumMismatch.name': 'Sabit Uzunluklu: checksum hatası',
+  'protocol.iec101.example.fixedLengthChecksumMismatch.description':
+    'reset-remote-link ile aynı gövde, checksum baytı kasten 0x00 — checksum-mismatch hata yolu.',
+  'protocol.iec101.example.fixedLengthStopByteInvalid.name': 'Sabit Uzunluklu: end baytı hatası',
+  'protocol.iec101.example.fixedLengthStopByteInvalid.description':
+    'reset-remote-link ile aynı gövde, end baytı kasten 0x00 — soft hata yolu, geri kalan alanlar yine çözülür.',
+  'protocol.iec101.example.variableLengthUserData.name':
+    'Değişken Uzunluklu: user data (M_SP_NA_1, varsayılan genişlikler)',
+  'protocol.iec101.example.variableLengthUserData.description':
+    'PRM=1, fonksiyon kodu 3 (Send/confirm). ASDU: M_SP_NA_1, COT=Spontaneous, Common Address=1, IOA=1, SIQ SPI açık — 104’ün kendi örneğiyle aynı baytlar (CA=2/IOA=3/COT=2 varsayılan genişlikler).',
+  'protocol.iec101.example.variableLengthSecondaryResponse.name': 'Değişken Uzunluklu: secondary yanıtı (PRM=0)',
+  'protocol.iec101.example.variableLengthSecondaryResponse.description':
+    'AYNI ASDU, fonksiyon kodu 8 (PRM=0) — Respond user data. Karşı yönün fonksiyon tablosunu ve aynı decodeAsdu() yolunu kanıtlar.',
+  'protocol.iec101.example.variableLengthChecksumMismatch.name': 'Değişken Uzunluklu: checksum hatası',
+  'protocol.iec101.example.variableLengthChecksumMismatch.description':
+    'variable-length-user-data ile aynı gövde, checksum kasten 0x00 — checksum-mismatch hata yolu, ASDU yine çözülür.',
+  'protocol.iec101.example.variableLengthCopiesMismatch.name': 'Değişken Uzunluklu: L kopyaları uyuşmazlığı',
+  'protocol.iec101.example.variableLengthCopiesMismatch.description':
+    'variable-length-user-data ile aynı gövde, ikinci L kopyası kasten farklı (0x0C → 0x0D) — length-mismatch hata yolu, ilk kopya baz alınarak yine de çözülür.',
+  'protocol.iec101.example.variableLengthTruncated.name': 'Değişken Uzunluklu: gövde eksik',
+  'protocol.iec101.example.variableLengthTruncated.description':
+    'L=20 → 26 baytlık bir çerçeve vaat eder ama tampon yalnız 6 bayt — length-mismatch ile ParseFailure (kaydedilebilir).',
+  'protocol.iec101.option.linkAddressWidth': 'Link Address Genişliği',
+  'protocol.iec101.option.linkAddressWidth.description':
+    'Link katmanı adres alanının bayt genişliği — sistem yapılandırması, çerçeveden çıkarılamaz.',
+  'protocol.iec101.option.commonAddressWidth': 'Common Address Genişliği',
+  'protocol.iec101.option.commonAddressWidth.description':
+    'ASDU Common Address alanının bayt genişliği (1 veya 2) — 104 her zaman 2 kullanır, 101’de yapılandırılabilir.',
+  'protocol.iec101.option.informationObjectAddressWidth': 'Information Object Address Genişliği',
+  'protocol.iec101.option.informationObjectAddressWidth.description':
+    'ASDU Information Object Address alanının bayt genişliği (1, 2 veya 3) — 104 her zaman 3 kullanır, 101’de yapılandırılabilir.',
+  'protocol.iec101.option.causeOfTransmissionWidth': 'Cause of Transmission Genişliği',
+  'protocol.iec101.option.causeOfTransmissionWidth.description':
+    'ASDU Cause of Transmission alanının bayt genişliği — 2 bayt originator address okteti İÇERİR, 1 bayt İÇERMEZ. 104 her zaman 2 kullanır.',
+  'protocol.iec101.option.width.zeroBytes': '0 bayt (adres yok)',
+  'protocol.iec101.option.width.oneByte': '1 bayt',
+  'protocol.iec101.option.width.twoBytes': '2 bayt',
+  'protocol.iec101.option.width.threeBytes': '3 bayt',
+
   // --- M-Bus ---
   'protocol.mbus.error.emptyFrame': 'Tampon boş — hiçbir çerçeve sınıfı okunamaz.',
   'protocol.mbus.error.unrecognizedFrameClass':

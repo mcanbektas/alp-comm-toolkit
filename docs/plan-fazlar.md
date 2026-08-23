@@ -315,6 +315,63 @@ davranış değişmedi), `protocol-core/checksums/crcCatalogue.ts` +
 (yeni). Sıradaki: **13b (iec-60870-5-101)** — `decodeAsdu()` paylaşımı,
 brief'in "kod seviyesinde zaten kanıtlı" dediği ikinci en güvenli alt dalga.
 
+**13b (2026-08-23 bitti) — iec-60870-5-101.** Brief'in "kod seviyesinde zaten
+kanıtlı" dediği `decodeAsdu()` paylaşımı DOĞRULANDI: `iec104.ts`in ASDU
+çekirdeği (`iec104Asdu.ts`teki `decodeAsdu()`) imzası HİÇ DEĞİŞMEDEN 101'e
+devredildi, yalnız `AsduWidths`e üçüncü bir alan (`causeOfTransmissionLength`,
+1=yalnız cause / 2=cause+originator address) EKLENDİ — kanıt: Wireshark'ın
+`asdu_parms{cot_len;asdu_addr_len;ioa_len}` ile lib60870'in
+`CS101_AppLayerParameters{sizeOfCOT;sizeOfCA;sizeOfIOA}`ı AYNI üç alanı
+parametrize ediyor (2 bağımsız kaynak, tam örtüşme). Varsayılan `2` kaldığı
+için 104'ün 21 testi DEĞİŞMEDEN yeşil kaldı.
+
+101'in 104'te HİÇ olmayan gerçek farkı — SERİ link katmanı (IEC 60870-5-1
+FT1.2: Tek Karakter Onayı 0xE5, Sabit/Değişken Uzunluklu çerçeve) — sıfırdan
+yazıldı ve YEDİ bağımsız kamuya açık kaynaktan (Wireshark `packet-iec104.c`
+— 101/104/ASDU dissector'larının HEPSİ bu TEK dosyada, ayrı
+`packet-iec60870_101.c` YOK; lib60870-C `link_layer.c`/`iec60870_common.h`/
+`link_layer_parameters.h`/`cs101_master.h`; scadaprotocols.com; Wikipedia)
+çapraz teyitle alındı. Checksum PAYLAŞILDI: `sum8Checksum`
+(`protocol-core/checksums/simpleChecksums.ts`) zaten GENEL bir yardımcıydı,
+`mbus.ts` (wired M-Bus, EN 13757-2 → FT1.2'yi DOĞRUDAN miras alır) da AYNI
+hesabı kendi link katmanında kullanıyordu — ayrı bir 101-özel checksum
+fonksiyonu YAZILMADI.
+
+Control field'ın PRM'ye göre çift-anlamlı bit yapısı (RES/DIR+PRM+FCB/ACD+
+FCV/DFC+fonksiyon nibble'ı) `mbus.ts`in dalga 5c'de zaten kurduğu AYNI
+ayrımla çözüldü — üstelik `mbus.ts`in C Field'ı (aynı FT1.2 mirası) ACD
+bitinin FCB ile AYNI konumda olduğunu DOĞRULAYAN, Wireshark'ın eksik
+bıraktığı bir yerel emsal olarak da işe yaradı. Fonksiyon kodu tabloları dar
+tutuldu (`iec104Asdu.ts`in `ELEMENT_WIDTH_TABLE` disiplini): PRM=1 yönünde
+kod 2 ve 7 Wireshark ("Reserved") ile lib60870 (gerçek handler'lı
+`TEST_FUNCTION_FOR_LINK`/`RESET_FCB`) arasında ÇAKIŞTI, kod 8 TEK kaynaklı —
+üçü de HAM bırakıldı; PRM=0 yönünde YEDİ kod çakışmadan örtüştü, hepsi
+adlandırıldı. Broadcast link adresi (255/65535) TEK kaynaklı (yalnız
+lib60870) — ADLANDIRILMADI.
+
+`decodeOptions`a DÖRT genişlik kanalı açıldı — Link Address (0/1/2 bayt),
+Common Address (1/2), Information Object Address (1/2/3), Cause of
+Transmission (1/2) — dördü de brief'in öngördüğü gibi çerçeveden
+ÇIKARILAMAYAN sistem parametreleri. Dengeli/dengesiz iletim modu SEÇİMİ ayrı
+bir kanal olarak AÇILMADI: RES/DIR bitinin hangi yorumla okunacağı hiçbir
+downstream çözümü etkilemiyor (fonksiyon tablosu seçimi yalnız PRM'ye
+bakıyor), bu yüzden bit ham değeriyle nötr gösteriliyor (dalga 12f'nin
+WebSocket MASK-biti dersiyle aynı disiplin — çerçeveden okunabilecek bir
+şeyi sorma).
+
+32 birim testi (`iec101.test.ts`, checksum'lar bağımsız bir toplama
+döngüsüyle AYRICA doğrulanıyor) + 15 e2e (gerçek tarayıcı,
+`iec101-decode.spec.ts`) + 4326 toplam test + typecheck/build yeşil;
+`iec104`ün 21 testi DE yeşil kaldı (paylaşılan çekirdek bozulmadı).
+Değişen/yeni dosyalar: `protocols/industrial/iec101/iec101.ts` (yeni) +
+`iec101.test.ts` (yeni), `protocols/industrial/iec104/iec104Asdu.ts`
+(`AsduWidths`e `causeOfTransmissionLength`, varsayılan 104 davranışını
+KORUYARAK), `protocols/index.ts` (kayıt) + `index.test.ts` (kayıt sayacı
+güncellendi), `app/catalog/domains/industrial-automation.ts` (`status:
+'ready'`, `pluginId`), `translations/{tr,en}.ts`, `e2e/iec101-decode.spec.ts`
+(yeni). Sıradaki: **13c (opc-ua)** — paylaşım YOK, bağımsız/en geniş araç
+yüzeyi (12 araç), çok adımlı state machine — brief'in Opus·high önerisi.
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.

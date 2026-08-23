@@ -56,6 +56,26 @@
  * her iki kaynakta da aynı bit sırasıyla doğrulandı). Diğer tüm tipler HAM
  * "Information Element" bloğu olarak gösterilir — genişlikleri biliniyor
  * olsa bile (ör. M_ME_NC_1) içerik yorumlanmaz, yalnız yürüyüş için kullanılır.
+ *
+ * ── 101 GENİŞLİĞİ: CAUSE OF TRANSMISSION (dalga 13b, KANITLANDI) ───────────
+ * `iec-60870-5-101` bu motoru OLDUĞU GİBİ tüketiyor (`iec101.ts`), yalnız
+ * `AsduWidths`e `causeOfTransmissionLength` EKLENDİ. Kanıt: Wireshark'ın
+ * `packet-iec104.c`sindeki `asdu_parms{cot_len; asdu_addr_len; ioa_len}` İLE
+ * lib60870'in `CS101_AppLayerParameters{sizeOfCOT; sizeOfCA; sizeOfIOA}`ı
+ * AYNI ÜÇ alanı parametrize ediyor (İKİ bağımsız kaynak, tam örtüşme) —
+ * https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-iec104.c
+ * https://github.com/mz-automation/lib60870/blob/master/lib60870-C/src/inc/api/iec60870_common.h
+ * 104 COT'u HER ZAMAN 2 bayt sabitler (cause + originator address octet'i);
+ * 101'de bu 1 bayt da olabilir (yalnız cause, originator address OKTETİ HİÇ
+ * YOK) — sistem parametresi, çerçeveden çıkarılamaz. Varsayılan `2` kalması
+ * ZORUNLU (104'ün testleri bekçilik ediyor): `causeOfTransmissionLength`
+ * verilmezse `decodeAsdu()` ÖNCEKİYLE BİREBİR AYNI davranır. Wireshark'ın
+ * 101 için önerdiği "tipik" varsayılan (`cot_len=1,asdu_addr_len=1,ioa_len=2`)
+ * İLE lib60870'in kütüphane-geneli varsayılanı (`2/2/3`, 104'le birebir aynı)
+ * ÇAKIŞIYOR — ikisi de "varsayılan" ama farklı senaryo temsil ediyor, bu
+ * yüzden decodeAsdu()'nun KENDİ varsayılanı (104 ile aynı, `2/2/3`) korundu
+ * ve iec101.ts bunu yalnız `decodeOptions` ile KULLANICIDAN sorar (kod
+ * içine gömülü ikinci bir "tipik 101" varsayımı EKLENMEDİ).
  */
 
 import type { ParsedField, ProtocolError, ProtocolWarning } from '@/protocol-core/types';
@@ -161,15 +181,23 @@ const COT_NAMES: ReadonlyMap<number, string> = new Map([
   [47, 'Unknown information object address'],
 ]);
 
-/** 104 profili sabit genişlikleri (spec/kaynaklar: CA=2, IOA=3, ikisi de LE). */
+/**
+ * 104 profili sabit genişlikleri (spec/kaynaklar: CA=2, IOA=3, ikisi de LE,
+ * COT=2/originator-adresli). `causeOfTransmissionLength` dalga 13b'de
+ * EKLENDİ (bkz. dosya başı "101 GENİŞLİĞİ" notu); varsayılanı `2` olduğu
+ * için bu ekleme 104'ün mevcut davranışını BOZMAZ.
+ */
 export interface AsduWidths {
   readonly commonAddressLength: number;
   readonly informationObjectAddressLength: number;
+  /** 1 bayt (yalnız cause) ya da 2 bayt (cause + originator address octet'i). */
+  readonly causeOfTransmissionLength: number;
 }
 
 export const IEC104_ASDU_WIDTHS: AsduWidths = {
   commonAddressLength: 2,
   informationObjectAddressLength: 3,
+  causeOfTransmissionLength: 2,
 };
 
 export interface AsduSummary {
@@ -312,7 +340,7 @@ export function decodeAsdu(
     causeOfTransmissionLabel: undefined,
   };
 
-  const minimumLength = 1 + 1 + 2 + widths.commonAddressLength;
+  const minimumLength = 1 + 1 + widths.causeOfTransmissionLength + widths.commonAddressLength;
   if (data.length < minimumLength) {
     errors.push({
       code: 'truncated-frame',
@@ -400,18 +428,22 @@ export function decodeAsdu(
   fields.push(causeField);
   pos += 1;
 
-  const originatorAddress = byteAt(data, pos);
-  fields.push({
-    id: 'originator-address',
-    name: 'Originator Address',
-    offset: baseOffset + pos,
-    length: 1,
-    rawBytes: data.slice(pos, pos + 1),
-    rawValue: originatorAddress,
-    valid: true,
-    warnings: [],
-  });
-  pos += 1;
+  // 101'de COT genişliği 1 baytsa originator address OKTETİ YOK (dosya başı
+  // "101 GENİŞLİĞİ" notu) — 104 her zaman 2 olduğu için bu dal hep girilir.
+  if (widths.causeOfTransmissionLength >= 2) {
+    const originatorAddress = byteAt(data, pos);
+    fields.push({
+      id: 'originator-address',
+      name: 'Originator Address',
+      offset: baseOffset + pos,
+      length: 1,
+      rawBytes: data.slice(pos, pos + 1),
+      rawValue: originatorAddress,
+      valid: true,
+      warnings: [],
+    });
+    pos += 1;
+  }
 
   const commonAddressBytes = data.slice(pos, pos + widths.commonAddressLength);
   const commonAddress = readUintLe(commonAddressBytes, 0, widths.commonAddressLength);

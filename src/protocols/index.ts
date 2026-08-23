@@ -301,6 +301,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iec-60870-5-104', () =>
     import('./industrial/iec104/iec104').then((module) => module.iec104Plugin),
   );
+  // IEC 60870-5-101 — dalga 13b: SERİ link katmanı (IEC 60870-5-1 FT1.2 —
+  // Tek Karakter/Sabit/Değişken Uzunluklu çerçeve, sum8Checksum) kendi
+  // kodunda çözülür; ASDU 104'ün `iec104Asdu.ts`teki `decodeAsdu()`suna
+  // KANITLI PAYLAŞIM olarak devredilir — 101'e özgü CA/IOA/COT genişlikleri
+  // `AsduWidths` + `decodeOptions` ile geçirilir (bkz. iec101.ts dosya başı).
+  registerOnce(registry, 'iec-60870-5-101', () =>
+    import('./industrial/iec101/iec101').then((module) => module.iec101Plugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

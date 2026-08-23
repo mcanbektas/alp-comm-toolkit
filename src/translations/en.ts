@@ -3557,6 +3557,85 @@ export const en: TranslationDictionary = {
   'protocol.iec104.example.lengthMismatch.description':
     'Length=10 promises a 12-byte frame but the buffer is only 6 bytes — a length-mismatch ParseFailure (modbusTcp precedent, recoverable).',
 
+  // --- IEC 60870-5-101 ---
+  'protocol.iec101.error.emptyFrame': 'Buffer is empty — no frame class can be read.',
+  'protocol.iec101.error.unrecognizedFrameClass':
+    'The first byte does not match any of the three frame classes (0xE5/0x10/0x68).',
+  'protocol.iec101.error.frameTooLong': 'Frame length exceeds the configured maximum frame length.',
+  'protocol.iec101.error.aborted': 'Parsing was aborted.',
+  'protocol.iec101.error.fixedLengthTruncated':
+    'Not enough bytes remain for a fixed-length frame (Start+Control+Address+Checksum+End).',
+  'protocol.iec101.error.variableLengthHeaderTruncated':
+    'Not enough bytes remain for the variable-length frame header (Start+L+L+Start, 4 bytes).',
+  'protocol.iec101.error.lengthCopiesMismatch':
+    "The two copies of the L field disagree — the first copy was used to continue decoding.",
+  'protocol.iec101.error.secondStartInvalid': 'The second start byte is not 0x68.',
+  'protocol.iec101.error.stopByteInvalid': 'The end byte is not 0x16.',
+  'protocol.iec101.error.checksumMismatch': 'Checksum (8-bit arithmetic sum, mod 256) does not match.',
+  'protocol.iec101.error.bodyTruncated':
+    'The total frame length promised by L exceeds the number of bytes available in the buffer.',
+  'protocol.iec101.warning.unknownFunctionCode':
+    'The function code is not in the narrow name set (some codes were deliberately left raw because they conflict between sources or are single-sourced) — shown raw.',
+  'protocol.iec101.warning.trailingBytes': 'There are extra bytes past the frame boundary.',
+  'protocol.iec101.summary.singleCharacter': 'Single character confirmation',
+  'protocol.iec101.summary.fixedLength': 'Fixed-length frame — control field decoded',
+  'protocol.iec101.summary.variableLength': 'Variable-length frame — ASDU decoded',
+  'protocol.iec101.documentation.summary':
+    "IEC 60870-5-101: decodes the SERIAL link layer itself (IEC 60870-5-1 FT1.2 — Single Character Confirmation 0xE5, Fixed-length and Variable-length frame; sum8Checksum arithmetic-sum/mod-256 checksum). The control field is decoded bit by bit (RES/DIR + PRM + FCB/ACD + FCV/DFC + function code — the same bit means something different depending on PRM direction, so there are two separate function-code tables). The ASDU (Type Identification, Cause of Transmission, Common Address, Information Object Address + element) is handed to 104's decodeAsdu() core AS-IS; the Common Address/Information Object Address/Cause of Transmission widths and the Link Address width (system parameters that cannot be derived from the frame) come from the decodeOptions form. Field names are cross-checked against the Wireshark IEC 60870 dissector (packet-iec104.c) and the lib60870 documentation; function codes that conflict between the two sources or are single-sourced (PRM=1 codes 2/7/8) and the broadcast link address are deliberately left raw.",
+  'protocol.iec101.example.singleCharacterConfirmation.name': 'Single Character Confirmation (0xE5)',
+  'protocol.iec101.example.singleCharacterConfirmation.description':
+    'A single-byte confirmation frame — acknowledges receipt of a Fixed-length or Variable-length (Send/Confirm) frame.',
+  'protocol.iec101.example.fixedLengthResetRemoteLink.name': 'Fixed-length: reset remote link (PRM=1)',
+  'protocol.iec101.example.fixedLengthResetRemoteLink.description':
+    'Primary-to-secondary direction, function code 0 — Reset of remote link. Control=0x40, Address=1, checksum and end both correct.',
+  'protocol.iec101.example.fixedLengthAck.name': 'Fixed-length: ACK (PRM=0)',
+  'protocol.iec101.example.fixedLengthAck.description':
+    'Secondary-to-primary direction, function code 0 — in this direction the SAME number means ACK (not to be confused with reset).',
+  'protocol.iec101.example.fixedLengthBalancedDirBit.name': 'Fixed-length: RES/DIR bit set to 1',
+  'protocol.iec101.example.fixedLengthBalancedDirBit.description':
+    'Same body as reset-remote-link, the top bit (RES/DIR) deliberately set to 1 — shown neutrally because balanced-vs-unbalanced interpretation cannot be derived from the frame.',
+  'protocol.iec101.example.fixedLengthUnknownFunction.name': 'Fixed-length: unrecognized function code (5)',
+  'protocol.iec101.example.fixedLengthUnknownFunction.description':
+    'PRM=1, function code 5 — unnamed in both sources (Reserved) — the warning path; the frame is still considered valid.',
+  'protocol.iec101.example.fixedLengthChecksumMismatch.name': 'Fixed-length: checksum error',
+  'protocol.iec101.example.fixedLengthChecksumMismatch.description':
+    'Same body as reset-remote-link, checksum byte deliberately set to 0x00 — the checksum-mismatch error path.',
+  'protocol.iec101.example.fixedLengthStopByteInvalid.name': 'Fixed-length: end byte error',
+  'protocol.iec101.example.fixedLengthStopByteInvalid.description':
+    'Same body as reset-remote-link, end byte deliberately set to 0x00 — the soft-error path; the rest of the fields still decode.',
+  'protocol.iec101.example.variableLengthUserData.name':
+    'Variable-length: user data (M_SP_NA_1, default widths)',
+  'protocol.iec101.example.variableLengthUserData.description':
+    "PRM=1, function code 3 (Send/confirm). ASDU: M_SP_NA_1, COT=Spontaneous, Common Address=1, IOA=1, SIQ with SPI on — the same bytes as 104's own example (default widths CA=2/IOA=3/COT=2).",
+  'protocol.iec101.example.variableLengthSecondaryResponse.name': 'Variable-length: secondary response (PRM=0)',
+  'protocol.iec101.example.variableLengthSecondaryResponse.description':
+    'The SAME ASDU, function code 8 (PRM=0) — Respond user data. Demonstrates the opposite-direction function table going through the same decodeAsdu() path.',
+  'protocol.iec101.example.variableLengthChecksumMismatch.name': 'Variable-length: checksum error',
+  'protocol.iec101.example.variableLengthChecksumMismatch.description':
+    'Same body as variable-length-user-data, checksum deliberately set to 0x00 — the checksum-mismatch error path; the ASDU still decodes.',
+  'protocol.iec101.example.variableLengthCopiesMismatch.name': 'Variable-length: L copies mismatch',
+  'protocol.iec101.example.variableLengthCopiesMismatch.description':
+    'Same body as variable-length-user-data, second L copy deliberately different (0x0C → 0x0D) — the length-mismatch error path; still decoded using the first copy.',
+  'protocol.iec101.example.variableLengthTruncated.name': 'Variable-length: body truncated',
+  'protocol.iec101.example.variableLengthTruncated.description':
+    'L=20 promises a 26-byte frame but the buffer is only 6 bytes — a length-mismatch ParseFailure (recoverable).',
+  'protocol.iec101.option.linkAddressWidth': 'Link Address Width',
+  'protocol.iec101.option.linkAddressWidth.description':
+    'Byte width of the link-layer address field — a system configuration parameter, not derivable from the frame.',
+  'protocol.iec101.option.commonAddressWidth': 'Common Address Width',
+  'protocol.iec101.option.commonAddressWidth.description':
+    'Byte width of the ASDU Common Address field (1 or 2) — 104 always uses 2, configurable in 101.',
+  'protocol.iec101.option.informationObjectAddressWidth': 'Information Object Address Width',
+  'protocol.iec101.option.informationObjectAddressWidth.description':
+    'Byte width of the ASDU Information Object Address field (1, 2 or 3) — 104 always uses 3, configurable in 101.',
+  'protocol.iec101.option.causeOfTransmissionWidth': 'Cause of Transmission Width',
+  'protocol.iec101.option.causeOfTransmissionWidth.description':
+    'Byte width of the ASDU Cause of Transmission field — 2 bytes INCLUDES the originator address octet, 1 byte does NOT. 104 always uses 2.',
+  'protocol.iec101.option.width.zeroBytes': '0 bytes (no address)',
+  'protocol.iec101.option.width.oneByte': '1 byte',
+  'protocol.iec101.option.width.twoBytes': '2 bytes',
+  'protocol.iec101.option.width.threeBytes': '3 bytes',
+
   // --- M-Bus ---
   'protocol.mbus.error.emptyFrame': 'Buffer is empty — no frame class can be read.',
   'protocol.mbus.error.unrecognizedFrameClass':

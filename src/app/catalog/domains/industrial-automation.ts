@@ -629,7 +629,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Serial telecontrol companion standard carrying ASDUs with type identification, cause of transmission, information object addresses, quality bits and time tags.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'iec-60870-5-101',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Link Layer',
