@@ -125,15 +125,15 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13c'den sonra)
-  97 `ready` / 60 `planned` / 15 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13d'den sonra)
+  100 `ready` / 57 `planned` / 15 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **112 `ready` / 45 `planned` / 15 `partial`**; gerçekten yapılacak iş **45 kanonik
-  kayıt** (industrial-automation 13, automotive 12, aerospace-uav 12, wireless-iot 4,
+  **115 `ready` / 42 `planned` / 15 `partial`**; gerçekten yapılacak iş **42 kanonik
+  kayıt** (industrial-automation 10, automotive 12, aerospace-uav 12, wireless-iot 4,
   marine-navigation 3, building-automation 1). **`network-ethernet` (19 kayıt) dalga
   12 ile TAMAMEN KAPANDI** (12a-12h, `docs/plan-fazlar.md`); `industrial-automation`
-  dalga 13 ile SÜRÜYOR (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua bitti;
-  `scada-utility` ailesi KAPANDI).
+  dalga 13 ile SÜRÜYOR (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
+  cip/ethernet-ip/devicenet bitti; `scada-utility` VE `cip-can-based` aileleri KAPANDI).
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

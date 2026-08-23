@@ -289,7 +289,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'ODVA adaptation that encapsulates CIP over standard TCP/IP for explicit messaging and over UDP multicast for implicit cyclic I/O at a configured RPI.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'ethernet-ip',
           tabs: [
             'overview',
             'live',
@@ -383,7 +384,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Media-independent object-oriented application protocol whose class/instance/attribute/service model is shared by EtherNet/IP and DeviceNet.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'cip',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Object',
@@ -406,7 +408,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'CIP over a CAN data link on a trunkline/dropline cable that also carries network power, connecting controllers to field I/O and starters.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'devicenet',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Node Explorer',

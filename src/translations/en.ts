@@ -5165,4 +5165,126 @@ export const en: TranslationDictionary = {
   'protocol.telnet.example.unterminatedSubnegotiation.name': 'Unterminated subnegotiation',
   'protocol.telnet.example.unterminatedSubnegotiation.description':
     'IAC SB is opened but IAC SE never arrives — represents a truncated capture.',
+
+  // --- CIP ---
+  'protocol.cip.error.frameTooShort':
+    'The record is not long enough to carry the Service and Path Size bytes.',
+  'protocol.cip.error.frameTooLong': 'The record exceeds the maximum allowed length.',
+  'protocol.cip.error.aborted': 'Parsing was cancelled.',
+  'protocol.cip.error.messageEmpty': 'The message body is empty.',
+  'protocol.cip.error.requestHeaderTruncated':
+    'Not enough bytes for the request header (Service + Path Size).',
+  'protocol.cip.error.responseHeaderTruncated':
+    'Not enough bytes for the response header (Reply Service + Reserved + General Status + Additional Status Size).',
+  'protocol.cip.warning.unknownService':
+    'The service code is not in the common service table — it may be class-specific or vendor-specific; no name was assigned.',
+  'protocol.cip.warning.reservedByteNonzero': 'The reserved byte is not zero.',
+  'protocol.cip.warning.unknownGeneralStatus':
+    'The General Status code is not in the recognised table; shown raw.',
+  'protocol.cip.warning.pathTruncated':
+    'The declared Path Size is not present in the record; resolved with the bytes available.',
+  'protocol.cip.warning.extendedPathNotDecoded':
+    'A Port/Network/Symbolic/Data segment or an Electronic Key/Service ID sub-type: this engine does not decode its own format rules, the remaining path is shown raw.',
+  'protocol.cip.warning.additionalStatusTruncated':
+    'The byte count promised by Additional Status Size is not present in the record; the available part is shown.',
+  'protocol.cip.summary.request': 'CIP request',
+  'protocol.cip.summary.response': 'CIP response',
+  'protocol.cip.documentation.summary':
+    'Resolves a media-independent CIP Message Router request/response: Service/Reply Service, EPATH (Class/Instance/Member/Connection Point/Attribute) and General Status. EtherNet/IP and DeviceNet consume the SAME engine from within their own carrier envelopes.',
+  'protocol.cip.example.getAttributeSingleRequest8Bit.name': 'Get_Attribute_Single request (8-bit path)',
+  'protocol.cip.example.getAttributeSingleRequest8Bit.description':
+    'Class 1 (Identity)/Instance 1/Attribute 1 — all three segments are 8-bit, no pad byte.',
+  'protocol.cip.example.getAttributeAllRequest16BitClass.name': 'Get_Attribute_All request (16-bit Class)',
+  'protocol.cip.example.getAttributeAllRequest16BitClass.description':
+    "A 16-bit Class segment carries a pad byte right after the segment byte; skip it and the Instance segment shifts by one byte.",
+  'protocol.cip.example.getAttributeSingleResponseSuccess.name': 'Successful response (Vendor ID)',
+  'protocol.cip.example.getAttributeSingleResponseSuccess.description':
+    'Reply Service = 0x8E (0x0E | 0x80), General Status = Success, Response Data = Vendor ID 1.',
+  'protocol.cip.example.responsePathDestinationUnknown.name': 'Error response (Path destination unknown)',
+  'protocol.cip.example.responsePathDestinationUnknown.description':
+    'General Status = 0x05: the path does not point at a valid class/instance/member.',
+  'protocol.cip.example.requestConnectionPointSegment.name': 'Connection Point segment',
+  'protocol.cip.example.requestConnectionPointSegment.description':
+    "EPATH's fourth logical sub-type: Class 4 (Assembly) + Connection Point 0x65.",
+  'protocol.cip.example.requestUnknownServiceCode.name': 'Unnamed service code',
+  'protocol.cip.example.requestUnknownServiceCode.description':
+    '0x4B is not in the common service table but sits in the 0x00-0x7F range — structurally valid, just unnamed.',
+  'protocol.cip.example.requestPathTruncated.name': 'Truncated path',
+  'protocol.cip.example.requestPathTruncated.description':
+    'Path Size promises 3 words (6 bytes) but only 4 bytes of path data are present.',
+
+  // --- EtherNet/IP ---
+  'protocol.ethernetip.error.headerTruncated':
+    'The record is not long enough to carry the 24-byte encapsulation header.',
+  'protocol.ethernetip.error.frameTooLong': 'The record exceeds the maximum allowed length.',
+  'protocol.ethernetip.error.aborted': 'Parsing was cancelled.',
+  'protocol.ethernetip.error.cpfHeaderTruncated': 'Not enough bytes for the CPF Item Count field.',
+  'protocol.ethernetip.error.cpfItemTruncated':
+    "A CPF item's declared length exceeds the remaining byte count.",
+  'protocol.ethernetip.warning.unknownCommand':
+    'The command code is not one of the eight known encapsulation commands.',
+  'protocol.ethernetip.warning.unknownStatus':
+    'The status code is not in the recognised table; shown raw.',
+  'protocol.ethernetip.warning.lengthMismatch':
+    'The Length field does not match the actual body length.',
+  'protocol.ethernetip.warning.unhandledCommandData':
+    "This command's command-specific body is not decoded field by field by this engine; shown raw.",
+  'protocol.ethernetip.summary.known': 'EtherNet/IP encapsulation message',
+  'protocol.ethernetip.summary.unknown': 'Unrecognised EtherNet/IP command',
+  'protocol.ethernetip.documentation.summary':
+    "Resolves the encapsulation header (Command/Length/Session Handle/Status/Sender Context/Options) and the Common Packet Format. The CIP message inside SendRRData/SendUnitData's Connected/Unconnected Data Items is fully resolved by SHARING the `cip` engine.",
+  'protocol.ethernetip.example.registerSessionRequest.name': 'Register Session request',
+  'protocol.ethernetip.example.registerSessionRequest.description':
+    'Protocol Version = 1, Options Flags = 0 — the first message before a session exists.',
+  'protocol.ethernetip.example.registerSessionResponse.name': 'Register Session response',
+  'protocol.ethernetip.example.registerSessionResponse.description':
+    'The Session Handle returned by the server, carried on every subsequent message.',
+  'protocol.ethernetip.example.sendRrDataGetAttributeSingle.name': 'SendRRData — Get_Attribute_Single',
+  'protocol.ethernetip.example.sendRrDataGetAttributeSingle.description':
+    'CPF: Null Address Item + Unconnected Data Item. The CIP request inside the Data Item is resolved by the `cip` engine.',
+  'protocol.ethernetip.example.sendUnitDataConnectedResponse.name': 'SendUnitData — connected response',
+  'protocol.ethernetip.example.sendUnitDataConnectedResponse.description':
+    'Connected Address Item (Connection ID) + Connected Data Item. A 2-byte Sequence Count is split off before the CIP message.',
+  'protocol.ethernetip.example.unregisterSession.name': 'UnRegister Session',
+  'protocol.ethernetip.example.unregisterSession.description':
+    'Carries no command-specific data; a request to close the session.',
+  'protocol.ethernetip.example.sendRrDataCpfItemTruncated.name': 'Truncated CPF item',
+  'protocol.ethernetip.example.sendRrDataCpfItemTruncated.description':
+    'The Unconnected Data Item promises 6 bytes but only 2 bytes of data are present — an error is raised.',
+
+  // --- DeviceNet ---
+  'protocol.devicenet.error.frameTooShort':
+    'The record is not long enough to carry the CAN identifier and length fields.',
+  'protocol.devicenet.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.devicenet.error.aborted': 'Parsing was cancelled.',
+  'protocol.devicenet.error.extendedNotSupported':
+    "DeviceNet's Predefined Master/Slave Connection Set only defines base (11-bit) identifiers; this frame is extended.",
+  'protocol.devicenet.warning.truncatedPayload':
+    'The declared data length is not present in the record; the bytes available are shown.',
+  'protocol.devicenet.summary.group1': 'Group 1 message (mostly I/O)',
+  'protocol.devicenet.summary.group2': 'Group 2 message',
+  'protocol.devicenet.summary.group3Or4': 'Group 3/4 message (boundary not named)',
+  'protocol.devicenet.summary.extendedRejected': 'Extended identifier — rejected',
+  'protocol.devicenet.documentation.summary':
+    "Splits the CAN identifier into a Message Group (1/2/3-4) and resolves DIFFERENTLY sized Message ID/MAC ID fields per group — the CAN data-link engine is SHARED from automotive/can. Payload is shown raw by default; the `payloadInterpretation` option hands it to the `cip` engine as a CIP explicit message.",
+  'protocol.devicenet.option.payloadInterpretation': 'Payload Interpretation',
+  'protocol.devicenet.option.payloadInterpretation.description':
+    'Cannot be inferred from the group/Message ID alone: whether the payload is I/O data or a CIP Explicit Message is something the user knows from system context.',
+  'protocol.devicenet.option.payloadInterpretation.raw': 'Raw data',
+  'protocol.devicenet.option.payloadInterpretation.cipExplicit': 'CIP Explicit Message',
+  'protocol.devicenet.example.group1PollResponseNode5.name': 'Group 1 — Message ID 5, MAC ID 5',
+  'protocol.devicenet.example.group1PollResponseNode5.description':
+    "CAN ID 0x145 = (Message ID 5 << 6) | MAC ID 5 — Group 1's 4-bit Message ID field.",
+  'protocol.devicenet.example.group2MessageNode10.name': 'Group 2 — Message ID 3, MAC ID 10',
+  'protocol.devicenet.example.group2MessageNode10.description':
+    "CAN ID 0x4CA — Group 2's 3-bit Message ID field (a DIFFERENT width from Group 1).",
+  'protocol.devicenet.example.group3Or4Unnamed.name': 'Group 3/4 — unnamed upper region',
+  'protocol.devicenet.example.group3Or4Unnamed.description':
+    'CAN ID 0x6C1: the exact boundary between Group 3 and Group 4 is not named by this engine, shown as a raw number.',
+  'protocol.devicenet.example.explicitMessageGetAttributeSingle.name': 'Explicit message payload',
+  'protocol.devicenet.example.explicitMessageGetAttributeSingle.description':
+    'The payload carries a raw Get_Attribute_Single request; selecting `payloadInterpretation=cip-explicit` resolves it with the `cip` engine.',
+  'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier rejected',
+  'protocol.devicenet.example.extendedIdentifierRejected.description':
+    'The Predefined Master/Slave Connection Set only defines base identifiers; an extended frame raises an error.',
 };

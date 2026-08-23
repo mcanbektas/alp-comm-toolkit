@@ -318,6 +318,24 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'opc-ua', () =>
     import('./industrial/opcua/opcua').then((module) => module.opcUaPlugin),
   );
+  // CIP — dalga 13d: media-independent nesne modeli çekirdeği (Service/EPATH/
+  // General Status), `ethernet-ip` ve `devicenet` bunu AYNEN tüketir (bkz.
+  // cipCore.ts dosya başı — brief'in "CIP GERÇEK bir paylaşım vakası" bulgusu).
+  registerOnce(registry, 'cip', () => import('./industrial/cip/cip').then((module) => module.cipPlugin));
+  // EtherNet/IP — dalga 13d: Encapsulation başlığı (24 bayt, 8 komut) + Common
+  // Packet Format; SendRRData/SendUnitData'nın Connected/Unconnected Data
+  // Item'ları CIP çekirdeğine devredilir (bkz. ethernetip.ts dosya başı).
+  registerOnce(registry, 'ethernet-ip', () =>
+    import('./industrial/ethernetip/ethernetip').then((module) => module.ethernetIpPlugin),
+  );
+  // DeviceNet — dalga 13d: CAN veri-bağı `automotive/can/canClassic`ten
+  // PAYLAŞILIR (canopen.ts emsali, ikinci bir CAN çözücü YAZILMADI); CAN
+  // ID'nin Message Group'a göre FARKLI genişlikte alan taşıdığı tuzağı
+  // (Group 1: 4-bit Message ID, Group 2/3-4: 3-bit) burada çözülür, payload
+  // isteğe bağlı olarak CIP çekirdeğine devredilir (bkz. devicenet.ts dosya başı).
+  registerOnce(registry, 'devicenet', () =>
+    import('./industrial/devicenet/devicenet').then((module) => module.deviceNetPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

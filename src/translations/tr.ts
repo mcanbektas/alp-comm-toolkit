@@ -5150,6 +5150,127 @@ export const tr = {
   'protocol.telnet.example.unterminatedSubnegotiation.name': 'Kapatılmamış subnegotiation',
   'protocol.telnet.example.unterminatedSubnegotiation.description':
     'IAC SB açılıyor ama IAC SE hiç gelmiyor — kesilmiş bir yakalamayı gösterir.',
+
+  // --- CIP ---
+  'protocol.cip.error.frameTooShort':
+    'Kayıt en az Service ve Path Size baytlarını taşıyacak kadar uzun değil.',
+  'protocol.cip.error.frameTooLong': 'Kayıt izin verilen azami uzunluğu aşıyor.',
+  'protocol.cip.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.cip.error.messageEmpty': 'Mesaj gövdesi boş.',
+  'protocol.cip.error.requestHeaderTruncated':
+    'İstek başlığı (Service + Path Size) için yeterli bayt yok.',
+  'protocol.cip.error.responseHeaderTruncated':
+    'Yanıt başlığı (Reply Service + Reserved + General Status + Additional Status Size) için yeterli bayt yok.',
+  'protocol.cip.warning.unknownService':
+    'Servis kodu ortak servis tablosunda yok — sınıfa özel ya da vendor-specific olabilir, ad atanmadı.',
+  'protocol.cip.warning.reservedByteNonzero': 'Reserved bayt sıfır değil.',
+  'protocol.cip.warning.unknownGeneralStatus':
+    'General Status kodu tanınan tabloda yok, ham gösteriliyor.',
+  'protocol.cip.warning.pathTruncated':
+    'Bildirilen Path Size kayıtta yok; elde olan baytlarla sınırlı çözüldü.',
+  'protocol.cip.warning.extendedPathNotDecoded':
+    'Port/Network/Symbolic/Data segmenti ya da Electronic Key/Service ID alt tipi: kendi format kuralları bu motorda çözülmüyor, kalan path ham gösterildi.',
+  'protocol.cip.warning.additionalStatusTruncated':
+    'Additional Status Size’ın vaat ettiği bayt sayısı kayıtta yok; elde olan kısım gösterildi.',
+  'protocol.cip.summary.request': 'CIP isteği',
+  'protocol.cip.summary.response': 'CIP yanıtı',
+  'protocol.cip.documentation.summary':
+    'Media-independent CIP Message Router isteği/yanıtı: Service/Reply Service, EPATH (Class/Instance/Member/Connection Point/Attribute) ve General Status çözülür. EtherNet/IP ve DeviceNet AYNI motoru kendi taşıyıcı zarflarının içinden tüketir.',
+  'protocol.cip.example.getAttributeSingleRequest8Bit.name': 'Get_Attribute_Single isteği (8-bit path)',
+  'protocol.cip.example.getAttributeSingleRequest8Bit.description':
+    'Class 1 (Identity)/Instance 1/Attribute 1 — üç segment de 8-bit, pad baytı yok.',
+  'protocol.cip.example.getAttributeAllRequest16BitClass.name': 'Get_Attribute_All isteği (16-bit Class)',
+  'protocol.cip.example.getAttributeAllRequest16BitClass.description':
+    '16-bit Class segmentinde segment baytından sonra bir PAD baytı gelir; atlanmazsa Instance segmenti bir bayt kayar.',
+  'protocol.cip.example.getAttributeSingleResponseSuccess.name': 'Başarılı yanıt (Vendor ID)',
+  'protocol.cip.example.getAttributeSingleResponseSuccess.description':
+    'Reply Service = 0x8E (0x0E | 0x80), General Status = Success, Response Data = Vendor ID 1.',
+  'protocol.cip.example.responsePathDestinationUnknown.name': 'Hata yanıtı (Path destination unknown)',
+  'protocol.cip.example.responsePathDestinationUnknown.description':
+    'General Status = 0x05: yol geçerli bir sınıf/instance/üyeye işaret etmiyor.',
+  'protocol.cip.example.requestConnectionPointSegment.name': 'Connection Point segmenti',
+  'protocol.cip.example.requestConnectionPointSegment.description':
+    'EPATH’in dördüncü lojik alt tipi: Class 4 (Assembly) + Connection Point 0x65.',
+  'protocol.cip.example.requestUnknownServiceCode.name': 'Adlandırılmamış servis kodu',
+  'protocol.cip.example.requestUnknownServiceCode.description':
+    '0x4B ortak servis tablosunda yok ama 0x00-0x7F aralığında — yapısal olarak geçerli, yalnız adsız.',
+  'protocol.cip.example.requestPathTruncated.name': 'Kesik path',
+  'protocol.cip.example.requestPathTruncated.description':
+    'Path Size 3 word (6 bayt) vaat ediyor ama yalnız 4 bayt path verisi var.',
+
+  // --- EtherNet/IP ---
+  'protocol.ethernetip.error.headerTruncated':
+    'Kayıt 24 baytlık encapsulation başlığını taşıyacak kadar uzun değil.',
+  'protocol.ethernetip.error.frameTooLong': 'Kayıt izin verilen azami uzunluğu aşıyor.',
+  'protocol.ethernetip.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ethernetip.error.cpfHeaderTruncated': 'CPF Item Count alanı için yeterli bayt yok.',
+  'protocol.ethernetip.error.cpfItemTruncated':
+    'CPF item’ının bildirilen uzunluğu kalan bayt sayısını aşıyor.',
+  'protocol.ethernetip.warning.unknownCommand':
+    'Komut kodu bilinen sekiz encapsulation komutundan biri değil.',
+  'protocol.ethernetip.warning.unknownStatus': 'Status kodu tanınan tabloda yok, ham gösteriliyor.',
+  'protocol.ethernetip.warning.lengthMismatch':
+    'Length alanı gerçek gövde uzunluğuyla uyuşmuyor.',
+  'protocol.ethernetip.warning.unhandledCommandData':
+    'Bu komutun command-specific gövdesi bu motorda alan alan çözülmüyor, ham gösterildi.',
+  'protocol.ethernetip.summary.known': 'EtherNet/IP encapsulation mesajı',
+  'protocol.ethernetip.summary.unknown': 'Tanınmayan EtherNet/IP komutu',
+  'protocol.ethernetip.documentation.summary':
+    'Encapsulation başlığı (Command/Length/Session Handle/Status/Sender Context/Options) ve Common Packet Format çözülür. SendRRData/SendUnitData’nın Connected/Unconnected Data Item’larındaki CIP mesajı `cip` motoruyla PAYLAŞILARAK tam çözülür.',
+  'protocol.ethernetip.example.registerSessionRequest.name': 'Register Session isteği',
+  'protocol.ethernetip.example.registerSessionRequest.description':
+    'Protocol Version = 1, Options Flags = 0 — oturum açmadan önceki ilk mesaj.',
+  'protocol.ethernetip.example.registerSessionResponse.name': 'Register Session yanıtı',
+  'protocol.ethernetip.example.registerSessionResponse.description':
+    'Sunucunun döndürdüğü Session Handle, sonraki tüm mesajlarda taşınır.',
+  'protocol.ethernetip.example.sendRrDataGetAttributeSingle.name': 'SendRRData — Get_Attribute_Single',
+  'protocol.ethernetip.example.sendRrDataGetAttributeSingle.description':
+    'CPF: Null Address Item + Unconnected Data Item. Data Item’ın içindeki CIP isteği `cip` motoruyla çözülür.',
+  'protocol.ethernetip.example.sendUnitDataConnectedResponse.name': 'SendUnitData — bağlı yanıt',
+  'protocol.ethernetip.example.sendUnitDataConnectedResponse.description':
+    'Connected Address Item (Connection ID) + Connected Data Item. CIP mesajından önce 2 baytlık Sequence Count ayrılır.',
+  'protocol.ethernetip.example.unregisterSession.name': 'UnRegister Session',
+  'protocol.ethernetip.example.unregisterSession.description':
+    'Command-specific veri taşımaz; oturumu kapatma isteği.',
+  'protocol.ethernetip.example.sendRrDataCpfItemTruncated.name': 'Kesik CPF item’ı',
+  'protocol.ethernetip.example.sendRrDataCpfItemTruncated.description':
+    'Unconnected Data Item 6 bayt vaat ediyor ama yalnız 2 bayt veri var — hata basılır.',
+
+  // --- DeviceNet ---
+  'protocol.devicenet.error.frameTooShort':
+    'Kayıt CAN kimliği ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.devicenet.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.devicenet.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.devicenet.error.extendedNotSupported':
+    'DeviceNet’in Predefined Master/Slave Connection Set’i yalnız base (11-bit) identifier tanımlar; bu çerçeve extended.',
+  'protocol.devicenet.warning.truncatedPayload':
+    'Bildirilen veri uzunluğu kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.devicenet.summary.group1': 'Group 1 mesajı (I/O ağırlıklı)',
+  'protocol.devicenet.summary.group2': 'Group 2 mesajı',
+  'protocol.devicenet.summary.group3Or4': 'Group 3/4 mesajı (sınır adlandırılmadı)',
+  'protocol.devicenet.summary.extendedRejected': 'Extended identifier — reddedildi',
+  'protocol.devicenet.documentation.summary':
+    'CAN identifier’ı Message Group’a (1/2/3-4) böler, gruba göre FARKLI genişlikte Message ID/MAC ID alanları çözer — CAN veri-bağı motoru automotive/can’den PAYLAŞILIR. Payload varsayılan olarak ham gösterilir; `payloadInterpretation` seçeneği CIP explicit mesajı olarak `cip` motoruna devretmeyi sağlar.',
+  'protocol.devicenet.option.payloadInterpretation': 'Payload Yorumu',
+  'protocol.devicenet.option.payloadInterpretation.description':
+    'Grup/Message ID’den tek başına çıkarılamaz: payload I/O verisi mi yoksa CIP Explicit Message mi, kullanıcı sistem bağlamından bilir.',
+  'protocol.devicenet.option.payloadInterpretation.raw': 'Ham veri',
+  'protocol.devicenet.option.payloadInterpretation.cipExplicit': 'CIP Explicit Message',
+  'protocol.devicenet.example.group1PollResponseNode5.name': 'Group 1 — Message ID 5, MAC ID 5',
+  'protocol.devicenet.example.group1PollResponseNode5.description':
+    'CAN ID 0x145 = (Message ID 5 << 6) | MAC ID 5 — Group 1’in 4-bit Message ID alanı.',
+  'protocol.devicenet.example.group2MessageNode10.name': 'Group 2 — Message ID 3, MAC ID 10',
+  'protocol.devicenet.example.group2MessageNode10.description':
+    'CAN ID 0x4CA — Group 2’nin 3-bit Message ID alanı (Group 1’den FARKLI genişlik).',
+  'protocol.devicenet.example.group3Or4Unnamed.name': 'Group 3/4 — adlandırılmamış üst bölge',
+  'protocol.devicenet.example.group3Or4Unnamed.description':
+    'CAN ID 0x6C1: Group 3 ile Group 4’ün kesin sınırı bu motorda adlandırılmadı, ham sayı gösterilir.',
+  'protocol.devicenet.example.explicitMessageGetAttributeSingle.name': 'Explicit message payload’ı',
+  'protocol.devicenet.example.explicitMessageGetAttributeSingle.description':
+    'Payload ham bir Get_Attribute_Single isteği taşır; `payloadInterpretation=cip-explicit` seçilince `cip` motoruyla çözülür.',
+  'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier reddedildi',
+  'protocol.devicenet.example.extendedIdentifierRejected.description':
+    'Predefined Master/Slave Connection Set yalnız base identifier tanımlar; extended çerçeve hata basar.',
 } as const;
 
 /**

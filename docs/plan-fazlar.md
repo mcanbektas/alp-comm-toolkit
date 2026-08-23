@@ -466,6 +466,79 @@ KORUNDU. Sıradaki: **13d (cip, ethernet-ip, devicenet)** — `cip-can-based` ai
 kapatır; `cipObjectModel` GERÇEK paylaşım adayı, sıralama önemli (cip önce yazılır,
 iki taşıyıcı onu tüketir).
 
+**13d (2026-08-23 bitti) — cip, ethernet-ip, devicenet.** `cip-can-based` ailesi
+KAPANDI (canopen zaten `ready`ydi) + `industrial-ethernet`ten bir kayıt (ethernet-ip)
+alındı. Brief'in 2. mimari bulgusu ("CIP GERÇEK bir paylaşım vakası") DOĞRULANDI:
+`cipCore.ts` yeni ortak motor olarak yazıldı (`iec104Asdu.ts`/`opcUaBinary.ts`in "fields
+dizisine doğrudan basan, kendi `ProtocolParser`ı OLMAYAN" deseniyle BİREBİR) ve HEM
+`cip` kaydının kendi başına plugin'i HEM `ethernetip.ts`in SendRRData/SendUnitData CPF
+Data Item'ları HEM `devicenet.ts`in (isteğe bağlı) payload yorumu TARAFINDAN AYNEN
+tüketildi — üç dosya da `decodeCipMessage()`in ürettiği BİREBİR aynı alan adlarını
+(`service`/`path-class`/`path-instance`/`general-status`…) yalnız farklı öneklerle basar.
+
+Brief'in "cross-domain paylaşım emsali YOK" tahmini ÇÜRÜDÜ: ana session'ın işaret ettiği
+gibi `canopen.ts:57` zaten `automotive/can/canClassic`i paylaşıyordu (dalga 1'den beri).
+`devicenet.ts` AYNI emsali izledi — `canFrame.ts`/`canClassic.ts`ten `decodeCanId`/
+`readUint32Le`/`CAN_HEADER_LENGTH`/`buildCanClassicFrame` alındı, İKİNCİ bir CAN
+çözücü YAZILMADI. CAN ailesinin kendi testleri (canopen dahil) dokunulmadan yeşil kaldı.
+
+**Kaynak durumu — ODVA'nın Volume 1/2/3'ü ücretli, depoda YOK.** Üç bağımsız kamuya açık
+kaynaktan çapraz teyitle alan yerleşimleri kuruldu: **OpENer** (EIPStackGroup/OpENer,
+Apache-2.0 — bağımsız açık kaynak EtherNet/IP stack'i; `ciperror.h`/`ciptypes.h`/
+`cipepath.c` KOD SEVİYESİNDE okundu, kod kopyalanmadı), **Wireshark** `packet-cip.c`/
+`packet-enip.c` (GPL-2.0, bağımsız implementasyon), **scadaprotocols.com** (tertiary,
+101'in S3 kaynağıyla AYNI ölçütle kabul edildi — "CIP Path Segments Explained"/"CIP
+General Status Codes Reference" sayfaları). Üçü de General Status tablosunda VE EPATH
+segment/format bitlerinde birebir örtüştü, çelişki YOK. **En kritik doğrulama:**
+OpENer'ın `cipepath.c`si `CipEpathGetLogicalValue()`da 16/32-bit logical segment'lerde
+"Pad byte needs to be skipped" yorumuyla PAD BAYTINI KOD SEVİYESİNDE kanıtlıyor —
+brief'in vurguladığı tuzak gerçekten var ve `cipCore.test.ts` bunu hem 16-bit hem 32-bit
+için ayrı testle kilitliyor (16-bit Class segmentinde PAD atlanmasaydı Instance
+segmenti bir bayt kayardı, test bunu doğruluyor).
+
+**EDS sorusu** (brief açık soru 1) ana session tarafından zaten kapatılmıştı:
+`ethernet-ip`e `definitions` sekmesi/listesi EKLENMEDİ, `tabs`/`tools` alanlarına
+dokunulmadı.
+
+**DeviceNet'in kapsam dışı bıraktığı, dosya başında açıkça yazılan iki nokta:** (1)
+Group 3 ile Group 4'ün kesin sayısal sınırı — iki bağımsız ikincil kaynak (element14,
+embien.com) Group 1 (`0x000-0x3FF`, 4-bit Message ID) ve Group 2'yi (`0x400-0x5FF`,
+3-bit Message ID) birebir aynı aralıkta doğruluyor, ama `0x600-0x7FF`in Group 3/Group 4
+arasında NASIL bölündüğünü veren ikinci kaynak bulunamadı — bu yüzden TEK "Group 3/4"
+etiketiyle gösterilir, Message ID/MAC ID ham sayı kalır. (2) Message ID'nin SAYISAL
+DEĞERİNİN anlamı (Predefined Master/Slave Connection Set tablosu) — CANopen'ın PDO
+içeriğini EDS'e bırakmasıyla AYNI sınır, uydurulmadı. (3) Fragmentation Protocol
+(>8 baytlık CIP mesajları) uygulanmadı.
+
+**`decodeOptions` — TEK kanal, yalnız DeviceNet'te.** `payloadInterpretation`
+(raw/cip-explicit, varsayılan raw): yukarıdaki Group 3/4 sınırı belirsizliği yüzünden
+payload'ın I/O verisi mi CIP Explicit Message mi olduğu ÇERÇEVEDEN güvenilir
+çıkarılamıyor — `iec-60870-5-101`in link adresi genişliği kanalıyla AYNI gerekçe sınıfı
+(sistem bağlamı gerekiyor, tahmin edilmiyor). `cip` ve `ethernet-ip` HİÇBİR kanal
+AÇMADI: istek/yanıt ayrımı Reply Service'in 7. bitinden (12f'nin WebSocket MASK-biti
+dersiyle AYNI disiplin), command-specific data biçimi Command kodundan, CPF item
+içeriği Type ID'den — hepsi çerçevenin kendisinden okunuyor, kanal GEREKMEDİ.
+
+**Encoder YAZILMADI** (`modbus-tcp`/`iec-60870-5-101`/`opc-ua` emsali — `build` sekmesi
+katalogda var ama plugin'de `encoder` alanı YOK), `protocol-core/types.ts`e
+DOKUNULMADI, `live`/`tools`/`definitions` alanlarına DOKUNULMADI.
+
+42 birim testi (`cip.test.ts` 17 + `ethernetip.test.ts` 12 + `devicenet.test.ts` 13) +
+28 e2e (gerçek tarayıcı — `cip-decode.spec.ts` 11, `devicenet-decode.spec.ts` 9,
+`ethernet-ip-decode.spec.ts` 8 — her dosyada `decode-parse-error` (`success:false`)
+yolunu da AYRICA sınayan bir test var) + 4451 toplam test + typecheck/build yeşil; canopen +
+CAN ailesinin mevcut testleri (paylaşılan `canClassic.ts`/`canFrame.ts` dokunuldu)
+DOKUNULMADAN yeşil kaldı. Değişen/yeni dosyalar: `protocols/industrial/cip/cipCore.ts`
+(yeni, paylaşılan motor), `cip.ts` (yeni) + `cip.test.ts` (yeni),
+`protocols/industrial/ethernetip/ethernetip.ts` (yeni) + `ethernetip.test.ts` (yeni),
+`protocols/industrial/devicenet/devicenet.ts` (yeni) + `devicenet.test.ts` (yeni),
+`protocols/index.ts` (üç kayıt) + `index.test.ts` (kayıt sayacı, alfabetik sıra),
+`app/catalog/domains/industrial-automation.ts` (üç kayıt `status: 'ready'` + `pluginId`),
+`translations/{tr,en}.ts` (~90 anahtar), `e2e/{cip,devicenet,ethernet-ip}-decode.spec.ts`
+(yeni), `CLAUDE.md` (borç sayımı: 45→42 kanonik, industrial-automation 13→10). Sıradaki:
+**13e (profinet)** — `industrial-ethernet`in en yaygın/en çok araçlı kaydı, GSDML
+definitions + DCP discovery + slot/subslot ağacı.
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.
