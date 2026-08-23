@@ -339,7 +339,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Ethernet real-time bus for controls, drives and I/O with cycle times from 31.25 µs and sub-microsecond synchronization accuracy.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'sercos-iii',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Communication Cycle',
@@ -356,7 +357,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Hard real-time Fast Ethernet protocol where a managing node schedules isochronous polling of controlled nodes and reuses the CANopen object model.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'powerlink',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Managing Node',
@@ -368,7 +370,12 @@ export const industrialAutomationDomain: CatalogDomain = {
             'NMT',
             'Diagnostics',
           ],
-          // Aynı OD / PDO / SDO / NMT modeli — ortak motor paylaşılabilir.
+          // Aynı OD adresleme SÖZLEŞMESİ (16-bit Index + 8-bit Sub-index), ama ortak
+          // motor YOK: dalga 13f iddiayı sınadı ve bit düzeyinde çürüttü — NMT durum
+          // baytları kesişmiyor (`0x00` iki tarafta FARKLI anlam), SDO komut
+          // spesifikatörü farklı, PDO uzunluğu POWERLINK'te 16-bit ALAN iken
+          // CANopen'da CAN DLC'sidir (≤8 bayt). Gerekçe `powerlink.ts` dosya başında;
+          // `canopen.ts` bilerek DEĞİŞTİRİLMEDİ. Bağ kavramsaldır, kod paylaşımı değil.
           related: ['industrial-automation/cip-can-based/canopen'],
         },
       ],

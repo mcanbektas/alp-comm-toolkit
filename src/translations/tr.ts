@@ -5384,6 +5384,210 @@ export const tr = {
   'protocol.profinet.example.frameTooShort.name': 'Çok kısa çerçeve',
   'protocol.profinet.example.frameTooShort.description':
     '10 bayt: Ethernet başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+  // --- POWERLINK ---
+  'protocol.powerlink.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.powerlink.error.asndBodyTruncated':
+    'ASnd gövdesi ServiceID baytı için bile yeterli uzunlukta değil.',
+  'protocol.powerlink.error.basicHeaderTruncated':
+    'MessageType + Destination/Source Node ID için gereken 3 bayt tamamlanmıyor.',
+  'protocol.powerlink.error.etherTypeNotPowerlink':
+    'EtherType 0x88AB değil — bu çerçeve POWERLINK değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.powerlink.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.powerlink.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + temel POWERLINK başlığı (3 bayt) kadar uzun değil.',
+  'protocol.powerlink.error.pdoHeaderTruncated':
+    'PReq/PRes başlığının (7 bayt: durum/NMTStatus, bayraklar, PDOVersion, Size) tamamı gelmedi.',
+  'protocol.powerlink.error.sdoCommandTruncated':
+    'Command Layer sabit başlığının (8 bayt) ya da Abort Code’un (4 bayt) tamamı gelmedi.',
+  'protocol.powerlink.error.sdoSequenceTruncated':
+    'Sequence Layer için gereken 4 bayt (ReceiveCon/SendCon + ayrılmış) tamamlanmıyor.',
+  'protocol.powerlink.warning.asndServiceBodyNotDecoded':
+    'ASnd ServiceID çapraz teyitli altı serviste (IdentResponse/StatusResponse/NMTRequest/NMTCommand/SDO/SyncResponse) değil — gövde bu motorun kapsamı dışında, ham bırakıldı.',
+  'protocol.powerlink.warning.asndServiceNotNamed':
+    'ASnd ServiceID iki kaynakta da adlandırılmış kümede değil.',
+  'protocol.powerlink.warning.bodyNotDecoded':
+    'MessageType adlandırılmış olsa da (AInv/AMNI gibi) iki kaynak da bu tip için alan tablosu vermiyor — gövde ham gösteriliyor.',
+  'protocol.powerlink.warning.errorHistoryTrailingBytes':
+    'ErrorCodeList bölgesi 20 baytlık girdilere tam bölünmüyor; kalan baytlar ham gösteriliyor.',
+  'protocol.powerlink.warning.ipFieldByteOrderConflict':
+    'IdentResponse’un IPAddress/SubnetMask/DefaultGateway alanlarında iki kaynak bayt sırasında ANLAŞMIYOR (Wireshark big-endian, openPOWERLINK little-endian okuyor) — yanlış yönde okunmuş bir IP ham baytlardan daha kötü olacağı için alan çevrilmeden ham basılıyor.',
+  'protocol.powerlink.warning.messageTypeHighBitSet':
+    'MessageType baytının 7. biti set — Wireshark bu biti maskeler, openPOWERLINK MessageType’ı tam bayt sayar; değer maskelenmiş haliyle çözüldü.',
+  'protocol.powerlink.warning.messageTypeNotNamed':
+    'MessageType iki kaynakta da adlandırılmış kümede değil.',
+  'protocol.powerlink.warning.nmtCommandDataNotDecoded':
+    'NMT komut verisinin yapısı komuta göre değişir (node listesi, ana bilgisayar adı, hata gerekçesi …); iki kaynağın kesiştiği ortak bir kırılım yok, bölge ham gösteriliyor.',
+  'protocol.powerlink.warning.nmtCommandNotNamed':
+    'NMTCommandID/RequestedCommandID iki kaynakta da adlandırılmış kümede değil.',
+  'protocol.powerlink.warning.nmtStateNotNamed':
+    'NMT durum baytı ortak ya da role özgü tabloda yok (ya da STOPPED, tanımlı olmadığı Managing Node’dan geldi).',
+  'protocol.powerlink.warning.paddingNotZero':
+    'Bildirilen bölgeden sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.powerlink.warning.pdoPayloadNeedsMapping':
+    'PDO yükünün hangi baytı hangi objeye karşılık geldiği XDD/PDO eşlemesinden gelir, çerçeveden değil — bölge tek parça ham gösteriliyor.',
+  'protocol.powerlink.warning.pdoSizeExceedsFrame':
+    'Size alanının vaat ettiği bayt sayısı telde olandan büyük — çerçeve kesik ya da Size bozuk; yük telde olanla kırpıldı.',
+  'protocol.powerlink.warning.sdoAbortCodeNotNamed':
+    'SDO Abort Code, iki kaynağın kesiştiği kümede değil.',
+  'protocol.powerlink.warning.sdoCommandLayerEmpty':
+    'Command Layer boş: bu çerçeve yalnız Sequence Layer taşıyor (bağlantı kurulum/onay çerçevesi) — geçerli bir durum, hata değil.',
+  'protocol.powerlink.warning.sdoCommandNotNamed':
+    'SDO CommandID iki kaynakta da adlandırılmış kümede değil.',
+  'protocol.powerlink.warning.sdoDataNeedsObjectDictionary':
+    'Verinin tipi ve ölçeği Object Dictionary’de (XDD/EDS) tanımlanır, çerçevede değil — bölge tek parça ham gösteriliyor.',
+  'protocol.powerlink.warning.sdoSegmentSizeMismatch':
+    'SegmentSize alanının vaat ettiği bayt sayısı telde olandan büyük.',
+  'protocol.powerlink.warning.singleSourceField':
+    'Bu alan yalnız tek kaynakta (openPOWERLINK) adlandırılıyor; Wireshark bu baytı atlıyor.',
+  'protocol.powerlink.warning.soaFlagsPartiallyNamed':
+    'SoA bayrak baytının kalan bitleri (DNA AN yerel/genel, ring-redundancy) yalnız Wireshark’ta adlandırılıyor — openPOWERLINK’in bayrak listesinde yok.',
+  'protocol.powerlink.warning.soaServiceNotNamed':
+    'RequestedServiceID iki kaynakta da adlandırılmış kümede değil.',
+  'protocol.powerlink.warning.staticErrorFieldNotSplit':
+    'StaticErrorBitField’in iç kırılımı (ErrorRegister + DeviceSpecific) yalnız Wireshark’ta var; openPOWERLINK tek bir 64-bit alan sayıyor — sekiz bayt tek parça gösteriliyor.',
+  'protocol.powerlink.summary.asnd': 'ASnd — {service} {detail}',
+  'protocol.powerlink.summary.notPowerlink': 'POWERLINK değil (EtherType {etherType})',
+  'protocol.powerlink.summary.other': '{messageType} — kaynak {sourceNodeId}, hedef {destinationNodeId}',
+  'protocol.powerlink.summary.pdo': '{messageType} — {size} bayt, sürüm {pdoVersion}',
+  'protocol.powerlink.summary.soa': 'SoA — {service}, hedef {target}',
+  'protocol.powerlink.summary.soc': 'SoC — kaynak {sourceNodeId}, hedef {destinationNodeId}',
+  'protocol.powerlink.documentation.summary':
+    'POWERLINK (EPSG DS 301 / IEC 61784-2 CP 13): girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x88AB çözülür (ethercat.ts/profinet.ts ile aynı girdi sözleşmesi, aynı paylaşılan Ethernet motoru). CANopen ile ortak bir OD/PDO motoru paylaşma iddiası SINANDI ve ÇÜRÜDÜ: NMT durum baytları kesişmiyor, SDO çerçeveleri (Sequence+Command Layer) CANopen’ın tek baytlık command specifier’ından tamamen farklı ve PDO uzunluğu CANopen’da ≤8 baytlık CAN DLC’siyken POWERLINK’te çerçevede yazan 16-bit bir Size alanı — canopen.ts’e dokunulmadı. MessageType baytı (bit 7 maskeli) SoC/PReq/PRes/SoA/ASnd’i ayrıştırır; her tipin bayrak bitleri, NetTime/RelativeTime, PDOVersion ve Size alanı tam çözülür. ASnd altı servise (IdentResponse/StatusResponse/NMTRequest/NMTCommand/SDO/SyncResponse) dallanır; SDO via ASnd Sequence Layer (4 bayt) ve Command Layer’ı (8 baytlık sabit başlık + ReadByIndex/WriteByIndex alt başlığı + Abort Code) çözer. Alan yerleşimleri Wireshark’ın EPL dissector’ı ile openPOWERLINK V2’nin dokümante sabitleri arasında çapraz teyitlidir; yalnız tek kaynakta geçen alanlar (IdentResponse’un IP alanları, StaticErrorBitField’in iç kırılımı, FeatureFlags bitleri, SoA’nın ring-redundancy bayrakları) ham bırakılır ve uyarı taşır. PDO yükü ve NMT/SDO komut verisi XDD’ye/PDO eşlemesine bağlı olduğu için ham bırakılır — bu bir eksik değil, tanım-bağımlı içeriktir. SDO via UDP/PDO, XDD ayrıştırma ve çok çerçeveli analiz (cycle timing, node tablosu) kapsam dışıdır.',
+  'protocol.powerlink.example.socCycleStart.name': 'SoC — döngü başlangıcı',
+  'protocol.powerlink.example.socCycleStart.description':
+    'Start of Cycle çok noktaya yayını: MC/PS bayrakları sıfır (ne çoklanmış ne ön ölçekli döngü), NetTime ve 64-bit RelativeTime alanları dolu.',
+  'protocol.powerlink.example.socMultiplexedPrescaled.name':
+    'SoC — çoklanmış ve ön ölçekli döngü',
+  'protocol.powerlink.example.socMultiplexedPrescaled.description':
+    'Aynı yapı, MC (multiplexed cycle completed) ve PS (prescaled slot) bayrakları set — iki bayrağın da ayrı ayrı okunduğunu gösterir.',
+  'protocol.powerlink.example.preqPollRequest.name': 'PReq — anket isteği',
+  'protocol.powerlink.example.preqPollRequest.description':
+    'MN’den bir CN’e PollRequest: RD (data valid) bayrağı set, PDOVersion 1.0, 36 baytlık PDO yükü çerçevede YAZAN 16-bit Size alanıyla taşınıyor.',
+  'protocol.powerlink.example.presPollResponse.name': 'PRes — anket yanıtı',
+  'protocol.powerlink.example.presPollResponse.description':
+    'CN’den çok noktaya yayınlanan PollResponse: NMTStatus NMT_CS_OPERATIONAL, RD bayrağı set, aynı 36 baytlık PDO yükü.',
+  'protocol.powerlink.example.presLargePdo.name': 'PRes — büyük PDO yükü',
+  'protocol.powerlink.example.presLargePdo.description':
+    '200 baytlık PDO yükü: CANopen’ın ≤8 baytlık CAN DLC sınırının POWERLINK’te GEÇMEDİĞİNİ kanıtlıyor — Size alanı çerçevede 16-bit olarak yazıyor, üst sınır 1499 bayt.',
+  'protocol.powerlink.example.presSizeExceedsFrame.name': 'PRes — Size çerçeveden büyük',
+  'protocol.powerlink.example.presSizeExceedsFrame.description':
+    'Size alanı 512 bayt vaat ediyor ama telde yalnız 36 bayt yük var — uyarı basılır, yük telde olanla kırpılır, UYDURULMAZ.',
+  'protocol.powerlink.example.soaIdentRequest.name': 'SoA — IdentRequest daveti',
+  'protocol.powerlink.example.soaIdentRequest.description':
+    'MN’in bir CN’i asenkron faza davet etmesi: RequestedServiceID IdentRequest, hedef CN 1, POWERLINKVersion 2.0.',
+  'protocol.powerlink.example.soaSyncRequest.name':
+    'SoA — SyncRequest (PollResponse Chaining)',
+  'protocol.powerlink.example.soaSyncRequest.description':
+    'RequestedServiceID SyncRequest (0x06): SyncControl, PResTimeFirst/Second, SyncMNDelayFirst/Second, PResFallBackTimeout ve hedef MAC adresi ayrı ayrı çözülür.',
+  'protocol.powerlink.example.asndIdentResponse.name': 'ASnd — IdentResponse',
+  'protocol.powerlink.example.asndIdentResponse.description':
+    'CN’in kimlik yanıtı: FeatureFlags/DeviceType/VendorId/ProductCode/RevisionNumber/SerialNumber hex biçiminde, IP alanları İKİ KAYNAĞIN bayt sırasında anlaşmadığı için ham bırakılıyor.',
+  'protocol.powerlink.example.asndStatusResponse.name': 'ASnd — StatusResponse',
+  'protocol.powerlink.example.asndStatusResponse.description':
+    'StaticErrorBitField tek parça ham (iç kırılımı tek kaynaklı); ErrorCodeList’teki iki girdi EntryType’ın Profile/Mode/Emergency/Status alt bitlerini ayrı ayrı gösteriyor.',
+  'protocol.powerlink.example.asndNmtStartNode.name': 'ASnd — NMTStartNode komutu',
+  'protocol.powerlink.example.asndNmtStartNode.description':
+    'MN’in çok noktaya yayınladığı NMTStartNode komutu: CommandID adlandırılır, CommandData’nın yapısı komuta göre değiştiği için ham bırakılır.',
+  'protocol.powerlink.example.asndSdoReadByIndex.name':
+    'ASnd — SDO ReadByIndex isteği (expedited)',
+  'protocol.powerlink.example.asndSdoReadByIndex.description':
+    'SDO via ASnd: Sequence Layer bağlantı geçerli, Command Layer’ın CommandID’si ReadByIndex, Index 0x1006/Sub-index 0x00 alt başlıktan okunuyor.',
+  'protocol.powerlink.example.asndSdoAbort.name': 'ASnd — SDO Abort',
+  'protocol.powerlink.example.asndSdoAbort.description':
+    'Abort biti set: Abort Code 0x06020000 = "Object does not exist in the object dictionary" — iki kaynağın kesiştiği tabloda adlandırılmış bir kod.',
+  'protocol.powerlink.example.ainvAsyncInvite.name': 'AInv — asenkron davet',
+  'protocol.powerlink.example.ainvAsyncInvite.description':
+    'MessageType adlandırılmış (Asynchronous Invite) ama iki kaynak da bu tip için alan tablosu vermiyor — gövde ham gösterilir, nedeni uyarıyla söylenir.',
+  'protocol.powerlink.example.etherTypeNotPowerlink.name': 'Yanlış EtherType',
+  'protocol.powerlink.example.etherTypeNotPowerlink.description':
+    'SoC örneğiyle aynı gövde, EtherType kasten 0x0800 (IPv4). MAC alanları çözülür ama MessageType’a bile dokunulmaz.',
+  'protocol.powerlink.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.powerlink.example.frameTooShort.description':
+    '12 bayt: Ethernet başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+  // --- SERCOS III ---
+  'protocol.sercosIii.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.sercosIii.error.etherTypeNotSercos':
+    'EtherType 0x88CD değil — bu çerçeve Sercos III değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.sercosIii.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.sercosIii.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + Sercos başlığı (6 bayt) kadar uzun değil.',
+  'protocol.sercosIii.error.headerTruncated':
+    '6 baytlık Sercos başlığı (telgraf tipi + faz + CRC32) tamamlanmıyor.',
+  'protocol.sercosIii.warning.cp34LayoutFromCp2':
+    'CP3/CP4’te servis kanalı, cihaz durumu ve bağlantı ofsetleri ÇERÇEVEDE YAZMAZ — CP2 sırasında pazarlanan konfigürasyondan gelir; referans dissector da aynı yerde durur. Bölge tek parça ham gösteriliyor.',
+  'protocol.sercosIii.warning.crc32NotVerified':
+    'CRC32 GÖSTERİLİR, DOĞRULANMAZ: üretici polinomu tek kaynakta teyitli ama başlangıç değeri/son XOR ikinci bir kaynakta yok — yanlış parametreyle hesaplanmış bir "hatalı" rozeti hiç doğrulamamaktan daha kötü olurdu.',
+  'protocol.sercosIii.warning.cycleCountInvalid':
+    'Cycle Count Valid biti sıfır: sayaç değeri basılıyor ama bu durumda anlamsızdır.',
+  'protocol.sercosIii.warning.cycleCountSingleSource':
+    'Cycle Count alanı (bit 4-6) yalnız Wireshark’ta adlandırılıyor; ikinci kaynağın faz baytında bu sayaç yok.',
+  'protocol.sercosIii.warning.detailedDeviceLimit':
+    'Ayrıntılı çözüm 16 cihazla sınırlı — tam boy bir telgraf 128 cihaz taşıyabilir; ötesi tek parça ham gösteriliyor.',
+  'protocol.sercosIii.warning.deviceListTruncated':
+    'Cihaz kontrol/durum listesi 128 cihazın tamamını kapsamıyor — telgraf kesik ya da tam boy değil.',
+  'protocol.sercosIii.warning.hotPlugBitsSingleSource':
+    'Hot-Plug kontrol/durum kelimesinin bit adları yalnız Wireshark’ta var — kelime tek alan olarak, adlandırılmadan gösteriliyor.',
+  'protocol.sercosIii.warning.paddingNotZero':
+    'Bildirilen bölgeden sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.sercosIii.warning.phaseNotNamed':
+    'Communication Phase iki kaynakta da adlandırılmış CP0-CP4 kümesinde değil — gövde ham gösteriliyor.',
+  'protocol.sercosIii.warning.recognizedDeviceListRaw':
+    'CP0/AT0’ın tanınan cihaz listesi 511 girdilik sabit bir dizidir; tek tek basmak yerine bölge ham gösterilip yapısı söyleniyor.',
+  'protocol.sercosIii.warning.svcInfoNeedsIdnDictionary':
+    'Servis kanalı bilgi alanının anlamı DBE’ye (IDN/ad/öznitelik/birim/min/maks/işletim verisi) bağlıdır; IDN sayısal olarak okunur ama parametre adı cihaz tanımından gelir — sözlük bu motorun kapsamı dışında.',
+  'protocol.sercosIii.warning.telegramNumberWidthConflict':
+    'Telgraf numarasının genişliği konusunda kaynaklar ANLAŞMIYOR: Wireshark 4 bit (0-3), Sercos Soft Master 2 bit (0-1) okuyor. Numara ortak 2 bitten okunuyor, bit 2-3 ayrı bir alan olarak gösteriliyor.',
+  'protocol.sercosIii.warning.versionFieldBitsSingleSource':
+    'Communication Version alanının bit adları (fast CP switch, init procedure version …) yalnız Wireshark’ta var — değer hex olarak, bit bit kırılmadan gösteriliyor.',
+  'protocol.sercosIii.summary.at': '{telegram} — {phase}',
+  'protocol.sercosIii.summary.mdt': '{telegram} — {phase}',
+  'protocol.sercosIii.summary.notSercos': 'Sercos III değil (EtherType {etherType})',
+  'protocol.sercosIii.documentation.summary':
+    'Sercos III (Sercos International / IEC 61158 & 61784-2 CPF 16): girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x88CD çözülür (ethercat.ts/profinet.ts/powerlink.ts ile aynı girdi sözleşmesi). 6 baytlık Sercos başlığı (telgraf tipi/kanal/MDT-AT ayrımı, haberleşme fazı CP0-CP4, faz geçiş biti, cycle count ve CRC32) tam çözülür. Telgraf numarasının genişliği konusunda iki kaynak ayrışıyor (Wireshark 4 bit, Sercos Soft Master 2 bit) — numara ortak 2 bitten okunur, kalan iki bit ayrı bir alan olarak gösterilir. CRC32 alanı GÖSTERİLİR ama DOĞRULANMAZ: algoritma parametreleri (başlangıç değeri, son XOR) tek kaynaklı. Faz-bağımlı gövdeler yapısı sabit olduğu ölçüde çözülür: CP0’ın sürüm alanı (MDT) ve tanınan cihaz listesi (AT), CP1/CP2’nin 128 cihazlık servis kanalı (6 bayt/cihaz, ayrıntı 16 cihazla sınırlı) ve C-DEV/S-DEV kontrol/durum kelimeleri (4 bayt/cihaz), CP3/CP4’ün ilk telgrafındaki 8 baytlık Hot-Plug alanı. CP3/CP4’ün geri kalanı (servis kanalı, cihaz durumu, bağlantı ofsetleri) ÇERÇEVEDE YAZMAZ — CP2’de pazarlanan konfigürasyondan gelir ve tek parça ham bırakılır; referans dissector da aynı sınırda durur. Alan yerleşimleri Wireshark’ın Sercos III dissector’ı ile Sercos Soft Master Core Library (SICE+CoSeMa) arasında çapraz teyitlidir. UCC, Sercos I/II, SIP ve IDN sözlüğü kapsam dışıdır.',
+  'protocol.sercosIii.example.mdt0Cp4Operational.name':
+    'MDT0 — CP4 (operasyonel faz), Hot-Plug alanı',
+  'protocol.sercosIii.example.mdt0Cp4Operational.description':
+    'Master Data Telegram 0, CP4’te (operasyonel): 8 baytlık Hot-Plug alanı (Sercos adresi + kontrol/durum kelimesi + bilgi) çözülür, gerisi CP2’den pazarlanan konfigürasyona bağlı olduğu için ham kalır.',
+  'protocol.sercosIii.example.at0Cp4Operational.name':
+    'AT0 — CP4 (operasyonel faz), Hot-Plug alanı',
+  'protocol.sercosIii.example.at0Cp4Operational.description':
+    'Aynı yapının AT (cihazdan gelen) tarafı: AT biti set, Hot-Plug durum kelimesi gösterilir.',
+  'protocol.sercosIii.example.mdt0Cp0CommunicationVersion.name':
+    'MDT0 — CP0, Communication Version',
+  'protocol.sercosIii.example.mdt0Cp0CommunicationVersion.description':
+    'CP0’da MDT gövdesi 4 baytlık Communication Version alanından ibarettir; bit adları yalnız Wireshark’ta olduğu için değer hex gösterilir, bit bit kırılmaz.',
+  'protocol.sercosIii.example.at0Cp0RecognizedDevices.name':
+    'AT0 — CP0, tanınan cihaz listesi',
+  'protocol.sercosIii.example.at0Cp0RecognizedDevices.description':
+    'CP0’da AT gövdesi sıra sayacı (3 tanınan cihaz) ve 511 girdilik sabit bir Sercos adresi listesi taşır; liste tek parça ham gösterilir.',
+  'protocol.sercosIii.example.mdt0Cp2ServiceChannel.name':
+    'MDT0 — CP2, servis kanalı (tam boy telgraf)',
+  'protocol.sercosIii.example.mdt0Cp2ServiceChannel.description':
+    '14+6+768+512 = 1300 baytlık tam boy CP2 telgrafı: ilk üç cihazın servis kanalı kelimesi (MHS/Read-Write/EOT/DBE) ve C-DEV kontrol kelimesi ayrı ayrı çözülür, ayrıntı 16 cihazla sınırlı olduğu için gerisi ham gösterilir.',
+  'protocol.sercosIii.example.at1Cp2SecondDeviceGroup.name':
+    'AT1 — CP2, ikinci cihaz grubu',
+  'protocol.sercosIii.example.at1Cp2SecondDeviceGroup.description':
+    'Telgraf numarası 1: cihaz indeksleri 128’den başlar. Servis kanalı durum kelimesi (AHS/Idle-Busy/Error/Process) ve S-DEV durum kelimesi çözülür.',
+  'protocol.sercosIii.example.mdt0Cp3PhaseSwitching.name': 'MDT0 — CP3, faz geçişi',
+  'protocol.sercosIii.example.mdt0Cp3PhaseSwitching.description':
+    'Faz baytında geçiş biti (bit 7) set — cihaz CP3’ten bir sonraki faza geçiyor; Hot-Plug alanı yine çözülür.',
+  'protocol.sercosIii.example.mdtSecondaryChannel.name':
+    'MDT — S-Telegram (ikincil port), cycle count geçersiz',
+  'protocol.sercosIii.example.mdtSecondaryChannel.description':
+    'Kanal biti set (ikincil port üzerinden gönderilen telgraf) ve Cycle Count Valid biti sıfır — sayaç değeri basılır ama geçersiz olduğu ayrıca söylenir.',
+  'protocol.sercosIii.example.telegramNumberExtendedBits.name':
+    'Telgraf numarası — bit 2-3 çakışması',
+  'protocol.sercosIii.example.telegramNumberExtendedBits.description':
+    'Bit 2-3 set: Wireshark bunları numaraya katar, Sercos Soft Master katmaz. İki kaynak ANLAŞMADIĞI için bu bitler ayrı bir alan olarak gösterilir, ana numara yalnız bit 0-1’den okunur.',
+  'protocol.sercosIii.example.unknownPhase.name': 'Adı olmayan haberleşme fazı',
+  'protocol.sercosIii.example.unknownPhase.description':
+    'Faz alanı 7: iki kaynakta da CP0-CP4 dışında bir adı yok — gövde ham gösterilir, nedeni uyarıyla söylenir.',
+  'protocol.sercosIii.example.etherTypeNotSercos.name': 'Yanlış EtherType',
+  'protocol.sercosIii.example.etherTypeNotSercos.description':
+    'CP4 örneğiyle aynı gövde, EtherType kasten 0x0800 (IPv4). MAC alanları çözülür ama Sercos başlığına bile dokunulmaz.',
+  'protocol.sercosIii.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.sercosIii.example.frameTooShort.description':
+    '16 bayt: Ethernet başlığı var ama 6 baytlık Sercos başlığı tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
 } as const;
 
 /**

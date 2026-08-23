@@ -663,9 +663,137 @@ dosyalar: `protocols/industrial/profinet/profinetFrameId.ts` (yeni),
 sayacı, alfabetik sıra + kategori haritası), `app/catalog/domains/industrial-automation.ts`
 (`status: 'ready'` + `pluginId`), `translations/{tr,en}.ts` (66'şar anahtar),
 `e2e/profinet-decode.spec.ts` (yeni), `CLAUDE.md` (borç sayımı KODDAN doğrulandı:
-42→41 kanonik, industrial-automation 10→9). Sıradaki: **13f (powerlink, cc-link-ie,
-sercos-iii)** — `industrial-ethernet` ailesi kapanır; powerlink'in CANopen paylaşımı bu
-alt dalgada sınanır (kanıtlanırsa kullanılır, kanıtlanmazsa bağımsız yazılır).
+42→41 kanonik, industrial-automation 10→9). Sıradaki: **13f (powerlink, sercos-iii)**.
+
+**13f (2026-08-23 bitti) — powerlink, sercos-iii.** `industrial-ethernet`in kalan üç
+kaydından ikisi bitti; `cc-link-ie` BİLEREK YAZILMADI (gerekçe aşağıda), aile bu yüzden
+HENÜZ KAPANMADI. Girdi modeli aynı: `ethercat.ts`/`profinet.ts` gibi TAM bir Ethernet
+çerçevesi alınır ve `ethernetFrame.ts`in `formatMac`/`classifyDestinationMac`/
+`walkTypeLengthChain`i PAYLAŞILIR; ikinci bir MAC biçimleyici ya da VLAN yürüyüşü
+YAZILMADI. `ETHER_TYPE_NAMES`e 0x88AB (POWERLINK) ve 0x88CD (Sercos III) eklendi.
+
+**POWERLINK'in CANopen paylaşım iddiası SINANDI ve BİT DÜZEYİNDE ÇÜRÜDÜ.** Spec özeti
+(`docs/spec/ozet/03-endustriyel.md:107-111`) "CANopen benzeri model … ortak OD engine
+paylaşılabilir" diyordu; brief bunu 13f'nin açık sorusu sayıyordu. Üç bağımsız kanıt
+tersini gösterdi: (1) **NMT durum baytları KESİŞMİYOR** — `canopen.ts`in
+`NMT_STATE_LABELS`i {0x00 Boot-up, 0x04 Stopped, 0x05 Operational, 0x7F
+Pre-operational}, POWERLINK'inki {0x00, 0x19, 0x29, 0x39, 0x1C, 0x1D, 0x1E, 0x4D, 0x5D,
+0x6D, 0xFD}; ortak görünen 0x00'ın ANLAMI FARKLI (CANopen "Boot-up", POWERLINK
+"NMT_GS_OFF"). (2) **SDO çerçeveleri farklı** — CANopen'ın SDO'su tek baytlık command
+specifier + Index(2) + SubIndex(1) + 4 bayt veri = CAN çerçevesinin TAMAMI (8 bayt);
+POWERLINK'inki Sequence Layer (4 bayt) + Command Layer (8 baytlık sabit başlık) + gövde,
+iki ayrı katman. (3) **PDO boyut sınırı GERÇEKTEN FARKLI** — CANopen'da PDO uzunluğu CAN
+başlığının DLC'sidir, ≤ 8 bayt, ayrı bir uzunluk alanı YOKTUR; POWERLINK'in PReq/PRes'inde
+uzunluk 16-bit, little-endian, ÇERÇEVEDE YAZAN bir `Size` alanıdır (ofset 22, tavan 1499
+bayt) — birim testinde ve e2e turunda 200 baytlık `pres-large-pdo` örneğiyle kanıtlandı.
+**`canopen.ts`e HİÇ DOKUNULMADI**; iç fonksiyonları private kaldı, mevcut testleri
+değişmedi. Ortak olan tek şey (OD adresleme: 16-bit Index + 8-bit Sub-index) iki satırlık
+bir okuma olduğu için modül açmaya değmedi (dalga 12'nin "spekülatif ortak modül açma"
+dersi).
+
+**POWERLINK kaynak durumu.** EPSG DS 301'in resmi metni depoda YOK. İki bağımsız kamuya
+açık kaynaktan çapraz teyit: **Wireshark EPL dissector'ı** (`packet-epl.c`,
+GPL-2.0-or-later) ve **openPOWERLINK V2** (B&R/Kalycito referans yığını, yalnız
+dokümante sabitler alındı, KOD KOPYALANMADI); üçüncü bağımsız teyit IEEE EtherType kayıt
+defterinin 0x88AB'yi "B&R Industrial Automation GmbH — ETHERNET Powerlink" olarak
+listelemesi. **Tuzak — IdentResponse'un IP alanları İKİ KAYNAKTA BAYT SIRASINDA
+ÇAKIŞIYOR**: Wireshark `ntohl()` ile big-endian okur, openPOWERLINK `ami_setUint32Le()`
+ile little-endian yazar; yanlış yönde okunmuş bir IP ham baytlardan çok daha kötü olacağı
+için üç alan (IPAddress/SubnetMask/DefaultGateway) ÇEVRİLMEDEN ham basılır ve
+`WARN_IP_FIELD_BYTE_ORDER_CONFLICT` taşır. **Tuzak — MessageType baytının 7. biti**:
+Wireshark maskeler (`& 0x7F`), openPOWERLINK MessageType'ı tam bayt sayar; bit set
+olduğunda maskelenmiş değerle dispatch edilir ve `WARN_MESSAGE_TYPE_HIGH_BIT_SET`
+basılır — birim testinde SoC örneğinin baytı bilerek bozulup dispatch'in yine SoC gövdesine
+düştüğü doğrulandı.
+
+**POWERLINK `ready` kararı.** Ham kalan tek bölgeler PDO yükü ve NMT/SDO komut verisidir;
+ikisi de YAPISAL bir eksik değil TANIM-BAĞIMLI içeriktir (XDD/PDO eşlemesi ya da komut
+başına değişen yapı gerektirir) — `ethercat.ts`in datagram verisiyle aynı sınıf. Buna
+karşılık MessageType dispatch'i, iki node adresi, her mesaj tipinin bayrak bitleri,
+NetTime/RelativeTime, PDOVersion, 16-bit Size, NMT durum baytı, ASnd'in altı servisi
+(IdentResponse/StatusResponse/NMTRequest/NMTCommand/SDO/SyncResponse) ve SDO'nun iki
+katmanı + abort kodu tam çözülür. POWERLINK'in KENDİ tanımladığı bir çerçeve checksum'ı
+YOKTUR (Ethernet FCS'e bırakılır) — MAVLink'in `partial` gerekçesi burada GEÇERSİZ.
+`decodeOptions` üç gerekçeyle AÇILMADI: PDO boyu ve MN/CN ayrımı zaten çerçeveden
+çıkarılabiliyor (dalga 12f'nin WebSocket MASK-biti dersi), PDO eşlemesi bir `select`/
+`number` alanına sığmıyor (`profinet.ts`in GSDML gerekçesinin aynısı).
+
+**Sercos III kaynak durumu.** Sercos International'ın spec metni depoda YOK. İki bağımsız
+kaynaktan çapraz teyit: **Wireshark Sercos III dissector'ı** (`packet-sercosiii.c`,
+telif satırı "Bosch Rexroth/Hilscher" — protokolü tanımlayan firmaların dissector'ı,
+EtherCAT'teki Beckhoff imzalı dissector'la aynı emsal) ve **Sercos Soft Master Core
+Library** (SICE+CoSeMa, MIT, `aschiffler/linuxcnc-sercos3` — bir DISSECTOR değil bir
+UYGULAMA, çerçeveyi KURAN taraf); üçüncü teyit IEEE EtherType kayıt defterinin 0x88CD'yi
+"sercos international e.V." olarak listelemesi. 6 baytlık başlık iki kaynakta BİREBİR
+(Wireshark `dissect_siii_mst()`ün 0-5 aralığı; Sercos Soft Master'ın
+`SICE_SERC3_TEL_HEADER 20` = 14 Ethernet + 6 Sercos).
+
+**Tuzak — telgraf numarasının BİT GENİŞLİĞİ konusunda kaynaklar ANLAŞMIYOR.** Wireshark
+`type & 0x0F` ile 4 bit okur ama KENDİ YORUMUYLA "even though it's reserved (the V1.1
+spec states that it is reserved for additional MDT/AT)" der; Sercos Soft Master
+`SICE_TEL_NO_MASK (0x03)` ile yalnız 2 bit okur. Kaynaklar bit 0-1'de ANLAŞIYOR, bit
+2-3'te ANLAŞMIYOR — numara yalnız bit 0-1'den okunur, bit 2-3 AYRI bir alan olarak basılır
+ve `WARN_TELEGRAM_NUMBER_WIDTH_CONFLICT` taşır; birim testi ve e2e turu bu ayrımı
+`telegram-number-extended-bits` örneğiyle ofset ve değer üzerinden kilitler.
+
+**CRC32 GÖSTERİLİR, ASLA DOĞRULANMAZ.** Başlıktaki 4 baytlık CRC32'nin üretici polinomu
+(Sercos Soft Master `SICE_PRIV.h`: `0xEDB88320`) ve CRC'ye giren 16 baytlık bölge
+(`SICE_TEL_LENGTH_HDR_FOR_CRC 0x10` = 14 Ethernet + 2 Sercos) TEK KAYNAKLI teyitli, ama
+başlangıç değeri ve son XOR ikinci bir kaynakta YOK; Wireshark CRC32'yi yalnız GÖSTERİR,
+hesaplamaz. `ethercat.ts`in Working Counter kararının aynısı: yanlış parametreyle
+hesaplanmış bir "CRC hatalı" rozeti, hiç doğrulamamaktan çok daha kötüdür. Birim testi ve
+e2e turu bunu İKİ FARKLI (gerçek olmayan) CRC değeri taşıyan iki örnek çerçeveyle
+kanıtlıyor — ikisi de sıfır hatayla, doğrulanmadan kabul ediliyor.
+
+**CP3/CP4 servis kanalı ofsetleri ÇERÇEVEDE YAZMAZ, tek kaynaklı değil PROTOKOLÜN
+DOĞASI gereği bilinmez.** Operasyonel fazlarda servis kanalı, cihaz durumu ve bağlantı
+ofsetleri CP2 sırasında pazarlanan konfigürasyondan gelir; referans dissector da AYNI
+YERDE durur — Wireshark'ın `dissect_siii_{mdt,at}_cp3_4()`sinin kendi yorumu: *"offsets
+of service channel, device status and connections are unknown / this data could be
+extracted from svc communication during CP2"*. Yalnız telgraf 0'daki 8 baytlık Hot-Plug
+alanı (Sercos adresi + kontrol/durum kelimesi + bilgi) çözülür; gerisi TEK PARÇA ham
+basılır ve `WARN_CP34_LAYOUT_FROM_CP2` ile nedeni söylenir — birim testi ve e2e turu
+Hot-Plug alanının ofsetlerini (20/22/24) ve ardından gelen ham bloğu ayrı ayrı kilitler.
+CP1/CP2'nin 128 cihazlık servis kanalı (6 B/cihaz) ve cihaz kontrol/durum bölgesi (4
+B/cihaz) YAPISI sabit olduğu için çözülür, ama ayrıntı 16 cihazla SINIRLI (`ethercat.ts`in
+"analyzer sınırı" emsali); tam doldurulmamış bir cihaz listesi `WARN_DEVICE_LIST_TRUNCATED`
+GERÇEKTEN bastığı birim testiyle kanıtlandı. CP0'ın MDT tarafı (Communication Version, bit
+adları tek kaynaklı → hex ham) ve AT tarafı (511 girdilik sabit tanınan-cihaz listesi → tek
+parça ham) da çözülür.
+
+**Sercos III `ready` kararı.** Ham kalan tek bölge CP3/CP4'ün konfigürasyona bağlı
+gövdesidir; bu YAPISAL bir eksik değil TANIM-BAĞIMLI içeriktir — `ethercat.ts`in datagram
+verisiyle aynı sınıf. Protokolün kendi tanımladığı doğrulama (CRC32) ATLANMIYOR; kaynak
+yetersizliği yüzünden BİLİNÇLİ OLARAK hesaplanmıyor ve bu kullanıcıya uyarıyla söyleniyor —
+MAVLink'in `partial` gerekçesinden (doğrulama dialect olmadan YAPILAMIYOR) farklı: burada
+doğrulama YAPILABİLİR ama YANLIŞ parametreyle yapmak susmaktan kötü olurdu.
+
+**`cc-link-ie` BİLEREK YAZILMADI.** Gerekçe: CLPA'nın spec paketi üyelik/ücret arkasında;
+spec özeti bunu AÇIKÇA söylüyor — `docs/spec/ozet/03-endustriyel.md:93` "Exact telgraf
+alanları CLPA spec paketinden (tahmin edilmez)" (CC-Link için yazılmış ama CLPA aynı
+kısıtı CC-Link IE'ye de uygular) ve aynı dosyanın 262. satırındaki genel uyarı CC-Link'i
+"exact bit/byte alanları resmi spec revizyonundan alınmalı, tahmin edilmemeli" listesine
+açıkça dahil ediyor. Katalogdaki `cc-link-ie` kaydı `status: 'planned'` bırakıldı,
+DOKUNULMADI. **Sonuç: `industrial-ethernet` ailesi (6 kayıt) HENÜZ KAPANMADI** — profinet/
+ethercat/ethernet-ip/sercos-iii/powerlink `ready`, yalnız `cc-link-ie` `planned` kaldı.
+
+**Encoder YAZILMADI**, `protocol-core/types.ts`e DOKUNULMADI, `live`/`tools`/
+`definitions`/`related` alanlarına DOKUNULMADI.
+
+76 yeni birim testi (`powerlink.test.ts` 50 + `sercosIii.test.ts` 26) + 25 yeni e2e
+(gerçek tarayıcı — `powerlink-decode.spec.ts` 13 + `sercos-iii-decode.spec.ts` 12; CANopen
+paylaşımının ÇÜRÜDÜĞÜNÜ 200 baytlık PDO örneğiyle, CRC32'nin ASLA doğrulanmadığını iki
+farklı CRC değeriyle, telgraf numarası bit çakışmasını ofset+değerle kanıtlayan turlar
+dahil) + 4566 toplam birim test + 888 toplam e2e + typecheck/build yeşil; `ethercat`,
+`profinet` ve `canopen`in mevcut testleri (paylaşılan `ethernetFrame.ts` dokunuldu, `canopen.ts`
+DOKUNULMADI) DEĞİŞMEDEN yeşil kaldı. Değişen/yeni dosyalar: `translations/{tr,en}.ts`
+(70 POWERLINK + 46 Sercos III = 116'şar anahtar), `e2e/powerlink-decode.spec.ts` (yeni),
+`e2e/sercos-iii-decode.spec.ts` (yeni), `protocols/industrial/powerlink/powerlink.test.ts`
+(yeni), `protocols/industrial/sercosiii/sercosIii.test.ts` (yeni), `CLAUDE.md` (borç
+sayımı KODDAN doğrulandı: 41→39 kanonik, industrial-automation 9→7). Sıradaki:
+**`cc-link-ie`** (CLPA spec erişimi sağlanınca) ya da **13g (classic-fieldbus:
+profibus-dp/cc-link/as-interface/foundation-fieldbus)** — ikisi de aynı ticari konsorsiyum
+spec-bulunabilirlik riskini taşıyor.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

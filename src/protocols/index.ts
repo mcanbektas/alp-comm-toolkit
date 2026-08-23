@@ -345,6 +345,23 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'profinet', () =>
     import('./industrial/profinet/profinet').then((module) => module.profinetPlugin),
   );
+  // POWERLINK — dalga 13f: EtherType 0x88AB altında MessageType (SoC/PReq/PRes/
+  // SoA/ASnd/AInv/AMNI) ile ayrışan aile; Ethernet başlığı/VLAN yürüyüşü yine
+  // `network/ethernet/ethernetFrame`ten PAYLAŞILIR. Spec özetinin önerdiği
+  // "CANopen ile ortak OD motoru" SINANDI VE ÇÜRÜDÜ (NMT durum baytları
+  // kesişmiyor, SDO çerçeveleri farklı, PDO uzunluğu POWERLINK'te 16-bit alan —
+  // gerekçe powerlink.ts dosya başında); `canopen.ts`e DOKUNULMADI.
+  registerOnce(registry, 'powerlink', () =>
+    import('./industrial/powerlink/powerlink').then((module) => module.powerlinkPlugin),
+  );
+  // Sercos III — dalga 13f: EtherType 0x88CD, 6 baytlık Sercos başlığı (telegram
+  // tipi + faz + CRC32) ve haberleşme fazına göre değişen gövde. CP3/CP4'te
+  // servis kanalı/bağlantı ofsetleri CP2'deki SVC pazarlığından gelir ve TEK
+  // ÇERÇEVEDEN çıkarılamaz — referans dissector'ın kendisi de orada duruyor,
+  // bu motor da HAM bırakıp uyarır (bkz. sercosIii.ts dosya başı).
+  registerOnce(registry, 'sercos-iii', () =>
+    import('./industrial/sercosiii/sercosIii').then((module) => module.sercosIiiPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

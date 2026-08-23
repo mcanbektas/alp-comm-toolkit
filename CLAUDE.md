@@ -125,16 +125,18 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13e'den sonra)
-  101 `ready` / 56 `planned` / 15 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13f'den sonra)
+  103 `ready` / 54 `planned` / 15 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **116 `ready` / 41 `planned` / 15 `partial`**; gerçekten yapılacak iş **41 kanonik
-  kayıt** (industrial-automation 9, automotive 12, aerospace-uav 12, wireless-iot 4,
+  **118 `ready` / 39 `planned` / 15 `partial`**; gerçekten yapılacak iş **39 kanonik
+  kayıt** (industrial-automation 7, automotive 12, aerospace-uav 12, wireless-iot 4,
   marine-navigation 3, building-automation 1). **`network-ethernet` (19 kayıt) dalga
   12 ile TAMAMEN KAPANDI** (12a-12h, `docs/plan-fazlar.md`); `industrial-automation`
   dalga 13 ile SÜRÜYOR (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
-  cip/ethernet-ip/devicenet + 13e profinet bitti; `scada-utility` VE `cip-can-based`
-  aileleri KAPANDI, `industrial-ethernet` ailesinde 4 kayıt kaldı).
+  cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii bitti;
+  `scada-utility` VE `cip-can-based` aileleri KAPANDI, `industrial-ethernet` ailesinde
+  yalnız `cc-link-ie` kaldı — CLPA spec'i üyelik arkasında olduğu için BİLEREK
+  yazılmadı, `docs/plan-fazlar.md`nin 13f notu).
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

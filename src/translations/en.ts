@@ -5399,4 +5399,208 @@ export const en: TranslationDictionary = {
   'protocol.profinet.example.frameTooShort.name': 'Frame too short',
   'protocol.profinet.example.frameTooShort.description':
     '10 bytes: not even the Ethernet header is complete — a ParseFailure (recoverable, the stream can continue).',
+  // --- POWERLINK ---
+  'protocol.powerlink.error.aborted': 'Decoding was cancelled.',
+  'protocol.powerlink.error.asndBodyTruncated':
+    'The ASnd body is not even long enough for the ServiceID byte.',
+  'protocol.powerlink.error.basicHeaderTruncated':
+    'The 3 bytes required for MessageType plus Destination/Source Node ID are incomplete.',
+  'protocol.powerlink.error.etherTypeNotPowerlink':
+    'The EtherType is not 0x88AB — this frame is not POWERLINK; the body was left raw and not decoded.',
+  'protocol.powerlink.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.powerlink.error.frameTooShort':
+    'The frame is not long enough for the Ethernet header (14 bytes) plus the basic POWERLINK header (3 bytes).',
+  'protocol.powerlink.error.pdoHeaderTruncated':
+    'The PReq/PRes header (7 bytes: status/NMTStatus, flags, PDOVersion, Size) is incomplete.',
+  'protocol.powerlink.error.sdoCommandTruncated':
+    'The Command Layer fixed header (8 bytes) or the Abort Code (4 bytes) is incomplete.',
+  'protocol.powerlink.error.sdoSequenceTruncated':
+    'The 4 bytes required for the Sequence Layer (ReceiveCon/SendCon plus reserved) are incomplete.',
+  'protocol.powerlink.warning.asndServiceBodyNotDecoded':
+    'The ASnd ServiceID is not one of the six cross-verified services (IdentResponse/StatusResponse/NMTRequest/NMTCommand/SDO/SyncResponse) — the body is out of scope for this engine and was left raw.',
+  'protocol.powerlink.warning.asndServiceNotNamed':
+    'The ASnd ServiceID is not in the set named by both sources.',
+  'protocol.powerlink.warning.bodyNotDecoded':
+    'Even though the MessageType is named (AInv/AMNI and similar), neither source provides a field table for it — the body is shown raw.',
+  'protocol.powerlink.warning.errorHistoryTrailingBytes':
+    'The ErrorCodeList region does not divide evenly into 20-byte entries; the remaining bytes are shown raw.',
+  'protocol.powerlink.warning.ipFieldByteOrderConflict':
+    'The two sources DISAGREE on the byte order of the IdentResponse IPAddress/SubnetMask/DefaultGateway fields (Wireshark reads big-endian, openPOWERLINK writes little-endian) — an IP read in the wrong direction is worse than raw bytes, so the field is shown raw and not converted.',
+  'protocol.powerlink.warning.messageTypeHighBitSet':
+    'Bit 7 of the MessageType byte is set — Wireshark masks this bit while openPOWERLINK treats MessageType as a full byte; the value was decoded with the bit masked off.',
+  'protocol.powerlink.warning.messageTypeNotNamed':
+    'The MessageType is not in the set named by both sources.',
+  'protocol.powerlink.warning.nmtCommandDataNotDecoded':
+    'The structure of NMT command data depends on the command (a node list, a host name, an error reason …); the two sources share no common breakdown, so the region is shown raw.',
+  'protocol.powerlink.warning.nmtCommandNotNamed':
+    'The NMTCommandID/RequestedCommandID is not in the set named by both sources.',
+  'protocol.powerlink.warning.nmtStateNotNamed':
+    'The NMT state byte is not in the common or role-specific table (or STOPPED arrived from a Managing Node, where it is not defined).',
+  'protocol.powerlink.warning.paddingNotZero':
+    'The bytes after the declared region are not zero — Ethernet padding was expected.',
+  'protocol.powerlink.warning.pdoPayloadNeedsMapping':
+    'Which byte of the PDO payload maps to which object comes from the XDD/PDO mapping, not the frame — the region is shown as one raw block.',
+  'protocol.powerlink.warning.pdoSizeExceedsFrame':
+    'The Size field promises more bytes than are on the wire — the frame is truncated or Size is corrupt; the payload was clipped to what is actually present.',
+  'protocol.powerlink.warning.sdoAbortCodeNotNamed':
+    'The SDO Abort Code is not in the set shared by both sources.',
+  'protocol.powerlink.warning.sdoCommandLayerEmpty':
+    'The Command Layer is empty: this frame carries only a Sequence Layer (a connection setup/acknowledgement frame) — a valid state, not an error.',
+  'protocol.powerlink.warning.sdoCommandNotNamed':
+    'The SDO CommandID is not in the set named by both sources.',
+  'protocol.powerlink.warning.sdoDataNeedsObjectDictionary':
+    'The type and scale of the data are defined in the Object Dictionary (XDD/EDS), not the frame — the region is shown as one raw block.',
+  'protocol.powerlink.warning.sdoSegmentSizeMismatch':
+    'The SegmentSize field promises more bytes than are on the wire.',
+  'protocol.powerlink.warning.singleSourceField':
+    'This field is named in only one source (openPOWERLINK); Wireshark skips this byte.',
+  'protocol.powerlink.warning.soaFlagsPartiallyNamed':
+    'The remaining bits of the SoA flag byte (DNA AN local/global, ring-redundancy) are named only by Wireshark — they do not appear in openPOWERLINK’s flag list.',
+  'protocol.powerlink.warning.soaServiceNotNamed':
+    'The RequestedServiceID is not in the set named by both sources.',
+  'protocol.powerlink.warning.staticErrorFieldNotSplit':
+    'The internal breakdown of StaticErrorBitField (ErrorRegister + DeviceSpecific) exists only in Wireshark; openPOWERLINK treats it as a single 64-bit field — the eight bytes are shown as one block.',
+  'protocol.powerlink.summary.asnd': 'ASnd — {service} {detail}',
+  'protocol.powerlink.summary.notPowerlink': 'Not POWERLINK (EtherType {etherType})',
+  'protocol.powerlink.summary.other': '{messageType} — source {sourceNodeId}, destination {destinationNodeId}',
+  'protocol.powerlink.summary.pdo': '{messageType} — {size} bytes, version {pdoVersion}',
+  'protocol.powerlink.summary.soa': 'SoA — {service}, target {target}',
+  'protocol.powerlink.summary.soc': 'SoC — source {sourceNodeId}, destination {destinationNodeId}',
+  'protocol.powerlink.documentation.summary':
+    'POWERLINK (EPSG DS 301 / IEC 61784-2 CP 13): the input is a COMPLETE Ethernet frame — destination/source MAC, optional VLAN tags and EtherType 0x88AB are decoded (the same input contract as ethercat.ts/profinet.ts, sharing the same Ethernet engine). The claim that it could share an OD/PDO engine with CANopen was TESTED and DISPROVEN: the NMT state bytes do not intersect, the SDO frames (Sequence + Command Layer) are entirely different from CANopen’s single-byte command specifier, and the PDO length is a CAN DLC of ≤8 bytes in CANopen but a 16-bit Size field written in the frame in POWERLINK — canopen.ts was not touched. The MessageType byte (bit 7 masked) dispatches SoC/PReq/PRes/SoA/ASnd; each type’s flag bits, NetTime/RelativeTime, PDOVersion and Size field are fully decoded. ASnd dispatches to six services (IdentResponse/StatusResponse/NMTRequest/NMTCommand/SDO/SyncResponse); SDO via ASnd decodes the Sequence Layer (4 bytes) and the Command Layer (an 8-byte fixed header plus the ReadByIndex/WriteByIndex sub-header and the Abort Code). Field layouts are cross-verified between the Wireshark EPL dissector and openPOWERLINK V2’s documented constants; fields that appear in only one source (IdentResponse’s IP fields, the internal breakdown of StaticErrorBitField, the FeatureFlags bits, SoA’s ring-redundancy flags) are left raw and carry a warning. The PDO payload and the NMT/SDO command data are left raw because they depend on the XDD/PDO mapping — this is definition-dependent content, not a gap. SDO via UDP/PDO, XDD parsing and multi-frame analysis (cycle timing, node table) are out of scope.',
+  'protocol.powerlink.example.socCycleStart.name': 'SoC — start of cycle',
+  'protocol.powerlink.example.socCycleStart.description':
+    'A Start of Cycle multicast: the MC/PS flags are zero (neither a multiplexed nor a prescaled cycle), and the NetTime and 64-bit RelativeTime fields are populated.',
+  'protocol.powerlink.example.socMultiplexedPrescaled.name':
+    'SoC — multiplexed and prescaled cycle',
+  'protocol.powerlink.example.socMultiplexedPrescaled.description':
+    'The same structure with the MC (multiplexed cycle completed) and PS (prescaled slot) flags set — showing both flags decoded separately.',
+  'protocol.powerlink.example.preqPollRequest.name': 'PReq — poll request',
+  'protocol.powerlink.example.preqPollRequest.description':
+    'A PollRequest from the MN to a CN: the RD (data valid) flag is set, PDOVersion is 1.0, and a 36-byte PDO payload is carried through the 16-bit Size field WRITTEN in the frame.',
+  'protocol.powerlink.example.presPollResponse.name': 'PRes — poll response',
+  'protocol.powerlink.example.presPollResponse.description':
+    'A PollResponse multicast from the CN: NMTStatus is NMT_CS_OPERATIONAL, the RD flag is set, and the same 36-byte PDO payload is present.',
+  'protocol.powerlink.example.presLargePdo.name': 'PRes — large PDO payload',
+  'protocol.powerlink.example.presLargePdo.description':
+    'A 200-byte PDO payload: proof that CANopen’s ≤8-byte CAN DLC limit does NOT carry over to POWERLINK — the Size field is written as 16 bits in the frame, with an upper bound of 1499 bytes.',
+  'protocol.powerlink.example.presSizeExceedsFrame.name': 'PRes — Size exceeds the frame',
+  'protocol.powerlink.example.presSizeExceedsFrame.description':
+    'The Size field promises 512 bytes but only 36 are on the wire — a warning is raised and the payload is clipped to what is present, never invented.',
+  'protocol.powerlink.example.soaIdentRequest.name': 'SoA — IdentRequest invitation',
+  'protocol.powerlink.example.soaIdentRequest.description':
+    'The MN inviting a CN into the asynchronous phase: RequestedServiceID is IdentRequest, the target is CN 1, POWERLINKVersion is 2.0.',
+  'protocol.powerlink.example.soaSyncRequest.name':
+    'SoA — SyncRequest (PollResponse Chaining)',
+  'protocol.powerlink.example.soaSyncRequest.description':
+    'RequestedServiceID is SyncRequest (0x06): SyncControl, PResTimeFirst/Second, SyncMNDelayFirst/Second, PResFallBackTimeout and the target MAC address are decoded separately.',
+  'protocol.powerlink.example.asndIdentResponse.name': 'ASnd — IdentResponse',
+  'protocol.powerlink.example.asndIdentResponse.description':
+    'A CN’s identity response: FeatureFlags/DeviceType/VendorId/ProductCode/RevisionNumber/SerialNumber are shown in hex, while the IP fields are left raw because the two sources disagree on byte order.',
+  'protocol.powerlink.example.asndStatusResponse.name': 'ASnd — StatusResponse',
+  'protocol.powerlink.example.asndStatusResponse.description':
+    'StaticErrorBitField is one raw block (its internal breakdown is single-sourced); the two ErrorCodeList entries show the Profile/Mode/Emergency/Status sub-bits of EntryType separately.',
+  'protocol.powerlink.example.asndNmtStartNode.name': 'ASnd — NMTStartNode command',
+  'protocol.powerlink.example.asndNmtStartNode.description':
+    'An NMTStartNode command multicast by the MN: the CommandID is named, while CommandData is left raw because its structure depends on the command.',
+  'protocol.powerlink.example.asndSdoReadByIndex.name':
+    'ASnd — SDO ReadByIndex request (expedited)',
+  'protocol.powerlink.example.asndSdoReadByIndex.description':
+    'SDO via ASnd: the Sequence Layer connection is valid, the Command Layer CommandID is ReadByIndex, and Index 0x1006 / Sub-index 0x00 are read from the sub-header.',
+  'protocol.powerlink.example.asndSdoAbort.name': 'ASnd — SDO Abort',
+  'protocol.powerlink.example.asndSdoAbort.description':
+    'The Abort bit is set: Abort Code 0x06020000 = "Object does not exist in the object dictionary" — a code named in the set shared by both sources.',
+  'protocol.powerlink.example.ainvAsyncInvite.name': 'AInv — asynchronous invite',
+  'protocol.powerlink.example.ainvAsyncInvite.description':
+    'The MessageType is named (Asynchronous Invite) but neither source provides a field table for it — the body is shown raw and the reason is stated in a warning.',
+  'protocol.powerlink.example.etherTypeNotPowerlink.name': 'Wrong EtherType',
+  'protocol.powerlink.example.etherTypeNotPowerlink.description':
+    'The same body as the SoC example with the EtherType deliberately set to 0x0800 (IPv4). The MAC fields are decoded but not even the MessageType is touched.',
+  'protocol.powerlink.example.frameTooShort.name': 'Frame too short',
+  'protocol.powerlink.example.frameTooShort.description':
+    '12 bytes: not even the Ethernet header is complete — a ParseFailure (recoverable, the stream can continue).',
+  // --- SERCOS III ---
+  'protocol.sercosIii.error.aborted': 'Decoding was cancelled.',
+  'protocol.sercosIii.error.etherTypeNotSercos':
+    'The EtherType is not 0x88CD — this frame is not Sercos III; the body was left raw and not decoded.',
+  'protocol.sercosIii.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.sercosIii.error.frameTooShort':
+    'The frame is not long enough for the Ethernet header (14 bytes) plus the Sercos header (6 bytes).',
+  'protocol.sercosIii.error.headerTruncated':
+    'The 6-byte Sercos header (telegram type + phase + CRC32) is incomplete.',
+  'protocol.sercosIii.warning.cp34LayoutFromCp2':
+    'In CP3/CP4 the service channel, device status and connection offsets are NOT stated in the frame — they come from the configuration negotiated during CP2, and the reference dissector stops at the same point. The region is shown as one raw block.',
+  'protocol.sercosIii.warning.crc32NotVerified':
+    'The CRC32 is SHOWN but NOT VERIFIED: the generator polynomial is confirmed in one source, but the initial value and final XOR are not confirmed in a second — a "CRC failed" badge computed with the wrong parameters would be worse than never verifying it.',
+  'protocol.sercosIii.warning.cycleCountInvalid':
+    'The Cycle Count Valid bit is zero: the counter value is shown, but it is meaningless in this state.',
+  'protocol.sercosIii.warning.cycleCountSingleSource':
+    'The Cycle Count field (bits 4-6) is named only by Wireshark; the second source has no such counter in the phase byte.',
+  'protocol.sercosIii.warning.detailedDeviceLimit':
+    'Detailed decoding is capped at 16 devices — a full-size telegram can carry 128; anything beyond that is shown as one raw block.',
+  'protocol.sercosIii.warning.deviceListTruncated':
+    'The device control/status list does not cover all 128 devices — the telegram is truncated or not full size.',
+  'protocol.sercosIii.warning.hotPlugBitsSingleSource':
+    'The bit names of the Hot-Plug control/status word exist only in Wireshark — the word is shown as a single unnamed field.',
+  'protocol.sercosIii.warning.paddingNotZero':
+    'The bytes after the declared region are not zero — Ethernet padding was expected.',
+  'protocol.sercosIii.warning.phaseNotNamed':
+    'The Communication Phase is not in the CP0-CP4 set named by both sources — the body is shown raw.',
+  'protocol.sercosIii.warning.recognizedDeviceListRaw':
+    'The CP0/AT0 recognized-device list is a fixed array of 511 entries; rather than printing each one, the region is shown raw with its structure stated.',
+  'protocol.sercosIii.warning.svcInfoNeedsIdnDictionary':
+    'The meaning of the service channel info field depends on the DBE (IDN/name/attribute/unit/min/max/operation data); the IDN itself is readable as a number, but the parameter name comes from the device description — the dictionary is out of scope for this engine.',
+  'protocol.sercosIii.warning.telegramNumberWidthConflict':
+    'The sources DISAGREE on the width of the telegram number: Wireshark reads 4 bits (0-3), the Sercos Soft Master reads 2 bits (0-1). The number is read from the 2 bits both agree on; bits 2-3 are shown as a separate field.',
+  'protocol.sercosIii.warning.versionFieldBitsSingleSource':
+    'The bit names of the Communication Version field (fast CP switch, init procedure version …) exist only in Wireshark — the value is shown in hex, not split bit by bit.',
+  'protocol.sercosIii.summary.at': '{telegram} — {phase}',
+  'protocol.sercosIii.summary.mdt': '{telegram} — {phase}',
+  'protocol.sercosIii.summary.notSercos': 'Not Sercos III (EtherType {etherType})',
+  'protocol.sercosIii.documentation.summary':
+    'Sercos III (Sercos International / IEC 61158 & 61784-2 CPF 16): the input is a COMPLETE Ethernet frame — destination/source MAC, optional VLAN tags and EtherType 0x88CD are decoded (the same input contract as ethercat.ts/profinet.ts/powerlink.ts). The 6-byte Sercos header — telegram type/channel/MDT-AT split, communication phase CP0-CP4, phase-switch bit, cycle count and CRC32 — is fully decoded. The two sources disagree on the width of the telegram number (Wireshark 4 bits, Sercos Soft Master 2 bits) — the number is read from the 2 bits both agree on, and the remaining two bits are shown as a separate field. The CRC32 field is SHOWN but NOT VERIFIED: the algorithm parameters (initial value, final XOR) are single-sourced. Phase-dependent bodies are decoded wherever their structure is fixed: CP0’s version field (MDT) and recognized-device list (AT), CP1/CP2’s 128-device service channel (6 bytes/device, detail capped at 16 devices) and C-DEV/S-DEV control/status words (4 bytes/device), and the 8-byte Hot-Plug field in CP3/CP4’s first telegram. The rest of CP3/CP4 (service channel, device status, connection offsets) is NOT stated in the frame — it comes from configuration negotiated in CP2 and is left as one raw block; the reference dissector stops at the same boundary. Field layouts are cross-verified between the Wireshark Sercos III dissector and the Sercos Soft Master Core Library (SICE+CoSeMa). UCC, Sercos I/II, SIP and the IDN dictionary are out of scope.',
+  'protocol.sercosIii.example.mdt0Cp4Operational.name':
+    'MDT0 — CP4 (operational phase), Hot-Plug field',
+  'protocol.sercosIii.example.mdt0Cp4Operational.description':
+    'Master Data Telegram 0 in CP4 (operational): the 8-byte Hot-Plug field (Sercos address + control/status word + info) is decoded; the rest is left raw because it depends on the configuration negotiated in CP2.',
+  'protocol.sercosIii.example.at0Cp4Operational.name':
+    'AT0 — CP4 (operational phase), Hot-Plug field',
+  'protocol.sercosIii.example.at0Cp4Operational.description':
+    'The AT (device-side) counterpart of the same structure: the AT bit is set and the Hot-Plug status word is shown.',
+  'protocol.sercosIii.example.mdt0Cp0CommunicationVersion.name':
+    'MDT0 — CP0, Communication Version',
+  'protocol.sercosIii.example.mdt0Cp0CommunicationVersion.description':
+    'In CP0 the MDT body is only a 4-byte Communication Version field; its bit names exist only in Wireshark, so the value is shown in hex without being split bit by bit.',
+  'protocol.sercosIii.example.at0Cp0RecognizedDevices.name':
+    'AT0 — CP0, recognized device list',
+  'protocol.sercosIii.example.at0Cp0RecognizedDevices.description':
+    'In CP0 the AT body carries a sequence counter (3 recognized devices) and a fixed 511-entry list of Sercos addresses; the list is shown as one raw block.',
+  'protocol.sercosIii.example.mdt0Cp2ServiceChannel.name':
+    'MDT0 — CP2, service channel (full-size telegram)',
+  'protocol.sercosIii.example.mdt0Cp2ServiceChannel.description':
+    'A full-size CP2 telegram of 14+6+768+512 = 1300 bytes: the service channel word (MHS/Read-Write/EOT/DBE) and C-DEV control word of the first three devices are decoded separately; the rest is shown raw because detail is capped at 16 devices.',
+  'protocol.sercosIii.example.at1Cp2SecondDeviceGroup.name':
+    'AT1 — CP2, second device group',
+  'protocol.sercosIii.example.at1Cp2SecondDeviceGroup.description':
+    'Telegram number 1: device indices start at 128. The service channel status word (AHS/Idle-Busy/Error/Process) and the S-DEV status word are decoded.',
+  'protocol.sercosIii.example.mdt0Cp3PhaseSwitching.name': 'MDT0 — CP3, phase switch',
+  'protocol.sercosIii.example.mdt0Cp3PhaseSwitching.description':
+    'The phase-switch bit (bit 7) is set in the phase byte — the device is moving from CP3 to the next phase; the Hot-Plug field is decoded as usual.',
+  'protocol.sercosIii.example.mdtSecondaryChannel.name':
+    'MDT — S-Telegram (secondary port), cycle count invalid',
+  'protocol.sercosIii.example.mdtSecondaryChannel.description':
+    'The channel bit is set (a telegram sent over the secondary port) and the Cycle Count Valid bit is zero — the counter value is shown, but it is also flagged as invalid.',
+  'protocol.sercosIii.example.telegramNumberExtendedBits.name':
+    'Telegram number — bit 2-3 conflict',
+  'protocol.sercosIii.example.telegramNumberExtendedBits.description':
+    'Bits 2-3 are set: Wireshark folds them into the telegram number, the Sercos Soft Master does not. Because the sources DISAGREE, these bits are shown as a separate field and the main number is read only from bits 0-1.',
+  'protocol.sercosIii.example.unknownPhase.name': 'Unnamed communication phase',
+  'protocol.sercosIii.example.unknownPhase.description':
+    'The phase field is 7: neither source names anything outside CP0-CP4 — the body is shown raw and the reason is stated in a warning.',
+  'protocol.sercosIii.example.etherTypeNotSercos.name': 'Wrong EtherType',
+  'protocol.sercosIii.example.etherTypeNotSercos.description':
+    'The same body as the CP4 example with the EtherType deliberately set to 0x0800 (IPv4). The MAC fields are decoded but not even the Sercos header is touched.',
+  'protocol.sercosIii.example.frameTooShort.name': 'Frame too short',
+  'protocol.sercosIii.example.frameTooShort.description':
+    '16 bytes: the Ethernet header is present but the 6-byte Sercos header is incomplete — a ParseFailure (recoverable, the stream can continue).',
 };
