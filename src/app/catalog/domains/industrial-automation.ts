@@ -143,9 +143,10 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'profibus-dp',
           name: 'PROFIBUS DP',
           summary:
-            'IEC 61158 based RS-485 fieldbus for decentralized peripheral I/O, where a master parameterizes, configures and then cyclically exchanges data with addressed slave stations.',
+            'IEC 61158 based RS-485 fieldbus for decentralized peripheral I/O, where a master parameterizes, configures and then cyclically exchanges data with addressed slave stations. The decoder covers every FDL telegram class — short acknowledgement, SD1, SD2, SD3 and the SD4 token — down to the frame control bits, the address extension that carries the DP service access points, and the frame check sequence, which is really verified. Only the user data unit stays raw, because its layout comes from the GSD file rather than the wire.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'profibus-dp',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'definitions', 'examples'],
           tools: [
             'Station Explorer',
@@ -164,9 +165,15 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'cc-link',
           name: 'CC-Link',
           summary:
-            'Mitsubishi-originated factory automation fieldbus reaching 10 Mbit/s over up to 64 stations, exchanging remote inputs, outputs and registers as logical data areas.',
+            'Mitsubishi-originated factory automation fieldbus reaching 10 Mbit/s over up to 64 stations, exchanging remote inputs, outputs and registers as logical data areas. The decoder covers the cyclic link-device image of one station — the RX/RY bit points and the RWr/RWw registers, sized from the occupied-station count and the extended cyclic setting you supply. The RS-485 telegram itself is not decoded: its field layout is not published anywhere, so guessing it would be worse than leaving it out.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Karar (dalga 13g): CLPA'nın veri bağı spec'i üyelik arkasında ve
+          // hiçbir kamuya açık kaynak (Wireshark dahil) telgraf alanlarını
+          // vermiyor. Motor telgrafı DEĞİL, nokta sayıları iki bağımsız
+          // belgede teyitli olan döngüsel link cihazı görüntüsünü çözer —
+          // rozet bu yüzden 'partial' (iec-61850 emsali).
+          status: 'partial',
+          pluginId: 'cc-link',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Station Explorer',
@@ -182,9 +189,14 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'as-interface',
           name: 'AS-Interface',
           summary:
-            'Low-cost sensor/actuator network carrying data and power on the same two wires, polled device by device — classic AS-i and the faster ASi-5 generation.',
+            'Low-cost sensor/actuator network carrying data and power on the same two wires, polled device by device — classic AS-i and the faster ASi-5 generation. The decoder covers classic AS-i completely: every bit of the 14-bit master call and the 7-bit slave response, the call table down to each named command, and the even-parity check the specification defines. ASi-5 is not implemented: it is a different OFDM physical and data-link layer whose frame format is not published anywhere.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Karar (dalga 13g): klasik AS-i tarafı bit bit çözülüyor ve parite
+          // gerçekten doğrulanıyor, ama kayıt İKİ nesil vaat ediyor (özet +
+          // araç listesindeki "ASi-5"). ASi-5'in tel biçimi kamuya açık
+          // olmadığı için bilinçli eksik → rozet 'partial' (iec-61850 emsali).
+          status: 'partial',
+          pluginId: 'as-interface',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Master',
@@ -206,9 +218,15 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'foundation-fieldbus',
           name: 'FOUNDATION Fieldbus',
           summary:
-            'Process-automation digital bus combining the H1 publisher/subscriber segment with the HSE Ethernet backbone and a function-block device model.',
+            'Process-automation digital bus combining the H1 publisher/subscriber segment with the HSE Ethernet backbone and a function-block device model. The decoder covers HSE only: the 12-byte FDA message header — version, option flags, protocol id (FDA, SM, FMS, LAN Redundancy), message type, service name, FDA address and message length — plus the optional trailer. The service body stays raw and H1 is not decoded at all, because its frame is defined in a paid standard and its start and end delimiters are non-data symbols that cannot be represented as bytes.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Karar (dalga 13g): motor HSE-only ve FDA zarfıyla sınırlı. Kayıt
+          // iki katman vaat ediyor (araç listesinde ayrı "H1" ve "HSE"), H1
+          // için kamuya açık kaynak YOK ve sınırlayıcıları bayt bile değil.
+          // Ayrıca HSE yerleşimi TEK kaynaklı (Wireshark packet-ff.c) ve bu
+          // her çözümde uyarıyla söyleniyor → rozet 'partial' (iec-61850).
+          status: 'partial',
+          pluginId: 'foundation-fieldbus',
           tabs: ['overview', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'H1',
@@ -319,9 +337,14 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'cc-link-ie',
           name: 'CC-Link IE',
           summary:
-            'Gigabit Ethernet CC-Link family (Controller, Field, Field Basic, TSN) mixing deterministic cyclic data with transient messaging on one network.',
+            'Gigabit Ethernet CC-Link family (Controller, Field, Field Basic, TSN) mixing deterministic cyclic data with transient messaging on one network. The decoder covers the three variants that share EtherType 0x890F — Controller, Field and TSN: the Ethernet frame, the frame type, the common header down to srcNodeNumber, the protocolVer/protocolType nibbles that name the network variant, and the SLMP envelope inside TSN acyclic data. The HEC is shown but never verified because its algorithm is not public, cyclic payloads stay raw because their link-device map comes from the network parameters, and Field Basic is not covered at all: it is SLMP over IPv4/UDP, not an 0x890F frame.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Karar (dalga 13g): motor 0x890F-only. Kaydın vaat ettiği dört ağ
+          // tipinden Field Basic BAŞKA BİR TAŞIYICIDA (IPv4/UDP + SLMP) geldiği
+          // için bilinçli eksik — rozet 'ready' değil 'partial', özet metni
+          // neyin çözülüp neyin çözülmediğini açıkça yazar (iec-61850 emsali).
+          status: 'partial',
+          pluginId: 'cc-link-ie',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'IE Field',

@@ -5588,6 +5588,343 @@ export const tr = {
   'protocol.sercosIii.example.frameTooShort.name': 'Çok kısa çerçeve',
   'protocol.sercosIii.example.frameTooShort.description':
     '16 bayt: Ethernet başlığı var ama 6 baytlık Sercos başlığı tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+  // --- CC-LINK IE ---
+  'protocol.ccLinkIe.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ccLinkIe.error.etherTypeNotCcLinkIe':
+    'EtherType 0x890F değil — bu çerçeve CC-Link IE değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.ccLinkIe.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ccLinkIe.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + en kısa CC-Link IE başlığı (2 bayt) kadar uzun değil.',
+  'protocol.ccLinkIe.error.headerTruncated':
+    'Çerçeve tipinin gerektirdiği CC-Link IE başlığı tamamlanmıyor.',
+  'protocol.ccLinkIe.warning.hecNotVerified':
+    'HEC GÖSTERİLİR, DOĞRULANMAZ: 4 baytlık başlık sağlama alanının algoritması hiçbir kamuya açık kaynakta yok — iki referans ayrıştırıcı da alanı yalnız gösteriyor. Yanlış parametreyle hesaplanmış bir "HEC hatalı" rozeti hiç doğrulamamaktan daha kötü olurdu.',
+  'protocol.ccLinkIe.warning.middleFieldsSingleSource':
+    'Başlığın 2.-5. baytlarının bu çerçeve tipine özel kırılımı TEK KAYNAKLIDIR (NTT Communications’ın Zeek ayrıştırıcısı); CLPA’nın kendi dissector’ı bu tipi kapsamıyor. Alanlar adlandırılıp çözülüyor ama teyit tek kaynaktan.',
+  'protocol.ccLinkIe.warning.frameTypeNotNamed':
+    'Çerçeve tipi iki kaynağın da adlandırdığı kümede değil — gövdeye dokunulmadı, ham gösteriliyor.',
+  'protocol.ccLinkIe.warning.cyclicLayoutFromNetworkParameters':
+    'Döngüsel gövdenin hangi baytı hangi istasyonun hangi link cihazına (RX/RY/RWr/RWw) düştüğü ÇERÇEVEDE YAZMAZ — ağ parametresinden (CSP+ / ağ ayarı) gelir. Bölge tek parça ham gösteriliyor; her iki referans ayrıştırıcı da aynı yerde duruyor.',
+  'protocol.ccLinkIe.warning.transientPayloadRaw':
+    'Transient gövdesinin yapısı bağlantı tipine ve komut kataloğuna bağlıdır; kamuya açık kaynak yalnız başlığı veriyor — gövde ham gösteriliyor.',
+  'protocol.ccLinkIe.warning.protocolTypeReserved':
+    'protocolType nibble’ı adlandırılmış kümede değil (0=Control, 1=Field, 3=TSN) — ağ tipi çerçeveden belirlenemedi.',
+  'protocol.ccLinkIe.warning.fieldBasicNotOnThisWire':
+    'EtherType 0x0800 (IPv4): CC-Link IE Field Basic BU TELDE GELMEZ — standart IPv4/UDP üstünde SLMP’dir (master 61450, cihaz 61451) ve bu motorun girdi sözleşmesiyle kesişmez.',
+  'protocol.ccLinkIe.warning.slmpEnvelopeOnly':
+    'SLMP’nin yalnız ZARFI (subheader → subcommand) çözülür; komuta özel istek/cevap verisi ham bırakılır — komut kataloğu bu motorun kapsamı dışında.',
+  'protocol.ccLinkIe.warning.slmpSubheaderUnknown':
+    'Transient gövdesi 0x5000 (istek) ya da 0xD000 (cevap) subheader’ıyla başlamıyor — SLMP zarfı olarak çözülmedi, ham gösteriliyor.',
+  'protocol.ccLinkIe.warning.tsnDetectionBodyRaw':
+    'TSN Detection/DetectionAck gövdesinin alan kırılımı iki kaynakta ortaklaşmıyor — bölge ham gösteriliyor.',
+  'protocol.ccLinkIe.warning.paddingNotZero':
+    'Bildirilen bölgeden sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.ccLinkIe.summary.frame': '{frameType}',
+  'protocol.ccLinkIe.summary.notCcLinkIe': 'CC-Link IE değil (EtherType {etherType})',
+  'protocol.ccLinkIe.documentation.summary':
+    'CC-Link IE (CLPA): girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x890F çözülür (ethercat.ts/profinet.ts/powerlink.ts/sercosIii.ts ile aynı girdi sözleşmesi). Çerçeve tipi (arFType) adlandırılır ve tipe göre başlık çözülür: CC-Link IE Field ve Control çerçevelerinde 14 baytlık ortak başlık (dataType/priority, tipe özel dört bayt, srcNodeNumber, protocolVerType, HEC), TSN çerçevelerinde tipe göre 2/6/10/14 baytlık başlık (cyclicNo ve kontrol bayrağı, sa/da, HEC). protocolVerType baytının iki nibble’ı ağ tipini SÖYLER (Control / Field / TSN) — spec’in "analyzer önce network type belirlemeli" maddesinin çerçevedeki cevabı budur, bu yüzden ayrı bir seçenek kanalı açılmadı. TSN acyclicData (0xC3) gövdesindeki SLMP 3E zarfı (subheader, ağ/istasyon/modül I/O/multidrop numaraları, veri uzunluğu, izleme zamanlayıcısı, komut ve alt komut ya da end code) da çözülür. HEC alanı GÖSTERİLİR ama DOĞRULANMAZ: algoritması kamuya açık değil. Döngüsel gövde HAM bırakılır — hangi baytın hangi istasyonun hangi link cihazına düştüğü çerçevede değil ağ parametresinde yazar. CC-Link IE Field Basic KAPSAM DIŞIDIR: 0x890F altında değil, IPv4/UDP üstünde SLMP olarak gelir. Alan yerleşimleri CLPA’nın kendi yayımladığı CC-Link IE TSN Wireshark dissector’ı ile NTT Communications’ın Zeek/Spicy ayrıştırıcısı arasında çapraz teyitlidir; EtherType IEEE kayıt defterinden doğrulanmıştır.',
+  'protocol.ccLinkIe.example.fieldTokenM.name': 'Field — TokenM (token geçişi)',
+  'protocol.ccLinkIe.example.fieldTokenM.description':
+    'CC-Link IE Field’ın token geçiş çerçevesi: nodeId, srcNodeNumber ve protocolVerType 0x01 (protocolVer 0 = tek master, protocolType 1 = Field) çözülür; HEC gösterilir ama doğrulanmaz.',
+  'protocol.ccLinkIe.example.fieldMyStatus.name': 'Field — MyStatus (istasyon durumu)',
+  'protocol.ccLinkIe.example.fieldMyStatus.description':
+    'MyStatus’ta orta dört bayt nodeId + syncFlag + nodeType olarak kırılır; protocolVerType 0x11 → protocolVer 1 (çok master), protocolType 1 (Field).',
+  'protocol.ccLinkIe.example.fieldCyclicDataRwr.name': 'Field — CyclicDataRWr (döngüsel veri)',
+  'protocol.ccLinkIe.example.fieldCyclicDataRwr.description':
+    'Döngüsel çerçevede başlık tam çözülür ama 32 baytlık gövde TEK PARÇA ham kalır: link cihazı haritası çerçevede değil ağ parametresinde yazar.',
+  'protocol.ccLinkIe.example.fieldTransient1.name': 'Field — Transient1 (transient iletim)',
+  'protocol.ccLinkIe.example.fieldTransient1.description':
+    'Transient çerçevesinde nodeId + connectionInfo çözülür; transient gövdesinin yapısı bağlantı tipine bağlı olduğu için ham gösterilir.',
+  'protocol.ccLinkIe.example.fieldTestData.name': 'Field — TestData (iki kaynakta teyitli tip)',
+  'protocol.ccLinkIe.example.fieldTestData.description':
+    'TestData, CLPA’nın kendi dissector’ının da kırılımını verdiği iki tipten biri: persPriority + nodeType iki kaynakta birebir aynı ofsette — bu yüzden "tek kaynaklı" uyarısı BASILMAZ.',
+  'protocol.ccLinkIe.example.controlToken.name': 'Control — Token',
+  'protocol.ccLinkIe.example.controlToken.description':
+    'CC-Link IE Control çerçevesinde ikinci bayt priority, orta alan scanNumber’dır ve 8.-9. baytlar protocolVerType DEĞİL ayrılmış alandır — Field ile aynı iskelet, farklı adlar.',
+  'protocol.ccLinkIe.example.tsnCyclicMs.name': 'TSN — Cyclic M/Ms (10 baytlık başlık)',
+  'protocol.ccLinkIe.example.tsnCyclicMs.description':
+    'TSN döngüsel çerçevesi: cyclicNo (bit 0-6) ve cyclicNoCheckFlag (bit 7) ayrı ayrı çözülür, sa alanı kaynak istasyonu verir, HEC 6. bayttan başlar.',
+  'protocol.ccLinkIe.example.tsnCyclicSsCheckDisabled.name':
+    'TSN — Cyclic S/Ss, döngü numarası kontrolü kapalı',
+  'protocol.ccLinkIe.example.tsnCyclicSsCheckDisabled.description':
+    'Bit 7 set: cyclicNoCheckFlag = disable, döngü numarası 7. Cihazdan gelen yönde alan sa değil da’dır.',
+  'protocol.ccLinkIe.example.tsnAcyclicDataSlmp.name': 'TSN — AcyclicData, içinde SLMP 3E isteği',
+  'protocol.ccLinkIe.example.tsnAcyclicDataSlmp.description':
+    '6 baytlık TSN acyclicData başlığından sonra SLMP zarfı gelir: subheader 0x5000 (istek), izleme zamanlayıcısı 16 × 250 ms, komut 0x0401 / alt komut 0x0000. Komut verisi ham kalır.',
+  'protocol.ccLinkIe.example.tsnAcyclicDetection.name': 'TSN — Detection (2 baytlık başlık)',
+  'protocol.ccLinkIe.example.tsnAcyclicDetection.description':
+    'Detection çerçevesinde başlık yalnız iki bayttır (çerçeve tipi + ayrılmış); gövdenin alan kırılımı iki kaynakta ortaklaşmadığı için ham gösterilir.',
+  'protocol.ccLinkIe.example.unknownFrameType.name': 'Adı olmayan çerçeve tipi',
+  'protocol.ccLinkIe.example.unknownFrameType.description':
+    'Çerçeve tipi 0x77: iki kaynakta da adlandırılmamış — başlık boyu bile bilinmediği için gövdeye DOKUNULMAZ, tek parça ham gösterilir.',
+  'protocol.ccLinkIe.example.etherTypeIpv4FieldBasic.name':
+    'EtherType 0x0800 — CC-Link IE Field Basic bu telde gelmez',
+  'protocol.ccLinkIe.example.etherTypeIpv4FieldBasic.description':
+    'IPv4 çerçevesi: MAC alanları çözülür ama CC-Link IE başlığına dokunulmaz. Field Basic IPv4/UDP üstünde SLMP olarak gelir ve bu motorun kapsamında değildir — uyarı bunu açıkça söyler.',
+  'protocol.ccLinkIe.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.ccLinkIe.example.frameTooShort.description':
+    '20 bayt: EtherType 0x890F ve TokenM çerçeve tipi var ama başlığın gerektirdiği 14 bayttan yalnız 6’sı kaldı — kesik başlık hatası.',
+  // --- CC-LINK (KLASİK) ---
+  'protocol.ccLink.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ccLink.error.emptyInput': 'Girdi boş — çözülecek link cihazı görüntüsü yok.',
+  'protocol.ccLink.error.frameTooLong': 'Girdi izin verilen azami uzunluğu aşıyor.',
+  'protocol.ccLink.error.imageTruncated':
+    'Girdi, seçilen konfigürasyonun (işgal edilen istasyon sayısı × genişletilmiş çevrim ayarı) gerektirdiği bayt sayısından kısa — görüntü kesik.',
+  'protocol.ccLink.warning.linkLayerNotPublic':
+    'ÇÖZÜLEN ŞEY RS-485 TELGRAFI DEĞİL, döngüsel link cihazı görüntüsüdür. CC-Link’in veri bağı telgraf biçimi (sınırlayıcılar, adres alanı, FCS) hiçbir kamuya açık kaynakta yok: Wireshark’ta dissector yok, CLPA spec’i üyelik arkasında. Tahmin edilmiş bir alan tablosu basmak yerine bu katman bilinçli olarak kapsam dışı bırakıldı.',
+  'protocol.ccLink.warning.wordOrderAssumption':
+    'Kelimeler LITTLE-ENDIAN okunuyor (Mitsubishi tampon belleği kuralı: alt bayt önce, RX0000 = ilk baytın en düşük anlamlı biti). Dışa aktarma aracınız kelimeleri ters sırada yazıyorsa değerler ters çıkar.',
+  'protocol.ccLink.warning.pointMeaningFromDeviceProfile':
+    'Nokta ADLANDIRILIR ama ANLAMLANDIRILMAZ: RX0000’ın "hazır", RWw2’nin "ayar değeri" demek olup olmadığı cihazın CSP+ dosyasından/kılavuzundan gelir, veriden değil.',
+  'protocol.ccLink.warning.detailLimit':
+    'Ayrıntılı çözüm alan başına 32 kelimeyle sınırlı — en büyük konfigürasyon (4 istasyon × ×8) 56 bit kelimesi ve 128 yazmaç üretir; ötesi tek parça ham gösteriliyor.',
+  'protocol.ccLink.warning.trailingBytes':
+    'Beklenen görüntüden sonra fazladan bayt var — uydurulmuş bir alan üretilmedi, bölge ham gösteriliyor. Konfigürasyon seçenekleri gerçek istasyonla eşleşmiyor olabilir.',
+  'protocol.ccLink.warning.extendedCyclicIsVer2':
+    '×1 dışındaki genişletilmiş çevrim ayarları yalnız CC-Link Ver.2’de vardır; Ver.1 uyumlu bir istasyonda ayar ×1’dir.',
+  'protocol.ccLink.summary.image':
+    '{area} — {stations} istasyon işgal, {multiplier} ({bitPoints} bit, {wordPoints} yazmaç)',
+  'protocol.ccLink.option.direction': 'Yön',
+  'protocol.ccLink.option.direction.description':
+    'Aynı baytlar master→slave yönünde RY+RWw, slave→master yönünde RX+RWr’dir; görüntünün kendisi yönü söylemez.',
+  'protocol.ccLink.option.direction.slaveToMaster': 'Slave → Master (RX + RWr)',
+  'protocol.ccLink.option.direction.masterToSlave': 'Master → Slave (RY + RWw)',
+  'protocol.ccLink.option.occupiedStations': 'İşgal edilen istasyon',
+  'protocol.ccLink.option.occupiedStations.description':
+    'Bir slave’in ağda kapladığı istasyon sayısı (1-4). Ağ parametresinde ayarlanır, baytların içinde yazmaz.',
+  'protocol.ccLink.option.extendedCyclic': 'Genişletilmiş çevrim',
+  'protocol.ccLink.option.extendedCyclic.description':
+    'CC-Link Ver.2 çarpanı; nokta sayılarını belirler. ×1 aynı zamanda Ver.1 uyumlu istasyonun ayarıdır.',
+  'protocol.ccLink.option.extendedCyclic.x1': '×1 (Ver.1 uyumlu)',
+  'protocol.ccLink.option.extendedCyclic.x2': '×2',
+  'protocol.ccLink.option.extendedCyclic.x4': '×4',
+  'protocol.ccLink.option.extendedCyclic.x8': '×8',
+  'protocol.ccLink.documentation.summary':
+    'CC-Link (klasik, CLPA): RS-485 üstünde ≤10 Mbit/s, ≤64 istasyon, ≤1200 m master/slave fabrika otomasyonu veri yolu. BU MOTOR TELGRAFI ÇÖZMEZ — CC-Link’in veri bağı çerçeve biçimi hiçbir kamuya açık kaynakta belgelenmemiştir (Wireshark’ta dissector yok, CLPA spec paketi üyelik arkasında) ve tahmin edilmiş bir alan tablosu ham bloktan çok daha kötü olurdu. Çözülen şey protokolün kullanıcıya görünen yüzüdür: tek bir slave istasyonun DÖNGÜSEL LINK CİHAZI GÖRÜNTÜSÜ — önce bit alanı (uzak giriş RX ya da uzak çıkış RY), sonra yazmaç alanı (RWr ya da RWw). Nokta sayıları işgal edilen istasyon sayısı (1-4) ile genişletilmiş çevrim ayarından (×1/×2/×4/×8) gelir ve bu 4×4’lük link nokta tablosu iki bağımsız belgede teyitlidir: Pro-face’in CC-Link Intelligent Device Driver kılavuzundaki bağlanabilir birim formülleri ve Mitsubishi EMU4-VA2 CC-Link programlama kılavuzunun bir satırı. Bit noktaları 16’lık kelimeler hâlinde onaltılık indekslerle adlandırılır (RX0000, RX0011 …), yazmaçlar 16-bit little-endian okunur. Yön, işgal edilen istasyon sayısı ve çevrim çarpanı baytların İÇİNDE OLMADIĞI için seçenek olarak sorulur. Nokta adları verilir ama anlamları verilmez — onlar cihazın CSP+ dosyasından gelir. Transient iletim, cihaz profili anlamı ve ağ genelindeki adres eşlemesi kapsam dışıdır.',
+  'protocol.ccLink.example.remoteDeviceTypical.name': 'Uzak cihaz istasyonu — tipik görüntü',
+  'protocol.ccLink.example.remoteDeviceTypical.description':
+    'Varsayılan konfigürasyon (slave→master, 1 istasyon, ×1): 32 bit RX + 4 RWr yazmaç = 12 bayt. RX0000, RX0002 ve RX0011 açık; RWr0 = 250, RWr1 = 0x1234.',
+  'protocol.ccLink.example.remoteDeviceAllOff.name': 'Tüm noktalar kapalı',
+  'protocol.ccLink.example.remoteDeviceAllOff.description':
+    'Sıfırlanmış bir görüntü: her bit kelimesi "—" ile gösterilir, yazmaçlar 0x0000.',
+  'protocol.ccLink.example.remoteDeviceAllOn.name': 'Tüm noktalar açık',
+  'protocol.ccLink.example.remoteDeviceAllOn.description':
+    'Bütün baytlar 0xFF: her kelimede 16 nokta adıyla listelenir, yazmaçlar 0xFFFF.',
+  'protocol.ccLink.example.imageTruncated.name': 'Kesik görüntü',
+  'protocol.ccLink.example.imageTruncated.description':
+    '8 bayt: varsayılan konfigürasyon 12 bayt bekler. Eksik kısım uydurulmaz, kesik görüntü hatası basılır.',
+  'protocol.ccLink.example.imageTrailingBytes.name': 'Fazladan bayt',
+  'protocol.ccLink.example.imageTrailingBytes.description':
+    '16 bayt: 12’si beklenen görüntü, 4’ü fazla. Fazlalık için sahte bir alan üretilmez — ham blok olarak gösterilip konfigürasyonun eşleşmiyor olabileceği söylenir.',
+  // --- AS-INTERFACE (KLASIK) ---
+  'protocol.asInterface.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.asInterface.error.frameTooLong': 'Girdi izin verilen azami uzunluğu aşıyor.',
+  'protocol.asInterface.error.unsupportedLength':
+    'AS-i çerçevesi ya 2 bayttır (14 bitlik master çağrısı, sağa dayalı) ya da 1 bayt (7 bitlik slave yanıtı, sağa dayalı) — başka uzunluk bu sözleşmenin dışındadır.',
+  'protocol.asInterface.error.startBitNotZero':
+    'Başlangıç biti (ST) 1 — AS-i’de ST her zaman "0"dır; bu bir AS-i çerçevesi değil ya da hizalama kaymış.',
+  'protocol.asInterface.error.parityMismatch':
+    'Çift parite tutmuyor: başlangıç ve bitiş bitleri hariç, parite biti dâhil bitlerin toplamı ÇIFT olmalıdır (AS-Interface Complete Specification kuralı).',
+  'protocol.asInterface.warning.classicAsiOnly':
+    'Çözülen nesil KLASIK AS-i’dir (14 bit master çağrısı / 7 bit slave yanıtı). ASi-5 KAPSAM DIŞIDIR — OFDM tabanlı, tamamen farklı bir katmandır ve tel biçimi kamuya açık değildir; ASi-5 baytlarını buraya vermeyin.',
+  'protocol.asInterface.warning.endBitNotOne':
+    'Bitiş biti (EB) 0 — AS-i’de EB her zaman "1"dir; çerçeve eksik ya da hizalama kaymış olabilir.',
+  'protocol.asInterface.warning.paddingBitsNotZero':
+    'Sağa dayalı gösterimde kullanılmayan üst bitler sıfır değil — girdi 14/7 bitlik çerçeveyi doğru hizalamıyor olabilir.',
+  'protocol.asInterface.warning.selectBitPolarityUnconfirmed':
+    'I3 biti genişletilmiş adreslemede (A/B slave) seçim bilgisi taşır ama POLARITESI teyitli değil: aynı belgenin tablosu bu hücreyi "~Sel", hemen ardındaki şeması "Sel" olarak veriyor. Bit gösterilir, "A-slave mı B-slave mı" IDDIA EDILMEZ. Ayrıca tek bir çerçeve slave’in standart mı A/B mi olduğunu söylemez.',
+  'protocol.asInterface.warning.responseMeaningNeedsRequest':
+    'Slave yanıtının 4 biti tek başına anlamsızdır: giriş verisi mi, ID kodu mu, I/O konfigürasyonu mu yoksa durum mu olduğu ÖNCEKI master çağrısından gelir. Çok çerçeveli eşleştirme parser’ın değil analyzer’ın işidir — bitler ham gösteriliyor.',
+  'protocol.asInterface.warning.callNotNamed':
+    'Bilgi alanının bu bileşimi kaynak tabloda adlandırılmamış (ya da "reserved") — komut ADLANDIRILMADI, ham ikilik değer gösteriliyor.',
+  'protocol.asInterface.warning.addressZeroIsUnconfigured':
+    'Adres 0, henüz adreslenmemiş slave’i gösterir; bu adreste bilgi alanı veri değil yeni adres ya da genişletilmiş ID kodu taşır.',
+  'protocol.asInterface.summary.masterRequest': 'Master → {address}: {call}',
+  'protocol.asInterface.summary.slaveResponse': 'Slave yanıtı: {data}',
+  'protocol.asInterface.documentation.summary':
+    'AS-Interface (AS-i, IEC 62026-2 / EN 50295): sensör-aktüatör seviyesinde, veriyi ve gücü aynı iki telden taşıyan master/slave ağı. Bu motor KLASIK AS-i’yi çözer — ASi-5 (OFDM) kapsam dışıdır ve her çözümde bu söylenir. Girdi sözleşmesi: 2 bayt = 14 bitlik master çağrısı (16 bitlik big-endian değerin sağa dayalı hâli), 1 bayt = 7 bitlik slave yanıtı. Master çağrısında başlangıç biti (ST=0), kontrol biti (SB: 0 veri/parametre, 1 komut), 5 bitlik slave adresi, 5 bitlik bilgi alanı, parite ve bitiş biti (EB=1) ayrı ayrı çözülür. Bilgi alanının kırılımı çağrı tipine bağlıdır: SB=0 ve I4=0 → çıkış verisi D3-D0, SB=0 ve I4=1 → parametre P3-P0, adres 0 ve SB=0 → yeni slave adresi, SB=1 → komut (Read I/O Configuration, Read ID Code, Read ID Code_1/_2, Reset Slave, Read Status, Delete Address, Write Extended ID Code_1, Broadcast Reset, Enter Program Mode). Çift parite GERÇEKTEN hesaplanır ve uyuşmazlıkta hata basılır: kural, başlangıç ve bitiş bitleri hariç parite biti dâhil bit toplamının çift olmasıdır. Genişletilmiş adreslemenin seçim biti (I3) gösterilir ama polaritesi kaynaklarda çeliştiği için A/B slave iddiası yapılmaz. Slave yanıtının anlamı önceki çağrıya bağlı olduğu için bitler ham gösterilir. Alan yerleşimi AS-International Association’ın sitesinde yayımlanan ASI4U datasheet’inin Table 3.2’si ile bağımsız bir üretici kılavuzunun telgraf yapısı arasında çapraz teyitlidir.',
+  'protocol.asInterface.example.dataExchangeRequest.name': 'Veri çağrısı (Data Exchange)',
+  'protocol.asInterface.example.dataExchangeRequest.description':
+    'SB=0 ve I4=0 → veri çağrısı: adres 5’e 0b1010 çıkış verisi. I3 biti hem D3 hem seçim biti olabileceği için ayrı bir alan olarak gösterilir.',
+  'protocol.asInterface.example.dataExchangeResponse.name': 'Slave yanıtı (7 bit)',
+  'protocol.asInterface.example.dataExchangeResponse.description':
+    'Tek bayt: ST=0, dört bilgi biti (0b0011), parite ve EB=1. Bitlerin ANLAMI önceki çağrıdan gelir — burada söylenmez.',
+  'protocol.asInterface.example.writeParameterRequest.name': 'Parametre çağrısı (Write Parameter)',
+  'protocol.asInterface.example.writeParameterRequest.description':
+    'SB=0 ve I4=1 → parametre çağrısı: adres 12’ye 0b0110 parametre biti.',
+  'protocol.asInterface.example.addressAssignment.name': 'Adres atama (Address Assignment)',
+  'protocol.asInterface.example.addressAssignment.description':
+    'Adres alanı 0 (adreslenmemiş slave) ve SB=0: bilgi alanı veri değil YENI ADRESi taşır (burada 7).',
+  'protocol.asInterface.example.readIoConfiguration.name': 'Read I/O Configuration',
+  'protocol.asInterface.example.readIoConfiguration.description':
+    'SB=1, I4=1, I2 I1 I0 = 000 → slave’in I/O konfigürasyonu okunur.',
+  'protocol.asInterface.example.readIdCode.name': 'Read ID Code',
+  'protocol.asInterface.example.readIdCode.description':
+    'SB=1, I4=1, I2 I1 I0 = 001 → slave fabrikada yazılmış kimlik kodunu döner.',
+  'protocol.asInterface.example.resetSlave.name': 'Reset Slave',
+  'protocol.asInterface.example.resetSlave.description':
+    'SB=1, I4=1, I2 I1 I0 = 100 → adreslenmiş slave sıfırlanır.',
+  'protocol.asInterface.example.readStatus.name': 'Read Status',
+  'protocol.asInterface.example.readStatus.description':
+    'SB=1, I4=1, I2 I1 I0 = 110 → durum bitleri okunur; bitlerin anlamı profil tablosundan gelir, burada adlandırılmaz.',
+  'protocol.asInterface.example.deleteAddress.name': 'Delete Address',
+  'protocol.asInterface.example.deleteAddress.description':
+    'SB=1, I4=0, I2 I1 I0 = 000 → slave’in adresi 0’a çekilir. Aynı kod adres 0’da Write Extended ID Code_1 anlamına gelir.',
+  'protocol.asInterface.example.broadcastReset.name': 'Broadcast (Reset)',
+  'protocol.asInterface.example.broadcastReset.description':
+    'Adres 11111 + SB=1 + bilgi alanı 10101: bütün slave’lere yayın, yanıt beklenmez.',
+  'protocol.asInterface.example.unnamedCommand.name': 'Adı olmayan komut',
+  'protocol.asInterface.example.unnamedCommand.description':
+    'I2 I1 I0 = 111: kaynak şemasında "reserved". Komut UYDURULMAZ, ham ikilik değer gösterilir ve nedeni uyarıyla söylenir.',
+  'protocol.asInterface.example.parityError.name': 'Parite hatası',
+  'protocol.asInterface.example.parityError.description':
+    'Veri çağrısının parite biti bilerek ters çevrildi: çift parite tutmaz ve çerçeve düzeyinde hata basılır — bu doğrulama gerçekten yapılıyor.',
+  'protocol.asInterface.example.startBitError.name': 'Başlangıç biti hatası',
+  'protocol.asInterface.example.startBitError.description':
+    'ST=1: AS-i’de başlangıç biti her zaman "0"dır. Çerçeve reddedilir, alanlar yine de gösterilir.',
+  'protocol.asInterface.example.endBitError.name': 'Bitiş biti hatası',
+  'protocol.asInterface.example.endBitError.description':
+    'EB=0: bitiş biti her zaman "1" olmalı. Bu bir uyarıdır, hata değil — parite tuttuğu için çerçeve okunabilir kalır.',
+  // --- FOUNDATION FIELDBUS (HSE) ---
+  'protocol.foundationFieldbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.foundationFieldbus.error.frameTooLong': 'Girdi izin verilen azami uzunluğu aşıyor.',
+  'protocol.foundationFieldbus.error.frameTooShort':
+    'Girdi 12 baytlık FDA mesaj başlığı kadar uzun değil.',
+  'protocol.foundationFieldbus.error.messageLengthMismatch':
+    'Başlıkta bildirilen mesaj uzunluğu girdinin uzunluğuyla eşleşmiyor — mesaj kesik, birden çok mesaj yapıştırılmış ya da taşıyıcı baytları da girdiye karışmış olabilir.',
+  'protocol.foundationFieldbus.warning.layoutSingleSource':
+    'Alan yerleşimi TEK KAYNAKLIDIR: yalnız Wireshark’ın FF-HSE dissector’ı (packet-ff.c, FF-588-1.3 §6’yı kaynak gösteriyor ve bir FF üyesi firmanın mühendisi tarafından yazılmış). İkinci bir bağımsız kamuya açık kaynak bulunamadı; bulunan iki aday da uydurma çıktığı için kullanılmadı. IANA port kayıtları yalnız dört alt protokolün (FDA/SM/FMS/LAN Redundancy) varlığını bağımsız doğruluyor, bayt ofsetlerini değil.',
+  'protocol.foundationFieldbus.warning.h1NotDecoded':
+    'ÇÖZÜLEN KATMAN HSE’dir, H1 DEĞİL. H1’in veri bağı çerçevesi ücretli standartta (IEC 61158-2 / FF-816) tanımlıdır ve başlangıç/bitiş sınırlayıcıları Manchester kuralını bilerek ihlal eden N+/N− sembolleridir — bayt olarak temsil edilemezler, bu panelin girdisiyle çözülemez.',
+  'protocol.foundationFieldbus.warning.bodyRaw':
+    'Servise özel parametreler ve kullanıcı verisi HAM bırakıldı: bu bölge servise göre onlarca farklı yapı alır ve hepsi tek kaynaklıdır. Uydurulmuş bir kırılım yerine tek parça gösteriliyor.',
+  'protocol.foundationFieldbus.warning.protocolIdNotNamed':
+    'Protokol kimliği adlandırılmış kümede değil (FDA Session Management, SM, FMS, LAN Redundancy) — ham değer gösteriliyor.',
+  'protocol.foundationFieldbus.warning.serviceNotNamed':
+    'Servis kimliği bu protokol ve onaylı/onaysız bileşimi için kaynak tabloda yok — servis ADLANDIRILMADI, ham değer gösteriliyor.',
+  'protocol.foundationFieldbus.warning.reservedOptionSet':
+    'Seçenek baytının ayrılmış biti (bit 4) set — kaynak bu bit için bir anlam vermiyor.',
+  'protocol.foundationFieldbus.warning.trailerTruncated':
+    'Seçenek bayrakları bildirilen mesaja sığmayan bir trailer istiyor — trailer çözülmedi, alanlar uydurulmadı.',
+  'protocol.foundationFieldbus.warning.trailingBytes':
+    'Mesajın sonundan sonra fazladan bayt var — girdide birden çok FDA mesajı ya da taşıyıcıdan artan baytlar olabilir; bölge ham gösteriliyor.',
+  'protocol.foundationFieldbus.summary.message': '{protocol} — {service}',
+  'protocol.foundationFieldbus.documentation.summary':
+    'FOUNDATION Fieldbus (FieldComm Group): proses otomasyonu dijital veri yolu; H1 (31.25 kbit/s publisher/subscriber segmenti) ve HSE (100 Mbit/s Ethernet omurgası) AYRI katmanlardır. Bu motor HSE’yi çözer, H1’i çözmez. Girdi, TCP ya da UDP yükünün içindeki tek bir FDA mesajıdır (1089/1090/1091 portları) — Ethernet/IP/TCP başlıkları girdiye dâhil değildir, çünkü FF-HSE ham Ethernet değil normal bir TCP/UDP uygulamasıdır. 12 baytlık FDA mesaj başlığı tam çözülür: sürüm, seçenek bayrakları (mesaj numarası / invoke id / zaman damgası / genişletilmiş kontrol alanı ve dolgu uzunluğu), protokol kimliği (FDA Session Management, SM, FMS, LAN Redundancy), onaylı mesaj tipi (istek/yanıt/hata), servis (onaylı bayrağı + servis kimliği, protokole göre adlandırılır), FDA adresi ve mesaj uzunluğu. Bildirilen uzunluk girdiyle karşılaştırılır ve tutmazsa hata basılır. Seçenek bayraklarından çıkan trailer (mesaj numarası, invoke id, zaman damgası, genişletilmiş kontrol alanı) mesajın sonundan çözülür. Servise özel gövde HAM bırakılır. Alan yerleşimi TEK kaynaklıdır (Wireshark’ın FF-588-1.3 §6’yı kaynak gösteren FF-HSE dissector’ı) ve bu her çözümde açıkça söylenir; IANA port kayıtları yalnız dört alt protokolü bağımsız doğrular. H1, fonksiyon blok modeli ve cihaz tanımı (DD) kapsam dışıdır.',
+  'protocol.foundationFieldbus.example.fdaOpenSessionRequest.name': 'FDA Open Session — istek',
+  'protocol.foundationFieldbus.example.fdaOpenSessionRequest.description':
+    'Oturum açma isteği: protokol kimliği FDA Session Management, mesaj tipi istek, onaylı servis 1. Seçenek yok, bu yüzden trailer da yok.',
+  'protocol.foundationFieldbus.example.smIdentifyResponse.name':
+    'SM Identify — yanıt (mesaj numarası + invoke id)',
+  'protocol.foundationFieldbus.example.smIdentifyResponse.description':
+    'Seçenek baytı 0xC0: mesaj numarası ve invoke id trailer’da bulunur ve mesajın SONUNDAN çözülür; aradaki gövde ham kalır.',
+  'protocol.foundationFieldbus.example.smDeviceAnnunciation.name':
+    'SM Device Annunciation (onaysız)',
+  'protocol.foundationFieldbus.example.smDeviceAnnunciation.description':
+    'Onaylı bayrağı sıfır: servis kimliği 16 onaysız SM tablosundan okunur ve "SM Device Annunciation" olarak adlandırılır.',
+  'protocol.foundationFieldbus.example.fmsReadRequest.name': 'FMS Read — istek (invoke id)',
+  'protocol.foundationFieldbus.example.fmsReadRequest.description':
+    'FMS okuma isteği; yalnız invoke id seçeneği açık, trailer 4 bayttır. Okunacak nesnenin kimliği gövdededir ve ham gösterilir.',
+  'protocol.foundationFieldbus.example.fmsInformationReport.name':
+    'FMS Information Report (zaman damgalı)',
+  'protocol.foundationFieldbus.example.fmsInformationReport.description':
+    'Onaysız FMS servisi; zaman damgası seçeneği açık olduğu için 8 baytlık trailer var. Zaman damgasının iç kırılımı tek kaynakta bile yok, ham gösteriliyor.',
+  'protocol.foundationFieldbus.example.lanRedundancyDiagnostic.name':
+    'LAN Redundancy — Diagnostic Message',
+  'protocol.foundationFieldbus.example.lanRedundancyDiagnostic.description':
+    'Dördüncü alt protokol: genişletilmiş kontrol alanı seçeneği açık, trailer 4 bayt.',
+  'protocol.foundationFieldbus.example.unnamedService.name': 'Adı olmayan servis',
+  'protocol.foundationFieldbus.example.unnamedService.description':
+    'Servis kimliği 0x7E, FMS onaylı tablosunda yok — servis UYDURULMAZ, ham değer gösterilir ve nedeni uyarıyla söylenir.',
+  'protocol.foundationFieldbus.example.reservedOptionSet.name': 'Ayrılmış seçenek biti set',
+  'protocol.foundationFieldbus.example.reservedOptionSet.description':
+    'Seçenek baytının bit 4’ü set: kaynak bu bit için anlam vermiyor, alan geçersiz işaretlenip uyarı basılıyor.',
+  'protocol.foundationFieldbus.example.messageLengthMismatch.name': 'Mesaj uzunluğu tutmuyor',
+  'protocol.foundationFieldbus.example.messageLengthMismatch.description':
+    'Başlık 64 bayt bildiriyor ama girdi daha kısa — çerçeve düzeyinde hata basılır, eksik kısım uydurulmaz.',
+  'protocol.foundationFieldbus.example.headerOnly.name': 'Yalnız başlık (gövdesiz mesaj)',
+  'protocol.foundationFieldbus.example.headerOnly.description':
+    '12 baytlık FDA başlığından ibaret bir yanıt: gövde ve trailer yok, uzunluk alanı 12’dir.',
+  'protocol.foundationFieldbus.example.frameTooShort.name': 'Çok kısa girdi',
+  'protocol.foundationFieldbus.example.frameTooShort.description':
+    '8 bayt: 12 baytlık FDA başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
+  // --- PROFIBUS DP ---
+  'protocol.profibusDp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.profibusDp.error.emptyInput': 'Girdi boş — çözülecek telgraf yok.',
+  'protocol.profibusDp.error.frameTooLong': 'Telgraf izin verilen azami uzunluğu aşıyor.',
+  'protocol.profibusDp.error.startDelimiterUnknown':
+    'Başlangıç sınırlayıcısı tanınmıyor: PROFIBUS FDL yalnız SC (0xE5), SD1 (0x10), SD2 (0x68), SD3 (0xA2) ve SD4 (0xDC) ile başlar.',
+  'protocol.profibusDp.error.telegramTruncated':
+    'Telgraf, başlangıç sınırlayıcısının gerektirdiği uzunluğa ulaşmıyor.',
+  'protocol.profibusDp.error.lengthRepeatMismatch':
+    'Uzunluk alanı iki kez gönderilir ve aynı olmalıdır; LEr LE ile eşleşmiyor. Uzunluk güvenilmez olduğu için gövde alanlara BÖLÜNMEDİ.',
+  'protocol.profibusDp.error.lengthOutOfRange':
+    'LE alanı 3-249 aralığının dışında: en az DA+SA+FC (3 bayt) taşınmalı, en çok 246 bayt kullanıcı verisi eklenebilir.',
+  'protocol.profibusDp.error.secondStartMismatch':
+    'SD2 telgrafında başlangıç sınırlayıcısı uzunluk alanından sonra TEKRARLANIR; ikinci 0x68 eksik.',
+  'protocol.profibusDp.error.endDelimiterInvalid':
+    'Bitiş sınırlayıcısı 0x16 değil — telgraf eksik ya da hizalama kaymış.',
+  'protocol.profibusDp.error.checksumMismatch':
+    'FCS tutmuyor: kapsanan baytların 256 modundaki toplamı gönderilen değere eşit değil.',
+  'protocol.profibusDp.warning.userDataNeedsGsd':
+    'Kullanıcı verisi (DU) HAM bırakıldı: hangi baytın hangi modülün girişi/çıkışı olduğu ÇERÇEVEDE YAZMAZ, GSD dosyasındaki modül ve I/O uzunluk bildiriminden gelir. Servis telgraflarının gövdeleri de DP profiline bağlıdır.',
+  'protocol.profibusDp.warning.functionCodeNotNamed':
+    'Çerçeve kontrol baytının fonksiyon kodu kaynak tablolarda yok — kod ADLANDIRILMADI, ham değer gösteriliyor.',
+  'protocol.profibusDp.warning.sapNotNamed':
+    'Adres uzantısındaki servis erişim noktası (SAP) numarası bilinen DP tablosunda yok — numara gösteriliyor ama ADLANDIRILMIYOR.',
+  'protocol.profibusDp.warning.addressExtensionTruncated':
+    'Adres uzantısı zinciri "devam ediyor" diyor ama telgraf bitti — zincir eksik, kalan baytlar uydurulmadı.',
+  'protocol.profibusDp.warning.trailingBytes':
+    'Telgrafın sonundan sonra fazladan bayt var — girdide birden çok telgraf olabilir; bölge ham gösteriliyor.',
+  'protocol.profibusDp.warning.fcvWithoutFcbMeaning':
+    'FCB biti 1 ama FCV biti 0: alıcı bu durumda çerçeve sayacını DEĞERLENDİRMEZ, yani FCB’nin bir anlamı yoktur.',
+  'protocol.profibusDp.summary.telegram': '{source} → {destination}: {function}',
+  'protocol.profibusDp.summary.shortAck': 'SC — kısa onay',
+  'protocol.profibusDp.summary.token': 'Token: {source} → {destination}',
+  'protocol.profibusDp.documentation.summary':
+    'PROFIBUS DP (PI, IEC 61158/61784 Type 3): RS-485 üstünde merkezî olmayan çevre birimi I/O veri yolu. Girdi, hattan okunmuş TEK bir FDL telgrafıdır; UART karakter çerçevelemesi (start + 8 veri + parite + stop) decoder’a sızmaz. Beş telgraf sınıfının hepsi çözülür: SC (0xE5, kısa onay), SD1 (0x10, verisiz, 6 bayt), SD2 (0x68, değişken veri; uzunluk alanı iki kez gönderilir ve başlangıç sınırlayıcısı tekrarlanır), SD3 (0xA2, sabit 8 bayt veri, 14 bayt) ve SD4 (0xDC, token, 3 bayt). Hedef ve kaynak adresinin bit 7’si adres uzantısı bayrağıdır; uzantı baytları DP servis erişim noktalarını (Set Parameters, Check Configuration, Slave Diagnosis, Global Control, Read Inputs/Outputs, Set Slave Address, MS1/MS2 asiklik kanalları …) ve segment adresini taşır ve adlandırılır. Çerçeve kontrol baytı istek ise FCB/FCV ve fonksiyon kodu (SDA/SDN/SRD düşük-yüksek öncelik, FDL durumu, ident, LSAP …), yanıt ise istasyon tipi (slave / master token halkasında mı) ve durum kodu (OK, UE, RR, RS, DL, NR, DH, RDL, RDH) olarak kırılır. FCS GERÇEKTEN doğrulanır: kapsanan baytların 256 modundaki toplamı. Bu hesap IEC 60870-5-1 FT1.2’ninkiyle birebir aynı olduğu için depodaki ortak sum8Checksum paylaşıldı; çerçeveleme ise ayrı yazıldı, çünkü FT1.2’de Control adresten önce gelir, PROFIBUS’ta iki adres fonksiyon kodundan önce gelir ve SD3/SD4 FT1.2’de hiç yoktur. Kullanıcı verisi ham bırakılır: yerleşimi GSD dosyasından gelir. GSD içe aktarma, DPV1 servis gövdeleri ve çok telgraflı analiz kapsam dışıdır.',
+  'protocol.profibusDp.example.sd1FdlStatusRequest.name': 'SD1 — FDL durumu isteği',
+  'protocol.profibusDp.example.sd1FdlStatusRequest.description':
+    'Verisiz 6 baytlık telgraf (10 22 02 49 6D 16): bağımsız bir PROFIBUS yığınının birim testindeki gerçek vektör. FC 0x49 → istek biti set, FCB ve FCV sıfır, fonksiyon kodu 9 (FDL durumu iste). FCS = 0x22+0x02+0x49 = 0x6D.',
+  'protocol.profibusDp.example.sd1FdlStatusResponse.name': 'SD1 — FDL durumu yanıtı',
+  'protocol.profibusDp.example.sd1FdlStatusResponse.description':
+    'FC 0x20: istek biti sıfır olduğu için bayt YANIT olarak kırılır — istasyon tipi 2 (token halkasına girmeye hazır master), durum kodu 0 (OK).',
+  'protocol.profibusDp.example.sd2SetParameters.name': 'SD2 — Set Parameters (Set_Prm)',
+  'protocol.profibusDp.example.sd2SetParameters.description':
+    'Hedef ve kaynak adresinin bit 7’si set: veri biriminin ilk iki baytı adres uzantısıdır ve DSAP 61 (Set Parameters) ile SSAP 62 (DP master MS0) olarak adlandırılır. Parametre gövdesi GSD’ye bağlı olduğu için ham kalır.',
+  'protocol.profibusDp.example.sd2SlaveDiagnosisRequest.name': 'SD2 — Slave Diagnosis isteği',
+  'protocol.profibusDp.example.sd2SlaveDiagnosisRequest.description':
+    'DSAP 60 (Slave Diagnosis) + SSAP 62; kullanıcı verisi yok, telgraf yalnız adres uzantılarından ibaret.',
+  'protocol.profibusDp.example.sd2DataExchange.name': 'SD2 — Data Exchange (SAP’siz)',
+  'protocol.profibusDp.example.sd2DataExchange.description':
+    'Adres uzantısı YOK: Data Exchange varsayılan SAP’siz servistir, dört baytlık çıkış verisi doğrudan veri biriminde taşınır ve GSD olmadan kırılmaz.',
+  'protocol.profibusDp.example.sd2ResponseDataLow.name': 'SD2 — yanıt, düşük öncelikli veri',
+  'protocol.profibusDp.example.sd2ResponseDataLow.description':
+    'FC 0x08: yanıt çerçevesi, istasyon tipi 0 (slave), durum kodu 8 (DL — düşük öncelikli yanıt verisi hazır).',
+  'protocol.profibusDp.example.sd3FixedData.name': 'SD3 — sabit 8 baytlık veri',
+  'protocol.profibusDp.example.sd3FixedData.description':
+    'Uzunluk alanı YOKTUR: SD3 telgrafı her zaman 14 bayttır ve veri birimi tam 8 bayttır.',
+  'protocol.profibusDp.example.sd4Token.name': 'SD4 — token telgrafı',
+  'protocol.profibusDp.example.sd4Token.description':
+    'Üç bayt: sınırlayıcı + hedef + kaynak. Ne fonksiyon kodu ne FCS ne de bitiş sınırlayıcısı vardır.',
+  'protocol.profibusDp.example.shortAcknowledgement.name': 'SC — kısa onay',
+  'protocol.profibusDp.example.shortAcknowledgement.description':
+    'Tek bayt (0xE5): adres, fonksiyon kodu ve sağlama içermeyen en kısa telgraf sınıfı.',
+  'protocol.profibusDp.example.sd2GlobalControl.name': 'SD2 — Global Control (yayın)',
+  'protocol.profibusDp.example.sd2GlobalControl.description':
+    'Hedef adres 127 (yayın) ve DSAP 58 (Global Control): Sync/Freeze gibi komutlar bütün slave’lere aynı anda gönderilir.',
+  'protocol.profibusDp.example.checksumMismatch.name': 'FCS hatası',
+  'protocol.profibusDp.example.checksumMismatch.description':
+    'Data Exchange telgrafının sağlaması bilerek bir artırıldı: FCS gerçekten hesaplandığı için çerçeve düzeyinde hata basılır ve beklenen değer gösterilir.',
+  'protocol.profibusDp.example.lengthRepeatMismatch.name': 'Uzunluk tekrarı tutmuyor',
+  'protocol.profibusDp.example.lengthRepeatMismatch.description':
+    'LE 7 ama LEr 8: uzunluk güvenilmez olduğu için gövde ALANLARA BÖLÜNMEZ, tek parça ham gösterilir. Yanlış hizalanmış bir alan tablosu basmaktan iyidir.',
+  'protocol.profibusDp.example.endDelimiterInvalid.name': 'Bitiş sınırlayıcısı hatalı',
+  'protocol.profibusDp.example.endDelimiterInvalid.description':
+    'Son bayt 0x16 değil: alanlar yine de çözülür ama çerçeve geçersiz işaretlenir.',
+  'protocol.profibusDp.example.unknownStartDelimiter.name': 'Tanınmayan başlangıç sınırlayıcısı',
+  'protocol.profibusDp.example.unknownStartDelimiter.description':
+    'İlk bayt 0x55: beş sınırlayıcıdan hiçbiri değil — ParseFailure (kaydedilebilir, akış devam edebilir).',
 } as const;
 
 /**

@@ -5603,4 +5603,342 @@ export const en: TranslationDictionary = {
   'protocol.sercosIii.example.frameTooShort.name': 'Frame too short',
   'protocol.sercosIii.example.frameTooShort.description':
     '16 bytes: the Ethernet header is present but the 6-byte Sercos header is incomplete — a ParseFailure (recoverable, the stream can continue).',
+  // --- CC-LINK IE ---
+  'protocol.ccLinkIe.error.aborted': 'Decoding was cancelled.',
+  'protocol.ccLinkIe.error.etherTypeNotCcLinkIe':
+    'The EtherType is not 0x890F — this frame is not CC-Link IE; the body was left raw and not decoded.',
+  'protocol.ccLinkIe.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.ccLinkIe.error.frameTooShort':
+    'The frame is not long enough for the Ethernet header (14 bytes) plus the shortest CC-Link IE header (2 bytes).',
+  'protocol.ccLinkIe.error.headerTruncated':
+    'The CC-Link IE header required by this frame type is not complete.',
+  'protocol.ccLinkIe.warning.hecNotVerified':
+    'The HEC is SHOWN but NEVER VERIFIED: the algorithm behind the 4-byte header check field is not published anywhere, and both reference parsers only display it. A "HEC mismatch" badge computed with guessed parameters would be worse than no verification at all.',
+  'protocol.ccLinkIe.warning.middleFieldsSingleSource':
+    'The frame-type-specific breakdown of header bytes 2-5 is SINGLE-SOURCED (the NTT Communications Zeek parser); the CLPA dissector does not cover this frame type. The fields are named and decoded, but only one source confirms them.',
+  'protocol.ccLinkIe.warning.frameTypeNotNamed':
+    'The frame type is not in the set named by either source — the body was left untouched and is shown raw.',
+  'protocol.ccLinkIe.warning.cyclicLayoutFromNetworkParameters':
+    'Which byte of the cyclic body belongs to which station and which link device (RX/RY/RWr/RWw) IS NOT IN THE FRAME — it comes from the network parameters (CSP+ / network configuration). The region is shown as one raw block; both reference parsers stop at the same place.',
+  'protocol.ccLinkIe.warning.transientPayloadRaw':
+    'The structure of the transient body depends on the connection type and the command catalogue; public sources only give the header — the body is shown raw.',
+  'protocol.ccLinkIe.warning.protocolTypeReserved':
+    'The protocolType nibble is not in the named set (0=Control, 1=Field, 3=TSN) — the network variant could not be determined from the frame.',
+  'protocol.ccLinkIe.warning.fieldBasicNotOnThisWire':
+    'EtherType 0x0800 (IPv4): CC-Link IE Field Basic DOES NOT RUN ON THIS WIRE — it is SLMP over plain IPv4/UDP (master 61450, device 61451) and does not intersect this decoder\u2019s input contract.',
+  'protocol.ccLinkIe.warning.slmpEnvelopeOnly':
+    'Only the SLMP ENVELOPE (subheader through subcommand) is decoded; command-specific request/response data is left raw — the command catalogue is outside this decoder.',
+  'protocol.ccLinkIe.warning.slmpSubheaderUnknown':
+    'The transient body does not start with a 0x5000 (request) or 0xD000 (response) subheader — it was not decoded as an SLMP envelope and is shown raw.',
+  'protocol.ccLinkIe.warning.tsnDetectionBodyRaw':
+    'The field breakdown of the TSN Detection/DetectionAck body is not shared by both sources — the region is shown raw.',
+  'protocol.ccLinkIe.warning.paddingNotZero':
+    'The bytes after the declared region are not zero — Ethernet padding was expected.',
+  'protocol.ccLinkIe.summary.frame': '{frameType}',
+  'protocol.ccLinkIe.summary.notCcLinkIe': 'Not CC-Link IE (EtherType {etherType})',
+  'protocol.ccLinkIe.documentation.summary':
+    'CC-Link IE (CLPA): the input is a COMPLETE Ethernet frame — destination/source MAC, optional VLAN tags and EtherType 0x890F are decoded (the same input contract as ethercat.ts/profinet.ts/powerlink.ts/sercosIii.ts). The frame type (arFType) is named and the header is decoded per type: CC-Link IE Field and Control frames share a 14-byte header (dataType/priority, four type-specific bytes, srcNodeNumber, protocolVerType, HEC), while TSN frames use a 2/6/10/14-byte header depending on type (cyclicNo and its check flag, sa/da, HEC). The two nibbles of protocolVerType NAME the network variant (Control / Field / TSN) — that is the in-frame answer to the spec requirement that an analyzer must first determine the network type, which is why no separate option channel was opened. The SLMP 3E envelope inside TSN acyclicData (0xC3) is decoded as well (subheader, network/station/module I/O/multidrop numbers, data length, monitoring timer, command and subcommand, or end code). The HEC field is SHOWN but NEVER VERIFIED: its algorithm is not public. Cyclic bodies are left RAW — which byte belongs to which station and link device is written in the network parameters, not in the frame. CC-Link IE Field Basic is OUT OF SCOPE: it does not run under 0x890F but as SLMP over IPv4/UDP. Field layouts are cross-confirmed between the CC-Link IE TSN Wireshark dissector published by CLPA itself and the Zeek/Spicy parser from NTT Communications; the EtherType is confirmed by the IEEE registry.',
+  'protocol.ccLinkIe.example.fieldTokenM.name': 'Field — TokenM (token pass)',
+  'protocol.ccLinkIe.example.fieldTokenM.description':
+    'The token-passing frame of CC-Link IE Field: nodeId, srcNodeNumber and protocolVerType 0x01 (protocolVer 0 = single master, protocolType 1 = Field) are decoded; the HEC is shown but not verified.',
+  'protocol.ccLinkIe.example.fieldMyStatus.name': 'Field — MyStatus (station status)',
+  'protocol.ccLinkIe.example.fieldMyStatus.description':
+    'In MyStatus the middle four bytes break down into nodeId + syncFlag + nodeType; protocolVerType 0x11 means protocolVer 1 (multi master) and protocolType 1 (Field).',
+  'protocol.ccLinkIe.example.fieldCyclicDataRwr.name': 'Field — CyclicDataRWr (cyclic data)',
+  'protocol.ccLinkIe.example.fieldCyclicDataRwr.description':
+    'The header of a cyclic frame is fully decoded but the 32-byte body stays as ONE RAW BLOCK: the link-device map is written in the network parameters, not in the frame.',
+  'protocol.ccLinkIe.example.fieldTransient1.name': 'Field — Transient1 (transient transfer)',
+  'protocol.ccLinkIe.example.fieldTransient1.description':
+    'A transient frame decodes nodeId + connectionInfo; the transient body is shown raw because its structure depends on the connection type.',
+  'protocol.ccLinkIe.example.fieldTestData.name': 'Field — TestData (confirmed by both sources)',
+  'protocol.ccLinkIe.example.fieldTestData.description':
+    'TestData is one of the two types whose breakdown the CLPA dissector also provides: persPriority + nodeType sit at exactly the same offsets in both sources, so the "single source" warning is NOT raised.',
+  'protocol.ccLinkIe.example.controlToken.name': 'Control — Token',
+  'protocol.ccLinkIe.example.controlToken.description':
+    'In a CC-Link IE Control frame the second byte is priority, the middle field is scanNumber, and bytes 8-9 are reserved rather than protocolVerType — the same skeleton as Field with different names.',
+  'protocol.ccLinkIe.example.tsnCyclicMs.name': 'TSN — Cyclic M/Ms (10-byte header)',
+  'protocol.ccLinkIe.example.tsnCyclicMs.description':
+    'A TSN cyclic frame: cyclicNo (bits 0-6) and cyclicNoCheckFlag (bit 7) are decoded separately, the sa field gives the source station, and the HEC starts at byte 6.',
+  'protocol.ccLinkIe.example.tsnCyclicSsCheckDisabled.name':
+    'TSN — Cyclic S/Ss with cycle-number check disabled',
+  'protocol.ccLinkIe.example.tsnCyclicSsCheckDisabled.description':
+    'Bit 7 is set: cyclicNoCheckFlag = disable, cycle number 7. In the device-to-master direction the field is da, not sa.',
+  'protocol.ccLinkIe.example.tsnAcyclicDataSlmp.name':
+    'TSN — AcyclicData carrying an SLMP 3E request',
+  'protocol.ccLinkIe.example.tsnAcyclicDataSlmp.description':
+    'After the 6-byte TSN acyclicData header comes the SLMP envelope: subheader 0x5000 (request), monitoring timer 16 × 250 ms, command 0x0401 and subcommand 0x0000. The command data itself stays raw.',
+  'protocol.ccLinkIe.example.tsnAcyclicDetection.name': 'TSN — Detection (2-byte header)',
+  'protocol.ccLinkIe.example.tsnAcyclicDetection.description':
+    'A Detection frame has only a two-byte header (frame type + reserved); the body is shown raw because the two sources do not agree on its field breakdown.',
+  'protocol.ccLinkIe.example.unknownFrameType.name': 'Unnamed frame type',
+  'protocol.ccLinkIe.example.unknownFrameType.description':
+    'Frame type 0x77 is named by neither source — since even the header length is unknown, the body is NOT touched and is shown as one raw block.',
+  'protocol.ccLinkIe.example.etherTypeIpv4FieldBasic.name':
+    'EtherType 0x0800 — CC-Link IE Field Basic is not on this wire',
+  'protocol.ccLinkIe.example.etherTypeIpv4FieldBasic.description':
+    'An IPv4 frame: the MAC fields are decoded but the CC-Link IE header is not touched. Field Basic arrives as SLMP over IPv4/UDP and is outside this decoder — the warning says so explicitly.',
+  'protocol.ccLinkIe.example.frameTooShort.name': 'Frame too short',
+  'protocol.ccLinkIe.example.frameTooShort.description':
+    '20 bytes: EtherType 0x890F and the TokenM frame type are present, but only 6 of the 14 header bytes remain — a truncated-header error.',
+  // --- CC-LINK (CLASSIC) ---
+  'protocol.ccLink.error.aborted': 'Decoding was cancelled.',
+  'protocol.ccLink.error.emptyInput': 'The input is empty — there is no link-device image to decode.',
+  'protocol.ccLink.error.frameTooLong': 'The input exceeds the allowed maximum length.',
+  'protocol.ccLink.error.imageTruncated':
+    'The input is shorter than the byte count required by the selected configuration (occupied stations × extended cyclic setting) — the image is truncated.',
+  'protocol.ccLink.warning.linkLayerNotPublic':
+    'WHAT IS DECODED IS NOT THE RS-485 TELEGRAM but the cyclic link-device image. The CC-Link data-link frame layout (delimiters, address field, FCS) is not documented in any public source: Wireshark has no dissector and the CLPA specification is behind membership. Rather than print a guessed field table, this layer was deliberately left out of scope.',
+  'protocol.ccLink.warning.wordOrderAssumption':
+    'Words are read LITTLE-ENDIAN (the Mitsubishi buffer-memory convention: low byte first, RX0000 = least significant bit of the first byte). If your export tool writes words in the opposite order the values will come out reversed.',
+  'protocol.ccLink.warning.pointMeaningFromDeviceProfile':
+    'Points are NAMED but not INTERPRETED: whether RX0000 means "ready" or RWw2 means "setpoint" comes from the device CSP+ file or manual, not from the data.',
+  'protocol.ccLink.warning.detailLimit':
+    'Detailed decoding is limited to 32 words per area — the largest configuration (4 stations × ×8) produces 56 bit words and 128 registers; the rest is shown as one raw block.',
+  'protocol.ccLink.warning.trailingBytes':
+    'There are extra bytes after the expected image — no invented field was produced, the region is shown raw. The configuration options may not match the real station.',
+  'protocol.ccLink.warning.extendedCyclicIsVer2':
+    'Extended cyclic settings other than ×1 exist only in CC-Link Ver.2; a Ver.1-compatible station always uses ×1.',
+  'protocol.ccLink.summary.image':
+    '{area} — {stations} station(s) occupied, {multiplier} ({bitPoints} bit points, {wordPoints} registers)',
+  'protocol.ccLink.option.direction': 'Direction',
+  'protocol.ccLink.option.direction.description':
+    'The same bytes are RY+RWw master-to-slave and RX+RWr slave-to-master; the image itself does not state the direction.',
+  'protocol.ccLink.option.direction.slaveToMaster': 'Slave → Master (RX + RWr)',
+  'protocol.ccLink.option.direction.masterToSlave': 'Master → Slave (RY + RWw)',
+  'protocol.ccLink.option.occupiedStations': 'Occupied stations',
+  'protocol.ccLink.option.occupiedStations.description':
+    'How many stations one slave occupies on the network (1-4). It is set in the network parameters and does not appear in the bytes.',
+  'protocol.ccLink.option.extendedCyclic': 'Extended cyclic',
+  'protocol.ccLink.option.extendedCyclic.description':
+    'The CC-Link Ver.2 multiplier that determines the point counts. ×1 is also the setting of a Ver.1-compatible station.',
+  'protocol.ccLink.option.extendedCyclic.x1': '×1 (Ver.1 compatible)',
+  'protocol.ccLink.option.extendedCyclic.x2': '×2',
+  'protocol.ccLink.option.extendedCyclic.x4': '×4',
+  'protocol.ccLink.option.extendedCyclic.x8': '×8',
+  'protocol.ccLink.documentation.summary':
+    'CC-Link (classic, CLPA): a master/slave factory-automation bus over RS-485, up to 10 Mbit/s, 64 stations and 1200 m. THIS DECODER DOES NOT DECODE THE TELEGRAM — the CC-Link data-link frame layout is not documented in any public source (Wireshark has no dissector, the CLPA specification package is behind membership) and a guessed field table would be far worse than a raw block. What is decoded is the face of the protocol the user actually sees: the CYCLIC LINK-DEVICE IMAGE of a single slave station — first the bit area (remote input RX or remote output RY), then the register area (RWr or RWw). The point counts come from the occupied-station count (1-4) and the extended cyclic setting (×1/×2/×4/×8), and that 4×4 link point table is confirmed by two independent documents: the connectable-unit formulas in the Pro-face CC-Link Intelligent Device Driver manual and one row of the Mitsubishi EMU4-VA2 CC-Link programming manual. Bit points are named in 16-point words with hexadecimal indices (RX0000, RX0011 …) and registers are read as 16-bit little-endian words. Direction, occupied stations and the cyclic multiplier are asked as options because they ARE NOT in the bytes. Point names are given but their meaning is not — that comes from the device CSP+ file. Transient transfer, device-profile semantics and network-wide address mapping are out of scope.',
+  'protocol.ccLink.example.remoteDeviceTypical.name': 'Remote device station — typical image',
+  'protocol.ccLink.example.remoteDeviceTypical.description':
+    'The default configuration (slave-to-master, 1 station, ×1): 32 RX bit points + 4 RWr registers = 12 bytes. RX0000, RX0002 and RX0011 are on; RWr0 = 250, RWr1 = 0x1234.',
+  'protocol.ccLink.example.remoteDeviceAllOff.name': 'All points off',
+  'protocol.ccLink.example.remoteDeviceAllOff.description':
+    'A cleared image: every bit word shows "—" and the registers read 0x0000.',
+  'protocol.ccLink.example.remoteDeviceAllOn.name': 'All points on',
+  'protocol.ccLink.example.remoteDeviceAllOn.description':
+    'Every byte is 0xFF: each word lists all 16 point names and the registers read 0xFFFF.',
+  'protocol.ccLink.example.imageTruncated.name': 'Truncated image',
+  'protocol.ccLink.example.imageTruncated.description':
+    '8 bytes where the default configuration expects 12. The missing part is not invented — a truncated-image error is raised.',
+  'protocol.ccLink.example.imageTrailingBytes.name': 'Trailing bytes',
+  'protocol.ccLink.example.imageTrailingBytes.description':
+    '16 bytes: 12 of them the expected image, 4 extra. No fake field is produced for the extra bytes — they are shown raw and the configuration is flagged as possibly mismatched.',
+  // --- AS-INTERFACE (CLASSIC) ---
+  'protocol.asInterface.error.aborted': 'Decoding was cancelled.',
+  'protocol.asInterface.error.frameTooLong': 'The input exceeds the allowed maximum length.',
+  'protocol.asInterface.error.unsupportedLength':
+    'An AS-i frame is either 2 bytes (a 14-bit master call, right-aligned) or 1 byte (a 7-bit slave response, right-aligned) — any other length is outside this input contract.',
+  'protocol.asInterface.error.startBitNotZero':
+    'The start bit (ST) is 1 — in AS-i the start bit is always "0"; this is not an AS-i frame or the alignment has slipped.',
+  'protocol.asInterface.error.parityMismatch':
+    'Even parity does not hold: excluding the start and end bits and including the parity bit, the number of ones must be EVEN (the rule defined by the AS-Interface Complete Specification).',
+  'protocol.asInterface.warning.classicAsiOnly':
+    'The generation decoded here is CLASSIC AS-i (14-bit master call / 7-bit slave response). ASi-5 IS OUT OF SCOPE — it is a different OFDM-based layer whose frame format is not public; do not feed ASi-5 bytes here.',
+  'protocol.asInterface.warning.endBitNotOne':
+    'The end bit (EB) is 0 — in AS-i the end bit is always "1"; the frame may be truncated or the alignment has slipped.',
+  'protocol.asInterface.warning.paddingBitsNotZero':
+    'The unused high bits of the right-aligned representation are not zero — the input may not be aligning the 14/7-bit frame correctly.',
+  'protocol.asInterface.warning.selectBitPolarityUnconfirmed':
+    'In extended addressing (A/B slaves) bit I3 carries select information, but its POLARITY is not confirmed: the same document prints this cell as "~Sel" in its table and as "Sel" in the diagram right after it. The bit is shown; no claim is made about A-slave versus B-slave. A single frame also does not say whether the slave is standard or A/B.',
+  'protocol.asInterface.warning.responseMeaningNeedsRequest':
+    'The four bits of a slave response mean nothing on their own: whether they are input data, an ID code, an I/O configuration or a status comes from the PRECEDING master call. Multi-frame matching is an analyzer job, not a parser job — the bits are shown raw.',
+  'protocol.asInterface.warning.callNotNamed':
+    'This combination of the information field is not named in the source table (or is marked "reserved") — the command was NOT named and the raw binary value is shown.',
+  'protocol.asInterface.warning.addressZeroIsUnconfigured':
+    'Address 0 denotes a slave that has not been addressed yet; at this address the information field carries a new address or an extended ID code rather than data.',
+  'protocol.asInterface.summary.masterRequest': 'Master → {address}: {call}',
+  'protocol.asInterface.summary.slaveResponse': 'Slave response: {data}',
+  'protocol.asInterface.documentation.summary':
+    'AS-Interface (AS-i, IEC 62026-2 / EN 50295): a master/slave sensor-actuator network carrying data and power on the same two wires. This decoder covers CLASSIC AS-i — ASi-5 (OFDM) is out of scope and that is stated on every decode. Input contract: 2 bytes = a 14-bit master call (right-aligned in a 16-bit big-endian value), 1 byte = a 7-bit slave response. In a master call the start bit (ST=0), the control bit (SB: 0 for data/parameter, 1 for command), the 5-bit slave address, the 5-bit information field, the parity bit and the end bit (EB=1) are each decoded. The information field breaks down by call type: SB=0 with I4=0 gives output data D3-D0, SB=0 with I4=1 gives parameters P3-P0, address 0 with SB=0 carries a new slave address, and SB=1 selects a command (Read I/O Configuration, Read ID Code, Read ID Code_1/_2, Reset Slave, Read Status, Delete Address, Write Extended ID Code_1, Broadcast Reset, Enter Program Mode). Even parity is ACTUALLY computed and a mismatch raises an error: the rule is that the number of ones, excluding the start and end bits and including the parity bit, must be even. The select bit (I3) of extended addressing is shown but no A/B-slave claim is made because the sources disagree on its polarity. A slave response depends on the preceding call, so its bits are shown raw. Field layouts are cross-confirmed between Table 3.2 of the ASI4U datasheet published on the AS-International Association site and the telegram structure in an independent vendor manual.',
+  'protocol.asInterface.example.dataExchangeRequest.name': 'Data call (Data Exchange)',
+  'protocol.asInterface.example.dataExchangeRequest.description':
+    'SB=0 with I4=0 is a data call: output data 0b1010 to address 5. Bit I3 can be either D3 or the select bit, so it is shown as its own field.',
+  'protocol.asInterface.example.dataExchangeResponse.name': 'Slave response (7 bits)',
+  'protocol.asInterface.example.dataExchangeResponse.description':
+    'A single byte: ST=0, four information bits (0b0011), parity and EB=1. What those bits MEAN comes from the preceding call and is not claimed here.',
+  'protocol.asInterface.example.writeParameterRequest.name': 'Parameter call (Write Parameter)',
+  'protocol.asInterface.example.writeParameterRequest.description':
+    'SB=0 with I4=1 is a parameter call: parameter bits 0b0110 to address 12.',
+  'protocol.asInterface.example.addressAssignment.name': 'Address Assignment',
+  'protocol.asInterface.example.addressAssignment.description':
+    'The address field is 0 (an unaddressed slave) and SB=0: the information field carries the NEW ADDRESS (7 here) rather than data.',
+  'protocol.asInterface.example.readIoConfiguration.name': 'Read I/O Configuration',
+  'protocol.asInterface.example.readIoConfiguration.description':
+    'SB=1, I4=1, I2 I1 I0 = 000 reads the slave I/O configuration.',
+  'protocol.asInterface.example.readIdCode.name': 'Read ID Code',
+  'protocol.asInterface.example.readIdCode.description':
+    'SB=1, I4=1, I2 I1 I0 = 001 makes the slave return its factory-set identification code.',
+  'protocol.asInterface.example.resetSlave.name': 'Reset Slave',
+  'protocol.asInterface.example.resetSlave.description':
+    'SB=1, I4=1, I2 I1 I0 = 100 resets the addressed slave.',
+  'protocol.asInterface.example.readStatus.name': 'Read Status',
+  'protocol.asInterface.example.readStatus.description':
+    'SB=1, I4=1, I2 I1 I0 = 110 reads the status bits; what those bits mean comes from the profile table and is not named here.',
+  'protocol.asInterface.example.deleteAddress.name': 'Delete Address',
+  'protocol.asInterface.example.deleteAddress.description':
+    'SB=1, I4=0, I2 I1 I0 = 000 sets the slave address back to 0. At address 0 the same code means Write Extended ID Code_1.',
+  'protocol.asInterface.example.broadcastReset.name': 'Broadcast (Reset)',
+  'protocol.asInterface.example.broadcastReset.description':
+    'Address 11111 with SB=1 and information field 10101: a broadcast to every slave, with no response expected.',
+  'protocol.asInterface.example.unnamedCommand.name': 'Unnamed command',
+  'protocol.asInterface.example.unnamedCommand.description':
+    'I2 I1 I0 = 111 is marked "reserved" in the source diagram. No command is invented — the raw binary value is shown and the reason is stated in a warning.',
+  'protocol.asInterface.example.parityError.name': 'Parity error',
+  'protocol.asInterface.example.parityError.description':
+    'The parity bit of the data call was deliberately flipped: even parity fails and a frame-level error is raised — this check is really performed.',
+  'protocol.asInterface.example.startBitError.name': 'Start bit error',
+  'protocol.asInterface.example.startBitError.description':
+    'ST=1, but in AS-i the start bit is always "0". The frame is rejected while the fields are still shown.',
+  'protocol.asInterface.example.endBitError.name': 'End bit error',
+  'protocol.asInterface.example.endBitError.description':
+    'EB=0, but the end bit must always be "1". This is a warning rather than an error — parity still holds, so the frame remains readable.',
+  // --- FOUNDATION FIELDBUS (HSE) ---
+  'protocol.foundationFieldbus.error.aborted': 'Decoding was cancelled.',
+  'protocol.foundationFieldbus.error.frameTooLong': 'The input exceeds the allowed maximum length.',
+  'protocol.foundationFieldbus.error.frameTooShort':
+    'The input is not long enough for the 12-byte FDA message header.',
+  'protocol.foundationFieldbus.error.messageLengthMismatch':
+    'The message length declared in the header does not match the length of the input — the message may be truncated, several messages may be concatenated, or transport bytes may have been included.',
+  'protocol.foundationFieldbus.warning.layoutSingleSource':
+    'The field layout is SINGLE-SOURCED: only the Wireshark FF-HSE dissector (packet-ff.c, which cites FF-588-1.3 section 6 and was written by an engineer at an FF member company). No second independent public source was found; the two candidates that were found turned out to be fabricated and were not used. The IANA port registry independently confirms only the existence of the four sub-protocols (FDA/SM/FMS/LAN Redundancy), not the byte offsets.',
+  'protocol.foundationFieldbus.warning.h1NotDecoded':
+    'THE LAYER DECODED HERE IS HSE, NOT H1. The H1 data-link frame is defined in a paid standard (IEC 61158-2 / FF-816) and its start and end delimiters are N+/N- symbols that deliberately violate the Manchester rule — they cannot be represented as bytes and cannot be decoded from this panel input.',
+  'protocol.foundationFieldbus.warning.bodyRaw':
+    'The service-specific parameters and user data are left RAW: this region takes dozens of different shapes depending on the service and all of them are single-sourced. It is shown as one block instead of an invented breakdown.',
+  'protocol.foundationFieldbus.warning.protocolIdNotNamed':
+    'The protocol id is not in the named set (FDA Session Management, SM, FMS, LAN Redundancy) — the raw value is shown.',
+  'protocol.foundationFieldbus.warning.serviceNotNamed':
+    'The service id is not in the source table for this protocol and confirmed/unconfirmed combination — the service was NOT named and the raw value is shown.',
+  'protocol.foundationFieldbus.warning.reservedOptionSet':
+    'The reserved bit of the options byte (bit 4) is set — the source assigns no meaning to this bit.',
+  'protocol.foundationFieldbus.warning.trailerTruncated':
+    'The option flags ask for a trailer that does not fit inside the declared message — the trailer was not decoded and no fields were invented.',
+  'protocol.foundationFieldbus.warning.trailingBytes':
+    'There are extra bytes after the message — the input may contain several FDA messages or leftover transport bytes; the region is shown raw.',
+  'protocol.foundationFieldbus.summary.message': '{protocol} — {service}',
+  'protocol.foundationFieldbus.documentation.summary':
+    'FOUNDATION Fieldbus (FieldComm Group): a process-automation digital bus whose H1 (31.25 kbit/s publisher/subscriber segment) and HSE (100 Mbit/s Ethernet backbone) are SEPARATE layers. This decoder covers HSE and not H1. The input is a single FDA message carried inside a TCP or UDP payload (ports 1089/1090/1091) — Ethernet/IP/TCP headers are not part of the input, because FF-HSE is an ordinary TCP/UDP application rather than raw Ethernet. The 12-byte FDA message header is fully decoded: version, option flags (message number / invoke id / time stamp / extended control field and pad length), protocol id (FDA Session Management, SM, FMS, LAN Redundancy), confirmed message type (request/response/error), service (confirmed flag plus service id, named per protocol), FDA address and message length. The declared length is compared against the input and a mismatch raises an error. The trailer implied by the option flags (message number, invoke id, time stamp, extended control field) is decoded from the end of the message. The service-specific body is left RAW. The field layout is SINGLE-SOURCED (the Wireshark FF-HSE dissector citing FF-588-1.3 section 6) and that is stated on every decode; the IANA registry independently confirms only the four sub-protocols. H1, the function-block model and device descriptions are out of scope.',
+  'protocol.foundationFieldbus.example.fdaOpenSessionRequest.name': 'FDA Open Session request',
+  'protocol.foundationFieldbus.example.fdaOpenSessionRequest.description':
+    'A session-open request: protocol id FDA Session Management, message type request, confirmed service 1. No options are set, so there is no trailer.',
+  'protocol.foundationFieldbus.example.smIdentifyResponse.name':
+    'SM Identify response (message number + invoke id)',
+  'protocol.foundationFieldbus.example.smIdentifyResponse.description':
+    'Options byte 0xC0: the message number and invoke id live in the trailer and are decoded from the END of the message; the body in between stays raw.',
+  'protocol.foundationFieldbus.example.smDeviceAnnunciation.name':
+    'SM Device Annunciation (unconfirmed)',
+  'protocol.foundationFieldbus.example.smDeviceAnnunciation.description':
+    'The confirmed flag is zero, so service id 16 is read from the unconfirmed SM table and named "SM Device Annunciation".',
+  'protocol.foundationFieldbus.example.fmsReadRequest.name': 'FMS Read request (invoke id)',
+  'protocol.foundationFieldbus.example.fmsReadRequest.description':
+    'An FMS read request with only the invoke id option set, so the trailer is 4 bytes. The identity of the object being read lives in the body and is shown raw.',
+  'protocol.foundationFieldbus.example.fmsInformationReport.name':
+    'FMS Information Report (time stamped)',
+  'protocol.foundationFieldbus.example.fmsInformationReport.description':
+    'An unconfirmed FMS service; the time stamp option is set so the trailer is 8 bytes. The internal breakdown of the time stamp is not given even by the single source, so it is shown raw.',
+  'protocol.foundationFieldbus.example.lanRedundancyDiagnostic.name':
+    'LAN Redundancy Diagnostic Message',
+  'protocol.foundationFieldbus.example.lanRedundancyDiagnostic.description':
+    'The fourth sub-protocol: the extended control field option is set, so the trailer is 4 bytes.',
+  'protocol.foundationFieldbus.example.unnamedService.name': 'Unnamed service',
+  'protocol.foundationFieldbus.example.unnamedService.description':
+    'Service id 0x7E is not in the confirmed FMS table — no service is invented, the raw value is shown and the reason is stated in a warning.',
+  'protocol.foundationFieldbus.example.reservedOptionSet.name': 'Reserved option bit set',
+  'protocol.foundationFieldbus.example.reservedOptionSet.description':
+    'Bit 4 of the options byte is set: the source assigns no meaning to it, so the field is marked invalid and a warning is raised.',
+  'protocol.foundationFieldbus.example.messageLengthMismatch.name': 'Message length mismatch',
+  'protocol.foundationFieldbus.example.messageLengthMismatch.description':
+    'The header declares 64 bytes but the input is shorter — a frame-level error is raised and the missing part is not invented.',
+  'protocol.foundationFieldbus.example.headerOnly.name': 'Header only (no body)',
+  'protocol.foundationFieldbus.example.headerOnly.description':
+    'A response consisting of nothing but the 12-byte FDA header: no body, no trailer, and the length field reads 12.',
+  'protocol.foundationFieldbus.example.frameTooShort.name': 'Input too short',
+  'protocol.foundationFieldbus.example.frameTooShort.description':
+    '8 bytes: not even the 12-byte FDA header is complete — a ParseFailure (recoverable, the stream can continue).',
+  // --- PROFIBUS DP ---
+  'protocol.profibusDp.error.aborted': 'Decoding was cancelled.',
+  'protocol.profibusDp.error.emptyInput': 'The input is empty — there is no telegram to decode.',
+  'protocol.profibusDp.error.frameTooLong': 'The telegram exceeds the allowed maximum length.',
+  'protocol.profibusDp.error.startDelimiterUnknown':
+    'The start delimiter is not recognised: a PROFIBUS FDL telegram starts only with SC (0xE5), SD1 (0x10), SD2 (0x68), SD3 (0xA2) or SD4 (0xDC).',
+  'protocol.profibusDp.error.telegramTruncated':
+    'The telegram is shorter than the length its start delimiter requires.',
+  'protocol.profibusDp.error.lengthRepeatMismatch':
+    'The length field is sent twice and must match; LEr differs from LE. Because the length cannot be trusted, the body was NOT split into fields.',
+  'protocol.profibusDp.error.lengthOutOfRange':
+    'The LE field is outside the 3-249 range: it must cover at least DA+SA+FC (3 bytes) and at most 246 bytes of user data.',
+  'protocol.profibusDp.error.secondStartMismatch':
+    'In an SD2 telegram the start delimiter is REPEATED after the length fields; the second 0x68 is missing.',
+  'protocol.profibusDp.error.endDelimiterInvalid':
+    'The end delimiter is not 0x16 — the telegram is truncated or the alignment has slipped.',
+  'protocol.profibusDp.error.checksumMismatch':
+    'The FCS does not match: the sum of the covered bytes modulo 256 differs from the transmitted value.',
+  'protocol.profibusDp.warning.userDataNeedsGsd':
+    'The user data unit (DU) is left RAW: which byte belongs to which module input or output IS NOT IN THE FRAME, it comes from the module and I/O length declarations in the GSD file. The bodies of service telegrams likewise depend on the DP profile.',
+  'protocol.profibusDp.warning.functionCodeNotNamed':
+    'The function code of the frame control byte is not in the source tables — it was NOT named and the raw value is shown.',
+  'protocol.profibusDp.warning.sapNotNamed':
+    'The service access point number in the address extension is not in the known DP table — the number is shown but NOT named.',
+  'protocol.profibusDp.warning.addressExtensionTruncated':
+    'The address extension chain says it continues but the telegram ended — the chain is incomplete and the missing bytes were not invented.',
+  'protocol.profibusDp.warning.trailingBytes':
+    'There are extra bytes after the telegram — the input may contain several telegrams; the region is shown raw.',
+  'protocol.profibusDp.warning.fcvWithoutFcbMeaning':
+    'The FCB bit is 1 but FCV is 0: in that case the receiver does NOT evaluate the frame count bit, so the FCB carries no meaning.',
+  'protocol.profibusDp.summary.telegram': '{source} → {destination}: {function}',
+  'protocol.profibusDp.summary.shortAck': 'SC — short acknowledgement',
+  'protocol.profibusDp.summary.token': 'Token: {source} → {destination}',
+  'protocol.profibusDp.documentation.summary':
+    'PROFIBUS DP (PI, IEC 61158/61784 Type 3): a decentralized peripheral I/O bus over RS-485. The input is a SINGLE FDL telegram read off the line; the UART character framing (start + 8 data + parity + stop) never reaches the decoder. All five telegram classes are decoded: SC (0xE5, short acknowledgement), SD1 (0x10, no data unit, 6 bytes), SD2 (0x68, variable data, with the length field sent twice and the start delimiter repeated), SD3 (0xA2, a fixed 8-byte data unit, 14 bytes) and SD4 (0xDC, the token, 3 bytes). Bit 7 of the destination and source addresses is the address-extension flag; the extension bytes carry the DP service access points (Set Parameters, Check Configuration, Slave Diagnosis, Global Control, Read Inputs/Outputs, Set Slave Address, the MS1/MS2 acyclic channels and more) plus the segment address, and they are named. The frame control byte breaks down as FCB/FCV plus a function code for requests (SDA/SDN/SRD at low and high priority, FDL status, ident, LSAP status) and as station type (slave, or master relative to the token ring) plus a status code for responses (OK, UE, RR, RS, DL, NR, DH, RDL, RDH). The FCS is REALLY verified: the sum of the covered bytes modulo 256. Because that computation is identical to the one in IEC 60870-5-1 FT1.2, the shared sum8Checksum in this repository is reused; the framing, however, is written separately, because FT1.2 puts Control before the address while PROFIBUS puts two addresses before the function code, and SD3/SD4 do not exist in FT1.2 at all. The user data unit stays raw because its layout comes from the GSD file. GSD import, DPV1 service bodies and multi-telegram analysis are out of scope.',
+  'protocol.profibusDp.example.sd1FdlStatusRequest.name': 'SD1 — request FDL status',
+  'protocol.profibusDp.example.sd1FdlStatusRequest.description':
+    'A 6-byte telegram with no data unit (10 22 02 49 6D 16): the real vector from an independent PROFIBUS stack unit test. FC 0x49 means the request bit is set with FCB and FCV clear, and function code 9 (request FDL status). FCS = 0x22+0x02+0x49 = 0x6D.',
+  'protocol.profibusDp.example.sd1FdlStatusResponse.name': 'SD1 — FDL status response',
+  'protocol.profibusDp.example.sd1FdlStatusResponse.description':
+    'FC 0x20: the request bit is clear, so the byte is broken down as a RESPONSE — station type 2 (master ready to enter the token ring) and status code 0 (OK).',
+  'protocol.profibusDp.example.sd2SetParameters.name': 'SD2 — Set Parameters (Set_Prm)',
+  'protocol.profibusDp.example.sd2SetParameters.description':
+    'Bit 7 is set on both addresses: the first two bytes of the data unit are the address extension and are named DSAP 61 (Set Parameters) and SSAP 62 (DP master MS0). The parameter body depends on the GSD and stays raw.',
+  'protocol.profibusDp.example.sd2SlaveDiagnosisRequest.name': 'SD2 — Slave Diagnosis request',
+  'protocol.profibusDp.example.sd2SlaveDiagnosisRequest.description':
+    'DSAP 60 (Slave Diagnosis) with SSAP 62; there is no user data, the telegram consists of the address extensions alone.',
+  'protocol.profibusDp.example.sd2DataExchange.name': 'SD2 — Data Exchange (default SAP)',
+  'protocol.profibusDp.example.sd2DataExchange.description':
+    'No address extension: Data Exchange is the default service with no SAP, so four bytes of output data sit directly in the data unit and cannot be broken down without the GSD.',
+  'protocol.profibusDp.example.sd2ResponseDataLow.name': 'SD2 — response with low priority data',
+  'protocol.profibusDp.example.sd2ResponseDataLow.description':
+    'FC 0x08: a response frame with station type 0 (slave) and status code 8 (DL — low priority response data ready).',
+  'protocol.profibusDp.example.sd3FixedData.name': 'SD3 — fixed 8-byte data unit',
+  'protocol.profibusDp.example.sd3FixedData.description':
+    'There is NO length field: an SD3 telegram is always 14 bytes and its data unit is exactly 8 bytes.',
+  'protocol.profibusDp.example.sd4Token.name': 'SD4 — token telegram',
+  'protocol.profibusDp.example.sd4Token.description':
+    'Three bytes: delimiter, destination and source. There is no function code, no FCS and no end delimiter.',
+  'protocol.profibusDp.example.shortAcknowledgement.name': 'SC — short acknowledgement',
+  'protocol.profibusDp.example.shortAcknowledgement.description':
+    'A single byte (0xE5): the shortest telegram class, with no address, function code or checksum.',
+  'protocol.profibusDp.example.sd2GlobalControl.name': 'SD2 — Global Control (broadcast)',
+  'protocol.profibusDp.example.sd2GlobalControl.description':
+    'Destination address 127 (broadcast) with DSAP 58 (Global Control): commands such as Sync and Freeze go to every slave at once.',
+  'protocol.profibusDp.example.checksumMismatch.name': 'FCS mismatch',
+  'protocol.profibusDp.example.checksumMismatch.description':
+    'The checksum of the Data Exchange telegram was deliberately incremented: because the FCS is really computed, a frame-level error is raised and the expected value is shown.',
+  'protocol.profibusDp.example.lengthRepeatMismatch.name': 'Repeated length mismatch',
+  'protocol.profibusDp.example.lengthRepeatMismatch.description':
+    'LE is 7 but LEr is 8: because the length cannot be trusted the body is NOT split into fields and is shown as one raw block, which beats printing a misaligned field table.',
+  'protocol.profibusDp.example.endDelimiterInvalid.name': 'Invalid end delimiter',
+  'protocol.profibusDp.example.endDelimiterInvalid.description':
+    'The last byte is not 0x16: the fields are still decoded but the frame is marked invalid.',
+  'protocol.profibusDp.example.unknownStartDelimiter.name': 'Unknown start delimiter',
+  'protocol.profibusDp.example.unknownStartDelimiter.description':
+    'The first byte is 0x55, none of the five delimiters — a ParseFailure (recoverable, the stream can continue).',
 };

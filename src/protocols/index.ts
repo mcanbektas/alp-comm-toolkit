@@ -362,6 +362,54 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'sercos-iii', () =>
     import('./industrial/sercosiii/sercosIii').then((module) => module.sercosIiiPlugin),
   );
+  // CC-Link IE — dalga 13g: EtherType 0x890F altında Controller/Field/TSN
+  // çerçeveleri; 14 baytlık ortak başlık (TSN'de 2/6/10/14) İKİ bağımsız
+  // kaynakta teyitli, HEC gösterilir ama DOĞRULANMAZ (algoritma kamuya açık
+  // değil), döngüsel gövde ağ parametresine bağlı olduğu için HAM bırakılır.
+  // CC-Link IE Field Basic BU TELDE GELMEZ (IPv4/UDP üstünde SLMP) ve bilerek
+  // kapsam dışıdır — rozet bu yüzden 'partial' (bkz. ccLinkIe.ts dosya başı).
+  registerOnce(registry, 'cc-link-ie', () =>
+    import('./industrial/cclinkie/ccLinkIe').then((module) => module.ccLinkIePlugin),
+  );
+  // CC-Link (klasik) — dalga 13g: RS-485 TELGRAFI ÇÖZÜLMEZ, çünkü biçimi
+  // hiçbir kamuya açık kaynakta yok (Wireshark'ta dissector yok, CLPA spec'i
+  // üyelik arkasında, bulunan tek GitHub iddiası uydurma). Bunun yerine
+  // DÖNGÜSEL LINK CİHAZI GÖRÜNTÜSÜ (RX/RY + RWr/RWw) çözülür; nokta sayıları
+  // Pro-face ve Mitsubishi belgelerinde çapraz teyitli. Yön, işgal edilen
+  // istasyon sayısı ve genişletilmiş çevrim ayarı baytların İÇİNDE OLMADIĞI
+  // için `decodeOptions` kanalı açıldı (bkz. ccLink.ts dosya başı).
+  registerOnce(registry, 'cc-link', () =>
+    import('./industrial/cclink/ccLink').then((module) => module.ccLinkPlugin),
+  );
+  // AS-Interface — dalga 13g: KLASİK AS-i'nin 14 bitlik master çağrısı ve
+  // 7 bitlik slave yanıtı; alan yerleşimi AS-International Association'ın
+  // sitesinde yayımlanan ASI4U datasheet'i ile bağımsız bir üretici
+  // kılavuzunda ÇAPRAZ TEYİTLİ. Parite kuralı harfi harfine belgeli olduğu
+  // için GERÇEKTEN doğrulanır (sercos CRC32/CC-Link IE HEC'ten farkı budur).
+  // ASi-5 (OFDM) BİLİNÇLİ kapsam dışı → rozet 'partial' (bkz. asInterface.ts).
+  registerOnce(registry, 'as-interface', () =>
+    import('./industrial/asinterface/asInterface').then((module) => module.asInterfacePlugin),
+  );
+  // FOUNDATION Fieldbus — dalga 13g: HSE'nin 12 baytlik FDA mesaj basligi +
+  // opsiyonel trailer cozulur; girdi TCP/UDP YUKUdur (ham Ethernet DEGIL, FF-HSE
+  // kendi EtherType'ina sahip degildir). H1 KAPSAM DISI: veri bagi cercevesi
+  // ucretli spec'te ve baslangic/bitis sinirlayicilari bayt olarak temsil
+  // edilemeyen N+/N- sembolleridir. Alan yerleşimi TEK kaynakli (Wireshark
+  // packet-ff.c) ve bu her cozumde uyariyla soylenir (bkz. dosya basi).
+  registerOnce(registry, 'foundation-fieldbus', () =>
+    import('./industrial/foundationfieldbus/foundationFieldbus').then(
+      (module) => module.foundationFieldbusPlugin,
+    ),
+  );
+  // PROFIBUS DP - dalga 13g: FDL telgrafinin bes sinifi (SC/SD1/SD2/SD3/SD4)
+  // tam cozulur; alan yerlesimi IKI BAGIMSIZ acik kaynak yigindan (pyprofibus
+  // + profirust) capraz teyitli. FT1.2 akrabaligi SINANDI: FCS hesabi GERCEKTEN
+  // ayni oldugu icin `sum8Checksum` PAYLASILDI, ama cerceveleme AYRI yazildi
+  // (FT1.2 `10 C A CS 16` iken PROFIBUS `10 DA SA FC CS 16`; SD3/SD4 FT1.2'de
+  // hic yok) - gerekce bit duzeyinde profibusDp.ts dosya basinda.
+  registerOnce(registry, 'profibus-dp', () =>
+    import('./industrial/profibus/profibusDp').then((module) => module.profibusDpPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

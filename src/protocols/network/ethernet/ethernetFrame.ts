@@ -88,6 +88,7 @@ const ETHER_TYPE_NAMES: ReadonlyMap<number, string> = new Map([
   [0x88ab, 'POWERLINK'],
   [0x88b8, 'GOOSE'],
   [0x88cd, 'Sercos III'],
+  [0x890f, 'CC-Link IE'],
 ]);
 
 export type EthernetFrameMetadata = {

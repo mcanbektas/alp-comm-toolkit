@@ -795,6 +795,154 @@ sayımı KODDAN doğrulandı: 41→39 kanonik, industrial-automation 9→7). Sı
 profibus-dp/cc-link/as-interface/foundation-fieldbus)** — ikisi de aynı ticari konsorsiyum
 spec-bulunabilirlik riskini taşıyor.
 
+**13g (2026-08-23 bitti) — profibus-dp, cc-link, as-interface, foundation-fieldbus +
+cc-link-ie.** Beş kayıt; **İKİ AİLE BİRDEN KAPANDI**: `classic-fieldbus` (4 kayıt) ve
+`industrial-ethernet` (6 kayıt, 13f'de bilerek atlanan `cc-link-ie` bu dalgada yazıldı).
+`industrial-automation` domain'inde artık yalnız **io-link** ve **hart** açık (13h).
+
+Bu alt dalganın kuralı kullanıcı kararıydı: **kaynağı olmayan kayıt `planned` bırakılmaz,
+`partial` yazılır** — iki bağımsız kamuya açık kaynakta teyitli olan ÇÖZÜLÜR, gerisi HAM
+bırakılır ve neyin çözülüp neyin çözülmediği katalog özetinde AÇIKÇA yazılır
+(`iec-61850`in GOOSE-only presedanı). Beş kaydın beşinde de karar ayrı ayrı verildi:
+
+**profibus-dp — `ready`, ÜÇ bağımsız kaynak.** PI'nin FDL spec metni ücretli ve
+Wireshark'ta PROFIBUS dissector'ı YOK (1826 dissector tarandı), ama İKİ BAĞIMSIZ AÇIK
+KAYNAK YIĞIN var: **pyprofibus** (GPL-2.0, `pyprofibus/fdl.py`) ve **profirust**
+(Apache-2.0, `src/fdl/telegram.rs`) — sınırlayıcılarda, FC bit maskelerinde, FCS
+kapsamında ve SAP tablosunda BİREBİR aynılar; üçüncü teyit felser.ch'in kamuya açık
+"PROFIBUS Manual — Telegram formats" sayfası. Beş telgraf sınıfı da (SC 0xE5 / SD1 0x10 /
+SD2 0x68 / SD3 0xA2 / SD4 0xDC) tam çözülür: LE + LEr + tekrarlanan SD2, DA/SA'nın bit
+7'sindeki adres uzantısı bayrağı, DAE/SAE zincirinden DSAP/SSAP ve segment adresi
+(Set_Prm 61, Chk_Cfg 62, Slave_Diag 60, Global_Control 58, Rd_Inp 56, Rd_Outp 57,
+Set_Slave_Add 55, MS1/MS2 …), FC'nin istek (FCB/FCV + SDA/SDN/SRD/FDL-status/ident/LSAP)
+ve yanıt (istasyon tipi + OK/UE/RR/RS/DL/NR/DH/RDL/RDH) kırılımları, FCS ve ED.
+Ham kalan tek bölge DU'dur ve bu YAPISAL bir eksik değil TANIM-BAĞIMLI içeriktir (GSD'siz
+kırılamaz) — `ethercat.ts`in datagram verisiyle aynı sınıf, `ready` ölçütünü bozmaz.
+
+**FT1.2 akrabalığı SINANDI — sonuç BÖLÜNMÜŞ.** Brief `iec101.ts` (13b) ile paylaşımı
+sınamamı istemişti. ✔ **`sum8Checksum` PAYLAŞILDI**: PROFIBUS FCS'i FT1.2 checksum'ıyla
+BİREBİR aynı hesap (kapsanan baytların 256 modunda toplamı); ikinci bir toplam fonksiyonu
+yazılmadı, `simpleChecksums.ts`e DOKUNULMADI. ✘ **Çerçeveleme PAYLAŞILMADI** ve gerekçe
+bit düzeyinde yazıldı: (1) FT1.2 sabit çerçevesi `10 C A CS 16` iken PROFIBUS SD1
+`10 DA SA FC CS 16` — aynı 0x10 baytı, farklı alan sırası ve İKİ adres; (2) FT1.2'de adres
+genişliği yapılandırılabilir (0/1/2 bayt), PROFIBUS'ta hep tek bayt ve bit 7 uzantı
+bayrağı — FT1.2'de böyle bir bayrak yok; (3) SD3 ve SD4 FT1.2'de HİÇ YOK; (4) FT1.2'nin
+L'si Control+Address+ASDU'yu sayar, PROFIBUS'un LE'si DA+SA+FC+DU'yu sayar ve 3-249 ile
+sınırlıdır. `iec101.ts`e DOKUNULMADI. Dalga 12'nin iki yönlü dersi burada da geçerli:
+gerçekten aynı olan paylaşıldı, akraba görünen ayrı yazıldı.
+
+**cc-link-ie — `partial`, İKİ bağımsız kaynak, EtherType 0x890F.** 13f'de "CLPA spec'i
+üyelik arkasında" diye atlanmıştı; bu dalgada İKİ kamuya açık kaynak bulundu: **CLPA'nın
+KENDİ yayımladığı Wireshark Lua dissector'ı** (`CCLinkIE_TSN_Rev03.lua`, telif satırı
+birebir "Copyright(C) CC-Link Partner Association") ve **NTT Communications'ın Zeek/Spicy
+ayrıştırıcısı** (`zeek-parser-CCLinkIENoIP`, BSD-2-Clause). İkisi TestData/TestDataAck
+tipinde AYNI ofsetleri veriyor; EtherType IEEE kayıt defterinde "Mitsubishi Electric
+Nagoya Works" olarak listeli ve NTT'nin 860 çerçevelik yakalamalarının HEPSİ 0x890F.
+Çözülen: 14 baytlık Field/Control başlığı (frameType, dataType/priority, tipe özel dört
+bayt, srcNodeNumber, `protocolVerType`in AĞ TİPİNİ SÖYLEYEN iki nibble'ı, HEC) ve TSN'in
+tipe göre 2/6/10/14 baytlık başlıkları (cyclicNo + kontrol bayrağı, sa/da, HEC) + 0xC3
+acyclicData içindeki SLMP 3E zarfı. **HEC GÖSTERİLİR, DOĞRULANMAZ** (algoritma hiçbir
+kaynakta yok — `sercosIii.ts`in CRC32 kararının aynısı); döngüsel gövde ağ parametresine
+bağlı olduğu için HAM. **`partial` gerekçesi**: kayıt DÖRT ağ tipi vaat ediyor,
+**Field Basic BU TELDE GELMEZ** (IPv4/UDP üstünde SLMP, master 61450 / cihaz 61451) ve
+bilinçli kapsam dışı; IPv4 çerçevesi verilirse bunu uyarıyla SÖYLÜYOR. Ortadaki dört
+baytın tipe özel kırılımı TEK kaynaklı olduğu için `WARN_MIDDLE_FIELDS_SINGLE_SOURCE`
+taşır, iki kaynağın kesiştiği TestData'da BASILMAZ (`sercosIii.ts`in
+`WARN_CYCLE_COUNT_SINGLE_SOURCE` emsali). `ETHER_TYPE_NAMES`e 0x890F eklendi;
+`ethernetFrame.ts`in `formatMac`/`walkTypeLengthChain`i yine PAYLAŞILDI.
+
+**cc-link (klasik) — `partial`, TELGRAF ÇÖZÜLMEDİ, gerekçesi belgelendi.** İlk adım
+"yeterli kaynak var mı" sorgusuydu ve cevap HAYIR: Wireshark'ta dissector yok, CLPA veri
+bağı spec'i üyelik arkasında, kamuya açık kaynaklar "HDLC tabanlı" düzeyinde kalıyor.
+Bulunan tek "CC-Link çerçevesi" iddiası (`erikwang2013/industrial-protocols-cclink`, PHP)
+UYDURMA çıktı — `StationNo(1)+Flags(1)+Len(1)+Data+CRC-16/XMODEM` diye bir yapı hiçbir
+CLPA belgesinde yok, "Flags" baytı tamamen icat; KULLANILMADI ve dosya başında REDDEDİLDİ.
+Bunun yerine protokolün kullanıcıya görünen yüzü çözüldü: **tek bir slave istasyonun
+döngüsel LINK CİHAZI GÖRÜNTÜSÜ** (RX/RY bit alanı + RWr/RWw yazmaç alanı). 4×4'lük link
+nokta tablosu İKİ BAĞIMSIZ BELGEDE teyitli — **Pro-face (Schneider) GP-Pro EX CC-Link
+Intelligent Device Driver** kılavuzunun bağlanabilir birim formülleri tablonun TAMAMINI
+veriyor (1 istasyon ×1 = 32 bit/4 yazmaç … 4 istasyon ×8 = 896 bit/128 yazmaç) ve
+**Mitsubishi EMU4-VA2 CC-Link programlama kılavuzu** bir satırı doğrudan doğruluyor
+(1 istasyon, octuple → RX/RY 128, RWw/RWr 32). Bu tablo birim testinde 16 satırın hepsiyle
+kilitlendi. **`decodeOptions` AÇILDI, üç kanal** — yön (RX/RWr mi RY/RWw mi), işgal edilen
+istasyon sayısı (1-4) ve genişletilmiş çevrim ayarı (×1/×2/×4/×8): üçü de ağ
+parametresinde ayarlanır ve baytların İÇİNDE YOKTUR, yani 12f'nin "kanal yalnız gerçekten
+çıkarılamayan parametre için" kuralına birebir uyar. Her çözümde
+`WARN_LINK_LAYER_NOT_PUBLIC` basılır: kullanıcı TELGRAFI GÖRMEDİĞİNİ bilir.
+
+**as-interface — `partial`, İKİ bağımsız kaynak, PARİTE GERÇEKTEN DOĞRULANIR.** Kaynak:
+**ASI4U/ASI4U-E/ASI4U-F datasheet**'inin Table 3.2 "Master Calls and Related Slave
+Responses"ı — AS-International Association'ın KENDİ sitesinde (`as-interface.net`)
+yayımlanıyor ve "fully compliant with the AS-Interface Complete Specification V3.0" diyor —
+ve bağımsız bir üreticinin kılavuzu (**Sense Eletrônica**, §5 "Estrutura do Telegrama"),
+çerçeveyi BİREBİR aynı sırayla veriyor: master `ST SB A4..A0 I4..I0 PB EB` (14 bit), slave
+`ST I3..I0 PB EB` (7 bit); üçüncü teyit Pepperl+Fuchs'un "The AS-interface" kitapçığı.
+**`sercosIii.ts`/`ccLinkIe.ts`ten FARK: burada doğrulama GERÇEKTEN YAPILIR**, çünkü kural
+harfi harfine belgeli — *"the sum of all information bits … (excluding start and end bits,
+including the parity bit) must be even"*. Çift parite hesaplanır ve uyuşmazlıkta ÇERÇEVE
+HATASI basılır; birim testi bunu 32 adres × 32 bilgi alanı × 2 kontrol biti = 2048
+telgrafın hepsinde kilitliyor. Bilgi alanı çağrı tipine göre kırılır (SB=0∧I4=0 veri,
+SB=0∧I4=1 parametre, adres 0∧SB=0 yeni adres, SB=1 komut: Rd_IO_Cfg/Read_ID/Read_ID_1/
+Read_ID_2/Reset/Read_Status/Delete_Addr/Write_Ext_ID_1/Broadcast/EnterPmode).
+**Tuzak — seçim bitinin POLARİTESİ tek belgenin İÇİNDE çelişiyor**: Table 3.2 I3 hücresini
+`~Sel`, hemen ardındaki şemanın satır başlığı `I3=Sel` diyor. Bit ADLANDIRILIR ama
+"A-slave mı B-slave mı" İDDİA EDİLMEZ; `WARN_SELECT_BIT_POLARITY_UNCONFIRMED` taşır ve
+e2e turu physicalValue'da "A-slave"/"B-slave" geçmediğini doğruluyor (`sercosIii.ts`in
+telgraf numarası çakışmasının aynı deseni). **`partial` gerekçesi**: kayıt İKİ NESİL vaat
+ediyor (özet + araç listesindeki ayrı "ASi-5" maddesi); **ASi-5 OFDM tabanlı, tamamen
+farklı bir katman** ve tel biçimi kamuya açık değil — her çözümde `WARN_CLASSIC_ASI_ONLY`
+basılır ki iki nesil KARIŞMASIN (brief'in açık talebi).
+
+**foundation-fieldbus — `partial`, TEK kaynaklı ve bu SAKLANMIYOR.** Çözülen katman
+**HSE**: Wireshark'ın FF-HSE dissector'ı (`packet-ff.c`, GPL-2.0-or-later, telif satırı
+Yokogawa mühendisi, kaynak olarak **FF-588-1.3 §6 "Field Device Access Agent Interface"**
+gösteriliyor) 12 baytlık FDA mesaj başlığını veriyor: sürüm, seçenek bayrakları
+(mesaj numarası/invoke id/zaman damgası/genişletilmiş kontrol + dolgu uzunluğu), protokol
+kimliği (FDA/SM/FMS/LAN Redundancy), mesaj tipi, servis (onaylı bayrağı + protokole göre
+adlandırılan servis kimliği), FDA adresi ve mesaj uzunluğu; ardından seçenek
+bayraklarından çıkan trailer mesajın SONUNDAN çözülür. **İkinci bağımsız kaynak
+BULUNAMADI ve her çözümde `WARN_LAYOUT_SINGLE_SOURCE` basılır.** İki aday REDDEDİLDİ:
+`carbon-evolution/ot-nmap-blue-team`in FF-HSE NSE script'i + mock sunucusu ("Byte 0
+protocol version, Byte 1 service code, little-endian") Wireshark'ın 12 baytlık big-endian
+başlığıyla ÇELİŞİYOR ve hiçbir spec'e dayanmıyor; `erikwang2013`in FF paketi ise aynı
+yazarın CC-Link paketindeki uydurma gerekçesiyle hiç incelenmedi. KISMİ bağımsız teyit:
+IANA kayıt defteri `ff-annunc 1089` / `ff-fms 1090` / `ff-sm 1091` / `ff-lr-port 3622`
+girdilerini Fieldbus Foundation'a atanmış olarak listeliyor — dört alt protokolü doğruluyor,
+bayt ofsetlerini değil. **H1 KAPSAM DIŞI ve gerekçesi teknik**: veri bağı çerçevesi ücretli
+standartta (IEC 61158-2 / FF-816) ve başlangıç/bitiş sınırlayıcıları Manchester kuralını
+bilerek ihlal eden **N+/N− veri-olmayan sembolleridir — BAYT OLARAK TEMSİL EDİLEMEZLER**,
+yani bu panelin bayt girdisiyle kaynak bulunsa bile çözülemez. Girdi sözleşmesi de bu
+dalgada bir istisna: FF-HSE ham Ethernet DEĞİL normal bir TCP/UDP uygulamasıdır (kendi
+EtherType'ı yoktur), bu yüzden girdi Ethernet çerçevesi değil TCP/UDP YÜKÜdür
+(`opcua.ts`in girdi sözleşmesiyle aynı sınıf).
+
+**Encoder YAZILMADI**, `protocol-core/types.ts`e DOKUNULMADI, `tabs`/`tools`/
+`definitions`/`related` alanlarına DOKUNULMADI; `summary` yalnız dürüstlük gereği (neyin
+çözülüp neyin çözülmediği) genişletildi. Paylaşılan dosyalardan yalnız
+`network/ethernet/ethernetFrame.ts` değişti (`ETHER_TYPE_NAMES`e 0x890F) —
+`simpleChecksums.ts`, `canopen.ts` ve `iec101.ts` DEĞİŞMEDEN kaldı ve mevcut testleri
+yeşil geçti.
+
+112 yeni birim testi (`profibusDp.test.ts` 25 + `asInterface.test.ts` 24 +
+`ccLinkIe.test.ts` 25 + `ccLink.test.ts` 19 + `foundationFieldbus.test.ts` 19) + 57 yeni
+e2e (gerçek tarayıcı: `profibus-dp` 11 + `cc-link-ie` 13 + `cc-link` 11 + `as-interface`
+11 + `foundation-fieldbus` 11; `partial` rozetli dört kaydın hepsinde rozetin
+`resolveStatus()`ten geldiği ve **Kısmi** bastığı ayrıca doğrulandı — dalga 11 kuralı) +
+4678 toplam birim test + 945 toplam e2e + typecheck/build yeşil. Değişen/yeni dosyalar:
+`protocols/industrial/profibus/profibusDp.ts` (+test, yeni),
+`protocols/industrial/cclinkie/ccLinkIe.ts` (+test, yeni),
+`protocols/industrial/cclink/ccLink.ts` (+test, yeni),
+`protocols/industrial/asinterface/asInterface.ts` (+test, yeni),
+`protocols/industrial/foundationfieldbus/foundationFieldbus.ts` (+test, yeni),
+`protocols/network/ethernet/ethernetFrame.ts` (0x890F), `protocols/index.ts` (5 kayıt) +
+`index.test.ts` (sayaç/alfabetik sıra/kategori haritası),
+`app/catalog/domains/industrial-automation.ts` (5 kayıt: 1 `ready` + 4 `partial` +
+`pluginId` + dürüst `summary`), `translations/{tr,en}.ts` (5×~45 = 224'er anahtar),
+`e2e/{profibus-dp,cc-link-ie,cc-link,as-interface,foundation-fieldbus}-decode.spec.ts`
+(yeni), `CLAUDE.md` (borç sayımı KODDAN doğrulandı: 39→34 kanonik, industrial-automation
+7→2). Sıradaki: **13h (io-link, hart)** — bitince `industrial-automation` domain'i
+TAMAMEN KAPANIR.
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.
