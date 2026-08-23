@@ -235,7 +235,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Ethernet-based automation standard combining DCP device discovery, cyclic IO controller/device exchange, alarms and slot/subslot structured process data.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'profinet',
           tabs: [
             'overview',
             'live',

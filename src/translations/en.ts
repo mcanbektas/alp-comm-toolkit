@@ -5286,5 +5286,117 @@ export const en: TranslationDictionary = {
     'The payload carries a raw Get_Attribute_Single request; selecting `payloadInterpretation=cip-explicit` resolves it with the `cip` engine.',
   'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier rejected',
   'protocol.devicenet.example.extendedIdentifierRejected.description':
-    'The Predefined Master/Slave Connection Set only defines base identifiers; an extended frame raises an error.',
+    'The Predefined Master/Slave Connection Set only defines base identifiers; an extended frame raises an error.',  // --- PROFINET ---
+  'protocol.profinet.error.frameTooShort':
+    'The frame is not long enough for the Ethernet header (14 bytes) plus the FrameID (2 bytes).',
+  'protocol.profinet.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+  'protocol.profinet.error.aborted': 'Decoding was cancelled.',
+  'protocol.profinet.error.etherTypeNotProfinet':
+    'The EtherType is not 0x8892 — this frame is not PROFINET (PN-RT); the body was left raw and not decoded.',
+  'protocol.profinet.error.cyclicTooShort':
+    'The cyclic frame does not carry the 4 trailing bytes required for the APDU Status (CycleCounter + DataStatus + TransferStatus).',
+  'protocol.profinet.error.dcpHeaderTruncated':
+    'The DCP header (10 bytes: ServiceID/ServiceType/Xid/ResponseDelay/DCPDataLength) is incomplete.',
+  'protocol.profinet.error.dcpBlockTruncated':
+    'The region promised by DCPDataLength or DCPBlockLength exceeds the bytes present in the frame.',
+  'protocol.profinet.error.alarmHeaderTruncated':
+    'There is not enough data for the 12-byte alarm (RTA) fixed header.',
+  'protocol.profinet.error.alarmBlockTruncated':
+    'The alarm body promised by VarPartLen or the block header does not fit in the frame.',
+  'protocol.profinet.warning.apduStatusFromFrameEnd':
+    'A cyclic frame does not state the length of its IO data; the APDU Status can only be located by counting back from the end of the frame. Any extra trailing byte in the capture (Ethernet padding or a captured FCS) shifts these three fields.',
+  'protocol.profinet.warning.ioDataNeedsGsdml':
+    'Splitting the IO data into fields depends on the GSDML file and the slot/subslot plan; the IOPS/IOCS bytes are interleaved with the data and cannot be derived from a single frame — the region is shown as one raw block.',
+  'protocol.profinet.warning.dataStatusReservedBits':
+    'Reserved DataStatus bits (3 and 6) are not zero — a conforming frame keeps them zero.',
+  'protocol.profinet.warning.transferStatusNotOk':
+    'TransferStatus is not zero: the provider is asking consumers to ignore this frame.',
+  'protocol.profinet.warning.tsnProfileReassignsRange':
+    'This FrameID band (0x0100-0x3FFF) is assigned to a different class under a time-aware (TSN) profile. Which profile applies is not carried in the frame but established during the earlier connection setup — the classic reading was applied.',
+  'protocol.profinet.warning.ptcpBodyNotDecoded':
+    'PTCP (Precision Time Control Protocol) is a wire format of its own; the FrameID was classified but this engine does not decode the body, so it is shown raw.',
+  'protocol.profinet.warning.reservedFrameId':
+    'The FrameID does not fall into a class named identically by both sources (a reserved or single-source band) — the body was not decoded.',
+  'protocol.profinet.warning.fragmentationNotDecoded':
+    'A Real-Time fragmentation frame needs a separate reassembly step; the body is shown raw.',
+  'protocol.profinet.warning.paddingNotZero':
+    'The bytes after the declared region are not zero — Ethernet padding was expected.',
+  'protocol.profinet.warning.dcpUnknownService':
+    'The DCP ServiceID is not in the cross-verified set (Get/Set/Identify/Hello) — it is not named.',
+  'protocol.profinet.warning.dcpUnknownServiceType':
+    'The DCP ServiceType is none of the three defined values (0 Request, 1 Response Success, 5 ServiceID not supported).',
+  'protocol.profinet.warning.dcpReservedBitsSet':
+    'A field that should be reserved in the DCP header is not zero.',
+  'protocol.profinet.warning.dcpDataLengthMismatch':
+    'DCPDataLength and the bytes actually consumed by the block chain disagree — this is exactly where a decoder that skips the alignment padding drifts.',
+  'protocol.profinet.warning.dcpUnknownOption':
+    'The DCP Option/Suboption pair does not appear under the same name in both sources — it is not named.',
+  'protocol.profinet.warning.dcpValueNotDecoded':
+    'The layout of this block value could not be confirmed in two independent sources; it was left raw rather than inventing fields.',
+  'protocol.profinet.warning.dcpPaddingNotZero':
+    'The alignment padding of an odd-length block is not zero — the padding byte is expected to be zero.',
+  'protocol.profinet.warning.dcpBlockLimitReached':
+    'The block count hit its upper bound; the chain walk was stopped to guard against an infinite loop.',
+  'protocol.profinet.warning.dcpDeviceRoleBitsUnknown':
+    'The bit meanings of the DeviceRole byte are not named in any public source — the raw byte is shown.',
+  'protocol.profinet.warning.dcpBlockLengthUnderflow':
+    'The service expects a BlockInfo/BlockQualifier in this block, but DCPBlockLength is not even 2 bytes.',
+  'protocol.profinet.warning.alarmUnknownPduType':
+    'The RTA PDUType is not in the cross-verified set (Data/NACK/ACK/ERR) — the body was not decoded.',
+  'protocol.profinet.warning.alarmUnknownType':
+    'The AlarmType does not appear under the same name in both sources (0x0007 and 0x000A are named differently, and 0x0014-0x001D only appear in one) — the raw number is shown.',
+  'protocol.profinet.warning.alarmUnknownBlockType':
+    'The alarm block type is not in the Notification/Ack set; its body layout is unknown, so it was left raw.',
+  'protocol.profinet.warning.alarmVarPartMismatch':
+    'VarPartLen and the bytes actually consumed by the alarm body disagree.',
+  'protocol.profinet.warning.alarmPayloadNeedsContext':
+    'Decoding the UserStructureIdentifier payload that follows the AlarmSpecifier depends on the AR (Application Relation) context; it cannot be derived from a single frame and is shown raw.',
+  'protocol.profinet.warning.alarmReservedBitSet':
+    'The reserved AlarmSpecifier bit (bit 14) is not zero.',
+  'protocol.profinet.summary.cyclic': 'Cyclic IO — FrameID {frameId}',
+  'protocol.profinet.summary.dcp': 'DCP {service} — {blockCount} block(s)',
+  'protocol.profinet.summary.alarm': 'Alarm — {pduType}, {alarmType}',
+  'protocol.profinet.summary.other': 'FrameID {frameId} — {frameClass}',
+  'protocol.profinet.summary.notProfinet': 'Not PROFINET (EtherType {etherType})',
+  'protocol.profinet.documentation.summary':
+    'PROFINET (PI / IEC 61158-6-10): the input is a COMPLETE Ethernet frame — destination/source MAC, optional VLAN tags and EtherType 0x8892 are decoded (the same input contract as ethercat.ts, sharing the same Ethernet engine). PROFINET is not a single wire format but a family dispatched by FrameID: the FrameID picks the class, the body follows it. In a cyclic (RT) frame the APDU Status — CycleCounter, the six meaningful DataStatus bits and TransferStatus — can only be located by counting back from the end of the frame; because the IO data length is not stated in the frame, that region stays one raw block. DCP (0xFEFC-0xFEFF) is fully decoded: ServiceID/ServiceType bit by bit, Xid, ResponseDelayFactor, DCPDataLength and the block chain; blocks are aligned to an even length and the padding byte of an odd-length block is shown as its own field. Alarms (0xFC01/0xFE01) are decoded down to the RTA fixed header, AlarmType/API/Slot/Subslot/ModuleIdent/SubmoduleIdent and the AlarmSpecifier bits. Field layouts are cross-verified between the Wireshark PROFINET dissector and the RT-Labs p-net stack; values that do not appear under the same name in both (for example AlarmType 0x0007 and 0x000A) are not named. PN-IO acyclic services (DCE/RPC over UDP), the PTCP body and GSDML parsing are out of scope.',
+  'protocol.profinet.example.dcpIdentifyRequest.name': 'DCP Identify request (multicast)',
+  'protocol.profinet.example.dcpIdentifyRequest.description':
+    'A multicast device scan with FrameID 0xFEFE: a single All Selector block (length 0) and ResponseDelayFactor 0x0100. Those same two bytes carry the delay factor only in this service; everywhere else they are Reserved.',
+  'protocol.profinet.example.dcpIdentifyResponse.name': 'DCP Identify response (alignment padding)',
+  'protocol.profinet.example.dcpIdentifyResponse.description':
+    'A four-block response: Type of Station, Name of Station, IP parameter and Device ID. The first block carries an 11-byte (ODD) value, so a single alignment padding byte follows it — skip that byte and EVERY later block shifts by one. The padding is shown as its own field.',
+  'protocol.profinet.example.dcpSetResponsePadding.name': 'DCP Set response — two padded blocks',
+  'protocol.profinet.example.dcpSetResponsePadding.description':
+    'Two Control/Response blocks; each value is Option + Suboption + BlockError = 3 bytes (ODD), so each block carries its own alignment padding. Reading the second block at the right offset is the proof that the padding was consumed.',
+  'protocol.profinet.example.dcpGetRequestSelectors.name': 'DCP Get request (length-less selectors)',
+  'protocol.profinet.example.dcpGetRequestSelectors.description':
+    'In a Get request the body is a selector list, NOT blocks: only Option + Suboption pairs, with no DCPBlockLength. Reading it with the general block decoder would turn the value region into garbage.',
+  'protocol.profinet.example.dcpHello.name': 'DCP Hello (device-initiated)',
+  'protocol.profinet.example.dcpHello.description':
+    'A device announcing itself at power on: FrameID 0xFEFC, the 01:0E:CF:00:00:01 multicast destination that p-net also uses, and a Name of Station block. A Hello request DOES carry a BlockInfo — those two bytes are subtracted from DCPBlockLength.',
+  'protocol.profinet.example.rtCyclicIo.name': 'Cyclic IO — provider running',
+  'protocol.profinet.example.rtCyclicIo.description':
+    'FrameID 0x8000 (RT_CLASS_1 unicast). 40 bytes of opaque IO data are followed by the 4-byte APDU Status; DataStatus 0x35 = Primary + DataValid + Run + Normal operation. The 0x000F/0x05DC bytes at the start of the data are an example Control Word and Speed Setpoint but are NOT named: only GSDML provides that breakdown.',
+  'protocol.profinet.example.rtCyclicProviderStopped.name': 'Cyclic IO — provider stopped',
+  'protocol.profinet.example.rtCyclicProviderStopped.description':
+    'The same structure with DataStatus 0x20 = Backup + Invalid + Stop and TransferStatus 0x01 ("ignore this frame"). The frame is structurally valid; the problem is reported as a warning, not an error.',
+  'protocol.profinet.example.alarmLowDiagnosis.name': 'Alarm (low priority) — Diagnosis',
+  'protocol.profinet.example.alarmLowDiagnosis.description':
+    'FrameID 0xFE01 with a Data-RTA PDU and an Alarm Notification Low block: AlarmType Diagnosis, API 0, Slot 1 / Subslot 1, ModuleIdent 0x00000101. The 11-bit sequence number and the four diagnosis bits of the AlarmSpecifier are shown separately.',
+  'protocol.profinet.example.alarmHighPlug.name': 'Alarm (high priority) — Plug',
+  'protocol.profinet.example.alarmHighPlug.description':
+    'FrameID 0xFC01: a module-plugged notification. The PDUType and AddFlags bytes are split nibble by nibble (type/version, WindowSize/TACK); the UserStructureIdentifier payload after the AlarmSpecifier is left raw because it needs the AR context.',
+  'protocol.profinet.example.ptcpAnnounce.name': 'PTCP Announce (out-of-scope body)',
+  'protocol.profinet.example.ptcpAnnounce.description':
+    'FrameID 0xFF00 arrives under the same EtherType, so it is classified — but PTCP is a wire format of its own and this engine does not decode its body. Rather than printing an empty card, the body is shown raw and the reason is stated in a warning.',
+  'protocol.profinet.example.etherTypeNotProfinet.name': 'Wrong EtherType',
+  'protocol.profinet.example.etherTypeNotProfinet.description':
+    'The same body as the cyclic example with the EtherType deliberately set to 0x0800 (IPv4). The MAC fields are still decoded but not even the FrameID is touched — decoding a body under the wrong EtherType is exactly what silent-wrong decoding looks like.',
+  'protocol.profinet.example.dcpBlockTruncated.name': 'Truncated DCP block region',
+  'protocol.profinet.example.dcpBlockTruncated.description':
+    'DCPDataLength promises 32 bytes but only 8 are on the wire. The block that could be read is still shown (partial decoding is preserved) and the frame is flagged with length-mismatch.',
+  'protocol.profinet.example.frameTooShort.name': 'Frame too short',
+  'protocol.profinet.example.frameTooShort.description':
+    '10 bytes: not even the Ethernet header is complete — a ParseFailure (recoverable, the stream can continue).',
 };

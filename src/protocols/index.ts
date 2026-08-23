@@ -336,6 +336,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'devicenet', () =>
     import('./industrial/devicenet/devicenet').then((module) => module.deviceNetPlugin),
   );
+  // PROFINET — dalga 13e: EtherType 0x8892 altında FrameID ile ayrışan bir AİLE;
+  // Ethernet başlığı/VLAN yürüyüşü `network/ethernet/ethernetFrame`ten PAYLAŞILIR
+  // (ethercat.ts ile AYNI girdi sözleşmesi, ikinci bir MAC/VLAN çözücü YAZILMADI).
+  // DCP bloklarının ÇİFT hizalama pad'i ve döngüsel çerçevede APDU Status'un
+  // ÇERÇEVE SONUNDAN GERİ SAYILMASI burada çözülür; I/O verisi GSDML olmadan
+  // kırılamayacağı için HAM bırakılır (bkz. profinet.ts dosya başı).
+  registerOnce(registry, 'profinet', () =>
+    import('./industrial/profinet/profinet').then((module) => module.profinetPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

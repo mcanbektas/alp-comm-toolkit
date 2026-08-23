@@ -5271,6 +5271,119 @@ export const tr = {
   'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier reddedildi',
   'protocol.devicenet.example.extendedIdentifierRejected.description':
     'Predefined Master/Slave Connection Set yalnız base identifier tanımlar; extended çerçeve hata basar.',
+  // --- PROFINET ---
+  'protocol.profinet.error.frameTooShort':
+    'Çerçeve, Ethernet başlığı (14 bayt) + FrameID (2 bayt) kadar uzun değil.',
+  'protocol.profinet.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.profinet.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.profinet.error.etherTypeNotProfinet':
+    'EtherType 0x8892 değil — bu çerçeve PROFINET (PN-RT) değildir; gövde çözülmedi, ham bırakıldı.',
+  'protocol.profinet.error.cyclicTooShort':
+    'Döngüsel çerçevenin sonunda APDU Status için gereken 4 bayt (CycleCounter + DataStatus + TransferStatus) yok.',
+  'protocol.profinet.error.dcpHeaderTruncated':
+    'DCP başlığının (10 bayt: ServiceID/ServiceType/Xid/ResponseDelay/DCPDataLength) tamamı gelmedi.',
+  'protocol.profinet.error.dcpBlockTruncated':
+    'DCPDataLength ya da DCPBlockLength alanının vaat ettiği bölge çerçevedeki bayt sayısını aşıyor.',
+  'protocol.profinet.error.alarmHeaderTruncated':
+    'Alarm (RTA) sabit başlığının 12 baytı için yeterli veri yok.',
+  'protocol.profinet.error.alarmBlockTruncated':
+    'VarPartLen ya da blok başlığının vaat ettiği alarm gövdesi çerçeveye sığmıyor.',
+  'protocol.profinet.warning.apduStatusFromFrameEnd':
+    'Döngüsel çerçevede I/O verisinin uzunluğu YAZMAZ; APDU Status yalnız çerçeve sonundan geri sayılarak bulunur. Yakalamaya eklenmiş her fazladan bayt (Ethernet dolgusu ya da FCS) bu üç alanı kaydırır.',
+  'protocol.profinet.warning.ioDataNeedsGsdml':
+    'I/O verisinin alanlara bölünmesi GSDML ve slot/subslot planına bağlıdır; IOPS/IOCS baytları veriyle iç içedir ve tek çerçeveden çıkarılamaz — bölge tek parça ham gösteriliyor.',
+  'protocol.profinet.warning.dataStatusReservedBits':
+    'DataStatus’un ayrılmış bitleri (bit 3 ve 6) sıfır değil — uyumlu bir çerçevede sıfır olmalıdır.',
+  'protocol.profinet.warning.transferStatusNotOk':
+    'TransferStatus sıfır değil: sağlayıcı bu çerçevenin yok sayılmasını istiyor.',
+  'protocol.profinet.warning.tsnProfileReassignsRange':
+    'Bu FrameID bandı (0x0100-0x3FFF) time-aware (TSN) profilinde başka bir sınıfa atanır. Hangi profilin geçerli olduğu çerçevede değil, önceki bağlantı kurulumunda yazar — klasik okuma uygulandı.',
+  'protocol.profinet.warning.ptcpBodyNotDecoded':
+    'PTCP (Precision Time Control Protocol) kendi başına bir tel biçimidir; FrameID sınıflandırıldı ama gövde bu motorda çözülmüyor, ham gösteriliyor.',
+  'protocol.profinet.warning.reservedFrameId':
+    'FrameID iki kaynakta da adlandırılmış bir sınıfa düşmüyor (ayrılmış ya da tek kaynaklı bant) — gövde çözülmedi.',
+  'protocol.profinet.warning.fragmentationNotDecoded':
+    'Real-Time parçalama (fragmentation) çerçevesi ayrı bir yeniden birleştirme adımı ister; gövde ham gösteriliyor.',
+  'protocol.profinet.warning.paddingNotZero':
+    'Bildirilen bölgeden sonraki baytlar sıfır değil — Ethernet dolgusu beklenirdi.',
+  'protocol.profinet.warning.dcpUnknownService':
+    'DCP ServiceID çapraz teyitli kümede (Get/Set/Identify/Hello) yok — adı verilmez.',
+  'protocol.profinet.warning.dcpUnknownServiceType':
+    'DCP ServiceType tanımlı üç değerden (0 Request, 1 Response Success, 5 ServiceID desteklenmiyor) biri değil.',
+  'protocol.profinet.warning.dcpReservedBitsSet':
+    'DCP başlığında ayrılmış olması gereken bir alan sıfır değil.',
+  'protocol.profinet.warning.dcpDataLengthMismatch':
+    'DCPDataLength ile blok zincirinin gerçekte tükettiği bayt sayısı uyuşmuyor — hizalama dolgusu atlanmış bir çözümlemede tam olarak burası kayar.',
+  'protocol.profinet.warning.dcpUnknownOption':
+    'DCP Option/Suboption çifti iki kaynakta da aynı adla geçmiyor — adlandırılmaz.',
+  'protocol.profinet.warning.dcpValueNotDecoded':
+    'Bu blok değerinin yerleşimi iki bağımsız kaynakta teyit edilemedi; uydurma alan basmak yerine ham bırakıldı.',
+  'protocol.profinet.warning.dcpPaddingNotZero':
+    'Tek uzunluklu bloğun hizalama dolgusu sıfır değil — dolgu baytının sıfır olması beklenir.',
+  'protocol.profinet.warning.dcpBlockLimitReached':
+    'Blok sayısı üst sınıra ulaştı; zincir yürüyüşü sonsuz döngüye karşı durduruldu.',
+  'protocol.profinet.warning.dcpDeviceRoleBitsUnknown':
+    'DeviceRole baytının bit anlamları hiçbir kamuya açık kaynakta adlandırılmıyor — ham bayt gösteriliyor.',
+  'protocol.profinet.warning.dcpBlockLengthUnderflow':
+    'Servis bu blokta BlockInfo/BlockQualifier bekliyor ama DCPBlockLength 2 bayta bile yetmiyor.',
+  'protocol.profinet.warning.alarmUnknownPduType':
+    'RTA PDUType çapraz teyitli kümede (Data/NACK/ACK/ERR) yok — gövde çözülmedi.',
+  'protocol.profinet.warning.alarmUnknownType':
+    'AlarmType iki kaynakta AYNI adla geçmiyor (ör. 0x0007 ve 0x000A farklı adlandırılmış, 0x0014-0x001D yalnız tek kaynakta) — sayı ham gösteriliyor.',
+  'protocol.profinet.warning.alarmUnknownBlockType':
+    'Alarm blok tipi Notification/Ack kümesinde değil; gövdenin yerleşimi bilinmediği için ham bırakıldı.',
+  'protocol.profinet.warning.alarmVarPartMismatch':
+    'VarPartLen ile alarm gövdesinin gerçekte tükettiği bayt sayısı uyuşmuyor.',
+  'protocol.profinet.warning.alarmPayloadNeedsContext':
+    'AlarmSpecifier’dan sonraki UserStructureIdentifier yükünün çözümü AR (Application Relation) bağlamına dayanır; tek çerçeveden çıkarılamaz, ham gösteriliyor.',
+  'protocol.profinet.warning.alarmReservedBitSet':
+    'AlarmSpecifier’ın ayrılmış biti (bit 14) sıfır değil.',
+  'protocol.profinet.summary.cyclic': 'Döngüsel I/O — FrameID {frameId}',
+  'protocol.profinet.summary.dcp': 'DCP {service} — {blockCount} blok',
+  'protocol.profinet.summary.alarm': 'Alarm — {pduType}, {alarmType}',
+  'protocol.profinet.summary.other': 'FrameID {frameId} — {frameClass}',
+  'protocol.profinet.summary.notProfinet': 'PROFINET değil (EtherType {etherType})',
+  'protocol.profinet.documentation.summary':
+    'PROFINET (PI / IEC 61158-6-10): girdi TAM bir Ethernet çerçevesidir — DST/SRC MAC, opsiyonel VLAN tag’leri ve EtherType 0x8892 çözülür (ethercat.ts ile aynı girdi sözleşmesi, aynı paylaşılan Ethernet motoru). PROFINET tek bir tel biçimi değil, FrameID ile ayrışan bir ailedir: FrameID sınıfı belirler, gövde ona göre okunur. Döngüsel (RT) çerçevede APDU Status — CycleCounter, DataStatus’un altı anlamlı biti ve TransferStatus — yalnız çerçeve sonundan geri sayılarak bulunur; I/O verisinin uzunluğu çerçevede yazmadığı için bölge tek parça ham kalır. DCP (0xFEFC-0xFEFF) tam çözülür: ServiceID/ServiceType bit bit, Xid, ResponseDelayFactor, DCPDataLength ve blok zinciri; bloklar çift bayta hizalanır ve tek uzunluklu bloğun dolgusu ayrı alan olarak gösterilir. Alarm (0xFC01/0xFE01) RTA sabit başlığı, AlarmType/API/Slot/Subslot/ModuleIdent/SubmoduleIdent ve AlarmSpecifier bitleriyle çözülür. Alan düzenleri Wireshark’ın PROFINET eklentisi ile RT-Labs p-net yığını arasında çapraz teyitlidir; iki kaynakta aynı adla geçmeyen değerler (ör. AlarmType 0x0007/0x000A) adlandırılmaz. PN-IO acyclic (DCE/RPC üzerinden UDP), PTCP gövdesi ve GSDML ayrıştırma kapsam dışıdır.',
+  'protocol.profinet.example.dcpIdentifyRequest.name': 'DCP Identify isteği (multicast)',
+  'protocol.profinet.example.dcpIdentifyRequest.description':
+    'FrameID 0xFEFE ile çok noktaya yayın cihaz taraması: tek All Selector bloğu (uzunluk 0) ve ResponseDelayFactor 0x0100. Aynı iki bayt yalnız bu serviste gecikme çarpanıdır, diğer her yerde Reserved’dır.',
+  'protocol.profinet.example.dcpIdentifyResponse.name': 'DCP Identify yanıtı (hizalama dolgusu)',
+  'protocol.profinet.example.dcpIdentifyResponse.description':
+    'Dört bloklu yanıt: Type of Station, Name of Station, IP parametresi ve Device ID. İlk bloğun değeri 11 bayt (TEK) olduğu için ardından 1 bayt hizalama dolgusu gelir — dolgu atlansaydı sonraki HER blok bir bayt kayardı. Dolgu ayrı alan olarak gösterilir.',
+  'protocol.profinet.example.dcpSetResponsePadding.name': 'DCP Set yanıtı — iki dolgulu blok',
+  'protocol.profinet.example.dcpSetResponsePadding.description':
+    'İki Control/Response bloğu; her birinin değeri Option + Suboption + BlockError = 3 bayt (TEK), yani her blok kendi hizalama dolgusunu taşır. İkinci bloğun doğru ofsette okunması dolgunun tüketildiğinin kanıtıdır.',
+  'protocol.profinet.example.dcpGetRequestSelectors.name': 'DCP Get isteği (uzunluksuz seçiciler)',
+  'protocol.profinet.example.dcpGetRequestSelectors.description':
+    'Get isteğinde gövde blok DEĞİL seçici listesidir: yalnız Option + Suboption çiftleri, DCPBlockLength yoktur. Genel blok çözücüsüyle okunsaydı değer alanı çöp olurdu.',
+  'protocol.profinet.example.dcpHello.name': 'DCP Hello (cihazdan kendiliğinden)',
+  'protocol.profinet.example.dcpHello.description':
+    'Cihaz açılışta kendini duyurur: FrameID 0xFEFC, hedef p-net’in de kullandığı 01:0E:CF:00:00:01 çok noktaya yayın adresi, blokta Name of Station. Hello isteğinde BlockInfo VARDIR — bu iki bayt DCPBlockLength’in içinden düşülür.',
+  'protocol.profinet.example.rtCyclicIo.name': 'Döngüsel I/O — sağlayıcı çalışıyor',
+  'protocol.profinet.example.rtCyclicIo.description':
+    'FrameID 0x8000 (RT_CLASS_1 unicast). 40 bayt opak I/O verisinden sonra 4 baytlık APDU Status gelir; DataStatus 0x35 = Primary + DataValid + Run + Normal operation. Verinin başındaki 0x000F/0x05DC değerleri örnek bir Control Word ve Speed Setpoint’tir ama ADLANDIRILMAZ: kırılımı GSDML verir.',
+  'protocol.profinet.example.rtCyclicProviderStopped.name': 'Döngüsel I/O — sağlayıcı durmuş',
+  'protocol.profinet.example.rtCyclicProviderStopped.description':
+    'Aynı yapı, DataStatus 0x20 = Backup + Invalid + Stop ve TransferStatus 0x01 (“bu çerçeveyi yok say”). Çerçeve yapısal olarak geçerlidir; sorun uyarıyla bildirilir, hata olarak değil.',
+  'protocol.profinet.example.alarmLowDiagnosis.name': 'Alarm (düşük öncelik) — Diagnosis',
+  'protocol.profinet.example.alarmLowDiagnosis.description':
+    'FrameID 0xFE01, Data-RTA PDU’su ve Alarm Notification Low bloğu: AlarmType Diagnosis, API 0, Slot 1 / Subslot 1, ModuleIdent 0x00000101. AlarmSpecifier’ın 11 bitlik sıra numarası ve dört tanı biti ayrı ayrı gösterilir.',
+  'protocol.profinet.example.alarmHighPlug.name': 'Alarm (yüksek öncelik) — Plug',
+  'protocol.profinet.example.alarmHighPlug.description':
+    'FrameID 0xFC01: modül takıldı bildirimi. PDUType ve AddFlags baytları nibble nibble ayrılır (tip/sürüm, WindowSize/TACK); AlarmSpecifier’dan sonraki UserStructureIdentifier yükü AR bağlamı istediği için ham bırakılır.',
+  'protocol.profinet.example.ptcpAnnounce.name': 'PTCP Announce (kapsam dışı gövde)',
+  'protocol.profinet.example.ptcpAnnounce.description':
+    'FrameID 0xFF00 aynı EtherType altında gelir, bu yüzden sınıflandırılır — ama PTCP kendi başına bir tel biçimidir ve gövdesi bu motorda çözülmez. Boş kart basmak yerine ham gösterilip nedeni uyarıyla söylenir.',
+  'protocol.profinet.example.etherTypeNotProfinet.name': 'Yanlış EtherType',
+  'protocol.profinet.example.etherTypeNotProfinet.description':
+    'Döngüsel örnekle aynı gövde, EtherType kasten 0x0800 (IPv4). MAC alanları yine çözülür ama FrameID’ye bile dokunulmaz — yanlış EtherType’ta gövde çözmek sessiz-yanlış çözümlemenin ta kendisi olurdu.',
+  'protocol.profinet.example.dcpBlockTruncated.name': 'Kesik DCP blok bölgesi',
+  'protocol.profinet.example.dcpBlockTruncated.description':
+    'DCPDataLength 32 bayt vaat ediyor ama telde yalnız 8 bayt var. Okunabilen blok yine de gösterilir (kısmi çözüm korunur), çerçeve length-mismatch ile işaretlenir.',
+  'protocol.profinet.example.frameTooShort.name': 'Çok kısa çerçeve',
+  'protocol.profinet.example.frameTooShort.description':
+    '10 bayt: Ethernet başlığı bile tamamlanmıyor — ParseFailure (kaydedilebilir, akış devam edebilir).',
 } as const;
 
 /**

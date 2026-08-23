@@ -539,6 +539,134 @@ DOKUNULMADAN yeşil kaldı. Değişen/yeni dosyalar: `protocols/industrial/cip/c
 **13e (profinet)** — `industrial-ethernet`in en yaygın/en çok araçlı kaydı, GSDML
 definitions + DCP discovery + slot/subslot ağacı.
 
+**13e (2026-08-23 bitti) — profinet.** `industrial-ethernet` ailesinin en yaygın ve en
+çok araçlı kaydı; ailede 4 kayıt kaldı (cc-link-ie, sercos-iii, powerlink + classic
+tarafı ayrı). Brief'in ana tahmini DOĞRULANDI: **PROFINET tek bir tel biçimi değil,
+EtherType 0x8892 altında FrameID ile ayrışan bir AİLEdir**; dispatch alanı FrameID'dir
+ve gövde ancak ondan sonra okunabilir. `profinetFrameId.ts` bandın tamamını
+sınıflandırır, `profinetDcp.ts` ve `profinetAlarm.ts` iki büyük sınıfı `cipCore.ts`
+deseniyle (çağıranın `fields` dizisine doğrudan basan, kendi `ProtocolParser`ı OLMAYAN
+çekirdek) çözer, `profinet.ts` Ethernet katmanını ve dağıtımı yapar.
+
+**Brief'in bir tespiti ÇÜRÜDÜ.** `brief-faz10-dalga13.md:38-42` "`ethercat.ts`
+`network-ethernet`in `ethernetFrame.ts`inden HİÇBİR ŞEY import etmiyor, emsal budur"
+diyordu; kod bunun tersini söylüyor (`ethercat.ts:96-105` `formatMac`,
+`classifyDestinationMac`, `walkTypeLengthChain`, `MAC_LENGTH`, `MIN_HEADER_LENGTH`,
+`TYPE_LENGTH_FIELD_LENGTH`, `VLAN_TPID`'yi AYNEN alıyor). Doğru emsal PAYLAŞIM olduğu
+için `profinet.ts` de aynısını yaptı — **girdi sınırı ethercat.ts ile BİREBİR aynı: TAM
+bir Ethernet çerçevesi** (DST/SRC MAC + opsiyonel VLAN tag'leri + EtherType + gövde).
+Ailede iki farklı girdi sözleşmesi yok; ikinci bir MAC formatlayıcı ya da ikinci bir
+VLAN yürüyüşü YAZILMADI. `ethernetFrame.ts`in `ETHER_TYPE_NAMES` tablosuna 0x8892
+eklendi (5d'de 0x88A4, 5e'de 0x88B8 için kurulan "motoru OLAN her EtherType burada
+ADLANDIRILIR" kuralının gereği); zincir yine KURULMAZ.
+
+**Kaynak durumu — PI'nin IEC 61158-6-10 metni üyelik/ücret arkasında, depoda YOK.** İki
+bağımsız kamuya açık kaynaktan çapraz teyit: **Wireshark PROFINET eklentisi**
+(`plugins/epan/profinet/{packet-pn-rt.c, packet-pn-dcp.c, packet-pn.h,
+packet-dcerpc-pn-io.c}`, GPL-2.0; `packet-pn-dcp.c` dosya başı kaynağını "IEC 61158-6-10
+section 4.3" diye yazıyor) ve **p-net** (RT-Labs AB, GPLv3/ticari çift lisans —
+`src/pf_types.h`, `src/common/pf_dcp.[ch]`, `src/common/pf_alarm.c`,
+`include/pnet_api.h`). İkisi de KOD SEVİYESİNDE okundu, kod kopyalanmadı. Örtüşenler:
+EtherType 0x8892, DCP başlığının 10 baytı, blok başlığının 4 baytı, çift hizalama
+dolgusu, DCP Option/Suboption numaraları, DCP FrameID dörtlüsü (0xFEFC-0xFEFF), alarm
+FrameID ikilisi (0xFC01/0xFE01), RTA sabit başlığının 12 baytı, PNIOStatus'un 4 baytı ve
+**DataStatus'un sekiz biti** (W'nin `hf_pn_rt_data_status_*` maskeleri ile P'nin
+`pnet_data_status_bits_t` bit numaraları BİREBİR aynı).
+
+**Çakışan/tek kaynaklı olduğu için ADLANDIRILMAYANLAR** (`ethercat.ts`in 0xFF/"EXT"
+emsali): AlarmType 0x0007 (W "Redundancy" / P `MEDIA_REDUNDANCY`) ve 0x000A (W "Plug
+wrong submodule" / P `PLUG_WRONG_MODULE` — biri submodule, öteki module diyor) ÇAKIŞTI;
+0x0014-0x001D bandını yalnız P adlandırıyor, W "reserved" diyor. FrameID 0xFC41/0xFE41/
+0xFE02/0xFE03/0xFE42 ("with security", RSI, SXP) yalnız W'de — hem tek kaynaklı hem
+kripto sınırının ötesinde, `reserved` sayılıp gövdeleri ham bırakıldı. DeviceRole
+baytının BİT anlamları hiçbir kaynakta yok → ham bayt. Ayrıca W'nin kendi kaskadındaki
+bir tutarsızlık (0xFF22 dalının KOŞULU `<= 0xFF22` iken YORUMU "0xFF22-0xFF3F Reserved"
+diyor) yorumun lehine çözüldü ve birim testiyle kilitlendi.
+
+**Tuzak 1 — DCP blokları ÇİFT uzunluğa hizalanır.** Blok başlığı 4 bayt (çift) olduğu
+için toplamın tekliği yalnız DCPBlockLength'ten gelir; tek uzunluklu bloktan sonra 1
+bayt `0x00` pad vardır. `cipCore.ts`in EPATH pad tuzağıyla AYNI SINIF: pad sıfır olduğu
+için tek bloklu örneklerde hata GÖRÜNMEZ, ama zincirde sonraki HER blok bir bayt kayar.
+İki örnek çerçeve bunu bilerek tetikliyor — `dcp-identify-response`ta ilk blok 11 baytlık
+(TEK) bir değer taşır ve pad atlansaydı ikinci bloğun Option baytı `'c'` (0x63) okunurdu;
+`dcp-set-response-padding`ta ART ARDA iki Control/Response bloğu (değer = Option +
+Suboption + BlockError = 3 bayt, TEK) pad zincirini sınar. Hem birim testi hem e2e turu
+ofseti SAYIYLA doğruluyor (blok 0 @26, pad @41, blok 1 @42) — e2e'de ofset sütunu
+tarayıcıda okunuyor, yani hizalama gerçekten ekranda kanıtlanıyor.
+
+**Tuzak 2 — APDU Status ÇERÇEVE SONUNDAN GERİ SAYILARAK bulunur.** Döngüsel çerçevede
+I/O verisinin uzunluğu ÇERÇEVEDE YAZMAZ; çerçevenin sonunda sabit 4 bayt (CycleCounter 2
++ DataStatus 1 + TransferStatus 1) vardır ve konumu ancak sondan geri sayılarak bulunur.
+İki kaynak da böyle yapıyor (W: `tvb_get_ntohs(tvb, pdu_len - 4)` / `pdu_len - 2` /
+`pdu_len - 1` ve `data_len = pdu_len - 2 - 4`; P: `pf_iocr_t`in `cycle_counter_offset` /
+`data_status_offset` / `transfer_status_offset` alanları). Bunun bedeli dosya başında
+AÇIKÇA yazılı ve alan uyarısı olarak basılıyor: yakalamaya eklenmiş her fazladan bayt
+(Ethernet dolgusu ya da yakalanmış FCS) kuyruğu kaydırır, çerçevede bunu yakalayacak bir
+uzunluk alanı YOKTUR. Birim testi aynı gövdeyi iki farklı uzunlukta çerçeveyle çözüp
+kuyruğun BİRLİKTE kaydığını gösteriyor.
+
+**I/O verisi HAM bırakıldı — sahte kırılım UYDURULMADI.** IOPS/IOCS baytları submodule
+verisiyle iç içe geçer ve konumları yalnız GSDML/AR bağlamından bilinir: P'de bu ofsetler
+(`pf_iodata_object_t.data_offset / iops_offset / iocs_offset`) `pf_cmdev.c`de CONNECT
+isteğindeki IOCR tanımlarından HESAPLANIR, döngüsel çerçeveden OKUNMAZ. Bölge tek parça
+ham basılır ve nedeni alan uyarısıyla söylenir (`ethercat.ts`in datagram verisi emsali).
+e2e turu I/O bölgesinde TEK satır olduğunu ayrıca doğruluyor.
+
+**`decodeOptions` — HİÇBİR kanal AÇILMADI, üç ayrı gerekçeyle.** (1) "I/O veri uzunluğu"
+/ "APDU Status var mı" çerçeveden ÇIKARILABİLİR (sınıf FrameID'den, uzunluk sondan geri
+sayılarak) — dalga 12f'nin WebSocket MASK-biti dersiyle AYNI disiplin, kanal gereksiz.
+(2) "IOPS/IOCS konumları" bir `select`/`number` alanına SIĞMAZ; slot/subslot ağacı ister,
+yarım bir kanal yanlış kırılıma davet olurdu. (3) "time-aware (TSN) profili" 0x0100-
+0x3FFF bandının anlamını değiştiriyor ama bilgi çerçevede DEĞİL OTURUMDA
+(`packet-pn-rt.c:718` onu `conversation_get_proto_data(...)`ten alıyor); tek çerçeve
+çözen bir motorda kullanıcı da bunu bilemez, bu yüzden klasik okuma uygulanıp belirsizlik
+UYARIYLA bildirildi.
+
+**Kapsam dışı bırakılanlar, dosya başında açıkça:** (1) **PN-IO acyclic**
+(Connect/Release/Read/Write) DCE/RPC üzerinden UDP/IP'de taşınır — bu motorun girdisi ham
+Ethernet çerçevesi, o ayrı ve büyük bir tel biçimi. (2) **PTCP** (Sync/Follow Up/Delay/
+Announce) aynı EtherType altında gelir, bu yüzden SINIFLANDIRILIR ama gövdesi ham kalır
+(`packet-pn-ptcp.c` Wireshark'ta bile ayrı bir dissector). (3) **GSDML ayrıştırıcısı**
+yazılmadı — bu depoda tanım dosyası paneli yalnız `DbcPanel`/`EdsPanel`; `definitions`
+sekmesi "planlandı" bildirimi basıyor (CLAUDE.md bunu açıkça meşru sayıyor) ve
+`tabs`/`tools`/`definitions`/`live` alanlarına DOKUNULMADI. (4) AlarmSpecifier'dan
+sonraki UserStructureIdentifier YÜKÜ (MaintenanceItem/AlarmItem/ChannelDiagnosis) AR
+bağlamı ister; USI ADLANDIRILIR, yükü ham kalır.
+
+**`ready` kararı ve araç sayımı.** Katalogdaki 9 aracın **2'si tam** (Device Discovery/
+DCP, Alarms), **5'i kısmi** (IO Controller, IO Device, Cyclic I/O — çerçeve ve APDU
+Status evet, yük semantiği hayır —, Slot/Subslot — alarmda slot/subslot numarası evet,
+ağaç hayır —, Diagnostics — DataStatus/TransferStatus/BlockError/alarm tanı bitleri evet,
+tanı kaydı kataloğu hayır), **2'si karşılanmadı** (Timing/Jitter çok çerçeve ister;
+GSDML Explorer bilinçli kapsam dışı). Bu, `ethercat`in (`ready`) kendi tablosuyla AYNI
+sınıfta: onun 10 aracından "Slave States", "Distributed Clocks", "PDO" ve "Mailbox"
+dosya başında AÇIKÇA motorun dışında bırakılmış. `ready` ölçütü `ethercat.ts`in kendi
+gerekçesinde yazılı: ham kalan bölge YAPISAL bir eksik değil TANIM-BAĞIMLI içerikse ve
+protokolün KENDİ tanımladığı atlanmış bir doğrulama yoksa `ready`dir (MAVLink `partial`
+çünkü CRC_EXTRA doğrulaması dialect olmadan YAPILAMIYOR). PROFINET ikinci gruba düşer:
+çözülen her sınıfın HER başlık alanı adlandırıldı, PROFINET'in kendi tanımladığı bir
+çerçeve checksum'ı YOKTUR (o iş Ethernet FCS'inindir), dolayısıyla atlanan doğrulama da
+yoktur.
+
+**Encoder YAZILMADI** (`modbus-tcp`/`opc-ua`/`ethernet-ip` emsali), `protocol-core/
+types.ts`e DOKUNULMADI, `live`/`tools`/`definitions` alanlarına DOKUNULMADI.
+
+39 birim testi (`profinet.test.ts`) + 14 e2e (gerçek tarayıcı, `profinet-decode.spec.ts`
+— DCP pad hizalamasını ve APDU-Status geri saymasını OFSET SÜTUNUNDAN doğrulayan ayrı
+testler, `decode-parse-error` (`success:false`) yolu ve 1440/390 px taşma turu dahil) +
+4490 toplam test + typecheck/build yeşil; `ethercat`, `goose` ve `ethernet-ii`nin mevcut
+testleri (paylaşılan `ethernetFrame.ts` dokunuldu) DOKUNULMADAN yeşil kaldı. Değişen/yeni
+dosyalar: `protocols/industrial/profinet/profinetFrameId.ts` (yeni),
+`profinetDcp.ts` (yeni), `profinetAlarm.ts` (yeni), `profinet.ts` (yeni) +
+`profinet.test.ts` (yeni), `protocols/network/ethernet/ethernetFrame.ts`
+(`ETHER_TYPE_NAMES`e 0x8892), `protocols/index.ts` (kayıt) + `index.test.ts` (kayıt
+sayacı, alfabetik sıra + kategori haritası), `app/catalog/domains/industrial-automation.ts`
+(`status: 'ready'` + `pluginId`), `translations/{tr,en}.ts` (66'şar anahtar),
+`e2e/profinet-decode.spec.ts` (yeni), `CLAUDE.md` (borç sayımı KODDAN doğrulandı:
+42→41 kanonik, industrial-automation 10→9). Sıradaki: **13f (powerlink, cc-link-ie,
+sercos-iii)** — `industrial-ethernet` ailesi kapanır; powerlink'in CANopen paylaşımı bu
+alt dalgada sınanır (kanıtlanırsa kullanılır, kanıtlanmazsa bağımsız yazılır).
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.
