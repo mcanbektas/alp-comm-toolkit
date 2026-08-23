@@ -943,6 +943,88 @@ e2e (gerçek tarayıcı: `profibus-dp` 11 + `cc-link-ie` 13 + `cc-link` 11 + `as
 7→2). Sıradaki: **13h (io-link, hart)** — bitince `industrial-automation` domain'i
 TAMAMEN KAPANIR.
 
+**13h (2026-08-23 bitti) — io-link, hart.** `sensors-device-integration` VE
+`process-instrumentation` aileleri KAPANDI — ikisi de tek kayıtlı aile olduğu için bu iki
+kaydın bitmesi doğrudan iki aile kapanışı demekti.
+
+**HART — brief'in 2. açık sorusu ÇÖZÜLDÜ, cevap HAYIR:** `protocol-core/checksums/
+lrc.ts`teki `lrcChecksum` HART'ın checksum'ı DEĞİL — kaynağında `twosComplementChecksum`a
+delege ettiği doğrulandı (Modbus ASCII'nin iki'nin tümleyeni LRC'si). Gerçek checksum
+`simpleChecksums.ts`teki `xor8Checksum`, PAYLAŞILDI. Kapsadığı baytlar Start Delimiter'dan
+(dahil) son veri baytına (dahil) — preamble ve checksum'ın kendisi HARİÇ; bu, İKİ bağımsız,
+GERÇEKTEN ÇALIŞAN açık kaynak uygulamasından (`yaq-project/hart-protocol` Python,
+`jszumigaj/hart` Go) ve o kütüphanelerin KENDİ birim testlerindeki ÜÇ elle-doğrulanmış
+vektörden (kısa istek→0x02, kısa yanıt→0xA3, uzun istek→0x07) teyitlendi. Bir web
+kaynağının "delimiter 0 ile başlarsa uzun, 8 ile başlarsa kısa" iddiası KENDİ TABLOSUYLA
+ve iki bağımsız kodla ÇELİŞTİĞİ için REDDEDİLDİ. Preamble bu ailede İSTİSNA: PROFIBUS/
+AS-i'nin "fiziksel katman decoder'a sızmaz" kuralının TERSİNE, HART'ın 0xFF tekrarı
+bayt-seviyesinde gerçekten var olduğu için bir ALAN olarak çözülür. Komut sınıflandırması
+(Universal 0-30/Common Practice 32-126/Device-Specific 128-253) doğrulandı, Data alanı
+komuta özel olduğu için (~200 komut) ham bırakıldı — `profibusDp.ts`in DU kararının aynısı.
+`ready` — envelope'un HER alanı adlandırılıp checksum GERÇEKTEN doğrulanıyor.
+
+**IO-Link — RESMİ, ÜCRETSİZ spec doğrudan indirildi (13g'nin GSD/spec-bulma sıkıntısı
+burada YOK):** IO-Link Interface and System Specification V1.1.4 (Haziran 2024),
+io-link.com'da herkese açık — 314 sayfa, `pdftotext` ile metne çevrilip Annex A (Codings,
+timing constraints and errors) birebir kullanıldı. M-sequence checksum (0x52 tohum + XOR +
+8→6 bit sıkıştırma denklemleri, Figure A.4 + denklem A.1) resmi formülle GERÇEKTEN
+doğrulanıyor; ISDU kanalında (Annex A.5) tek çerçeveye sığan bir parametre isteği/yanıtı
+varsa Index/Subindex/Data VE kendi bağımsız CHKPDU checksum'ı da çözülüyor. **Yeni bir
+mimari desen: `messageSide` decodeOptions kanalı.** Master mesajı (`MC,CKT,…`) ile Device
+mesajı (`…,CKS`) AYRI UART patlamaları ve hangisinin gönderildiği baytların içinde
+yazmıyor — kısa girdilerde gerçek bir çakışma (2 baytlık girdi hem "TYPE_0 okuma isteği"
+hem "TYPE_0 okuma yanıtı" olabilir). `ccLink.ts`in `direction`ı ve `iec101.ts`in genişlik
+seçeneklerinin "alan YERLEŞİMİNİ değiştiren decodeOptions" emsalini BÜYÜTÜYOR: burada
+seçenek hangi BAYTIN hangi ALANA karşılık geldiğini bile değiştiriyor. Process Data
+içeriği, Type 2'nin PD/OD sınırı (alt tip MC/CKT'de yazmıyor) ve segmentli ISDU ham
+bırakıldı. `ready` — aynı `profibusDp.ts`/`hart.ts` ölçütü: envelope'un HER alanı
+doğrulanıyor, ham kalanlar YAPISAL eksik değil IODD/eşleşen çerçeve/önceden-anlaşılmış-
+parametre bağımlı içerik.
+
+67 yeni birim testi (`hart.test.ts` 36 + `ioLink.test.ts` 31) + 23 yeni e2e (gerçek
+tarayıcı: `hart-decode` 12 + `io-link-decode` 11; IO-Link e2e'si `messageSide`in
+GERÇEKTEN alan yerleşimini değiştirdiğini AYRICA doğruluyor) + 4745 toplam birim test +
+968 toplam e2e + typecheck/build yeşil. Değişen/yeni dosyalar:
+`protocols/industrial/hart/hart.ts` (+test, yeni),
+`protocols/industrial/iolink/ioLink.ts` (+test, yeni), `protocols/index.ts` (2 kayıt) +
+`index.test.ts` (sayaç/alfabetik sıra/kategori haritası),
+`app/catalog/domains/industrial-automation.ts` (2 kayıt: ikisi de `ready` + `pluginId` +
+dürüst `summary`), `translations/{tr,en}.ts` (2×~50 anahtar),
+`e2e/{hart,io-link}-decode.spec.ts` (yeni), `CLAUDE.md` (borç sayımı KODDAN doğrulandı:
+34→32 kanonik, industrial-automation 2→0).
+
+**`industrial-automation` domain'i TAMAMEN BİTTİ — dalga 13 kapandı.**
+
+**Dalga 13 kapanış özeti (13a-13h, 8 alt dalga / 16 kanonik kayıt, 2026-08-22 →
+2026-08-23):** `industrial-automation`ın 8 ailesinin HEPSİ kapandı — modbus, metering
+(13a wireless-m-bus), scada-utility (13b iec-60870-5-101 + 13c opc-ua), cip-can-based
+(13d cip/ethernet-ip/devicenet), industrial-ethernet (13d ethernet-ip + 13e profinet +
+13f powerlink/sercos-iii/cc-link-ie), classic-fieldbus (13g profibus-dp/cc-link/
+as-interface/foundation-fieldbus), sensors-device-integration (13h io-link),
+process-instrumentation (13h hart). 16 kayıttan **12'si `ready`** (wireless-m-bus,
+iec-60870-5-101, opc-ua, cip, ethernet-ip, devicenet, profinet, powerlink, sercos-iii,
+profibus-dp, io-link, hart), **4'ü `partial`** (cc-link-ie, cc-link, as-interface,
+foundation-fieldbus — dördü de `classic-fieldbus`/`industrial-ethernet`in en
+kaynak-kısıtlı köşesinde, hepsi bilinçli kapsam kararı, eksik iş değil).
+
+Brief'in (`docs/brief-faz10-dalga13.md`) tahminlerinden: **"spec kaynağı riski dalga
+12'den köklü fark" tahmini tam DOĞRULANDI** — 13g'nin dört kaydı (classic-fieldbus'un
+profibus-dp DIŞINDAKİ tamamı) gerçekten kaynak yetersizliğinden `partial` kaldı, brief'in
+öngördüğü "IEC 61850 GOOSE-only presedanı" senaryosu birebir gerçekleşti. **POWERLINK'in
+CANopen paylaşımı "sınanacak, kanıtlanmazsa bağımsız yazılır" kararı ÇÜRÜME yönünde
+sonuçlandı** — paylaşım bit düzeyinde test edilip üç somut farkla (NMT durum kodları, SDO
+çerçeve biçimi, PDO boyut sınırı) reddedildi, dalga 12'nin "akraba görünen tel biçimi
+farklı çıkabilir" dersini bir kez daha doğruladı. **HART checksum sorusu (açık soru 2) bu
+alt dalgada ÇÖZÜLDÜ**, cevap `lrc.ts` değil `xor8Checksum` — yukarı. **EDS sorusu (açık
+soru 1) ana session tarafından erken kapatılmıştı**: `ethernet-ip`e `definitions` sekmesi
+eklenmedi, motor EDS okumuyor. Alt dalga zorluk sıralaması (13a/13b kolay başta, 13c/13e
+Opus-seviyesi, 13g en yüksek spec-riski) da fiilen doğru çıktı: 13g gerçekten dalganın en
+çok `partial` üreten alt dalgası oldu.
+
+Sıradaki domain seçimi HENÜZ YAPILMADI — kalan beş domain'de (`automotive` 12,
+`aerospace-uav` 12, `wireless-iot` 4, `marine-navigation` 3, `building-automation` 1) hiç
+iş başlamadı, toplam 32 kanonik kayıt açık.
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.

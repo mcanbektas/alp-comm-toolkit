@@ -5941,4 +5941,158 @@ export const en: TranslationDictionary = {
   'protocol.profibusDp.example.unknownStartDelimiter.name': 'Unknown start delimiter',
   'protocol.profibusDp.example.unknownStartDelimiter.description':
     'The first byte is 0x55, none of the five delimiters — a ParseFailure (recoverable, the stream can continue).',
+
+  'protocol.hart.error.emptyInput': 'Input is empty — no message to decode.',
+  'protocol.hart.error.frameTooLong': 'The message exceeds the maximum allowed length.',
+  'protocol.hart.error.aborted': 'Decoding was aborted.',
+  'protocol.hart.error.noDelimiterFound':
+    'No recognised start delimiter was found after the preamble.',
+  'protocol.hart.error.delimiterUnknown':
+    'The start delimiter is not one of the six recognised values.',
+  'protocol.hart.error.frameTruncated':
+    'There is not as much data as the Byte Count field promises — the message is truncated.',
+  'protocol.hart.error.checksumMismatch': 'The checksum does not match.',
+  'protocol.hart.warning.commandNotNamed':
+    'The command class is known, but this individual command is not named.',
+  'protocol.hart.warning.commandRangeReserved':
+    'The command number falls outside the Universal/Common Practice/Device-Specific ranges — reserved or undefined.',
+  'protocol.hart.warning.responseCodeNotNamed':
+    'The Response Code is not named in the command-specific status table.',
+  'protocol.hart.warning.dataIsCommandSpecific':
+    'The layout of the Data field depends on the command and is not broken down by this engine.',
+  'protocol.hart.warning.burstStatusLayoutInferred':
+    'The burst frame status bytes are assumed to have the same layout as a response frame — not independently confirmed.',
+  'protocol.hart.warning.trailingBytes': 'There are extra bytes after the checksum.',
+  'protocol.hart.summary.request': '{address} → Command {command}',
+  'protocol.hart.summary.response': '{address} ← Command {command}',
+  'protocol.hart.summary.burst': 'Burst {address}: Command {command}',
+  'protocol.hart.documentation.summary':
+    'The serial HART frame: preamble, short or long start delimiter, either a short polling address or a long manufacturer/device-type/device-ID address, Universal/Common Practice/Device-Specific command classification, byte count, response code and device status, and a checksum that is really an XOR and is genuinely verified. The Data field is command-specific and is left raw.',
+  'protocol.hart.example.shortRequestReadUniqueIdentifier.name': 'Short request — Read Unique Identifier',
+  'protocol.hart.example.shortRequestReadUniqueIdentifier.description':
+    'Delimiter 0x02 (master-to-slave, short frame), address 0, command 0, no data. The real vector from the jszumigaj/hart unit test (checksum 0x02) — hand-verified against the independent source.',
+  'protocol.hart.example.shortResponseReadUniqueIdentifier.name': 'Short response — Read Unique Identifier',
+  'protocol.hart.example.shortResponseReadUniqueIdentifier.description':
+    "Delimiter 0x06 (slave-to-master, short frame), status 00 40 (Configuration Changed), 12 bytes of data. The same library's second verified vector (checksum 0xA3).",
+  'protocol.hart.example.longRequestSecondaryMaster.name': 'Long request — secondary master',
+  'protocol.hart.example.longRequestSecondaryMaster.description':
+    'Delimiter 0x82 (master-to-slave, long frame), bit 7 of the address byte clear (secondary master). The third verified vector (checksum 0x07).',
+  'protocol.hart.example.longRequestPrimaryMasterWritePollingAddress.name':
+    'Long request — primary master, Write Polling Address',
+  'protocol.hart.example.longRequestPrimaryMasterWritePollingAddress.description':
+    'Same address but with bit 7 set (primary master); Command 6 writes a new polling address of 5.',
+  'protocol.hart.example.longResponseLoopCurrent.name': 'Long response — Read Loop Current and % of Range',
+  'protocol.hart.example.longResponseLoopCurrent.description':
+    "A Command 2 response: an 8-byte data field carrying two IEEE-754 floats — left raw by this engine, because its interpretation is command-specific.",
+  'protocol.hart.example.deviceMalfunctionStatus.name':
+    'Device Status — Device Malfunction + PV Out of Limits',
+  'protocol.hart.example.deviceMalfunctionStatus.description':
+    'The second status byte is 0x81: bit 0x80 (Device Malfunction) and bit 0x01 (Primary Variable Out of Limits) set together.',
+  'protocol.hart.example.communicationsErrorResponse.name': 'Communications error — Longitudinal Parity Error',
+  'protocol.hart.example.communicationsErrorResponse.description':
+    "Response Code 0x88: with bit 7 set, the remaining bits are read as communication error flags (0x08 = Longitudinal Parity Error). Matches the value used in jszumigaj/hart's own unit test.",
+  'protocol.hart.example.commandNotImplementedResponse.name':
+    'Command-specific status — Command Not Implemented',
+  'protocol.hart.example.commandNotImplementedResponse.description':
+    "Response Code 0x40: with bit 7 clear, it is read from the command-specific status table (Command Not Implemented). The same library's second verified status value.",
+  'protocol.hart.example.burstFrame.name': 'Burst frame',
+  'protocol.hart.example.burstFrame.description':
+    "Delimiter 0x81 (long, unsolicited). The status bytes are ASSUMED to share the response frame's layout — this inference is not independently confirmed, hence the warning.",
+  'protocol.hart.example.commonPracticeCommand.name':
+    'Common Practice command — Reset Configuration Changed Flag',
+  'protocol.hart.example.commonPracticeCommand.description':
+    'Command 38, within the Common Practice range (32-126) and named in the lookup table.',
+  'protocol.hart.example.deviceSpecificCommand.name': 'Device-Specific command — unnamed',
+  'protocol.hart.example.deviceSpecificCommand.description':
+    'Command 200, within the Device-Specific range (128-253) but not in the lookup table — the class is shown, the name is not invented.',
+  'protocol.hart.example.reservedCommandRange.name': 'Reserved command range',
+  'protocol.hart.example.reservedCommandRange.description':
+    'Command 31: the gap between Universal (0-30) and Common Practice (32-126), falling into no class.',
+  'protocol.hart.example.checksumMismatch.name': 'Checksum mismatch',
+  'protocol.hart.example.checksumMismatch.description':
+    'The checksum byte was deliberately incremented by one: because the XOR is really computed, a frame error is raised and the expected value is shown.',
+  'protocol.hart.example.unknownStartDelimiter.name': 'Unknown start delimiter',
+  'protocol.hart.example.unknownStartDelimiter.description':
+    'The byte after the preamble is 0x55 — none of the six recognised delimiters.',
+  'protocol.hart.example.noDelimiterFound.name': 'No delimiter found',
+  'protocol.hart.example.noDelimiterFound.description':
+    'The input is 0xFF from end to end — the preamble never ends, so no real delimiter is ever reached.',
+  'protocol.hart.example.frameTruncated.name': 'Truncated message',
+  'protocol.hart.example.frameTruncated.description':
+    'The Byte Count promises 12 bytes but only 2 are present: because the length cannot be trusted, the remaining bytes are shown as one raw block.',
+  'protocol.hart.example.trailingBytes.name': 'Trailing bytes after checksum',
+  'protocol.hart.example.trailingBytes.description':
+    'Two extra bytes were appended after an otherwise valid frame.',
+
+  'protocol.ioLink.error.emptyInput': 'Input is empty — no message to decode.',
+  'protocol.ioLink.error.frameTooLong': 'The message exceeds the maximum allowed length.',
+  'protocol.ioLink.error.aborted': 'Decoding was aborted.',
+  'protocol.ioLink.error.masterMessageTooShort': 'A master message needs at least 2 bytes (MC + CKT).',
+  'protocol.ioLink.error.checksumMismatch': 'The 6-bit checksum does not match.',
+  'protocol.ioLink.error.isduChecksumMismatch': "The ISDU's own CHKPDU checksum does not match.",
+  'protocol.ioLink.warning.processDataNeedsIodd':
+    'The layout of the Process Data content comes from the IODD file and is not broken down by this engine.',
+  'protocol.ioLink.warning.onRequestDataNotDecoded':
+    'The On-request Data was left raw: not the ISDU channel, a segmented ISDU fragment, or an unrecognised I-Service.',
+  'protocol.ioLink.warning.type2PayloadSplitUnknown':
+    "A Type 2 message's Process/On-request Data boundary depends on a previously negotiated M-sequence subtype and does not follow from this frame.",
+  'protocol.ioLink.warning.mSequenceTypeReserved': 'The M-sequence type is reserved (3) — it should not be used.',
+  'protocol.ioLink.warning.devicePayloadKindUnknown':
+    'Whether these bytes are Process Data or On-request Data is only known from the paired master message, not from this frame alone.',
+  'protocol.ioLink.warning.isduServiceNotNamed':
+    'The I-Service value is not one of the eleven recognised values — reserved or undefined.',
+  'protocol.ioLink.warning.isduTrailingBytes': "There are extra bytes after the length the ISDU declares.",
+  'protocol.ioLink.summary.master': '{rw} · {channel} · address {address}',
+  'protocol.ioLink.summary.device': 'Device reply · PD {pdStatus} · Event {event}',
+  'protocol.ioLink.documentation.summary':
+    'The M-sequence envelope: in a master message, MC (R/W, channel, address/FlowCTRL) plus CKT (M-sequence type and a genuinely verified 6-bit XOR checksum); in a device message, the Event and PD-status flags plus the same checksum. On the ISDU channel, a parameter request or response that fits in a single M-sequence also has its Index, Subindex, Data and its own CHKPDU decoded. Process Data content, a Type 2 message\'s PD/OD boundary and a segmented ISDU are left raw.',
+  'protocol.ioLink.option.messageSide': 'Message side',
+  'protocol.ioLink.option.messageSide.description':
+    'The M-sequence octets do not say inside the bytes which side sent them — a master message starts with MC+CKT, a device message ends with CKS. Choose which one to decode here.',
+  'protocol.ioLink.option.messageSide.master': 'Master → Device (MC, CKT, …)',
+  'protocol.ioLink.option.messageSide.device': 'Device → Master (…, CKS)',
+  'protocol.ioLink.example.masterType0IsduStart.name': 'TYPE_0 — ISDU transfer starting (FlowCTRL START)',
+  'protocol.ioLink.example.masterType0IsduStart.description':
+    "MC: write, ISDU channel, address 0x10 (FlowCTRL START). TYPE_0's single OD byte is the opening fragment of a segmented ISDU transfer — it does not fit in one frame, so it is left raw.",
+  'protocol.ioLink.example.masterType1ProcessDataWrite.name': 'TYPE_1_1 — Process Data write',
+  'protocol.ioLink.example.masterType1ProcessDataWrite.description':
+    "Because MC's channel is Process, the 2-byte body is named Process Data — its content depends on the IODD, so it stays raw.",
+  'protocol.ioLink.example.masterType1IsduWriteResponsePositive.name':
+    'TYPE_1 — ISDU Write Response (+), fully decoded',
+  'protocol.ioLink.example.masterType1IsduWriteResponsePositive.description':
+    'The OD is exactly a 2-byte Write Response(+) ISDU (I-Service 0x5, Length 0x2) — fully decoded, CHKPDU included, and verified.',
+  'protocol.ioLink.example.masterType1IsduReadRequest8Bit.name': 'TYPE_1 — ISDU Read Request, 8-bit Index',
+  'protocol.ioLink.example.masterType1IsduReadRequest8Bit.description':
+    'A read request with an 8-bit index of 16 — a complete three-octet ISDU.',
+  'protocol.ioLink.example.masterType1IsduReadResponse16Bit.name': 'TYPE_1 — ISDU Read Response (+), data',
+  'protocol.ioLink.example.masterType1IsduReadResponse16Bit.description':
+    'A Read Response(+) carries only Data (Table A.13: the response has no Index/Subindex) — four bytes of data plus CHKPDU.',
+  'protocol.ioLink.example.masterType0IsduFragment.name': 'TYPE_0 — ISDU fragment, cannot be fully decoded',
+  'protocol.ioLink.example.masterType0IsduFragment.description':
+    "Even the smallest ISDU (such as a Write Response) needs 2 bytes; it does not fit in TYPE_0's single OD byte — it is reported as segmented and left raw.",
+  'protocol.ioLink.example.masterType2Combined.name': 'TYPE_2 — combined Process + On-request Data',
+  'protocol.ioLink.example.masterType2Combined.description':
+    'The PD/OD boundary depends on a previously negotiated subtype (2_1..2_5/2_V) and is not written into this frame — shown as one raw block.',
+  'protocol.ioLink.example.masterTypeReserved.name': 'Reserved M-sequence type',
+  'protocol.ioLink.example.masterTypeReserved.description':
+    "CKT's type bits are 0b11 (3) — the spec says this is reserved and shall not be used.",
+  'protocol.ioLink.example.masterDiagnosisChannel.name': 'Diagnosis channel — not ISDU, raw',
+  'protocol.ioLink.example.masterDiagnosisChannel.description':
+    "Because the channel is Diagnosis, ISDU decoding is not attempted; the content (event/diagnostic sub-structure) is outside this engine's scope.",
+  'protocol.ioLink.example.masterChecksumMismatch.name': 'Checksum mismatch',
+  'protocol.ioLink.example.masterChecksumMismatch.description':
+    'The 6-bit checksum was deliberately incremented by one: because the official XOR-and-compress formula is really computed, a frame error is raised.',
+  'protocol.ioLink.example.masterIsduChkpduMismatch.name': 'ISDU CHKPDU mismatch',
+  'protocol.ioLink.example.masterIsduChkpduMismatch.description':
+    "The outer 6-bit checksum is correct, but the ISDU's own, independent CHKPDU was deliberately broken — the two checksums protect different layers.",
+  'protocol.ioLink.example.masterMessageTooShort.name': 'Master message too short',
+  'protocol.ioLink.example.masterMessageTooShort.description':
+    'A single byte: MC and CKT together need at least 2 bytes.',
+  'protocol.ioLink.example.deviceWriteAck.name': 'Device — write acknowledgement (CKS only)',
+  'protocol.ioLink.example.deviceWriteAck.description': 'No PD/OD, just CKS: the acknowledgement of a write request.',
+  'protocol.ioLink.example.deviceReplyWithPayloadAndEvent.name': 'Device — data plus the Event flag',
+  'protocol.ioLink.example.deviceReplyWithPayloadAndEvent.description':
+    '2 bytes of body (whether Process or On-request Data depends on the paired master message, hence raw) plus Event pending and Process Data invalid.',
+  'protocol.ioLink.example.deviceChecksumMismatch.name': 'Device checksum mismatch',
+  'protocol.ioLink.example.deviceChecksumMismatch.description': "CKS's 6-bit checksum was deliberately broken.",
 };

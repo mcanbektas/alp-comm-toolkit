@@ -501,9 +501,10 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'io-link',
           name: 'IO-Link',
           summary:
-            'Point-to-point interface between an IO-Link master port and an intelligent sensor or actuator, carrying process data, on-request parameters and events.',
+            'Point-to-point interface between an IO-Link master port and an intelligent sensor or actuator, carrying process data, on-request parameters and events. The decoder covers the full M-sequence envelope on both sides of the link — the master\'s R/W bit, communication channel and address (FlowCTRL on the ISDU channel), the M-sequence type, and the device\'s event flag and Process Data status — with a checksum that is really the official 6-bit XOR-and-compress algorithm, genuinely verified. On the ISDU channel it goes further and decodes a complete parameter request or response, index, subindex and its own independent CHKPDU checksum, whenever one fits in a single M-sequence. Process Data content, a Type 2 message\'s process/on-request split and a segmented ISDU stay raw, because they depend on the IODD file, a prior negotiation or the paired frame rather than on this one.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'io-link',
           tabs: [
             'overview',
             'live',
@@ -537,9 +538,10 @@ export const industrialAutomationDomain: CatalogDomain = {
           id: 'hart',
           name: 'HART',
           summary:
-            'FSK digital communication superimposed on the 4–20 mA current loop, letting a host read the analog process value and the digital device data side by side.',
+            'FSK digital communication superimposed on the 4–20 mA current loop, letting a host read the analog process value and the digital device data side by side. The decoder covers the full serial frame envelope — preamble, short and long start delimiters, the primary/secondary master flag, the short polling address and the long manufacturer/device-type/device-ID address, universal/common practice/device-specific command classification, byte count, response code (communication-error flags versus command-specific status) and device status, and the checksum, which is really an XOR over the delimiter through the data and is genuinely verified. Only the command data itself stays raw, because its layout is defined per command (roughly 200 of them) rather than by the envelope.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'hart',
           tabs: [
             'overview',
             'live',

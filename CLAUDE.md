@@ -125,24 +125,34 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13g'den sonra)
-  104 `ready` / 49 `planned` / 19 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13h'den sonra,
+  KODDAN doğrulandı — tek kullanımlık sayım script'i)
+  106 `ready` / 47 `planned` / 19 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **119 `ready` / 34 `planned` / 19 `partial`**; gerçekten yapılacak iş **34 kanonik
+  **121 `ready` / 32 `planned` / 19 `partial`**; gerçekten yapılacak iş **32 kanonik
   kayıt** (automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3,
-  industrial-automation 2, building-automation 1). **`network-ethernet` (19 kayıt) dalga
-  12 ile TAMAMEN KAPANDI** (12a-12h, `docs/plan-fazlar.md`); `industrial-automation`
-  dalga 13 ile SÜRÜYOR (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
-  cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii + 13g
-  profibus-dp/cc-link/as-interface/foundation-fieldbus/cc-link-ie bitti;
-  `scada-utility`, `cip-can-based`, `metering`, **`industrial-ethernet` ve
-  `classic-fieldbus`** aileleri KAPANDI — domain'de yalnız **io-link** ve **hart**
-  kaldı, 13h). **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik iş
-  değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı taşıyıcı),
-  `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil), `as-interface`
-  klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in sınırlayıcıları
-  bayt bile değil) — gerekçeler ilgili `.ts` dosyalarının başında ve
-  `docs/plan-fazlar.md`nin 13g notunda.
+  building-automation 1). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
+  KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
+  13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
+  cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii/cc-link-ie + 13g
+  profibus-dp/cc-link/as-interface/foundation-fieldbus + 13h io-link/hart — 8 alt dalga,
+  16 kanonik kayıt, 12 `ready` + 4 `partial`); domain'in 8 ailesi de (`modbus`,
+  `metering`, `scada-utility`, `cip-can-based`, `industrial-ethernet`,
+  `classic-fieldbus`, `sensors-device-integration`, `process-instrumentation`) kapandı.
+  Kalan beş domain'de (`automotive`, `aerospace-uav`, `wireless-iot`,
+  `marine-navigation`, `building-automation`) henüz hiç iş başlamadı; sıradaki domain
+  seçimi YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
+  iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
+  taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
+  `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
+  sınırlayıcıları bayt bile değil) — gerekçeler ilgili `.ts` dosyalarının başında ve
+  `docs/plan-fazlar.md`nin 13g notunda. `hart` ve `io-link` (13h) ikisi de `ready`:
+  HART'ın checksum'ı `lrc.ts` DEĞİL, paylaşılan `xor8Checksum`; IO-Link'in 6-bit
+  checksum'ı resmi spec formülüyle (seed+XOR+8→6 bit sıkıştırma) doğrulanır ve
+  `messageSide` adlı yeni bir `decodeOptions` deseniyle (alan YERLEŞİMİNİ değiştiren
+  seçenek — `ccLink.ts`/`iec101.ts` emsalinin genişletilmiş hâli) Master/Device
+  mesajları ayrı çözülür — ikisinin gerekçesi `hart.ts`/`ioLink.ts` dosya başında ve
+  `docs/plan-fazlar.md`nin 13h notunda.
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

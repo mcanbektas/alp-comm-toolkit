@@ -410,6 +410,30 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'profibus-dp', () =>
     import('./industrial/profibus/profibusDp').then((module) => module.profibusDpPlugin),
   );
+  // HART — dalga 13h: brief'in 2. açık sorusu ÇÖZÜLDÜ, `lrc.ts` SAHTE DOST —
+  // checksum gerçekte `xor8Checksum` (start delimiter'dan son veri baytına,
+  // preamble ve checksum'ın kendisi HARİÇ), iki bağımsız çalışan açık kaynak
+  // uygulamasıyla (yaq-project/hart-protocol, jszumigaj/hart) ve üç GERÇEK
+  // birim-test vektörüyle elle doğrulandı. Preamble bu ailede İSTİSNA olarak
+  // bir alan gibi çözülür (fiziksel katman değil, bayt-seviyesinde gerçekten
+  // var olan 0xFF tekrarı). `process-instrumentation` ailesinin TEK kaydı;
+  // bu kayıtla aile KAPANIR (bkz. hart.ts dosya başı).
+  registerOnce(registry, 'hart', () =>
+    import('./industrial/hart/hart').then((module) => module.hartPlugin),
+  );
+  // IO-Link — dalga 13h: RESMİ, ÜCRETSİZ IO-Link Interface and System
+  // Specification V1.1.4'ten (Annex A) birebir. MC/CKT (master) ve
+  // [PD/OD]+CKS (device) AYRI UART patlamaları olduğu için hangi yönün
+  // çözüleceği baytlardan çıkmaz — `messageSide` decodeOptions kanalı bunun
+  // için AÇILDI (`ccLink.ts`in `direction`ı ve `iec101.ts`in genişlik
+  // seçenekleri gibi alan YERLEŞİMİNİ değiştiren bir emsal). Checksum resmi
+  // formülle (0x52 tohum + XOR + 8→6 bit sıkıştırma) GERÇEKTEN doğrulanır;
+  // ISDU tek çerçeveye sığdığında CHKPDU da AYRICA doğrulanır, sığmıyorsa
+  // (segmentli) ham bırakılır. `sensors-device-integration` ailesinin TEK
+  // kaydı; bu kayıtla aile KAPANIR (bkz. ioLink.ts dosya başı).
+  registerOnce(registry, 'io-link', () =>
+    import('./industrial/iolink/ioLink').then((module) => module.ioLinkPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

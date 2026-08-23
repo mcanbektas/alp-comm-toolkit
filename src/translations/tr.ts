@@ -5925,6 +5925,165 @@ export const tr = {
   'protocol.profibusDp.example.unknownStartDelimiter.name': 'Tanınmayan başlangıç sınırlayıcısı',
   'protocol.profibusDp.example.unknownStartDelimiter.description':
     'İlk bayt 0x55: beş sınırlayıcıdan hiçbiri değil — ParseFailure (kaydedilebilir, akış devam edebilir).',
+
+  'protocol.hart.error.emptyInput': 'Girdi boş — çözülecek mesaj yok.',
+  'protocol.hart.error.frameTooLong': 'Mesaj izin verilen azami uzunluğu aşıyor.',
+  'protocol.hart.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.hart.error.noDelimiterFound':
+    'Preamble sonunda tanınan bir başlangıç sınırlayıcısı bulunamadı.',
+  'protocol.hart.error.delimiterUnknown':
+    'Başlangıç sınırlayıcısı tanınan altı değerden biri değil.',
+  'protocol.hart.error.frameTruncated':
+    'Byte Count alanının vaat ettiği kadar veri yok — mesaj kesik.',
+  'protocol.hart.error.checksumMismatch': 'Checksum tutmuyor.',
+  'protocol.hart.warning.commandNotNamed':
+    'Komut sınıfı biliniyor ama bu komut tek tek adlandırılmamış.',
+  'protocol.hart.warning.commandRangeReserved':
+    'Komut numarası Universal/Common Practice/Device-Specific aralıklarının hiçbirine girmiyor — ayrılmış/tanımsız.',
+  'protocol.hart.warning.responseCodeNotNamed':
+    'Response Code komuta özel durum tablosunda adlandırılmamış.',
+  'protocol.hart.warning.dataIsCommandSpecific':
+    'Data alanının yapısı komuta göre değişir, bu motor tarafından kırılmaz.',
+  'protocol.hart.warning.burstStatusLayoutInferred':
+    'Burst çerçevesinin durum baytları yanıt çerçevesiyle aynı varsayılıyor — bağımsız kaynakta doğrulanmadı.',
+  'protocol.hart.warning.trailingBytes': 'Checksum sonrasında fazladan bayt var.',
+  'protocol.hart.summary.request': '{address} → Komut {command}',
+  'protocol.hart.summary.response': '{address} ← Komut {command}',
+  'protocol.hart.summary.burst': 'Burst {address}: Komut {command}',
+  'protocol.hart.documentation.summary':
+    'Seri HART çerçevesi: preamble, kısa/uzun başlangıç sınırlayıcısı, kısa poll adresi ya da uzun üretici/cihaz tipi/cihaz ID adresi, Universal/Common Practice/Device-Specific komut sınıflandırması, byte count, response code ve device status, ve gerçekten doğrulanan XOR checksum. Data alanı komuta özel olduğu için ham bırakılır.',
+  'protocol.hart.example.shortRequestReadUniqueIdentifier.name': 'Kısa istek — Read Unique Identifier',
+  'protocol.hart.example.shortRequestReadUniqueIdentifier.description':
+    'Delimiter 0x02 (master→slave, kısa çerçeve), adres 0, komut 0, veri yok. jszumigaj/hart kütüphanesinin birim testindeki gerçek vektör (checksum 0x02) — bağımsız kaynakla elle doğrulandı.',
+  'protocol.hart.example.shortResponseReadUniqueIdentifier.name': 'Kısa yanıt — Read Unique Identifier',
+  'protocol.hart.example.shortResponseReadUniqueIdentifier.description':
+    'Delimiter 0x06 (slave→master, kısa çerçeve), status 00 40 (Configuration Changed), 12 baytlık veri. Aynı kütüphanenin ikinci doğrulanmış vektörü (checksum 0xA3).',
+  'protocol.hart.example.longRequestSecondaryMaster.name': 'Uzun istek — secondary master',
+  'protocol.hart.example.longRequestSecondaryMaster.description':
+    'Delimiter 0x82 (master→slave, uzun çerçeve), adres baytının bit 7\'si temiz (secondary master). Üçüncü doğrulanmış vektör (checksum 0x07).',
+  'protocol.hart.example.longRequestPrimaryMasterWritePollingAddress.name':
+    'Uzun istek — primary master, Write Polling Address',
+  'protocol.hart.example.longRequestPrimaryMasterWritePollingAddress.description':
+    'Aynı adres ama bit 7 set (primary master); Command 6 ile yeni poll adresi 5 yazılıyor.',
+  'protocol.hart.example.longResponseLoopCurrent.name': 'Uzun yanıt — Read Loop Current and % of Range',
+  'protocol.hart.example.longResponseLoopCurrent.description':
+    'Command 2 yanıtı: iki IEEE-754 float taşıyan 8 baytlık veri alanı — bu motor tarafından ham bırakılır, çünkü yorumlama komuta özeldir.',
+  'protocol.hart.example.deviceMalfunctionStatus.name':
+    'Device Status — Device Malfunction + PV Out of Limits',
+  'protocol.hart.example.deviceMalfunctionStatus.description':
+    'İkinci status baytında 0x81: bit 0x80 (Device Malfunction) ve bit 0x01 (Primary Variable Out of Limits) birlikte set.',
+  'protocol.hart.example.communicationsErrorResponse.name': 'İletişim hatası — Longitudinal Parity Error',
+  'protocol.hart.example.communicationsErrorResponse.description':
+    'Response Code 0x88: bit 7 set olduğu için alt bitler iletişim hatası bayrağı olarak okunur (0x08 = Longitudinal Parity Error). jszumigaj/hart\'ın birim testindeki değerle aynı.',
+  'protocol.hart.example.commandNotImplementedResponse.name':
+    'Komuta özel durum — Command Not Implemented',
+  'protocol.hart.example.commandNotImplementedResponse.description':
+    'Response Code 0x40: bit 7 temiz olduğu için komuta özel durum tablosundan okunur (Command Not Implemented). Aynı kütüphanenin ikinci doğrulanmış status değeri.',
+  'protocol.hart.example.burstFrame.name': 'Burst çerçevesi',
+  'protocol.hart.example.burstFrame.description':
+    'Delimiter 0x81 (uzun, istemsiz gönderim). Durum baytları yanıt çerçevesiyle aynı yapıda VARSAYILIYOR — bu çıkarım bağımsız kaynakta doğrulanmadı, uyarı basılır.',
+  'protocol.hart.example.commonPracticeCommand.name':
+    'Common Practice komutu — Reset Configuration Changed Flag',
+  'protocol.hart.example.commonPracticeCommand.description':
+    'Komut 38, Common Practice aralığında (32-126) ve isim tablosunda adlandırılmış.',
+  'protocol.hart.example.deviceSpecificCommand.name': 'Device-Specific komut — adlandırılmamış',
+  'protocol.hart.example.deviceSpecificCommand.description':
+    'Komut 200, Device-Specific aralığında (128-253) ama isim tablosunda YOK — sınıfı gösterilir, ismi UYDURULMAZ.',
+  'protocol.hart.example.reservedCommandRange.name': 'Ayrılmış komut aralığı',
+  'protocol.hart.example.reservedCommandRange.description':
+    'Komut 31: Universal (0-30) ile Common Practice (32-126) arasındaki boşlukta, hiçbir sınıfa girmiyor.',
+  'protocol.hart.example.checksumMismatch.name': 'Checksum hatası',
+  'protocol.hart.example.checksumMismatch.description':
+    'Checksum baytı kasten bir artırıldı: XOR gerçekten hesaplandığı için çerçeve hatası basılır ve beklenen değer gösterilir.',
+  'protocol.hart.example.unknownStartDelimiter.name': 'Tanınmayan başlangıç sınırlayıcısı',
+  'protocol.hart.example.unknownStartDelimiter.description':
+    'Preamble sonrası bayt 0x55 — altı bilinen sınırlayıcıdan hiçbiri değil.',
+  'protocol.hart.example.noDelimiterFound.name': 'Sınırlayıcı bulunamadı',
+  'protocol.hart.example.noDelimiterFound.description':
+    'Girdi baştan sona 0xFF — preamble hiç bitmiyor, gerçek bir sınırlayıcıya ulaşılamıyor.',
+  'protocol.hart.example.frameTruncated.name': 'Mesaj kesik',
+  'protocol.hart.example.frameTruncated.description':
+    'Byte Count 12 vaat ediyor ama yalnız 2 bayt veri var: uzunluk güvenilmez olduğu için kalan baytlar tek parça ham gösterilir.',
+  'protocol.hart.example.trailingBytes.name': 'Checksum sonrası fazla bayt',
+  'protocol.hart.example.trailingBytes.description':
+    'Geçerli bir çerçevenin ardından iki fazladan bayt eklendi.',
+
+  'protocol.ioLink.error.emptyInput': 'Girdi boş — çözülecek mesaj yok.',
+  'protocol.ioLink.error.frameTooLong': 'Mesaj izin verilen azami uzunluğu aşıyor.',
+  'protocol.ioLink.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ioLink.error.masterMessageTooShort':
+    'Master mesajı için asgari 2 bayt (MC + CKT) gerekir.',
+  'protocol.ioLink.error.checksumMismatch': '6-bit checksum tutmuyor.',
+  'protocol.ioLink.error.isduChecksumMismatch': 'ISDU\'nun kendi CHKPDU checksum\'ı tutmuyor.',
+  'protocol.ioLink.warning.processDataNeedsIodd':
+    'Process Data içeriğinin yapısı IODD dosyasından gelir, bu motor tarafından kırılmaz.',
+  'protocol.ioLink.warning.onRequestDataNotDecoded':
+    'On-request Data ham bırakıldı: ISDU kanalı değil, segmentli bir ISDU fragmanı ya da tanınmayan bir I-Service.',
+  'protocol.ioLink.warning.type2PayloadSplitUnknown':
+    'Type 2\'nin Process/On-request Data sınırı önceden anlaşılmış M-sequence alt tipine bağlıdır ve bu çerçeveden çıkmaz.',
+  'protocol.ioLink.warning.mSequenceTypeReserved': 'M-sequence tipi ayrılmış (3) — kullanılmamalıydı.',
+  'protocol.ioLink.warning.devicePayloadKindUnknown':
+    'Bu baytların Process mi On-request Data mı olduğu yalnız eşleşen master mesajından bilinir, tek başına bu çerçeveden çıkmaz.',
+  'protocol.ioLink.warning.isduServiceNotNamed':
+    'I-Service değeri tanınan on bir değerden biri değil — ayrılmış ya da tanımsız.',
+  'protocol.ioLink.warning.isduTrailingBytes': 'ISDU\'nun bildirdiği uzunluktan sonra fazladan bayt var.',
+  'protocol.ioLink.summary.master': '{rw} · {channel} · adres {address}',
+  'protocol.ioLink.summary.device': 'Device yanıtı · PD {pdStatus} · Event {event}',
+  'protocol.ioLink.documentation.summary':
+    'M-sequence zarfı: Master mesajında MC (R/W, kanal, adres/FlowCTRL) + CKT (M-sequence tipi + gerçekten doğrulanan 6-bit XOR checksum); Device mesajında Event/PD status bayrakları + aynı checksum. ISDU kanalında tek çerçeveye sığan bir parametre isteği/yanıtı varsa Index/Subindex/Data ve kendi CHKPDU\'su da çözülür. Process Data içeriği, Type 2\'nin PD/OD sınırı ve segmentli ISDU ham bırakılır.',
+  'protocol.ioLink.option.messageSide': 'Çerçeve yönü',
+  'protocol.ioLink.option.messageSide.description':
+    'M-sequence oktetleri hangi tarafın gönderdiğini baytların içinde SÖYLEMEZ — Master mesajı MC+CKT ile başlar, Device mesajı CKS ile biter. Hangisinin çözüleceği burada seçilir.',
+  'protocol.ioLink.option.messageSide.master': 'Master → Device (MC, CKT, …)',
+  'protocol.ioLink.option.messageSide.device': 'Device → Master (…, CKS)',
+  'protocol.ioLink.example.masterType0IsduStart.name':
+    'TYPE_0 — ISDU aktarımı başlıyor (FlowCTRL START)',
+  'protocol.ioLink.example.masterType0IsduStart.description':
+    'MC: write, ISDU kanalı, adres 0x10 (FlowCTRL START). TYPE_0\'ın tek OD baytı segmentli bir ISDU aktarımının başlangıç fragmanıdır — tek çerçeveye sığmadığı için ham bırakılır.',
+  'protocol.ioLink.example.masterType1ProcessDataWrite.name': 'TYPE_1_1 — Process Data yazma',
+  'protocol.ioLink.example.masterType1ProcessDataWrite.description':
+    'MC\'nin kanalı Process olduğu için 2 baytlık gövde Process Data olarak adlandırılır — içerik IODD\'ye bağlı olduğundan ham kalır.',
+  'protocol.ioLink.example.masterType1IsduWriteResponsePositive.name':
+    'TYPE_1 — ISDU Write Response (+), tam çözülür',
+  'protocol.ioLink.example.masterType1IsduWriteResponsePositive.description':
+    'OD, tam olarak 2 baytlık bir Write Response(+) ISDU\'sudur (I-Service 0x5, Length 0x2) — CHKPDU dahil tamamen çözülür ve doğrulanır.',
+  'protocol.ioLink.example.masterType1IsduReadRequest8Bit.name':
+    'TYPE_1 — ISDU Read Request, 8-bit Index',
+  'protocol.ioLink.example.masterType1IsduReadRequest8Bit.description':
+    'Index 16 için 8-bit indeksli okuma isteği — üç oktetlik tam bir ISDU.',
+  'protocol.ioLink.example.masterType1IsduReadResponse16Bit.name':
+    'TYPE_1 — ISDU Read Response (+), veri',
+  'protocol.ioLink.example.masterType1IsduReadResponse16Bit.description':
+    'Read Response(+) yalnız Data taşır (Table A.13: yanıtta Index/Subindex YOKTUR) — dört baytlık veri + CHKPDU.',
+  'protocol.ioLink.example.masterType0IsduFragment.name': 'TYPE_0 — ISDU fragmanı, tam çözülemez',
+  'protocol.ioLink.example.masterType0IsduFragment.description':
+    'En küçük ISDU bile (Write Response gibi) 2 bayt ister; TYPE_0\'ın tek OD baytına sığmaz — segmentli olduğu söylenir, ham bırakılır.',
+  'protocol.ioLink.example.masterType2Combined.name': 'TYPE_2 — Process + On-request Data birleşik',
+  'protocol.ioLink.example.masterType2Combined.description':
+    'PD/OD sınırı önceden anlaşılmış alt tipe (2_1..2_5/2_V) bağlıdır ve bu çerçevede yazmaz — tek parça ham gösterilir.',
+  'protocol.ioLink.example.masterTypeReserved.name': 'Ayrılmış M-sequence tipi',
+  'protocol.ioLink.example.masterTypeReserved.description':
+    'CKT\'nin tip bitleri 0b11 (3) — spec bunu "reserved and shall not be used" diyor.',
+  'protocol.ioLink.example.masterDiagnosisChannel.name': 'Diagnosis kanalı — ISDU değil, ham',
+  'protocol.ioLink.example.masterDiagnosisChannel.description':
+    'Kanal Diagnosis olduğu için ISDU denenmez; içerik (Event/diagnostic alt yapısı) bu motorun kapsamı dışındadır.',
+  'protocol.ioLink.example.masterChecksumMismatch.name': 'Checksum hatası',
+  'protocol.ioLink.example.masterChecksumMismatch.description':
+    '6-bit checksum kasten bir artırıldı: resmi XOR + sıkıştırma formülü gerçekten hesaplandığı için çerçeve hatası basılır.',
+  'protocol.ioLink.example.masterIsduChkpduMismatch.name': 'ISDU CHKPDU hatası',
+  'protocol.ioLink.example.masterIsduChkpduMismatch.description':
+    'Dış 6-bit checksum doğru ama ISDU\'nun kendi, bağımsız CHKPDU\'su kasten bozuldu — iki checksum ayrı katmanları korur.',
+  'protocol.ioLink.example.masterMessageTooShort.name': 'Master mesajı çok kısa',
+  'protocol.ioLink.example.masterMessageTooShort.description':
+    'Tek bayt: MC + CKT için asgari 2 bayt gerekir.',
+  'protocol.ioLink.example.deviceWriteAck.name': 'Device — yazma onayı (yalnız CKS)',
+  'protocol.ioLink.example.deviceWriteAck.description':
+    'PD/OD yok, yalnız CKS: bir yazma isteğinin onayı.',
+  'protocol.ioLink.example.deviceReplyWithPayloadAndEvent.name': 'Device — veri + Event bayrağı',
+  'protocol.ioLink.example.deviceReplyWithPayloadAndEvent.description':
+    '2 baytlık gövde (Process mi On-request Data mı olduğu eşleşen master çerçevesine bağlı, bu yüzden ham) + Event pending + Process Data invalid.',
+  'protocol.ioLink.example.deviceChecksumMismatch.name': 'Device checksum hatası',
+  'protocol.ioLink.example.deviceChecksumMismatch.description': 'CKS\'nin 6-bit checksum\'ı kasten bozuldu.',
 } as const;
 
 /**
