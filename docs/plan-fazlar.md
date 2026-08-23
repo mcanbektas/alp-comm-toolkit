@@ -41,10 +41,11 @@
 ## Sıradaki adım
 
 Comm SPA'sında **Faz 9 bitti; Faz 10 (protokol dalgaları) SÜRÜYOR** —
-`interfaces-framing` VE `network-ethernet` domain'leri bitti, öteki altı
-domain'de 48 kanonik kayıt duruyor. (Bu başlık 2026-08-21'de "Faz 10
-TAMAMEN BİTTİ" diyordu; o cümle `interfaces-framing`in bittiğini
-kastediyordu ama fazın tamamı gibi okunuyordu — 2026-08-22'de düzeltildi.)
+`interfaces-framing`, `network-ethernet` VE `industrial-automation`
+domain'leri bitti, öteki beş domain'de 32 kanonik kayıt duruyor. (Bu başlık
+2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle `interfaces-framing`in
+bittiğini kastediyordu ama fazın tamamı gibi okunuyordu — 2026-08-22'de
+düzeltildi. Sayım 2026-08-23'te dalga 13 kapanışıyla 48'den 32'ye indi.)
 
 **Dalga 12 (network-ethernet, 19 kayıt) 2026-08-22'de TAMAMEN KAPANDI**
 (12a icmp/icmpv6 · 12b arp/lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e
@@ -52,9 +53,9 @@ snmp/syslog · 12f http/websocket/mqtt-sn · 12g rtp/rtcp · 12h
 tftp/ftp/telnet — hepsi ayrı commit+push, ayrıntılar aşağıda ve
 `docs/brief-faz10-dalga12.md`de).
 
-**Dalga 13 (industrial-automation, 16 kayıt) 2026-08-22'de BAŞLADI — keşif
-turu bitti, `docs/brief-faz10-dalga13.md` yazıldı, uygulama HENÜZ
-BAŞLAMADI (onay bekliyor).** 8 alt dalga önerildi: 13a wireless-m-bus ·
+**Dalga 13 (industrial-automation, 16 kayıt) 2026-08-22'de BAŞLADI, 2026-08-23'te
+TAMAMEN KAPANDI** (kapanış özeti aşağıda, `046b914`; keşif turu
+`docs/brief-faz10-dalga13.md`). 8 alt dalga koştu: 13a wireless-m-bus ·
 13b iec-60870-5-101 · 13c opc-ua · 13d cip/ethernet-ip/devicenet · 13e
 profinet · 13f powerlink/cc-link-ie/sercos-iii · 13g profibus-dp/cc-link/
 as-interface/foundation-fieldbus · 13h io-link/hart. En önemli bulgu:
@@ -64,6 +65,58 @@ KANITLI paylaşım (13b bunu tüketecek); `canopen.ts` ise yalnız tek
 (13f) kod seviyesinde HENÜZ mümkün değil. classic-fieldbus (13g) dördü
 büyük ölçüde ticari konsorsiyum spec'lerine (PI/CLPA/FieldComm Group)
 dayanıyor — spec bulunabilirlik riski dalga 12'den köklü bir fark.
+
+**Dalga 14 (automotive, 12 kanonik kayıt) 2026-08-23'te BAŞLADI — keşif turu
+bitti, `docs/brief-faz10-dalga14.md` yazıldı, uygulama SÜRÜYOR (14a bitti,
+ayrıntı aşağıda).** Ham `planned` 13'tür ama `canopen` bir ALIAS'tır
+(`aliasOf: industrial-automation/cip-can-based/canopen`, dalga 13'te `ready`
+oldu) — gerçek iş 12 kayıt. 8 alt dalga önerildi: 14a automotive-ethernet/
+k-line · 14b xcp-on-can · 14c xcp-on-ethernet/ccp · 14d some-ip · 14e flexray ·
+14f sae-j1850-pwm/vpw · 14g sent/spc · 14h psi5. Keşfin dört ana bulgusu:
+(1) **beş kaydın girdisi bayt değil NABIZ günlüğü** (sent/spc/psi5/j1850×2) —
+`parse(Uint8Array)` sözleşmesi kilitli olduğu için bu dalganın tek büyük
+kararı, brief'in açık soru 1'i; (2) **CAN taşıyıcı paylaşımı KOD SEVİYESİNDE
+KANITLI** — `isotp.ts`, `j1939.ts` ve cross-domain `devicenet.ts` aynı beş
+sembolü `automotive/can/canFrame.ts`ten alıyor, xcp-on-can ile ccp de alacak,
+ikinci bir CAN çözücü yazılmayacak; (3) **`automotive-ethernet`in kendine ait
+tel biçimi YOK** — stack'in yedi halkası (ethernet-ii, vlan-802-1q, ipv4,
+ipv6, udp, tcp + PHY tarafında single-pair-ethernet) zaten `ready`, kayıt
+parser almadan `partial` + `calculatorIds` ile kapanmalı; (4) **`k-line` için
+depo 2. dalgada zaten "motor ALMAZ" kararı vermiş** ve bunu `iso9141.ts:4-7`
+ile `iso14230.ts:5-8`e yazmış. `CRC8_SAE_J1850` katalogda hazır ve YETİM
+duruyor (ilk tüketici J1850 kayıtları olacak); FlexRay'in İKİ CRC'si de
+katalogda YOK ve header CRC'si 20 bit — bayt hizalı `crc()` ile doğrudan
+hesaplanamıyor.
+
+**Sekiz alt dalganın uygulama brifleri de yazıldı**
+(`docs/brief-faz10-dalga14a.md` … `14h.md`, `brief-faz10-dalga2a/2b` emsali).
+Bağımlılık zinciri: 14c → 14b (`xcpPacket.ts` 14b'de doğar) · 14g → 14f (nabız
+konteyneri 14f'te tanımlanır) · 14h → 14g · 14d → 14a (aile kapanış sayımı) ·
+14e bağımsız. **14f/14g/14h ana brifin açık soru 1'i (nabız-günlüğü girdi
+sözleşmesi) karara bağlanmadan başlamaz.** Domain kapanış işleri (CLAUDE.md borç
+sayımı 32 → 20, plan kapanış özeti, çürüyen tahminlerin işaretlenmesi) 14h'in
+görev listesinde.
+
+**14a (automotive-ethernet + k-line) BİTTİ** (uygulama; brief
+`docs/brief-faz10-dalga14a.md`). İkisi de brief'in önerdiği gibi HİÇ parser
+almadan kapandı — LoRa paterni beşinci/altıncı kez uygulandı. `automotive-
+ethernet`: stack'in yedi halkası (Ethernet II, VLAN 802.1Q, IPv4, UDP, TCP +
+Single Pair Ethernet PHY'si) zaten başka sayfalarda `ready`/`partial`; `related`
+bu yediye genişletildi ve `summary` neyin nerede çözüldüğünü açıkça yazıyor;
+motor `calculatorIds: ['spe-plca']` ile var olan `singlePairEthernet.ts`e
+bağlandı, ikinci bir çözücü YAZILMADI. `k-line`: `iso9141.ts`/`iso14230.ts`
+dosya başlarının "init bir bayt akışı değil hat olayıdır" kararı korunarak
+rozet karara hizalandı (`planned` → `partial`); TEK yeni dosya
+`protocol-core/timing/kLine.ts` — 5-baud init süresini `calculateUartTiming`i
+`baudRate: 5` ile çağırarak hesaplar (ikinci bir UART formülü YAZILMADI), fast
+init darbe toplamını alır, inter-byte/inter-message gap'i TEK parametrik
+`evaluateTimingWindow` fonksiyonuyla değerlendirir (üç ayrı eşik fonksiyonu
+yerine). ISO 14230-2'nin W1-W5/P1-P4 pencere değerleri ve 0x33 adres baytı
+kaynakta olmadığı için KODA GÖMÜLMEDİ, hepsi çağırandan gelir (LIN `breakBits`
+kararının aynı gerekçesi). 12 birim testi + 9 e2e (gerçek tarayıcı,
+`e2e/k-line-calculator.spec.ts`) + `npm run typecheck` + tam paket (4757 test)
+yeşil. `legacy-diagnostics` ve `automotive-ethernet` ailelerinde `planned`
+kayıt kalmadı (yalnız `some-ip`, 14d'de kapanacak).
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular

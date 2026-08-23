@@ -455,23 +455,20 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Single-wire UART-based physical diagnostic line that carries ISO 9141, KWP2000, UDS or OEM proprietary protocols on top of it.',
           layer: 'physical',
-          status: 'planned',
-          tabs: ['overview', 'live', 'decode', 'timing', 'diagnostics', 'examples'],
-          // ISO 9141 ve ISO 14230 initialization yöntemleri aynı hatta bir arada
-          // bulunabilir; ayrımı tester yapmak zorunda, analizör tahmin etmemeli.
-          tools: [
-            'Idle Detection',
-            'Initialization Detector',
-            '5-Baud Init',
-            'Fast Init',
-            'Request/Response View',
-            'Inter-byte Gap',
-            'Inter-message Gap',
-            'Timing',
-          ],
+          // dalga 14a: `iso9141.ts`/`iso14230.ts` dosya başlarının kararı —
+          // init bir bayt akışı değil hat olayıdır, decoder'a hiç girmez.
+          // LoRa paterni: `pluginId` YOK, motor `calculatorIds` üzerinden
+          // (`timing/kLine.ts`): 5-baud init süresi, fast init darbe bütçesi,
+          // bayt/mesaj aralığı penceresi. Adres baytı, keyword değerleri ve
+          // W1-W5/P1-P4 pencereleri kaynakta YOK, koda gömülmedi.
+          status: 'partial',
+          calculatorIds: ['k-line-timing'],
+          tabs: ['overview', 'timing', 'diagnostics', 'examples'],
+          tools: ['5-Baud Init', 'Fast Init', 'Inter-byte Gap', 'Inter-message Gap', 'Timing'],
           related: [
             'automotive/legacy-diagnostics/iso-9141',
             'automotive/legacy-diagnostics/iso-14230',
+            'automotive/diagnostics/uds',
           ],
         },
         {
@@ -675,27 +672,26 @@ export const automotiveDomain: CatalogDomain = {
           id: 'automotive-ethernet',
           name: 'Automotive Ethernet',
           summary:
-            'Single-pair 100BASE-T1 and 1000BASE-T1 vehicle networking with VLAN, TSN and IP layers carrying camera, ADAS, infotainment and diagnostic traffic.',
+            'The Ethernet, VLAN, IPv4 and UDP/TCP layers this backbone carries are already decoded on their own network-ethernet pages; this page covers the single-pair PHY timing (100BASE-T1/1000BASE-T1) those pages don’t reach, with traffic-level statistics left for a later cross-frame analyzer.',
           layer: 'multi-layer',
-          status: 'planned',
-          tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
-          tools: [
-            '100BASE-T1',
-            '1000BASE-T1',
-            'VLAN',
-            'IP',
-            'UDP/TCP',
-            'Communication Matrix',
-            'Traffic Matrix',
-            'Bandwidth',
-            'Top Talkers',
-            'Latency/Jitter',
-            'Packet Loss',
-          ],
+          // dalga 14a: stack'in yedi halkası (Ethernet/VLAN/IPv4/UDP/TCP +
+          // single-pair PHY) zaten `ready`/`partial` olarak başka sayfalarda
+          // çözülüyor — ikinci bir çözücü YAZILMADI (LoRa paterni). Motor
+          // `calculatorIds` üzerinden `singlePairEthernet.ts`e bağlanır.
+          status: 'partial',
+          calculatorIds: ['spe-plca'],
+          tabs: ['overview', 'timing', 'data', 'diagnostics', 'examples'],
+          tools: ['100BASE-T1', '1000BASE-T1', 'PHY Frame Time', 'PLCA Cycle Budget', 'PLCA Burst Budget'],
           related: [
             'automotive/automotive-ethernet/some-ip',
             'automotive/diagnostics/doip',
             'automotive/calibration/xcp-on-ethernet',
+            'network-ethernet/data-link/ethernet-ii',
+            'network-ethernet/data-link/vlan-802-1q',
+            'network-ethernet/internet-layer/ipv4',
+            'network-ethernet/transport/udp',
+            'network-ethernet/transport/tcp',
+            'interfaces-framing/host-network-interfaces/single-pair-ethernet',
           ],
         },
         {

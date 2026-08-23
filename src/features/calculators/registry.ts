@@ -84,6 +84,9 @@ export const CALCULATOR_TOOLS: readonly CalculatorTool[] = [
   { id: 'can-phy-timing', category: 'timing', nameKey: 'calc.canPhy.name', summaryKey: 'calc.canPhy.summary' },
   { id: 'lin-phy-timing', category: 'timing', nameKey: 'calc.linPhy.name', summaryKey: 'calc.linPhy.summary' },
   { id: 'flexray-phy-timing', category: 'timing', nameKey: 'calc.flexrayPhy.name', summaryKey: 'calc.flexrayPhy.summary' },
+  // K-Line: `k-line` kaydının decode'u yok (LoRa paterni, dalga 14a) — 5-baud
+  // init, fast init ve bayt/mesaj aralığı bütçesi burada.
+  { id: 'k-line-timing', category: 'timing', nameKey: 'calc.kLine.name', summaryKey: 'calc.kLine.summary' },
   // Single Pair Ethernet: `single-pair-ethernet` kaydının decode'u yok (LoRa
   // paterni), PHY sınıfı + PLCA çevrim bütçesi burada. PLCA yalnız
   // 10BASE-T1S'te tanımlı ama bit süresi hesabı dört sınıfı da kapsıyor.

@@ -21,3 +21,6 @@ export * from './singlePairEthernet';
 // genişlikleri) girdidir, sabit değil. Spec'in "SPI ile aynı kabul etme"
 // emrinin karşılığı (bkz. microwire.ts dosya başı).
 export * from './microwire';
+// K-Line — 5-baud init, fast init ve bayt/mesaj aralığı bütçesi. Yine
+// decode'u olmayan bir katalog kaydının motoru (bkz. kLine.ts dosya başı).
+export * from './kLine';

@@ -20,6 +20,7 @@ import {
 } from '@/features/calculators/tools/numericTools';
 import { CurrentLoopTool } from '@/features/calculators/tools/currentLoopTools';
 import { VehiclePhyTool } from '@/features/calculators/tools/vehiclePhyTools';
+import { KLineTool } from '@/features/calculators/tools/kLineTools';
 import { LogicLevelCompatibilityTool } from '@/features/calculators/tools/logicLevelTools';
 import { SinglePairEthernetTool } from '@/features/calculators/tools/singlePairEthernetTools';
 import { LoraAirtimeTool, LoraBatteryTool, LoraLinkBudgetTool } from '@/features/calculators/tools/loraTools';
@@ -85,6 +86,7 @@ export const TOOL_RENDERERS: Record<string, () => ReactElement> = {
   'can-phy-timing': () => <VehiclePhyTool variant="can" />,
   'lin-phy-timing': () => <VehiclePhyTool variant="lin" />,
   'flexray-phy-timing': () => <VehiclePhyTool variant="flexray" />,
+  'k-line-timing': () => <KLineTool />,
   'spe-plca': () => <SinglePairEthernetTool />,
   'crc-calculator': () => <CrcCalculatorTool />,
   'checksum-finder': () => <ChecksumFinderTool />,
