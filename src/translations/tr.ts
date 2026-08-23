@@ -3634,6 +3634,119 @@ export const tr = {
   'protocol.iec101.option.width.twoBytes': '2 bayt',
   'protocol.iec101.option.width.threeBytes': '3 bayt',
 
+  // --- OPC UA ---
+  'protocol.opcua.error.emptyFrame': 'Tampon boş — mesaj tipi okunamaz.',
+  'protocol.opcua.error.headerTruncated':
+    'Mesaj başlığı 8 bayttan kısa; MessageSize okunamıyor.',
+  'protocol.opcua.error.unknownMessageType':
+    'İlk üç bayt tanınan bir mesaj tipi değil (HEL/ACK/ERR/RHE/OPN/CLO/MSG).',
+  'protocol.opcua.error.messageSizeTooSmall':
+    'MessageSize başlığın kendisini de sayar; 8 bayttan küçük olamaz.',
+  'protocol.opcua.error.frameTooLong': 'MessageSize izin verilen azami uzunluğu aşıyor.',
+  'protocol.opcua.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.opcua.error.bodyTruncated':
+    'Gövde çerçevenin sonundan önce kesildi; kesilene kadar okunan alanlar gösteriliyor.',
+  'protocol.opcua.error.truncatedField': 'Alan tamponun dışına taşıyor.',
+  'protocol.opcua.error.negativeLength':
+    'Uzunluk alanı negatif ama −1 (null) değil; bu kodlama geçersiz.',
+  'protocol.opcua.error.unknownNodeIdEncoding':
+    'NodeId kodlama baytı tanınan altı biçimden hiçbirine uymuyor.',
+  'protocol.opcua.error.unknownExtensionEncoding':
+    'ExtensionObject gövde kodlaması 0x00/0x01/0x02 dışında.',
+  'protocol.opcua.error.unknownVariantType': 'Variant yerleşik tip kimliği tanınmıyor.',
+  'protocol.opcua.error.recursionLimit':
+    'İç içe geçme sınırı aşıldı; daha derin çözümleme yapılmıyor.',
+  'protocol.opcua.warning.messageSizeExceedsBuffer':
+    'MessageSize elde olan bayt sayısından büyük — çerçeve eksik yakalanmış olabilir.',
+  'protocol.opcua.warning.trailingBytes': 'MessageSize sınırından sonra fazladan bayt var.',
+  'protocol.opcua.warning.chunkTypeNotFinal':
+    'Chunk tipi “F” değil; bu çerçeve çok parçalı bir mesajın parçası.',
+  'protocol.opcua.warning.unknownChunkType':
+    'Chunk baytı tanınan üç değerden (F/C/A) hiçbirine uymuyor; ham gösteriliyor.',
+  'protocol.opcua.warning.intermediateChunkBody':
+    'Ara parçanın gövdesi bir kesittir: servis kimliği yalnız ilk parçada bulunur, bu yüzden ham bırakıldı.',
+  'protocol.opcua.warning.encryptedPayload':
+    'Şifreli bölge çözülmez: SequenceHeader, gövde, padding ve imza SignAndEncrypt modunda şifrelidir.',
+  'protocol.opcua.warning.unknownService':
+    'Gövdenin başındaki NodeId tanınan bir servise karşılık gelmiyor.',
+  'protocol.opcua.warning.serviceBodyNotDecoded':
+    'Servis adı tanındı ve başlığı çözüldü, ama gövdesi bu sürümde alan alan çözülmüyor.',
+  'protocol.opcua.warning.signatureNotVerified':
+    'İmza yalnız gövdeden ayrıldı; DOĞRULANMADI.',
+  'protocol.opcua.warning.certificateNotValidated':
+    'Sertifika yalnız gösterildi; zinciri, süresi ve iptal durumu DOĞRULANMADI.',
+  'protocol.opcua.warning.arrayTruncated': 'Dizi uzun; yalnız ilk elemanlar gösteriliyor.',
+  'protocol.opcua.warning.bodyDecodeFailed':
+    'Gövde çözümlemesi yarıda kesildi; kısmi sonuç gösteriliyor.',
+  'protocol.opcua.summary.connection': 'Bağlantı protokolü mesajı (UACP)',
+  'protocol.opcua.summary.secureConversation': 'Güvenli oturum parçası — zarf ve gövde çözüldü',
+  'protocol.opcua.summary.encrypted': 'Güvenli oturum parçası — gövde şifreli, zarf çözüldü',
+  'protocol.opcua.documentation.summary':
+    'OPC UA TCP (UACP) çerçevesi: HEL/ACK/ERR/RHE bağlantı mesajları ile OPN/CLO/MSG güvenli oturum parçaları çözülür. Zarf tamdır (SecurityPolicyUri, sertifikalar, TokenId, SequenceNumber, RequestId); 78 servisin adı tanınır ve her serviste Request/ResponseHeader çözülür. Dokuz servisin gövdesi alan alan çözülür: OpenSecureChannel istek/yanıt, CloseSecureChannel isteği, Read istek/yanıt, Write isteği, Browse isteği, CreateSubscription istek/yanıt. Kalan servislerin gövdesi ham bırakılır. Kripto DOĞRULANMAZ: imza, sertifika zinciri ve şifreli gövde çözülmez.',
+  'protocol.opcua.option.bodySecurity': 'Gövde güvenlik modu',
+  'protocol.opcua.option.bodySecurity.description':
+    'MessageSecurityMode SecureChannel açılışında pazarlıkla belirlenir, tek bir çerçevenin baytlarında yazmaz. Otomatik seçenek, gövdenin başındaki NodeId tanınan bir servise çözülüyorsa açık, çözülmüyorsa şifreli sayar.',
+  'protocol.opcua.option.bodySecurity.auto': 'Otomatik (servis kimliğinden çıkar)',
+  'protocol.opcua.option.bodySecurity.plaintext': 'Açık — gövdeyi çöz',
+  'protocol.opcua.option.bodySecurity.encrypted': 'Şifreli — gövdeyi çözme',
+  'protocol.opcua.option.signatureLength': 'İmza uzunluğu (bayt)',
+  'protocol.opcua.option.signatureLength.description':
+    'Sign modunda gövdenin sonundaki imza bayt sayısı güvenlik politikasına bağlıdır ve çerçevede yazmaz. 0 verilirse imza alanı ayrılmaz.',
+  'protocol.opcua.example.hello.name': 'Hello — bağlantı açılışı',
+  'protocol.opcua.example.hello.description':
+    'İstemcinin tampon boyutlarını ve endpoint adresini bildirdiği ilk mesaj.',
+  'protocol.opcua.example.acknowledge.name': 'Acknowledge — sunucu yanıtı',
+  'protocol.opcua.example.acknowledge.description':
+    'Hello ile aynı alanları taşır ama EndpointUrl TAŞIMAZ — ikisi aynı sanılmamalı.',
+  'protocol.opcua.example.errorEndpointUrlInvalid.name': 'Error — geçersiz endpoint adresi',
+  'protocol.opcua.example.errorEndpointUrlInvalid.description':
+    'Bağlantı katmanı hatası: StatusCode adı çözülür, açıklama metni okunur.',
+  'protocol.opcua.example.reverseHello.name': 'ReverseHello — sunucudan bağlantı',
+  'protocol.opcua.example.reverseHello.description':
+    'Güvenlik duvarı arkasındaki sunucunun istemciye bağlandığı mesaj: ServerUri + EndpointUrl.',
+  'protocol.opcua.example.nullVersusEmptyString.name': 'null metin ile BOŞ metin ayrımı',
+  'protocol.opcua.example.nullVersusEmptyString.description':
+    'ServerUri uzunluğu 0 (boş metin), EndpointUrl uzunluğu −1 (null). İkisi aynı şey değildir ve ayrı gösterilir.',
+  'protocol.opcua.example.openSecureChannelRequestNone.name':
+    'OpenSecureChannel isteği — SecurityPolicy #None',
+  'protocol.opcua.example.openSecureChannelRequestNone.description':
+    'Asimetrik güvenlik başlığı çözülür; politika #None olduğu için gövdenin açık olduğu baytların içinden bilinir.',
+  'protocol.opcua.example.readRequest.name': 'Read isteği — Machine1.Temperature',
+  'protocol.opcua.example.readRequest.description':
+    'MSG parçası: simetrik başlık, SequenceHeader ve ReadValueId girdisi (String NodeId + AttributeId = Value).',
+  'protocol.opcua.example.readResponse.name': 'Read yanıtı — Value 25.73, Good',
+  'protocol.opcua.example.readResponse.description':
+    'DataValue maskesi Value + StatusCode + SourceTimestamp taşır; zaman damgası 1601 epoch’undan çözülür.',
+  'protocol.opcua.example.writeRequest.name': 'Write isteği — Machine1.Setpoint = 42.5',
+  'protocol.opcua.example.writeRequest.description':
+    'WriteValue içindeki DataValue yalnız Value taşır (maske 0x01); Variant skaler Double olarak çözülür.',
+  'protocol.opcua.example.browseRequest.name': 'Browse isteği — ObjectsFolder',
+  'protocol.opcua.example.browseRequest.description':
+    'ViewDescription + BrowseDescription: yön, referans tipi ve sonuç maskesi çözülür.',
+  'protocol.opcua.example.createSubscriptionRequest.name':
+    'CreateSubscription isteği — 100 ms yayın aralığı',
+  'protocol.opcua.example.createSubscriptionRequest.description':
+    'Yayın aralığı Double olarak kodlanır ve milisaniye biriminde gösterilir.',
+  'protocol.opcua.example.createSessionRequestBodyRaw.name':
+    'CreateSession isteği — gövde kapsam dışı',
+  'protocol.opcua.example.createSessionRequestBodyRaw.description':
+    'Kapsam kararının ekrandaki karşılığı: servis adı tanınır, RequestHeader çözülür, gövde ham bırakılır.',
+  'protocol.opcua.example.messageAbortChunk.name': 'Abort parçası (ChunkType A)',
+  'protocol.opcua.example.messageAbortChunk.description':
+    'Abort gövdesi normal servis gövdesi DEĞİLDİR: StatusCode + açıklama taşır.',
+  'protocol.opcua.example.messageIntermediateChunk.name': 'Ara parça (ChunkType C)',
+  'protocol.opcua.example.messageIntermediateChunk.description':
+    'Servis kimliği yalnız ilk parçada bulunur; ara parçanın gövdesi ham bırakılır.',
+  'protocol.opcua.example.messageEncryptedBody.name': 'Şifreli gövde — kripto sınırı',
+  'protocol.opcua.example.messageEncryptedBody.description':
+    'Gövde baytları YER TUTUCUdur, gerçek AES çıktısı değildir. Şifreli modda SequenceHeader bile okunmaz.',
+  'protocol.opcua.example.unknownMessageType.name': 'Tanınmayan mesaj tipi',
+  'protocol.opcua.example.unknownMessageType.description':
+    'İlk üç bayt tanınan bir tipe uymuyor; çözümleme kurtarılabilir hatayla döner.',
+  'protocol.opcua.example.truncatedBody.name': 'Kesik gövde',
+  'protocol.opcua.example.truncatedBody.description':
+    'MessageSize elde olan bayttan büyük; kesilene kadar okunan alanlar gösterilir.',
+
   // --- M-Bus ---
   'protocol.mbus.error.emptyFrame': 'Tampon boş — hiçbir çerçeve sınıfı okunamaz.',
   'protocol.mbus.error.unrecognizedFrameClass':

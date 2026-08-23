@@ -3636,6 +3636,119 @@ export const en: TranslationDictionary = {
   'protocol.iec101.option.width.twoBytes': '2 bytes',
   'protocol.iec101.option.width.threeBytes': '3 bytes',
 
+  // --- OPC UA ---
+  'protocol.opcua.error.emptyFrame': 'Buffer is empty — the message type cannot be read.',
+  'protocol.opcua.error.headerTruncated':
+    'The message header is shorter than 8 bytes; MessageSize cannot be read.',
+  'protocol.opcua.error.unknownMessageType':
+    'The first three bytes are not a recognised message type (HEL/ACK/ERR/RHE/OPN/CLO/MSG).',
+  'protocol.opcua.error.messageSizeTooSmall':
+    'MessageSize includes the header itself; it cannot be smaller than 8 bytes.',
+  'protocol.opcua.error.frameTooLong': 'MessageSize exceeds the configured maximum frame length.',
+  'protocol.opcua.error.aborted': 'Decoding was cancelled.',
+  'protocol.opcua.error.bodyTruncated':
+    'The body was cut before the end of the frame; the fields read up to that point are shown.',
+  'protocol.opcua.error.truncatedField': 'The field runs past the end of the buffer.',
+  'protocol.opcua.error.negativeLength':
+    'The length field is negative but not −1 (null); this encoding is invalid.',
+  'protocol.opcua.error.unknownNodeIdEncoding':
+    'The NodeId encoding byte matches none of the six defined formats.',
+  'protocol.opcua.error.unknownExtensionEncoding':
+    'The ExtensionObject body encoding is outside 0x00/0x01/0x02.',
+  'protocol.opcua.error.unknownVariantType': 'The Variant built-in type id is not recognised.',
+  'protocol.opcua.error.recursionLimit':
+    'The nesting limit was exceeded; no deeper decoding is attempted.',
+  'protocol.opcua.warning.messageSizeExceedsBuffer':
+    'MessageSize is larger than the available bytes — the frame may have been captured incompletely.',
+  'protocol.opcua.warning.trailingBytes': 'There are extra bytes past the MessageSize boundary.',
+  'protocol.opcua.warning.chunkTypeNotFinal':
+    'The chunk type is not “F”; this frame is part of a multi-chunk message.',
+  'protocol.opcua.warning.unknownChunkType':
+    'The chunk byte matches none of the three defined values (F/C/A); it is shown raw.',
+  'protocol.opcua.warning.intermediateChunkBody':
+    'An intermediate chunk body is a fragment: the service id only appears in the first chunk, so it is left raw.',
+  'protocol.opcua.warning.encryptedPayload':
+    'The encrypted region is not decoded: SequenceHeader, body, padding and signature are encrypted in SignAndEncrypt mode.',
+  'protocol.opcua.warning.unknownService':
+    'The NodeId at the start of the body does not map to a known service.',
+  'protocol.opcua.warning.serviceBodyNotDecoded':
+    'The service name was recognised and its header decoded, but its body is not decoded field by field in this version.',
+  'protocol.opcua.warning.signatureNotVerified':
+    'The signature was only split off from the body; it was NOT verified.',
+  'protocol.opcua.warning.certificateNotValidated':
+    'The certificate is only displayed; its chain, validity period and revocation status were NOT validated.',
+  'protocol.opcua.warning.arrayTruncated': 'The array is long; only the first elements are shown.',
+  'protocol.opcua.warning.bodyDecodeFailed':
+    'Body decoding stopped early; a partial result is shown.',
+  'protocol.opcua.summary.connection': 'Connection protocol message (UACP)',
+  'protocol.opcua.summary.secureConversation': 'Secure conversation chunk — envelope and body decoded',
+  'protocol.opcua.summary.encrypted': 'Secure conversation chunk — body encrypted, envelope decoded',
+  'protocol.opcua.documentation.summary':
+    'OPC UA TCP (UACP) frame: HEL/ACK/ERR/RHE connection messages and OPN/CLO/MSG secure conversation chunks are decoded. The envelope is complete (SecurityPolicyUri, certificates, TokenId, SequenceNumber, RequestId); 78 service names are recognised and the Request/ResponseHeader is decoded for every service. Nine service bodies are decoded field by field: OpenSecureChannel request/response, CloseSecureChannel request, Read request/response, Write request, Browse request, CreateSubscription request/response. Every other service body is left raw. Cryptography is NOT verified: signatures, certificate chains and encrypted bodies are not processed.',
+  'protocol.opcua.option.bodySecurity': 'Body security mode',
+  'protocol.opcua.option.bodySecurity.description':
+    'MessageSecurityMode is negotiated when the SecureChannel opens and is not written in the bytes of a single frame. The automatic option treats the body as plaintext when the NodeId at its start resolves to a known service, and as encrypted otherwise.',
+  'protocol.opcua.option.bodySecurity.auto': 'Automatic (infer from service id)',
+  'protocol.opcua.option.bodySecurity.plaintext': 'Plaintext — decode the body',
+  'protocol.opcua.option.bodySecurity.encrypted': 'Encrypted — do not decode the body',
+  'protocol.opcua.option.signatureLength': 'Signature length (bytes)',
+  'protocol.opcua.option.signatureLength.description':
+    'In Sign mode the number of signature bytes at the end of the body depends on the security policy and is not written in the frame. A value of 0 leaves no signature field.',
+  'protocol.opcua.example.hello.name': 'Hello — connection opening',
+  'protocol.opcua.example.hello.description':
+    'The first message, where the client announces its buffer sizes and endpoint address.',
+  'protocol.opcua.example.acknowledge.name': 'Acknowledge — server reply',
+  'protocol.opcua.example.acknowledge.description':
+    'Carries the same fields as Hello but does NOT carry EndpointUrl — the two must not be confused.',
+  'protocol.opcua.example.errorEndpointUrlInvalid.name': 'Error — invalid endpoint URL',
+  'protocol.opcua.example.errorEndpointUrlInvalid.description':
+    'A transport layer error: the StatusCode name is resolved and the reason text is read.',
+  'protocol.opcua.example.reverseHello.name': 'ReverseHello — server-initiated connection',
+  'protocol.opcua.example.reverseHello.description':
+    'The message a server behind a firewall sends to a client: ServerUri + EndpointUrl.',
+  'protocol.opcua.example.nullVersusEmptyString.name': 'null string versus EMPTY string',
+  'protocol.opcua.example.nullVersusEmptyString.description':
+    'ServerUri has length 0 (empty string), EndpointUrl has length −1 (null). They are not the same thing and are shown separately.',
+  'protocol.opcua.example.openSecureChannelRequestNone.name':
+    'OpenSecureChannel request — SecurityPolicy #None',
+  'protocol.opcua.example.openSecureChannelRequestNone.description':
+    'The asymmetric security header is decoded; because the policy is #None the body is known to be plaintext from the bytes themselves.',
+  'protocol.opcua.example.readRequest.name': 'Read request — Machine1.Temperature',
+  'protocol.opcua.example.readRequest.description':
+    'An MSG chunk: symmetric header, SequenceHeader and one ReadValueId entry (String NodeId + AttributeId = Value).',
+  'protocol.opcua.example.readResponse.name': 'Read response — Value 25.73, Good',
+  'protocol.opcua.example.readResponse.description':
+    'The DataValue mask carries Value + StatusCode + SourceTimestamp; the timestamp is resolved from the 1601 epoch.',
+  'protocol.opcua.example.writeRequest.name': 'Write request — Machine1.Setpoint = 42.5',
+  'protocol.opcua.example.writeRequest.description':
+    'The DataValue inside WriteValue carries only Value (mask 0x01); the Variant is decoded as a scalar Double.',
+  'protocol.opcua.example.browseRequest.name': 'Browse request — ObjectsFolder',
+  'protocol.opcua.example.browseRequest.description':
+    'ViewDescription + BrowseDescription: direction, reference type and result mask are decoded.',
+  'protocol.opcua.example.createSubscriptionRequest.name':
+    'CreateSubscription request — 100 ms publishing interval',
+  'protocol.opcua.example.createSubscriptionRequest.description':
+    'The publishing interval is encoded as a Double and shown in milliseconds.',
+  'protocol.opcua.example.createSessionRequestBodyRaw.name':
+    'CreateSession request — body out of scope',
+  'protocol.opcua.example.createSessionRequestBodyRaw.description':
+    'What the scope decision looks like on screen: the service name is recognised, the RequestHeader is decoded, the body is left raw.',
+  'protocol.opcua.example.messageAbortChunk.name': 'Abort chunk (ChunkType A)',
+  'protocol.opcua.example.messageAbortChunk.description':
+    'An abort body is NOT a normal service body: it carries a StatusCode and a reason.',
+  'protocol.opcua.example.messageIntermediateChunk.name': 'Intermediate chunk (ChunkType C)',
+  'protocol.opcua.example.messageIntermediateChunk.description':
+    'The service id only appears in the first chunk; an intermediate chunk body is left raw.',
+  'protocol.opcua.example.messageEncryptedBody.name': 'Encrypted body — the crypto boundary',
+  'protocol.opcua.example.messageEncryptedBody.description':
+    'The body bytes are a PLACEHOLDER, not real AES output. In encrypted mode even the SequenceHeader is unreadable.',
+  'protocol.opcua.example.unknownMessageType.name': 'Unrecognised message type',
+  'protocol.opcua.example.unknownMessageType.description':
+    'The first three bytes match no known type; decoding returns a recoverable error.',
+  'protocol.opcua.example.truncatedBody.name': 'Truncated body',
+  'protocol.opcua.example.truncatedBody.description':
+    'MessageSize is larger than the available bytes; the fields read before the cut are shown.',
+
   // --- M-Bus ---
   'protocol.mbus.error.emptyFrame': 'Buffer is empty — no frame class can be read.',
   'protocol.mbus.error.unrecognizedFrameClass':

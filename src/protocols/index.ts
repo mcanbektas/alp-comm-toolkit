@@ -309,6 +309,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iec-60870-5-101', () =>
     import('./industrial/iec101/iec101').then((module) => module.iec101Plugin),
   );
+  // OPC UA — dalga 13c: girdi OPC UA TCP (UACP) binary çerçevesidir, TEK
+  // MessageChunk. Zarf (HEL/ACK/ERR/RHE + OPN/CLO/MSG güvenlik ve sequence
+  // başlıkları) ve servis KİMLİĞİ tam çözülür; dokuz servisin gövdesi alan
+  // alan, kalanların yalnız Request/ResponseHeader'ı. Kripto DOĞRULANMAZ ve
+  // ÇÖZÜLMEZ (snmp/ntp/wirelessMbus presedanı). Yerleşik tip çözücüleri ayrı
+  // modülde: opcUaBinary.ts (bkz. opcua.ts dosya başı KAPSAM bölümü).
+  registerOnce(registry, 'opc-ua', () =>
+    import('./industrial/opcua/opcua').then((module) => module.opcUaPlugin),
+  );
   // M-Bus — dalga 5c: dört çerçeve sınıfı (Single Character/Short/Control/Long,
   // sum8Checksum) + CI=0x72 yolunda Fixed Data Header/DIF/VIF kayıt zinciri
   // (bkz. mbus.ts dosya başı). Kanonik kayıt industrial-automation/metering;

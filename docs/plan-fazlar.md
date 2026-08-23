@@ -372,6 +372,100 @@ güncellendi), `app/catalog/domains/industrial-automation.ts` (`status:
 (yeni). Sıradaki: **13c (opc-ua)** — paylaşım YOK, bağımsız/en geniş araç
 yüzeyi (12 araç), çok adımlı state machine — brief'in Opus·high önerisi.
 
+**13c (2026-08-23 bitti) — opc-ua.** `scada-utility` ailesi KAPANDI (iec-60870-5-104,
+dnp3, iec-61850 partial, iec-60870-5-101, opc-ua). Brief'in "paylaşım YOK, bağımsız,
+en geniş araç yüzeyi" tahmini DOĞRULANDI; "kaynak riski yüksek" tahmini ise bu kayıtta
+ÇÜRÜDÜ ve bunun kapsam üstünde doğrudan etkisi oldu. OPC Foundation'ın **Part 6
+(Mappings) v1.05 metni halka açık**, üstelik tip/servis/durum tabloları MİT lisanslı ve
+MAKİNE-OKUNUR (`UA-Nodeset/Schema/`: `NodeIds.csv`, `StatusCode.csv`,
+`AttributeIds.csv`, `Opc.Ua.Types.bsd`). Yani domain'in "ticari konsorsiyum spec'i,
+çoğu ücretli" kuralının İSTİSNASI. Risk kaynak bulmakta değil HACİMDE çıktı: karar
+"nereye kadar" sorusuna verildi, "bulabildim mi" sorusuna değil.
+
+Alan yerleşimlerinin tamamı **dört bağımsız kaynakta çapraz teyitli** (P6 + Wireshark
+`plugins/epan/opcua/` + open62541 `ua_types_encoding_binary.c` + OPCF Schema); çelişki
+BULUNMADI, tek kaynakta kalan hiçbir alan adlandırılmadı. Birim testlerin referans
+baytları **Part 6'nın KENDİ örneklerinden** geliyor (Şekil 2 Int32 1e9, Şekil 3 Float
+-6.5, Şekil 4 String "水Boy", Şekil 5 Guid 72962B91-…, Şekil 7-9 üç NodeId varyantı) —
+uydurma bayt YOK.
+
+**Kapsam (bilinçli, özet metninde de yazılı).** Girdi OPC UA TCP (UACP) binary
+çerçevesi, TEK MessageChunk; HTTPS/SOAP/JSON mapping'leri kapsam dışı. ÇÖZÜLÜR: dört
+UACP mesajı TAM (HEL/ACK/ERR/RHE), UASC zarfı TAM (OPN'in asimetrik başlığı —
+SecurityPolicyUri/SenderCertificate/ReceiverCertificateThumbprint; MSG/CLO'nun simetrik
+başlığı — TokenId; ikisinin SequenceHeader'ı), ChunkType F/C/A ayrımı, **78 servisin
+tamamının ADI** ve HER serviste Request/ResponseHeader. **Dokuz servisin gövdesi alan
+alan** çözülür: OpenSecureChannel istek/yanıt, CloseSecureChannel isteği, Read
+istek/yanıt, Write isteği, Browse isteği, CreateSubscription istek/yanıt — seçim
+ölçütü kaydın araç listesindeki her aracı (Secure Channel · Read · Write · Browse ·
+Subscription) EN AZ BİR gerçek gövdeyle karşılamaktı. HAM BIRAKILIR: kalan 69 servisin
+gövdesi (Session, Endpoint Discovery, Method/Call, MonitoredItems dâhil) — adı ve
+header'ı basılır, gövde tek "Service Body" alanı olur ve alan uyarısı bunu SÖYLER.
+[[IEC 61850 GOOSE-only]] ve 13a'nın Format-A-only presedanıyla aynı çizgi. Kayıt yine
+de `ready`: 12 aracın hepsinin karşılığı ekranda var, daraltma gövde DERİNLİĞİNDE, araç
+KAPSAMINDA değil.
+
+**KRİPTO SINIRI — zarf EVET, kripto HAYIR.** Depoda kurulu dört presedan (`snmp.ts` v3
+zarfı, `ntp.ts` MD5, `wirelessMbus.ts` AES, `websocket.ts` Accept) aynen sürdürüldü;
+teknik gerekçe `ProtocolParser.parse()`in SAF+SENKRON, `SubtleCrypto`nun ASENKRON
+olması. Kritik ayrıntı: şifreli bölgenin sınırı gövde DEĞİL **SequenceHeader**tır —
+Wireshark `opcua.c`in kendi ASCII şeması bunu birebir söylüyor (Message Header +
+Security Header açık; SequenceHeader + Body + Padding + Signature şifreli). Bu yüzden
+SignAndEncrypt'te SequenceNumber bile BASILMAZ; okunuyormuş gibi göstermek uydurmak
+olurdu. İmza yalnız gövdeden AYRILIR, DOĞRULANMAZ; sertifika yalnız GÖSTERİLİR, zinciri
+ve iptal durumu DOĞRULANMAZ — ikisi de alan seviyesinde uyarı taşır.
+
+**`decodeOptions` — İKİ kanal.** (1) `bodySecurity` (auto/plaintext/encrypted): brief
+"muhtemelen kanal AÇILMAZ" diyordu, ama MessageSecurityMode SecureChannel açılışında
+PAZARLIKLA belirlenir ve tek bir MSG çerçevesinin baytlarında YOKTUR — çerçeveden
+çıkarılamayan parametrenin tanımı bu. Varsayılan `auto`, Wireshark'ın
+`UA_MessageMode_MaybeEncrypted` sezgisinin AYNISIDIR (SequenceHeader'dan sonraki NodeId
+tanınan bir servise çözülüyorsa gövde açıktır); OPN'de SecurityPolicyUri `#None` ile
+bitiyorsa bilgi baytların İÇİNDEDİR ve sezgiyi EZER. (2) `signatureLength`: Sign
+modunda gövdenin sonundaki imza bayt sayısı politikaya bağlıdır, çerçevede yazmaz —
+Wireshark da bunu `g_opcua_default_sig_len` KULLANICI TERCİHİ olarak soruyor. Brief'in
+öngördüğü "sertifika güven zinciri / trust store" kanalı ise AÇILMADI: doğrulama zaten
+yapılmıyor, sormak kullanıcıya yapılmayacak bir işin sözünü vermek olurdu.
+
+**Paylaşım kararı.** `protocol-core`tan GERÇEKTEN uyan ikisi paylaşıldı:
+`encoding/ieee754.ts`in `decodeFloat32/64(…, 'little')` (P6 §5.2.2.3 düz IEEE 754
+little-endian) ve `encoding/utf8Viewer.ts`in `utf8BytesToString` (P6 §5.2.2.4 UTF-8).
+AYRI yazılanlar ve gerekçeleri: `buffers/endianness.ts`in `bytesToNumber`ı imleç
+tutmuyor ve 64 bit taşımıyor (Int64/UInt64 `bigint` gerektiriyor);
+`decoding/bitCursor.ts` bit hizasız okuma için, OPC UA ise tümüyle bayt hizalı.
+**`encoding/unixTimestamp.ts` SAHTE DOST olarak işaretlendi ve KULLANILMADI** —
+oradaki damga Unix epoch (1970) + saniye, buradaki 1601-01-01 UTC + 100 ns tick;
+karıştırmak 369 yıl kaydırır (12d'nin NTP/PTP dersi). Dönüşüm sabiti
+(`TICKS_1601_TO_1970`) türetimiyle birlikte açıkça yazıldı ve testle kilitlendi.
+Yerleşik tip çözücüleri KENDİ dosyasını hak etti (`opcUaBinary.ts`, `dnsWire.ts`/
+`iec104Asdu.ts` deseni): çerçeve katmanından bağımsız bir dilbilgisi ve kendi
+fixture'larıyla ayrı sınanıyor. Spekülatif ortak modül AÇILMADI.
+
+Yakalanan tuzaklar (hepsi teste bağlandı): NodeId'in altı varyantının FARKLI
+uzunlukları (TwoByte 2 / FourByte 4 / Numeric 7 — yanlış varyant sonraki HER alanı
+kaydırır); uzunluk −1 (null) ile 0 (boş) ayrımı ve uzunlukların İŞARETLİ okunması;
+Variant mask'ının bit 6/bit 7 ayrımı ve dizi uzunluğunun da −1 olabilmesi; Guid'in düz
+16 bayt OLMAMASI (Data1/2/3 little-endian, Data4 ham); DiagnosticInfo'da AKIŞ sırasının
+MASK bit sırasından farklı olması (maskede LocalizedText 0x04 önce ama akışta Locale
+önce — open62541 + Wireshark ikisi de teyit); MessageSize'ın başlığın KENDİSİNİ sayması;
+HEL/ACK/ERR/RHE'de SequenceHeader OLMAMASI (12e'nin "aynı konum, başka anlam" dersi);
+ChunkType 'A' gövdesinin servis DEĞİL StatusCode+Reason taşıması; ChunkType 'C'de
+servis NodeId'sinin BULUNMAMASI. Dizi elemanı basan her fonksiyon alan id'sine KENDİ
+offset'ini yazıyor (12g/12h'de iki kez ödenen ders), ve bir test bunu bütün örneklerde
+bekçiliyor.
+
+83 birim testi (`opcUaBinary.test.ts` 40 + `opcua.test.ts` 43) + 20 e2e (gerçek
+tarayıcı, `opcua-decode.spec.ts`) + 4409 toplam test + typecheck/build yeşil.
+Değişen/yeni dosyalar: `protocols/industrial/opcua/opcUaBinary.ts` (yeni) +
+`opcUaBinary.test.ts` (yeni), `protocols/industrial/opcua/opcua.ts` (yeni) +
+`opcua.test.ts` (yeni), `protocols/index.ts` (kayıt) + `index.test.ts` (kayıt sayacı),
+`app/catalog/domains/industrial-automation.ts` (`status: 'ready'`, `pluginId`),
+`translations/{tr,en}.ts` (69 anahtar), `e2e/opcua-decode.spec.ts` (yeni), `CLAUDE.md`
+(borç sayımı). `protocol-core/types.ts`e DOKUNULMADI, encoder YAZILMADI, `live` sekmesi
+KORUNDU. Sıradaki: **13d (cip, ethernet-ip, devicenet)** — `cip-can-based` ailesini
+kapatır; `cipObjectModel` GERÇEK paylaşım adayı, sıralama önemli (cip önce yazılır,
+iki taşıyıcı onu tüketir).
+
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz
 yok. Comm SPA'sı `/api` olmadan da çalışıyor, yalnız kimlik uçları 404 dönüyor.

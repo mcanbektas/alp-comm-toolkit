@@ -597,7 +597,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Interoperability architecture with an information model, service sets and built-in security, browsed as an address space and monitored through subscriptions.',
           layer: 'application',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'opc-ua',
           tabs: [
             'overview',
             'live',
