@@ -729,7 +729,21 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'ASAM MCD-1 XCP measurement, calibration, stimulation and programming carried over CAN or CAN FD between a calibration tool and the ECU.',
           layer: 'application',
-          status: 'planned',
+          // dalga 14b: çekirdek `xcp/xcpPacket.ts`te, taşıyıcıdan bağımsız
+          // (14c'nin xcp-on-ethernet'i de tüketecek). CAN veri-bağı
+          // `automotive/can/canClassic`ten PAYLAŞILIR (devicenet.ts emsali).
+          // `role`/`byteOrder` decodeOptions: hangi CAN ID'nin komut/yanıt
+          // taşıdığı ve CONNECT'in müzakere ettiği byte order GERÇEKTEN
+          // çerçeveden çıkarılamıyor (xcpPacket.ts dosya başı). CAN FD şu an
+          // desteklenmiyor, AÇIKÇA reddedilir (unsupported-encoding).
+          status: 'ready',
+          pluginId: 'xcp-on-can',
+          // `live`/`build`/`data`/`timing`/`diagnostics` içerik taşımıyor,
+          // "planlandı" bildirimi basıyor — `iso-tp`/`doip` (ikisi de `ready`,
+          // ikisinin de encoder'ı YOK) BİREBİR aynı durumda aynı sekmeleri
+          // koruyor; bu depoda yerleşik/kabul edilmiş desen (LoRa paterninin
+          // TERSİ — orada sekme YAPISAL OLARAK asla dolmaz, burada ileride
+          // dolabilir).
           tabs: [
             'overview',
             'live',
@@ -742,20 +756,11 @@ export const automotiveDomain: CatalogDomain = {
             'examples',
           ],
           // Ham DTO baytları A2L olmadan anlamsızdır: fiziksel değer ancak
-          // measurement/characteristic tanımıyla birlikte üretilebilir.
-          tools: [
-            'CTO',
-            'DTO',
-            'Commands',
-            'DAQ',
-            'ODT',
-            'Event Channels',
-            'Measurement',
-            'Calibration',
-            'A2L Import',
-            'Lost DTO',
-            'Transaction Tree',
-          ],
+          // measurement/characteristic tanımıyla birlikte üretilebilir. DAQ/
+          // ODT/Measurement/Calibration/A2L Import/Transaction Tree bu yüzden
+          // listede YOK — A2L olmadan bu dalgada üretilmiyor (definitions
+          // sekmesi panelsiz, `lin.ts`/`ldf` emsali).
+          tools: ['CTO', 'Commands', 'Connect', 'Set MTA', 'Get Status', 'Error Codes', 'Event Codes'],
           definitions: ['a2l'],
           related: [
             'automotive/calibration/xcp-on-ethernet',

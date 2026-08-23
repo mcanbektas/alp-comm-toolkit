@@ -5305,7 +5305,59 @@ export const en: TranslationDictionary = {
     'The payload carries a raw Get_Attribute_Single request; selecting `payloadInterpretation=cip-explicit` resolves it with the `cip` engine.',
   'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier rejected',
   'protocol.devicenet.example.extendedIdentifierRejected.description':
-    'The Predefined Master/Slave Connection Set only defines base identifiers; an extended frame raises an error.',  // --- PROFINET ---
+    'The Predefined Master/Slave Connection Set only defines base identifiers; an extended frame raises an error.',
+
+  // --- XCP on CAN ---
+  'protocol.xcp.documentation.summary':
+    'Resolves the XCP CTO (Command Transfer Object) PID: command name (CONNECT/GET_STATUS/SET_MTA/UPLOAD/DOWNLOAD/…) or response class (RES/ERR/EV/SERV), with CONNECT, SET_MTA and GET_STATUS decoded field by field. Command/response tables and error/event codes cross-checked byte-for-byte against two independent open-source XCP implementations (Scapy, pyxcp).',
+  'protocol.xcp.option.role': 'Role',
+  'protocol.xcp.option.role.description':
+    "Whether this CAN frame carries a master→slave command or a slave→master response — the same PID byte means a different thing in each (0xFF is CONNECT as a command, RES as a response). This genuinely cannot be derived from the frame; it depends on which configured CAN identifier it arrived on.",
+  'protocol.xcp.option.role.command': 'Command (master → slave)',
+  'protocol.xcp.option.role.response': 'Response (slave → master)',
+  'protocol.xcp.option.byteOrder': 'Byte order',
+  'protocol.xcp.option.byteOrder.description':
+    'Multi-byte fields (addresses, Max DTO, Session Configuration ID) are negotiated at CONNECT time and cannot be recovered from a single stateless frame. Choose the byte order your session negotiated.',
+  'protocol.xcp.option.byteOrder.little': 'Little-endian (Intel)',
+  'protocol.xcp.option.byteOrder.big': 'Big-endian (Motorola)',
+  'protocol.xcp.error.frameTooShort': 'The frame is shorter than the 8-byte SocketCAN header.',
+  'protocol.xcp.error.frameTooLong': 'The frame exceeds the classic CAN frame length.',
+  'protocol.xcp.error.canFdNotSupported':
+    'This frame is CAN FD length (72 bytes). CAN FD is not supported by this engine yet — only classic CAN is decoded.',
+  'protocol.xcp.error.aborted': 'Decoding was cancelled.',
+  'protocol.xcp.error.emptyPayload': 'The CAN payload is empty — an XCP packet needs at least a PID byte.',
+  'protocol.xcp.warning.daqData':
+    'This PID falls in the DAQ/STIM data range — its content depends on a DAQ list configuration this decoder does not have, and is shown raw.',
+  'protocol.xcp.warning.unassignedCommand':
+    'This PID is not assigned in the command table cross-checked for this engine (0xC0-0xC6 gap).',
+  'protocol.xcp.warning.commandParametersRaw':
+    "This command's parameters are not decoded field by field by this engine; shown raw.",
+  'protocol.xcp.warning.responseBodyRaw':
+    'A positive response body depends on which command it answers, which a single stateless frame cannot know; shown raw.',
+  'protocol.xcp.warning.eventBodyRaw': 'The event body beyond the event code is not decoded; shown raw.',
+  'protocol.xcp.warning.serviceBodyRaw':
+    'The service request name is only confirmed by one source and was not assigned; the code and message are shown raw.',
+  'protocol.xcp.summary.command': 'XCP command frame',
+  'protocol.xcp.summary.response': 'XCP response frame',
+  'protocol.xcp.example.connectCommandNormal.name': 'CONNECT (normal mode)',
+  'protocol.xcp.example.connectCommandNormal.description':
+    'PID 0xFF = CONNECT, connection_mode 0x00 = NORMAL — the first command of every XCP session.',
+  'protocol.xcp.example.connectPositiveResponse.name': 'CONNECT positive response',
+  'protocol.xcp.example.connectPositiveResponse.description':
+    'PID 0xFF = RES on the response side. Select role=response to see it decoded as CONNECT’s resource/comm-mode/Max CTO/Max DTO/version fields instead of the command CONNECT.',
+  'protocol.xcp.example.getStatusCommand.name': 'GET_STATUS',
+  'protocol.xcp.example.getStatusCommand.description': 'PID 0xFD = GET_STATUS, no parameters.',
+  'protocol.xcp.example.setMtaCommand.name': 'SET_MTA',
+  'protocol.xcp.example.setMtaCommand.description':
+    'PID 0xF6 = SET_MTA. Reserved bytes, address extension and a little-endian 4-byte address — try role=command with byteOrder=big-endian to see the same bytes resolve to a different address.',
+  'protocol.xcp.example.errorResponseCmdUnknown.name': 'ERR — ERR_CMD_UNKNOWN',
+  'protocol.xcp.example.errorResponseCmdUnknown.description':
+    'PID 0xFE = ERR on the response side (select role=response), error_code 0x20 = ERR_CMD_UNKNOWN.',
+  'protocol.xcp.example.stimDaqData.name': 'STIM/DAQ data (undecoded)',
+  'protocol.xcp.example.stimDaqData.description':
+    'PID 0x00 falls in the STIM range — its meaning depends on a DAQ list configuration this engine does not have, shown raw.',
+
+  // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':
     'The frame is not long enough for the Ethernet header (14 bytes) plus the FrameID (2 bytes).',
   'protocol.profinet.error.frameTooLong': 'The frame exceeds the allowed maximum length.',

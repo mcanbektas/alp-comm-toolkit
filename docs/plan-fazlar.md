@@ -118,6 +118,40 @@ kararının aynı gerekçesi). 12 birim testi + 9 e2e (gerçek tarayıcı,
 yeşil. `legacy-diagnostics` ve `automotive-ethernet` ailelerinde `planned`
 kayıt kalmadı (yalnız `some-ip`, 14d'de kapanacak).
 
+**14b (xcp-on-can) BİTTİ** (uygulama; brief `docs/brief-faz10-dalga14b.md`).
+İki yeni dosya: `automotive/xcp/xcpPacket.ts` (taşıyıcıdan bağımsız CTO paket
+çekirdeği, `cipCore.ts`in `decodeCipMessage` imza deseni) + `xcpOnCan.ts`
+(CAN taşıyıcı — `canFrame.ts`/`canClassic.ts` `devicenet.ts` emsaliyle
+PAYLAŞILDI, ikinci CAN çözücü YAZILMADI). Komut tablosu (57 kod, 0xC7-0xFF),
+hata kodu tablosu (19 kod) ve olay kodu tablosu (14 kod) İKİ BAĞIMSIZ açık
+kaynak XCP implementasyonundan (Scapy GPL-2.0, pyxcp LGPL) bayt bayt çapraz
+doğrulandı — dalga 13'ün "iki bağımsız kaynak" disiplini bu dalgada web
+araştırmasıyla gerçek zamanlı uygulandı. CONNECT/SET_MTA/GET_STATUS yapısal
+çözülür (SET_MTA'nın bayt sırası pyxcp'nin `request(SET_MTA,0,0,ext,*addr)`
+çağrısıyla BİREBİR örtüştü); UPLOAD/DOWNLOAD/DAQ/PGM komutları ad gösterilir,
+parametreleri A2L olmadan HAM kalır.
+
+**Ana brifin (14b) iki önerisi kaynak taramasıyla ÇÜRÜDÜ, ikisi de dosya
+başında gerekçeli:** (1) tek bir `packetInterpretation: raw|cto|dto` kanalı
+yerine, CTO/DTO ayrımının PID baytının SAYISAL ARALIĞINDAN (Scapy'nin kendi
+`bind_layers` eşiği) çerçeveden çıktığı, ama asıl belirsizliğin `role`
+(komut mu yanıt mı — AYNI bayt 0xFF hem CONNECT hem RES) olduğu ortaya
+çıktı; (2) "byte order ilk sürümde açılmasın, A2L'den gelir" varsayımı
+YANLIŞ çıktı — byte order CONNECT yanıtının `comm_mode_basic` bayrağından
+müzakere edilir (Scapy VE pyxcp'nin ikisi de aynı `INTEL=0/MOTOROLA=1`
+kodlamasını taşıyor) ve HER çok baytlı alanı etkiler; kanal AÇILDI. Bu,
+automotive domain'inde `decodeOptions` kanalını AÇAN ilk kayıt —
+`role`/`byteOrder` ikisi de `devicenet.ts`in `payloadInterpretation`
+kararıyla aynı gerekçe sınıfı (GERÇEKTEN çerçeveden çıkarılamıyor).
+CAN FD girdisi (72 bayt) AÇIKÇA `unsupported-encoding` ile reddedilir,
+sessizce yanlış çözülmez. 125 birim testi (komut/hata/olay tablosunun HER
+satırı `it.each` ile ayrı fixture) + 8 e2e (gerçek tarayıcı,
+`e2e/xcp-on-can-decode.spec.ts` — `role`in AYNI PID'i farklı çözdüğü,
+`byteOrder`ın SET_MTA adresini farklı çözdüğü kanıtlı) + typecheck + tam
+paket (4882 test) yeşil. `calibration` ailesinde iki kayıt kaldı
+(xcp-on-ethernet, ccp — 14c'de kapanacak, `xcpPacket.ts`in ikinci tüketicisi
+orada doğacak).
+
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
 Initialization Dashboard), dalga 10'un 2026-08-21'de biten alt-dalgaları:

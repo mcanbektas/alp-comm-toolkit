@@ -5290,6 +5290,57 @@ export const tr = {
   'protocol.devicenet.example.extendedIdentifierRejected.name': 'Extended identifier reddedildi',
   'protocol.devicenet.example.extendedIdentifierRejected.description':
     'Predefined Master/Slave Connection Set yalnız base identifier tanımlar; extended çerçeve hata basar.',
+
+  // --- XCP on CAN ---
+  'protocol.xcp.documentation.summary':
+    'XCP CTO (Command Transfer Object) PID baytını çözer: komut adı (CONNECT/GET_STATUS/SET_MTA/UPLOAD/DOWNLOAD/…) ya da yanıt sınıfı (RES/ERR/EV/SERV); CONNECT, SET_MTA ve GET_STATUS alan alan çözülür. Komut/yanıt tabloları ve hata/olay kodları iki bağımsız açık kaynak XCP implementasyonuyla (Scapy, pyxcp) bayt bayt çapraz doğrulandı.',
+  'protocol.xcp.option.role': 'Rol',
+  'protocol.xcp.option.role.description':
+    'Bu CAN çerçevesinin master→slave komut mu yoksa slave→master yanıt mı taşıdığı — aynı PID baytı ikisinde FARKLI anlama gelir (0xFF komutta CONNECT, yanıtta RES). Bu GERÇEKTEN çerçeveden çıkarılamaz; hangi konfigüre edilmiş CAN kimliğinden geldiğine bağlıdır.',
+  'protocol.xcp.option.role.command': 'Komut (master → slave)',
+  'protocol.xcp.option.role.response': 'Yanıt (slave → master)',
+  'protocol.xcp.option.byteOrder': 'Bayt sırası',
+  'protocol.xcp.option.byteOrder.description':
+    'Çok baytlı alanlar (adresler, Max DTO, Session Configuration ID) CONNECT anında müzakere edilir ve tek, durumsuz bir çerçeveden geri alınamaz. Oturumunuzun müzakere ettiği bayt sırasını seçin.',
+  'protocol.xcp.option.byteOrder.little': 'Little-endian (Intel)',
+  'protocol.xcp.option.byteOrder.big': 'Big-endian (Motorola)',
+  'protocol.xcp.error.frameTooShort': 'Çerçeve 8 baytlık SocketCAN başlığından kısa.',
+  'protocol.xcp.error.frameTooLong': 'Çerçeve klasik CAN çerçeve uzunluğunu aşıyor.',
+  'protocol.xcp.error.canFdNotSupported':
+    'Bu çerçeve CAN FD uzunluğunda (72 bayt). CAN FD bu motorda henüz desteklenmiyor — yalnız klasik CAN çözülüyor.',
+  'protocol.xcp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.xcp.error.emptyPayload': 'CAN payload’ı boş — bir XCP paketi en az bir PID baytı gerektirir.',
+  'protocol.xcp.warning.daqData':
+    'Bu PID, DAQ/STIM veri aralığına düşüyor — içeriği bu çözücünün sahip olmadığı bir DAQ list konfigürasyonuna bağlıdır, ham gösterilir.',
+  'protocol.xcp.warning.unassignedCommand':
+    'Bu PID, bu motor için çapraz doğrulanan komut tablosunda tanımlı değil (0xC0-0xC6 boşluğu).',
+  'protocol.xcp.warning.commandParametersRaw':
+    'Bu komutun parametreleri bu motor tarafından alan alan çözülmüyor; ham gösterilir.',
+  'protocol.xcp.warning.responseBodyRaw':
+    'Pozitif yanıt gövdesi hangi komuta karşılık geldiğine bağlıdır, tek durumsuz çerçeve bunu bilemez; ham gösterilir.',
+  'protocol.xcp.warning.eventBodyRaw': 'Olay kodunun ötesindeki olay gövdesi çözülmüyor; ham gösterilir.',
+  'protocol.xcp.warning.serviceBodyRaw':
+    'Servis isteği adı yalnız tek kaynakta teyitli olduğu için adlandırılmadı; kod ve mesaj ham gösterilir.',
+  'protocol.xcp.summary.command': 'XCP komut çerçevesi',
+  'protocol.xcp.summary.response': 'XCP yanıt çerçevesi',
+  'protocol.xcp.example.connectCommandNormal.name': 'CONNECT (normal kip)',
+  'protocol.xcp.example.connectCommandNormal.description':
+    'PID 0xFF = CONNECT, connection_mode 0x00 = NORMAL — her XCP oturumunun ilk komutu.',
+  'protocol.xcp.example.connectPositiveResponse.name': 'CONNECT pozitif yanıtı',
+  'protocol.xcp.example.connectPositiveResponse.description':
+    'Yanıt tarafında PID 0xFF = RES. Komut CONNECT yerine resource/comm-mode/Max CTO/Max DTO/sürüm alanlarıyla çözülmesi için role=response seçin.',
+  'protocol.xcp.example.getStatusCommand.name': 'GET_STATUS',
+  'protocol.xcp.example.getStatusCommand.description': 'PID 0xFD = GET_STATUS, parametresiz.',
+  'protocol.xcp.example.setMtaCommand.name': 'SET_MTA',
+  'protocol.xcp.example.setMtaCommand.description':
+    'PID 0xF6 = SET_MTA. Reserved baytlar, adres uzantısı ve little-endian 4 baytlık adres — aynı baytların byteOrder=big-endian ile FARKLI bir adrese çözüldüğünü görmek için role=command ile deneyin.',
+  'protocol.xcp.example.errorResponseCmdUnknown.name': 'ERR — ERR_CMD_UNKNOWN',
+  'protocol.xcp.example.errorResponseCmdUnknown.description':
+    'Yanıt tarafında (role=response seçin) PID 0xFE = ERR, error_code 0x20 = ERR_CMD_UNKNOWN.',
+  'protocol.xcp.example.stimDaqData.name': 'STIM/DAQ verisi (çözülmez)',
+  'protocol.xcp.example.stimDaqData.description':
+    'PID 0x00 STIM aralığına düşer — anlamı bu motorun sahip olmadığı bir DAQ list konfigürasyonuna bağlıdır, ham gösterilir.',
+
   // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':
     'Çerçeve, Ethernet başlığı (14 bayt) + FrameID (2 bayt) kadar uzun değil.',

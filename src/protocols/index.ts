@@ -100,6 +100,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'iso-9141', () =>
     import('./automotive/iso9141/iso9141').then((module) => module.iso9141Plugin),
   );
+  // XCP on CAN — dalga 14b: CAN veri-bağı `automotive/can/canClassic`ten
+  // PAYLAŞILIR (devicenet.ts emsali, ikinci bir CAN çözücü YAZILMADI); çekirdek
+  // `xcpPacket.ts` taşıyıcıdan bağımsız (14c'nin xcp-on-ethernet'i de onu
+  // tüketecek). `role`/`byteOrder` decodeOptions kanalları GERÇEKTEN
+  // çerçeveden çıkarılamayan iki eksen (bkz. xcpPacket.ts dosya başı).
+  registerOnce(registry, 'xcp-on-can', () =>
+    import('./automotive/xcp/xcpOnCan').then((module) => module.xcpOnCanPlugin),
+  );
   // v1 (0xFE) ve v2 (0xFD) AYNI modülden gelir: magic'e göre dallanan tek
   // parser, tek kayıt (can-2-0a/can-2-0b'nin iki-plugin deseninin BİLEREK
   // kullanılmadığı yer — bkz. mavlink.ts dosya başı).
