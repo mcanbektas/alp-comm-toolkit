@@ -31,6 +31,10 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   CRC16_XMODEM: 0x31c3n,
   CRC16_X25: 0x906en,
   CRC16_DNP: 0xea82n,
+  // CRC-16/EN-13757 (Wireless M-Bus link-layer block CRC, dalga 13a) — reveng
+  // kataloğunun yayımlı check değeri; Kamstrup meter-system + rtl_433 m_bus.c
+  // ile bağımsızca çapraz doğrulandı (crcCatalogue.ts'teki CRC16_EN13757 notu).
+  CRC16_EN13757: 0xc2b7n,
   // IEEE 802.15.4 FCS (dalga 7c) — reveng kataloğunun "CRC-16/KERMIT" girdisi;
   // bu motorla üretilip reveng'in yayımlı check değeriyle çapraz doğrulandı
   // (crcCatalogue.ts'teki CRC16_KERMIT girdisinin dosya başı notuna bak).

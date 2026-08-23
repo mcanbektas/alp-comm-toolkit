@@ -565,7 +565,8 @@ export const industrialAutomationDomain: CatalogDomain = {
           summary:
             'Radio variant of EN 13757 metering that reuses the wired application-data decoder behind its own link layer, radio metadata and optional payload encryption.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'wireless-m-bus',
           tabs: ['overview', 'live', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'Meter Browser',

@@ -26,6 +26,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_XMODEM',
   'CRC16_X25',
   'CRC16_DNP',
+  'CRC16_EN13757',
   'CRC16_KERMIT',
   'CRC16_USB',
   'CRC24',
@@ -133,6 +134,29 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     init: 0x0000n,
     refin: true,
     refout: true,
+    xorout: 0xffffn,
+  },
+  /**
+   * EN 13757-4 (Wireless M-Bus link-layer block CRC, dalga 13a) — reveng
+   * kataloğunun "CRC-16/EN-13757" girdisi. **`CRC16_DNP` DEĞİL:** ikisi AYNI
+   * polinomu (0x3D65) ve AYNI init'i (0x0000) paylaşır ama YANSITMA farklı —
+   * DNP `refin`/`refout` true, EN-13757 FALSE (reveng: "width=16 poly=0x3d65
+   * init=0x0000 refin=false refout=false xorout=0xffff check=0xc2b7
+   * residue=0xa366 name=\"CRC-16/EN-13757\""). Bu ayrımı KAÇIRMAK sessizce
+   * yanlış CRC üretirdi (aynı poly çakışması CRC16_USB'nin ARC ile
+   * karıştırılmaması notuyla aynı tuzak sınıfı, yukarı bakınız).
+   * Bağımsız ikinci kaynak: Kamstrup `meter-system` (`utils/crc16_wmbus.py`)
+   * ve `rtl_433`nin `src/devices/m_bus.c`si (`CRC_POLY=0x3D65`,
+   * `crc_calc = ~crc16(bytes, crc_offset, CRC_POLY, 0)` — init 0, sonuç
+   * bitwise-NOT = xorout 0xFFFF, refin/refout false) — üçü de birebir aynı
+   * parametrelerde buluşuyor (brief-faz10-dalga13.md wire-format araştırması).
+   */
+  CRC16_EN13757: {
+    width: 16,
+    poly: 0x3d65n,
+    init: 0x0000n,
+    refin: false,
+    refout: false,
     xorout: 0xffffn,
   },
   /**

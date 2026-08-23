@@ -54,8 +54,15 @@ import type { ParsedField, ProtocolError, ProtocolWarning } from '@/protocol-cor
 
 const HEX_RADIX = 16;
 
-/** Fixed Data Header: Ident(4)+Manufacturer(2)+Version(1)+Medium(1)+AccessNo(1)+Status(1)+Signature(2) = 12 bayt. */
-const FIXED_HEADER_LENGTH = 12;
+/**
+ * Fixed Data Header: Ident(4)+Manufacturer(2)+Version(1)+Medium(1)+AccessNo(1)+Status(1)+
+ * Signature(2) = 12 bayt. EXPORT: `wirelessMbus.ts` (CI=0x72 TPL long header, dalga 13a) bu
+ * uzunluğu bilerek kullanır — şifreli payload'da `data.slice(0, FIXED_HEADER_LENGTH)`
+ * vererek yalnız header'ı bu motora çözdürür, DIF/VIF zincirini BAŞLATMADAN (bkz.
+ * wirelessMbus.ts dosya başı "şifreli payload" notu). Bu sabitin değeri değişirse iki
+ * dosya da bozulur, tek yerde tutuluyor.
+ */
+export const FIXED_HEADER_LENGTH = 12;
 
 /** DIFE/VIFE zincirlerinde EN 13757'nin kendi bildirdiği azami sayı (m-bus.com 6.3.2: "maximum of ten DIFE") — sonsuz döngü koruması. */
 const MAX_EXTENSION_BYTES = 10;
@@ -78,8 +85,13 @@ const WARN_UNNAMED_VIF = 'protocol.mbus.warning.unnamedVif';
  * Ölçülen ortam (Medium) — dar küme: yalnız İKİ kaynağın da ÇAKIŞMADAN aynı adı
  * verdiği kodlar (0x00-0x0F, 0x16-0x19). 0x10-0x15 kaynaklar arasında çakışıyor,
  * 0x1A+ yalnız libmbus'ta var — ikisi de HAM bırakıldı (dosya başı notu).
+ *
+ * EXPORT: EN 13757 ailesi Medium/Device-Type kod tablosunu kablolu VE kablosuz
+ * M-Bus PAYLAŞIR (wmbusmeters'ın `mediaType()` fonksiyonu aynı kod aralığını
+ * kullanıyor — DLL A-field'ın son baytı bu). `wirelessMbus.ts` bu haritayı
+ * kendi Device Type alanı için ayrı bir kopya tutmak yerine buradan okur.
  */
-const MEDIUM_NAMES: ReadonlyMap<number, string> = new Map([
+export const MEDIUM_NAMES: ReadonlyMap<number, string> = new Map([
   [0x00, 'Other'],
   [0x01, 'Oil'],
   [0x02, 'Electricity'],
@@ -226,7 +238,7 @@ function readFloat32Le(bytes: Uint8Array): number {
   return new DataView(bytes.buffer, bytes.byteOffset, 4).getFloat32(0, true);
 }
 
-interface BcdResult {
+export interface BcdResult {
   readonly valid: boolean;
   readonly digits: string;
 }
@@ -237,8 +249,12 @@ interface BcdResult {
  * doğrular): `78 56 34 12` → "12345678" (bayt3'ten bayt0'a, her baytta üst
  * nibble önce). Nibble 0xA-0xF görülürse (spec'in tanımladığı BCD dışı) alan
  * GEÇERSİZ sayılır — sessizce yanlış ondalık basmak yerine dürüstçe pes eder.
+ *
+ * EXPORT: `wirelessMbus.ts` DLL A-field'ındaki Identification Number'ı (aynı
+ * paketlenmiş BCD, aynı bayt sırası — TPL long header'ın Fixed Header'ı ile
+ * birebir aynı alan) çözmek için bu fonksiyonu paylaşır.
  */
-function decodeBcd(bytes: Uint8Array): BcdResult {
+export function decodeBcd(bytes: Uint8Array): BcdResult {
   let digits = '';
   let valid = true;
   for (let index = bytes.length - 1; index >= 0; index -= 1) {
@@ -255,8 +271,13 @@ function decodeBcd(bytes: Uint8Array): BcdResult {
  * Manufacturer alanının 3-harfli EN 61107 kodu — 16-bit değeri 5'er bitlik üç
  * gruba böler, her grup `+64` ile ASCII büyük harfe döner (dosya başı formül +
  * worked example: `0x4024` → P/A/D). `((code >> shift) & 0x1F) + 64` deseni.
+ *
+ * EXPORT: EN 13757-4 (wireless M-Bus) M-field'ı AYNI 3-harfli 5-bit formülü
+ * kullanır (bennesp.github.io'nun Mode N tersine mühendislik notu + rtl_433/
+ * wmbusmeters'ın `manufacturerFlag()` fonksiyonu bağımsızca aynı deseni
+ * uyguluyor) — `wirelessMbus.ts` kopya formül yazmak yerine bunu paylaşır.
  */
-function decodeManufacturerCode(value: number): string {
+export function decodeManufacturerCode(value: number): string {
   const letter = (shift: number): string => String.fromCharCode(((value >> shift) & 0x1f) + 64);
   return `${letter(10)}${letter(5)}${letter(0)}`;
 }

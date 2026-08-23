@@ -50,10 +50,20 @@ kastediyordu ama fazın tamamı gibi okunuyordu — 2026-08-22'de düzeltildi.)
 (12a icmp/icmpv6 · 12b arp/lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e
 snmp/syslog · 12f http/websocket/mqtt-sn · 12g rtp/rtcp · 12h
 tftp/ftp/telnet — hepsi ayrı commit+push, ayrıntılar aşağıda ve
-`docs/brief-faz10-dalga12.md`de). Sıradaki domain seçimi henüz YAPILMADI —
-altı domain arasından (industrial-automation 16 · automotive 12 ·
-aerospace-uav 12 · wireless-iot 4 · marine-navigation 3 ·
-building-automation 1) bir keşif turuyla karara bağlanacak.
+`docs/brief-faz10-dalga12.md`de).
+
+**Dalga 13 (industrial-automation, 16 kayıt) 2026-08-22'de BAŞLADI — keşif
+turu bitti, `docs/brief-faz10-dalga13.md` yazıldı, uygulama HENÜZ
+BAŞLAMADI (onay bekliyor).** 8 alt dalga önerildi: 13a wireless-m-bus ·
+13b iec-60870-5-101 · 13c opc-ua · 13d cip/ethernet-ip/devicenet · 13e
+profinet · 13f powerlink/cc-link-ie/sercos-iii · 13g profibus-dp/cc-link/
+as-interface/foundation-fieldbus · 13h io-link/hart. En önemli bulgu:
+`iec104Asdu.ts`in `decodeAsdu()`su zaten `iec104.ts` tarafından kullanılan
+KANITLI paylaşım (13b bunu tüketecek); `canopen.ts` ise yalnız tek
+`parseCanopen()` export ediyor, powerlink'in CANopen paylaşımı iddiası
+(13f) kod seviyesinde HENÜZ mümkün değil. classic-fieldbus (13g) dördü
+büyük ölçüde ticari konsorsiyum spec'lerine (PI/CLPA/FieldComm Group)
+dayanıyor — spec bulunabilirlik riski dalga 12'den köklü bir fark.
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
@@ -238,8 +248,72 @@ RFC 854 anlamıyla tek başına gösterilir. Plaintext güvenlik uyarısı (spec
 olması içeriğe bakılmaksızın hep doğrudur.
 60 birim testi + 19 e2e (gerçek tarayıcı) + 4259 toplam test + build yeşil.
 **`network-ethernet` domain'i KAPANDI — dalga 12'de açık iş kalmadı.**
-Sıradaki: yeni bir domain seçimi (keşif turu gerekiyor, `docs/brief-faz10-
-dalga12.md`nin dalga başı yaptığı gibi).
+
+Sıradaki domain seçildi: **`industrial-automation`** (16 kanonik kayıt,
+keşif turu `docs/brief-faz10-dalga13.md`), 8 alt dalgaya bölündü (13a-13h).
+
+**13a (2026-08-22 bitti) — wireless-m-bus.** `metering` ailesi KAPANDI (m-bus
+zaten `ready`ydi). Brief'in "en kanıtlı paylaşım" öngörüsü DOĞRULANDI:
+CI=0x72 (TPL Long Header) yolu wired M-Bus'ın `mbusVariableData.ts`teki
+`decodeVariableData()`sına baytların birebir seviyesinde uyuyor — wmbusmeters
+(açık kaynak)'ın `parseLongTPL()`+`parseShortTPL()` zinciri CI=0x72'den
+sonra TAM 12 bayt (Ident+Manufacturer+Version+Medium+AccessNo+Status+
+Configuration Field) okuyup DIF/VIF'e geçiyor, `FIXED_HEADER_LENGTH=12` ile
+BİREBİR aynı. `decodeVariableData()`nın imzası HİÇ DEĞİŞMEDİ — şifreli
+payload'ı yalnız 12 baytlık header'ı vererek "kapatma" tekniği hiçbir
+opsiyonel parametre gerektirmedi (fonksiyon zaten `data`yı çağıranın verdiği
+kadarıyla işliyordu). `decodeManufacturerCode`/`decodeBcd`/`MEDIUM_NAMES`/
+`FIXED_HEADER_LENGTH` de aynı dosyadan EXPORT edilerek DLL A-field'ı için
+paylaşıldı — dalganın ilk tüketicisi olma riski (brief madde 3) gerçek
+çıkmadı, motor birinci denemede tam uydu.
+
+Link-layer wire format (EN 13757-4'ün resmi metni ücretli, depoda YOK) ÜÇ
+bağımsız kamuya açık kaynaktan çapraz teyitle alındı: **rtl_433** (`m_bus.c`
+— Block 1 bayt yerleşimi, CRC kapsamı, 16+2 baytlık veri blokları),
+**wmbusmeters** (`wmbus.cc`/`.h` — C-field/CI-field tabloları, TPL
+Configuration Field bit yerleşimi) ve **reveng.sourceforge.io CRC
+kataloğu** + **Kamstrup `meter-system`** (CRC-16/EN-13757 parametreleri —
+`crcCatalogue.ts`e YENİ `CRC16_EN13757` girdisi eklendi, `CRC16_DNP` ile
+AYNI polinomu (0x3D65) paylaşıp YANSITMASI farklı olan bir tuzak
+YAKALANDI ve ayrıştırıldı). Configuration Field'ın Security Mode bit
+yerleşimi (bit 8-12) AYRICA resmi **OMS-Group Vol.2 Primary Communication**
+spec'inin (oms-group.org, halka açık PDF) Table 18/19'uyla doğrulandı —
+`pdftotext` ile indirilip okundu, wmbusmeters'ın kod-seviyesi yorumuyla
+birebir örtüştüğü görüldü.
+
+Kapsam bilinçli daraltıldı (IEC 61850 GOOSE-only kararının presedanı):
+yalnız **Format A** çözülür (Format B fiziksel katmanda ayrı bir sync ile
+ayrışır, girdi baytlarından güvenle ayırt edilemez); CI-field'ların yalnız
+**0x72** yolu DIF/VIF zincirine kadar çözülür, diğerleri (0x73/0x78/0x79/
+0x7A/0x7B/ELL/AFL) adlandırılır ama ham bırakılır. **AES şifre çözme
+UYGULANMADI** — iki gerekçe: `ProtocolParser.parse()` saf/senkron olmalı
+(protocol-core/types.ts) oysa WebCrypto'nun `SubtleCrypto.decrypt`i
+tarayıcıda yalnız asenkron, senkron sözleşmeyi kırmadan gerçek AES-128-CBC
+bağlanamazdı; senkron elle yazılmış bir AES çekirdeği de NIST KAT
+vektörleriyle ayrı doğrulanması gereken, "kolay" alt dalganın kapsamını
+aşan yeni bir kriptografi yüzeyi olurdu. Bunun yerine Configuration
+Field'dan Security Mode (0/5/7/10/13) çıkarılıp "Encrypted Payload" olarak
+gösteriliyor — SNMP'nin şifreli ScopedPDU kararıyla AYNI desen. Radio
+metadata (Timestamp/Frequency/Mode/RSSI/LQI-SNR) telgraf baytlarının
+İÇİNDE olmadığı için `decodeOptions` üzerinden opsiyonel bağlam olarak
+sunuluyor (Device ID/Manufacturer/Direction/Encryption Status ise GERÇEKTEN
+bayt akışından çözüldüğü için decodeOptions'a duplicate edilmedi).
+Çoklu-blok (16 baytı aşan) çerçevelerde `decodeVariableData()`ya devredilen
+alanların `offset`i ilk 16 bayttan sonra 2 bayt/blok kayabilir (çıkarılan
+CRC baytları flat `baseOffset` sözleşmesine yansımıyor) — bu durumda
+`multiBlockOffsetApproximate` uyarısı basılıyor, DEĞERLER yine doğru.
+
+34 birim testi (`wirelessMbus.test.ts`) + 11 e2e (gerçek tarayıcı,
+`wireless-mbus-decode.spec.ts` — kanonik sayfa + `wireless-iot/
+wireless-metering` alias sayfası dahil) + 4294 toplam test + typecheck/build
+yeşil. Değişen dosyalar: `protocols/industrial/mbus/wirelessMbus.ts` (yeni),
+`wirelessMbus.test.ts` (yeni), `mbusVariableData.ts` (yalnız EXPORT ekleri —
+davranış değişmedi), `protocol-core/checksums/crcCatalogue.ts` +
+`crcEngine.test.ts` (`CRC16_EN13757` eklendi), `protocols/index.ts` (kayıt),
+`app/catalog/domains/industrial-automation.ts` (`status: 'ready'`,
+`pluginId`), `translations/{tr,en}.ts`, `e2e/wireless-mbus-decode.spec.ts`
+(yeni). Sıradaki: **13b (iec-60870-5-101)** — `decodeAsdu()` paylaşımı,
+brief'in "kod seviyesinde zaten kanıtlı" dediği ikinci en güvenli alt dalga.
 
 Platform deposunda **Faz 0–4'ün hepsi bitti** (son commit 2026-08-10). Comm feature
 modülü, `comm` şeması, CORS ve edge yönlendirme yerinde; o depoda planlanmış başka faz

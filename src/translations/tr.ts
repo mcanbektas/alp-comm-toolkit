@@ -3623,6 +3623,59 @@ export const tr = {
   'protocol.mbus.example.unrecognizedCi.description':
     'RSP_UD, CI=0x99 dar ad kümesinde yok — user data ham gösterilir, yalnız uyarı basılır (hata değil).',
 
+  // --- Wireless M-Bus ---
+  'protocol.wirelessMbus.error.emptyFrame': 'Tampon boş — hiçbir alan okunamaz.',
+  'protocol.wirelessMbus.error.block1Truncated':
+    'Block 1 (L+C+M+A+CRC, 12 bayt) tam okunamıyor — çerçeve çok kısa.',
+  'protocol.wirelessMbus.error.block1CrcMismatch': 'Block 1 CRC (CRC-16/EN-13757) uyuşmuyor.',
+  'protocol.wirelessMbus.error.invalidLengthField':
+    'L-field yapısal alt sınırın (C+M+A=9 bayt) altında — Block 2 çözümlenemiyor.',
+  'protocol.wirelessMbus.error.dataBlockTruncated': 'Veri bloğu (16 bayt + 2 bayt CRC) yarıda kesildi.',
+  'protocol.wirelessMbus.error.dataBlockCrcMismatch': 'Veri bloğu CRC (CRC-16/EN-13757) uyuşmuyor.',
+  'protocol.wirelessMbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.wirelessMbus.warning.invalidBcd': 'Identification Number geçerli BCD değil.',
+  'protocol.wirelessMbus.warning.unknownCi': 'CI Field dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.wirelessMbus.warning.ciNotDecoded':
+    'CI Field adlandırıldı ama bu dalgada yalnız CI=0x72 (TPL Long Header) DIF/VIF zincirine devrediliyor — payload ham gösteriliyor.',
+  'protocol.wirelessMbus.warning.unknownDeviceType': 'Device Type dar ad kümesinde yok — ham gösteriliyor.',
+  'protocol.wirelessMbus.warning.encryptedPayload':
+    'Payload şifreli (Security Mode ≠ 0) — bu dalga AES şifre çözme UYGULAMIYOR, yalnız "Encrypted" olarak gösteriliyor.',
+  'protocol.wirelessMbus.warning.multiBlockOffsetApproximate':
+    'Application data 16 bayttan uzun (birden çok veri bloğu) — ilk bloktan sonraki alanların bayt konumu (offset) yaklaşık gösterilir, DEĞERLER yine doğrudur.',
+  'protocol.wirelessMbus.warning.unnamedSecurityMode':
+    'Security Mode, OMS-Group Vol.2 Table 18/19in doğruladığı beş modun (0/5/7/10/13) dışında — adlandırılmadı.',
+  'protocol.wirelessMbus.warning.trailingBytes': 'Çerçeve sınırından sonra fazladan bayt var.',
+  'protocol.wirelessMbus.documentation.summary':
+    'EN 13757-4 Format A link-layer (Block 1 + CRC16_EN13757 korumalı veri blokları) kendi kodunda çözülür; CI=0x72 (TPL Long Header) yolu wired M-Bus ile PAYLAŞILAN Fixed Header + DIF/VIF motoruna (mbusVariableData.ts) devredilir. Şifreli payload (Security Mode ≠ 0) çözülmeden "Encrypted" gösterilir — anahtar/şifre çözme bu dalganın kapsamında değil.',
+  'protocol.wirelessMbus.option.radioMode': 'Radyo Modu',
+  'protocol.wirelessMbus.option.radioMode.description':
+    'Telgraf baytlarının İÇİNDE değildir — alıcı donanımının bildirdiği bağlam, yalnız bilgi amaçlı gösterilir.',
+  'protocol.wirelessMbus.option.radioMode.unknown': 'Bilinmiyor',
+  'protocol.wirelessMbus.option.frequency': 'Frekans (MHz)',
+  'protocol.wirelessMbus.option.frequency.description':
+    'Telgraf baytlarının İÇİNDE değildir — alıcı donanımının bildirdiği bağlam, yalnız bilgi amaçlı gösterilir.',
+  'protocol.wirelessMbus.option.rssi': 'RSSI (dBm)',
+  'protocol.wirelessMbus.option.rssi.description':
+    'Telgraf baytlarının İÇİNDE değildir — alıcı donanımının bildirdiği bağlam, yalnız bilgi amaçlı gösterilir.',
+  'protocol.wirelessMbus.option.linkQuality': 'LQI / SNR',
+  'protocol.wirelessMbus.option.linkQuality.description':
+    'Telgraf baytlarının İÇİNDE değildir — alıcı donanımının bildirdiği bağlam, yalnız bilgi amaçlı gösterilir.',
+  'protocol.wirelessMbus.example.simpleUnencrypted.name': 'Basit örnek: tek veri bloğu, şifresiz',
+  'protocol.wirelessMbus.example.simpleUnencrypted.description':
+    'CI=0x72, Security Mode 0, Block 2 payload tam 16 bayt (tek veri bloğu) — Energy=42 Wh tek kaydı.',
+  'protocol.wirelessMbus.example.multiBlockThreeRecords.name': 'Çoklu blok: 3 kayıt',
+  'protocol.wirelessMbus.example.multiBlockThreeRecords.description':
+    'CI=0x72, Block 2 payload 28 bayt — iki veri bloğuna yayılır (16+12), Energy/Volume/Flow Temperature kayıtları m-bus.ts örneğiyle aynı DIF/VIF baytlarını taşır.',
+  'protocol.wirelessMbus.example.encryptedMode5.name': 'Şifreli: Security Mode 5',
+  'protocol.wirelessMbus.example.encryptedMode5.description':
+    'Configuration Field Security Mode=5 (AES-128-CBC) işaretliyor — Fixed Header çözülür, payload ("Encrypted") ŞİFRE ÇÖZÜLMEDEN gösterilir (16 baytlık yer tutucu, gerçek AES çıktısı değil).',
+  'protocol.wirelessMbus.example.block1CrcMismatch.name': 'Block 1 CRC hatası',
+  'protocol.wirelessMbus.example.block1CrcMismatch.description':
+    'Basit örnekle aynı gövde, Block 1 CRC baytları kasten 0x00 0x00 — crc-mismatch hata yolu, alanlar yine de çözülür.',
+  'protocol.wirelessMbus.example.unsupportedCi.name': 'Desteklenmeyen CI (0x78)',
+  'protocol.wirelessMbus.example.unsupportedCi.description':
+    'CI=0x78 ("No Header APL Follows") adlandırılır ama bu dalgada DIF/VIF zincirine devredilmez — APL payload ham + uyarıyla gösterilir.',
+
   // --- EtherCAT ---
   'protocol.ethercat.error.frameTooShort':
     'Çerçeve, Ethernet başlığı (14 bayt) + EtherCAT başlığı (2 bayt) kadar uzun değil.',

@@ -3625,6 +3625,59 @@ export const en: TranslationDictionary = {
   'protocol.mbus.example.unrecognizedCi.description':
     'RSP_UD, CI=0x99 is not in the narrow name set — the user data is shown raw, only a warning is raised (not an error).',
 
+  // --- Wireless M-Bus ---
+  'protocol.wirelessMbus.error.emptyFrame': 'Buffer is empty — no field can be read.',
+  'protocol.wirelessMbus.error.block1Truncated':
+    'Block 1 (L+C+M+A+CRC, 12 bytes) cannot be read in full — the frame is too short.',
+  'protocol.wirelessMbus.error.block1CrcMismatch': 'Block 1 CRC (CRC-16/EN-13757) does not match.',
+  'protocol.wirelessMbus.error.invalidLengthField':
+    'L-field is below the structural minimum (C+M+A=9 bytes) — Block 2 cannot be parsed.',
+  'protocol.wirelessMbus.error.dataBlockTruncated': 'A data block (16 bytes + 2-byte CRC) was cut short.',
+  'protocol.wirelessMbus.error.dataBlockCrcMismatch': 'A data block CRC (CRC-16/EN-13757) does not match.',
+  'protocol.wirelessMbus.error.aborted': 'Parsing was aborted.',
+  'protocol.wirelessMbus.warning.invalidBcd': 'Identification Number is not valid BCD.',
+  'protocol.wirelessMbus.warning.unknownCi': 'CI Field is not in the narrow name set — shown raw.',
+  'protocol.wirelessMbus.warning.ciNotDecoded':
+    'CI Field was named but this wave only hands CI=0x72 (TPL Long Header) off to the DIF/VIF chain — the payload is shown raw.',
+  'protocol.wirelessMbus.warning.unknownDeviceType': 'Device Type is not in the narrow name set — shown raw.',
+  'protocol.wirelessMbus.warning.encryptedPayload':
+    'The payload is encrypted (Security Mode ≠ 0) — this wave does NOT implement AES decryption, it is only shown as "Encrypted".',
+  'protocol.wirelessMbus.warning.multiBlockOffsetApproximate':
+    'Application data is longer than 16 bytes (more than one data block) — byte offsets for fields past the first block are approximate; the decoded VALUES are still correct.',
+  'protocol.wirelessMbus.warning.unnamedSecurityMode':
+    'Security Mode is outside the five modes (0/5/7/10/13) confirmed by OMS-Group Vol.2 Table 18/19 — left unnamed.',
+  'protocol.wirelessMbus.warning.trailingBytes': 'There are extra bytes past the end of the frame.',
+  'protocol.wirelessMbus.documentation.summary':
+    'The EN 13757-4 Format A link layer (Block 1 plus CRC16_EN13757-protected data blocks) is decoded by dedicated code; the CI=0x72 (TPL Long Header) path hands off to the Fixed Header + DIF/VIF engine SHARED with wired M-Bus (mbusVariableData.ts). An encrypted payload (Security Mode ≠ 0) is shown as "Encrypted" without being decrypted — key handling/decryption is out of scope for this wave.',
+  'protocol.wirelessMbus.option.radioMode': 'Radio Mode',
+  'protocol.wirelessMbus.option.radioMode.description':
+    'Not present in the telegram bytes — this is context reported by the receiving hardware, shown for information only.',
+  'protocol.wirelessMbus.option.radioMode.unknown': 'Unknown',
+  'protocol.wirelessMbus.option.frequency': 'Frequency (MHz)',
+  'protocol.wirelessMbus.option.frequency.description':
+    'Not present in the telegram bytes — this is context reported by the receiving hardware, shown for information only.',
+  'protocol.wirelessMbus.option.rssi': 'RSSI (dBm)',
+  'protocol.wirelessMbus.option.rssi.description':
+    'Not present in the telegram bytes — this is context reported by the receiving hardware, shown for information only.',
+  'protocol.wirelessMbus.option.linkQuality': 'LQI / SNR',
+  'protocol.wirelessMbus.option.linkQuality.description':
+    'Not present in the telegram bytes — this is context reported by the receiving hardware, shown for information only.',
+  'protocol.wirelessMbus.example.simpleUnencrypted.name': 'Simple example: single data block, unencrypted',
+  'protocol.wirelessMbus.example.simpleUnencrypted.description':
+    'CI=0x72, Security Mode 0, Block 2 payload is exactly 16 bytes (a single data block) — one Energy=42 Wh record.',
+  'protocol.wirelessMbus.example.multiBlockThreeRecords.name': 'Multi-block: 3 records',
+  'protocol.wirelessMbus.example.multiBlockThreeRecords.description':
+    'CI=0x72, Block 2 payload is 28 bytes — spans two data blocks (16+12); the Energy/Volume/Flow Temperature records carry the same DIF/VIF bytes as the m-bus.ts example.',
+  'protocol.wirelessMbus.example.encryptedMode5.name': 'Encrypted: Security Mode 5',
+  'protocol.wirelessMbus.example.encryptedMode5.description':
+    'Configuration Field flags Security Mode=5 (AES-128-CBC) — the Fixed Header is decoded, the payload ("Encrypted") is shown WITHOUT being decrypted (a 16-byte placeholder, not real AES output).',
+  'protocol.wirelessMbus.example.block1CrcMismatch.name': 'Block 1 CRC error',
+  'protocol.wirelessMbus.example.block1CrcMismatch.description':
+    'Same body as the simple example, Block 1 CRC bytes are deliberately 0x00 0x00 — the crc-mismatch error path, fields are still decoded.',
+  'protocol.wirelessMbus.example.unsupportedCi.name': 'Unsupported CI (0x78)',
+  'protocol.wirelessMbus.example.unsupportedCi.description':
+    'CI=0x78 ("No Header APL Follows") is named but is not handed off to the DIF/VIF chain in this wave — the APL payload is shown raw with a warning.',
+
   // --- EtherCAT ---
   'protocol.ethercat.error.frameTooShort':
     'The frame is shorter than the Ethernet header (14 bytes) plus the EtherCAT header (2 bytes).',

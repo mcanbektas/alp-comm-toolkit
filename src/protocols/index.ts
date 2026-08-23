@@ -308,6 +308,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'm-bus', () =>
     import('./industrial/mbus/mbus').then((module) => module.mbusPlugin),
   );
+  // Wireless M-Bus — dalga 13a: EN 13757-4 Format A link-layer (L/C/M/A +
+  // CRC16_EN13757 block CRC'leri) kendi kodunda çözülür, CI=0x72 (TPL Long
+  // Header) yolu wired M-Bus'ın `decodeVariableData()`sına (mbusVariableData.ts)
+  // devredilir — brief-faz10-dalga13.md'nin "en kanıtlı paylaşım" kararı
+  // (bkz. wirelessMbus.ts dosya başı). Kanonik kayıt industrial-automation/metering.
+  registerOnce(registry, 'wireless-m-bus', () =>
+    import('./industrial/mbus/wirelessMbus').then((module) => module.wirelessMbusPlugin),
+  );
   // EtherCAT — dalga 5d: girdi TAM Ethernet çerçevesi (EtherType 0x88A4), sonra
   // EtherCAT başlığı + datagram zinciri + Working Counter (bkz. ethercat.ts
   // dosya başı: bu bir katman zinciri DEĞİL, çerçevenin kendisi).
