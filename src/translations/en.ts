@@ -5357,6 +5357,84 @@ export const en: TranslationDictionary = {
   'protocol.xcp.example.stimDaqData.description':
     'PID 0x00 falls in the STIM range — its meaning depends on a DAQ list configuration this engine does not have, shown raw.',
 
+  // --- XCP on Ethernet ---
+  'protocol.xcpEth.documentation.summary':
+    'Resolves the XCP-on-Ethernet transport unit (4-byte transport header + XCP CTO/DTO packet). The XCP packet itself is decoded by the same engine as XCP on CAN (command/response tables, error/event codes). The transport header’s Length and Counter fields are shown as raw bytes only: two independent open-source implementations (Scapy, pyxcp) disagree on their byte order.',
+  'protocol.xcpEth.error.frameTooShort': 'The frame is shorter than the 4-byte XCP transport header.',
+  'protocol.xcpEth.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.xcpEth.error.aborted': 'Decoding was cancelled.',
+  'protocol.xcpEth.error.emptyPacket':
+    'Only the transport header is present — an XCP packet needs at least a PID byte.',
+  'protocol.xcpEth.warning.headerByteOrderUnresolved':
+    'Scapy (contrib/automotive/xcp) encodes this header big-endian, pyxcp (transport/eth.py) encodes it little-endian — the two independent sources disagree, so no numeric value is asserted; only the raw bytes are shown.',
+  'protocol.xcpEth.summary.command': 'XCP-on-Ethernet command frame',
+  'protocol.xcpEth.summary.response': 'XCP-on-Ethernet response frame',
+  'protocol.xcpEth.example.connectCommandNormal.name': 'CONNECT (normal mode)',
+  'protocol.xcpEth.example.connectCommandNormal.description':
+    'Neutral header bytes + PID 0xFF = CONNECT, connection_mode 0x00 = NORMAL — the same XCP packet as the CAN example.',
+  'protocol.xcpEth.example.connectPositiveResponse.name': 'CONNECT positive response',
+  'protocol.xcpEth.example.connectPositiveResponse.description':
+    'PID 0xFF = RES on the response side. Select role=response to see it decoded as CONNECT’s resource/comm-mode/Max CTO/Max DTO/version fields.',
+  'protocol.xcpEth.example.getStatusCommand.name': 'GET_STATUS',
+  'protocol.xcpEth.example.getStatusCommand.description': 'PID 0xFD = GET_STATUS, no parameters.',
+  'protocol.xcpEth.example.setMtaCommand.name': 'SET_MTA',
+  'protocol.xcpEth.example.setMtaCommand.description':
+    'PID 0xF6 = SET_MTA. Try byteOrder=big-endian to see the same bytes resolve to a different address.',
+  'protocol.xcpEth.example.errorResponseCmdUnknown.name': 'ERR — ERR_CMD_UNKNOWN',
+  'protocol.xcpEth.example.errorResponseCmdUnknown.description':
+    'PID 0xFE = ERR on the response side (select role=response), error_code 0x20 = ERR_CMD_UNKNOWN.',
+  'protocol.xcpEth.example.emptyPacketHeaderOnly.name': 'Header only (no XCP packet)',
+  'protocol.xcpEth.example.emptyPacketHeaderOnly.description':
+    'Only the 4-byte transport header is present — there is no PID byte to decode, so the frame is reported invalid.',
+
+  // --- CCP ---
+  'protocol.ccp.documentation.summary':
+    'Decodes CAN Calibration Protocol frames: a CRO’s Command/Counter/Parameters, or a DTO’s Command Return Message (Return Code table), Event Message or DAQ data marker. Command and return-code tables cross-checked byte-for-byte against two independent open-source CCP implementations (pySART/cccp, CanCat). Every successful decode carries a legacy warning — ASAM classifies CCP as obsolete, superseded by XCP.',
+  'protocol.ccp.option.frameInterpretation': 'Frame interpretation',
+  'protocol.ccp.option.frameInterpretation.description':
+    'Whether this CAN frame is a CRO (leader → follower command) or a DTO (follower → leader response/DAQ data) genuinely cannot be derived from the bytes — a small command code and a DAQ PID can share the same numeric value. It depends on which configured CAN identifier it arrived on.',
+  'protocol.ccp.option.frameInterpretation.raw': 'Raw (no interpretation)',
+  'protocol.ccp.option.frameInterpretation.cro': 'CRO (command)',
+  'protocol.ccp.option.frameInterpretation.dto': 'DTO (response / DAQ data)',
+  'protocol.ccp.error.frameTooShort': 'The frame is shorter than the 8-byte SocketCAN header.',
+  'protocol.ccp.error.frameTooLong': 'The frame exceeds the classic CAN frame length.',
+  'protocol.ccp.error.aborted': 'Decoding was cancelled.',
+  'protocol.ccp.error.emptyPayload':
+    'The CAN payload is empty — a CCP frame needs at least a Command/Packet ID byte.',
+  'protocol.ccp.warning.legacyProtocol':
+    'CCP is a legacy protocol — ASAM classifies it as obsolete and recommends XCP for new designs.',
+  'protocol.ccp.warning.shortFrame':
+    'CRO and DTO are always 8 bytes; this payload is shorter, so trailing fields are missing.',
+  'protocol.ccp.warning.unassignedCommand': 'This command code is not in the table cross-checked for this engine.',
+  'protocol.ccp.warning.parametersRaw':
+    'This command’s parameters are not decoded field by field by this engine; shown raw.',
+  'protocol.ccp.warning.unknownReturnCode': 'This return code is not in the table cross-checked for this engine.',
+  'protocol.ccp.warning.responseDataRaw':
+    'Which command this Command Return Message answers cannot be known from a single stateless frame — unlike XCP, every CCP CRM is the same fixed length, so there is no length-based clue either; shown raw.',
+  'protocol.ccp.warning.eventDataRaw': 'The event body beyond the packet ID is not decoded; shown raw.',
+  'protocol.ccp.warning.daqData':
+    'This byte falls in the DAQ data range — its content depends on a DAQ list configuration this decoder does not have, and is shown raw.',
+  'protocol.ccp.summary.raw': 'CCP frame (raw)',
+  'protocol.ccp.summary.cro': 'CCP command frame (CRO)',
+  'protocol.ccp.summary.dto': 'CCP response frame (DTO)',
+  'protocol.ccp.example.connectCro.name': 'CONNECT (CRO)',
+  'protocol.ccp.example.connectCro.description':
+    'Command 0x01 = CONNECT, Counter 0x20, station address 0x1234 in Intel/little-endian format — select frameInterpretation=cro to see it decoded.',
+  'protocol.ccp.example.connectCrmAck.name': 'CONNECT acknowledged (CRM)',
+  'protocol.ccp.example.connectCrmAck.description':
+    'Packet ID 0xFF = Command Return Message, Return Code 0x00 = ACKNOWLEDGE, Counter 0x20 echoes the CRO — select frameInterpretation=dto to see it decoded.',
+  'protocol.ccp.example.setMtaCro.name': 'SET_MTA (CRO)',
+  'protocol.ccp.example.setMtaCro.description':
+    'Command 0x02 = SET_MTA, address 0x00002000 in Motorola/big-endian format — this byte order is fixed, unlike XCP’s negotiated SET_MTA address.',
+  'protocol.ccp.example.unassignedCommandCro.name': 'Unassigned command code',
+  'protocol.ccp.example.unassignedCommandCro.description':
+    'Command 0x0A falls in the gap between GET_ACTIVE_CAL_PAGE (0x09) and SET_S_STATUS (0x0C) — not in either source’s command table, shown as Unassigned.',
+  'protocol.ccp.example.daqDataDto.name': 'DAQ data (undecoded)',
+  'protocol.ccp.example.daqDataDto.description':
+    'Packet ID 0x02 is neither 0xFF (CRM) nor 0xFE (Event) — it is a DAQ list PID; the measurement bytes need a DAQ list configuration this engine does not have.',
+  'protocol.ccp.example.emptyPayload.name': 'Empty payload',
+  'protocol.ccp.example.emptyPayload.description': 'DLC 0 — no Command/Packet ID byte to decode.',
+
   // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':
     'The frame is not long enough for the Ethernet header (14 bytes) plus the FrameID (2 bytes).',

@@ -773,7 +773,17 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'The same XCP base protocol transported over UDP/IP or TCP/IP, where high-rate DAQ streams need packet-loss, ordering and time-correlation analysis.',
           layer: 'application',
-          status: 'planned',
+          // dalga 14c: `xcpPacket.ts`in İKİNCİ tüketicisi (ilki xcp-on-can).
+          // Girdi XCP-on-Ethernet TAŞIMA BİRİMİDİR (taşıma başlığı + XCP
+          // paketi), MAC/IP/UDP/TCP çerçevesinin tamamı DEĞİL — o kayıtlar
+          // zaten `ready` ve kendi sayfalarında çözülüyor, motorlar zincir
+          // KURMAZ. `role`/`byteOrder` decodeOptions xcp-on-can'dan PAYLAŞILIR
+          // (aynı dizi referansı). Taşıma başlığının LEN/CTR alanları HAM
+          // kalır: Scapy (big-endian) ve pyxcp (little-endian) bayt sırasında
+          // ÇELİŞİYOR (xcpOnEthernet.ts dosya başı) — sayısal değer İDDİA
+          // EDİLMEZ. TCP stream reassembly bu kaydın işi DEĞİLDİR.
+          status: 'ready',
+          pluginId: 'xcp-on-ethernet',
           tabs: [
             'overview',
             'live',
@@ -810,7 +820,17 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'CAN Calibration Protocol, the CAN-specific predecessor of XCP that ASAM now classifies as legacy but which is still found in older ECU projects.',
           layer: 'application',
-          status: 'planned',
+          // dalga 14c: `ccp/ccp.ts` — `xcp/` klasörünün İÇİNE DEĞİL, ayrı
+          // `automotive/ccp/` altına yazıldı (CRO/DTO ≠ CTO/DTO, `xcpPacket.ts`
+          // TÜKETİLMEZ). Yalnız CAN veri-bağı `automotive/can/canClassic`ten
+          // PAYLAŞILIR (devicenet.ts emsali). Kaynak taraması BEKLENENDEN iyi
+          // sonuç verdi (brief'in "yetersizse partial" kötümserliği ÇÜRÜDÜ):
+          // 28 komut kodu + 18 dönüş kodu İKİ bağımsız açık kaynakta (pySART/
+          // cccp, CanCat) BİREBİR örtüşüyor — bkz. ccp.ts dosya başı. Her
+          // başarılı çözümde koşulsuz legacy uyarısı basılır, `related` ile
+          // xcp-on-can'a yönlendirir.
+          status: 'ready',
+          pluginId: 'ccp',
           tabs: [
             'overview',
             'live',

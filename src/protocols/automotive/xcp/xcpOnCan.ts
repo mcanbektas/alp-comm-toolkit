@@ -62,15 +62,22 @@ const PROTOCOL_ID = 'xcp-on-can';
 /** Protokol adı veridir, çeviriye girmez (CLAUDE.md). */
 const PROTOCOL_DISPLAY_NAME = 'XCP on CAN';
 
-const OPTION_ROLE = 'role';
-const ROLE_COMMAND = 'command';
-const ROLE_RESPONSE = 'response';
+/**
+ * `export` edildi: dalga 14c'nin `xcpOnEthernet.ts`i bu diziyi ve sabitleri
+ * PAYLAŞIR (aynı çeviri anahtarları, aynı varsayılanlar) — çerçeveden
+ * çıkarılamayan `role`/`byteOrder` ekseni yalnız CAN'e özgü değil, XCP
+ * çekirdeğinin (`xcpPacket.ts`) kendisine ait (dosya başı DÜZELTME 1/2).
+ * İKİNCİ KEZ YAZILMAZ; bkz. `xcpOnEthernet.ts` dosya başı.
+ */
+export const OPTION_ROLE = 'role';
+export const ROLE_COMMAND = 'command';
+export const ROLE_RESPONSE = 'response';
 
-const OPTION_BYTE_ORDER = 'byteOrder';
-const BYTE_ORDER_LITTLE = 'little-endian';
-const BYTE_ORDER_BIG = 'big-endian';
+export const OPTION_BYTE_ORDER = 'byteOrder';
+export const BYTE_ORDER_LITTLE = 'little-endian';
+export const BYTE_ORDER_BIG = 'big-endian';
 
-const DECODE_OPTIONS: readonly DecodeOption[] = [
+export const DECODE_OPTIONS: readonly DecodeOption[] = [
   {
     id: OPTION_ROLE,
     label: 'protocol.xcp.option.role',

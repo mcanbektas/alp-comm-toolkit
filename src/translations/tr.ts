@@ -5341,6 +5341,84 @@ export const tr = {
   'protocol.xcp.example.stimDaqData.description':
     'PID 0x00 STIM aralığına düşer — anlamı bu motorun sahip olmadığı bir DAQ list konfigürasyonuna bağlıdır, ham gösterilir.',
 
+  // --- XCP on Ethernet ---
+  'protocol.xcpEth.documentation.summary':
+    'XCP-on-Ethernet taşıma birimini çözer (4 baytlık taşıma başlığı + XCP CTO/DTO paketi). XCP paketinin kendisi XCP on CAN ile AYNI motorla çözülür (komut/yanıt tabloları, hata/olay kodları). Taşıma başlığının Length ve Counter alanları yalnız ham bayt olarak gösterilir: iki bağımsız açık kaynak implementasyon (Scapy, pyxcp) bayt sırasında çelişiyor.',
+  'protocol.xcpEth.error.frameTooShort': 'Çerçeve 4 baytlık XCP taşıma başlığından kısa.',
+  'protocol.xcpEth.error.frameTooLong': 'Çerçeve yapılandırılmış azami uzunluğu aşıyor.',
+  'protocol.xcpEth.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.xcpEth.error.emptyPacket':
+    'Yalnız taşıma başlığı var — bir XCP paketi en az bir PID baytı gerektirir.',
+  'protocol.xcpEth.warning.headerByteOrderUnresolved':
+    'Scapy (contrib/automotive/xcp) bu başlığı big-endian kodluyor, pyxcp (transport/eth.py) little-endian kodluyor — iki bağımsız kaynak çelişiyor, bu yüzden sayısal bir değer İDDİA EDİLMİYOR; yalnız ham baytlar gösterilir.',
+  'protocol.xcpEth.summary.command': 'XCP-on-Ethernet komut çerçevesi',
+  'protocol.xcpEth.summary.response': 'XCP-on-Ethernet yanıt çerçevesi',
+  'protocol.xcpEth.example.connectCommandNormal.name': 'CONNECT (normal kip)',
+  'protocol.xcpEth.example.connectCommandNormal.description':
+    'Nötr başlık baytları + PID 0xFF = CONNECT, connection_mode 0x00 = NORMAL — CAN örneğiyle AYNI XCP paketi.',
+  'protocol.xcpEth.example.connectPositiveResponse.name': 'CONNECT pozitif yanıtı',
+  'protocol.xcpEth.example.connectPositiveResponse.description':
+    'Yanıt tarafında PID 0xFF = RES. resource/comm-mode/Max CTO/Max DTO/sürüm alanlarıyla çözülmesi için role=response seçin.',
+  'protocol.xcpEth.example.getStatusCommand.name': 'GET_STATUS',
+  'protocol.xcpEth.example.getStatusCommand.description': 'PID 0xFD = GET_STATUS, parametresiz.',
+  'protocol.xcpEth.example.setMtaCommand.name': 'SET_MTA',
+  'protocol.xcpEth.example.setMtaCommand.description':
+    'PID 0xF6 = SET_MTA. Aynı baytların byteOrder=big-endian ile FARKLI bir adrese çözüldüğünü görmek için deneyin.',
+  'protocol.xcpEth.example.errorResponseCmdUnknown.name': 'ERR — ERR_CMD_UNKNOWN',
+  'protocol.xcpEth.example.errorResponseCmdUnknown.description':
+    'Yanıt tarafında (role=response seçin) PID 0xFE = ERR, error_code 0x20 = ERR_CMD_UNKNOWN.',
+  'protocol.xcpEth.example.emptyPacketHeaderOnly.name': 'Yalnız başlık (XCP paketi yok)',
+  'protocol.xcpEth.example.emptyPacketHeaderOnly.description':
+    'Yalnız 4 baytlık taşıma başlığı var — çözülecek bir PID baytı yok, çerçeve geçersiz bildirilir.',
+
+  // --- CCP ---
+  'protocol.ccp.documentation.summary':
+    'CAN Calibration Protocol çerçevelerini çözer: bir CRO’nun Command/Counter/Parameters alanları, ya da bir DTO’nun Command Return Message (Return Code tablosu), Event Message veya DAQ verisi işareti. Komut ve dönüş kodu tabloları iki bağımsız açık kaynak CCP implementasyonuyla (pySART/cccp, CanCat) bayt bayt çapraz doğrulandı. Her başarılı çözüm bir legacy uyarısı taşır — ASAM CCP’yi obsolete ilan etti, yerine XCP öneriyor.',
+  'protocol.ccp.option.frameInterpretation': 'Çerçeve yorumu',
+  'protocol.ccp.option.frameInterpretation.description':
+    'Bu CAN çerçevesinin bir CRO (leader → follower komut) mu yoksa bir DTO (follower → leader yanıt/DAQ verisi) mu olduğu baytlardan GERÇEKTEN çıkarılamaz — küçük bir komut kodu ile bir DAQ PID’i aynı sayısal değeri paylaşabilir. Hangi konfigüre edilmiş CAN kimliğinden geldiğine bağlıdır.',
+  'protocol.ccp.option.frameInterpretation.raw': 'Ham (yorumsuz)',
+  'protocol.ccp.option.frameInterpretation.cro': 'CRO (komut)',
+  'protocol.ccp.option.frameInterpretation.dto': 'DTO (yanıt / DAQ verisi)',
+  'protocol.ccp.error.frameTooShort': 'Çerçeve 8 baytlık SocketCAN başlığından kısa.',
+  'protocol.ccp.error.frameTooLong': 'Çerçeve klasik CAN çerçeve uzunluğunu aşıyor.',
+  'protocol.ccp.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ccp.error.emptyPayload':
+    'CAN payload’ı boş — bir CCP çerçevesi en az bir Command/Packet ID baytı gerektirir.',
+  'protocol.ccp.warning.legacyProtocol':
+    'CCP legacy bir protokoldür — ASAM bunu obsolete ilan etti ve yeni tasarımlarda XCP öneriyor.',
+  'protocol.ccp.warning.shortFrame':
+    'CRO ve DTO her zaman 8 bayttır; bu payload daha kısa, sondaki alanlar eksik.',
+  'protocol.ccp.warning.unassignedCommand': 'Bu komut kodu bu motor için çapraz doğrulanan tabloda yok.',
+  'protocol.ccp.warning.parametersRaw':
+    'Bu komutun parametreleri bu motor tarafından alan alan çözülmüyor; ham gösterilir.',
+  'protocol.ccp.warning.unknownReturnCode': 'Bu dönüş kodu bu motor için çapraz doğrulanan tabloda yok.',
+  'protocol.ccp.warning.responseDataRaw':
+    'Bu Command Return Message’ın hangi komutu yanıtladığı tek, durumsuz bir çerçeveden bilinemez — XCP’nin aksine her CCP CRM’i AYNI sabit uzunluktadır, bu yüzden uzunluk tabanlı bir ipucu da yok; ham gösterilir.',
+  'protocol.ccp.warning.eventDataRaw': 'Packet ID’nin ötesindeki olay gövdesi çözülmüyor; ham gösterilir.',
+  'protocol.ccp.warning.daqData':
+    'Bu bayt DAQ veri aralığına düşüyor — içeriği bu çözücünün sahip olmadığı bir DAQ list konfigürasyonuna bağlıdır, ham gösterilir.',
+  'protocol.ccp.summary.raw': 'CCP çerçevesi (ham)',
+  'protocol.ccp.summary.cro': 'CCP komut çerçevesi (CRO)',
+  'protocol.ccp.summary.dto': 'CCP yanıt çerçevesi (DTO)',
+  'protocol.ccp.example.connectCro.name': 'CONNECT (CRO)',
+  'protocol.ccp.example.connectCro.description':
+    'Command 0x01 = CONNECT, Counter 0x20, station address 0x1234 Intel/little-endian biçiminde — çözülmüş görmek için frameInterpretation=cro seçin.',
+  'protocol.ccp.example.connectCrmAck.name': 'CONNECT onaylandı (CRM)',
+  'protocol.ccp.example.connectCrmAck.description':
+    'Packet ID 0xFF = Command Return Message, Return Code 0x00 = ACKNOWLEDGE, Counter 0x20 CRO’yu yankılıyor — çözülmüş görmek için frameInterpretation=dto seçin.',
+  'protocol.ccp.example.setMtaCro.name': 'SET_MTA (CRO)',
+  'protocol.ccp.example.setMtaCro.description':
+    'Command 0x02 = SET_MTA, address 0x00002000 Motorola/big-endian biçiminde — bu bayt sırası SABİTTİR, XCP’nin müzakere edilen SET_MTA adresinin aksine.',
+  'protocol.ccp.example.unassignedCommandCro.name': 'Tanımsız komut kodu',
+  'protocol.ccp.example.unassignedCommandCro.description':
+    'Command 0x0A, GET_ACTIVE_CAL_PAGE (0x09) ile SET_S_STATUS (0x0C) arasındaki boşlukta — hiçbir kaynağın komut tablosunda yok, Unassigned gösterilir.',
+  'protocol.ccp.example.daqDataDto.name': 'DAQ verisi (çözülmez)',
+  'protocol.ccp.example.daqDataDto.description':
+    'Packet ID 0x02 ne 0xFF (CRM) ne 0xFE (Event) — bir DAQ list PID’i; ölçüm baytları bu motorun sahip olmadığı bir DAQ list konfigürasyonu ister.',
+  'protocol.ccp.example.emptyPayload.name': 'Boş payload',
+  'protocol.ccp.example.emptyPayload.description': 'DLC 0 — çözülecek bir Command/Packet ID baytı yok.',
+
   // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':
     'Çerçeve, Ethernet başlığı (14 bayt) + FrameID (2 bayt) kadar uzun değil.',

@@ -108,6 +108,23 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'xcp-on-can', () =>
     import('./automotive/xcp/xcpOnCan').then((module) => module.xcpOnCanPlugin),
   );
+  // XCP on Ethernet — dalga 14c: `xcpPacket.ts`in İKİNCİ tüketicisi (ilki
+  // yukarıdaki xcp-on-can). `role`/`byteOrder` decodeOptions xcpOnCan.ts'ten
+  // PAYLAŞILIR (aynı dizi referansı, ikinci kez yazılmadı) — XCP paketinin
+  // kendisi taşıyıcıdan bağımsız bir belirsizlik taşır. Taşıma başlığının
+  // LEN/CTR alanları HAM kalır: Scapy (big-endian) ve pyxcp (little-endian)
+  // bayt sırasında ÇELİŞİYOR (bkz. xcpOnEthernet.ts dosya başı kaynak uyarısı).
+  registerOnce(registry, 'xcp-on-ethernet', () =>
+    import('./automotive/xcp/xcpOnEthernet').then((module) => module.xcpOnEthernetPlugin),
+  );
+  // CCP — dalga 14c: XCP'nin CAN'e özgü, ASAM'ın legacy ilan ettiği selefi.
+  // CAN veri-bağı `automotive/can/canClassic`ten PAYLAŞILIR (devicenet.ts
+  // emsali, ikinci bir CAN çözücü YAZILMADI) ama XCP çekirdeğini
+  // (`xcpPacket.ts`) TÜKETMEZ — CRO/DTO, XCP'nin CTO/DTO'sundan AYRI bir
+  // komut kümesi (aynı sayı farklı anlam, mqtt.ts/mqttSn.ts'in 12f'deki
+  // ayrımıyla aynı gerekçe). `ccp/` klasörü bilerek `xcp/`nin İÇİNE DEĞİL
+  // yanına kondu.
+  registerOnce(registry, 'ccp', () => import('./automotive/ccp/ccp').then((module) => module.ccpPlugin));
   // v1 (0xFE) ve v2 (0xFD) AYNI modülden gelir: magic'e göre dallanan tek
   // parser, tek kayıt (can-2-0a/can-2-0b'nin iki-plugin deseninin BİLEREK
   // kullanılmadığı yer — bkz. mavlink.ts dosya başı).
