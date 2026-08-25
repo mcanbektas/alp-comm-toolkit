@@ -2724,6 +2724,147 @@ export const tr = {
   'protocol.dronecan.example.notExtendedRejected.description':
     '11-bit (base) identifier: DroneCAN 29-bit zorunlu kılar, çerçeve yine gösterilir ama hata basılır.',
 
+  // --- Cyphal (UAVCAN v1) — Cyphal/CAN, yalnız Classic CAN ---
+  'protocol.cyphal.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.cyphal.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.cyphal.error.canFdNotSupported':
+    'CAN FD kapsam dışı: FD çerçevelerinde dolgu baytları transfer CRC’sinin içindedir, bu yüzden bir FD çerçevesi Classic CAN gibi çözülemez. Burada yalnız Classic CAN 2.0B üzerinden Cyphal/CAN çözülür.',
+  'protocol.cyphal.error.notExtended':
+    'Cyphal/CAN taşıma çerçeveleri CAN 2.0B çerçeveleridir; 11-bit çerçeve Cyphal olamaz.',
+  'protocol.cyphal.error.tailByteMissing':
+    'Veri alanı boş: bir baytdan az veri taşıyan CAN çerçevesi geçerli bir Cyphal/CAN çerçevesi değildir.',
+  'protocol.cyphal.error.reservedBit23NotZero':
+    'Ayrılmış bit 23 sıfır olmak zorunda; spec bu biti set eden çerçevenin atılmasını istiyor.',
+  'protocol.cyphal.error.v11RequiresOptIn':
+    'Ayrılmış bit 7 set: bu, deneysel v1.1’in 16-bit subject-ID düzeni ve v1.0 bunun atılmasını istiyor. Çözmek için sürüm seçeneğini v1.1 yapın.',
+  'protocol.cyphal.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.cyphal.warning.dsdlRequiredForPayload':
+    'Veri alanı ham gösteriliyor: alan yerleşimi DSDL tanımından gelir, bu araçta DSDL derleyicisi yok.',
+  'protocol.cyphal.warning.transferCrcNeedsFullTransfer':
+    'Transfer CRC gösterildi ama doğrulanmadı: transferdeki tüm çerçevelerin payload’ını ve dolgu baytlarını kapsar, tek çerçeveden doğrulanamaz.',
+  'protocol.cyphal.warning.transferCrcSplitAcrossFrames':
+    'Transfer CRC’nin yalnız bir kısmı bu çerçevede; kalan bayt bir önceki çerçevededir.',
+  'protocol.cyphal.warning.experimentalSpecVersion':
+    'v1.1 sürümü deneyseldir: 16-bit subject-ID düzeni stable v1.0 spec’inin parçası değildir.',
+  'protocol.cyphal.warning.remoteFrame':
+    'Remote bayrağı set; Cyphal/CAN remote çerçeve tanımlamaz.',
+  'protocol.cyphal.warning.truncatedPayload':
+    'Bildirilen uzunluktaki bayt kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.cyphal.warning.toggleLooksLikeDroneCan':
+    'Transferin ilk çerçevesinde Toggle 0; Cyphal her zaman 1’den başlar, bu yüzden çerçeve DroneCAN (UAVCAN v0) görünüyor. Sınıflandırmak için UAVCAN Compatibility sayfasını kullanın.',
+  'protocol.cyphal.warning.nonLastFrameNotFullMtu':
+    'Çok çerçeveli transferin son olmayan her çerçevesi veri alanını tamamen doldurmalıdır (Classic CAN’de DLC 8).',
+  'protocol.cyphal.warning.anonymousMustBeSingleFrame':
+    'Anonim transfer yalnız tek çerçeveli olabilir; çok çerçeveli anonim transfer yasaktır.',
+  'protocol.cyphal.warning.selfAddressedService':
+    'Kaynak ve hedef node-ID aynı; kendine adreslenen servis transferi yasaktır.',
+  'protocol.cyphal.option.transport': 'Taşıyıcı',
+  'protocol.cyphal.option.transport.description':
+    'Yalnız Classic CAN 2.0B üzerinden Cyphal/CAN çözülür. Cyphal/UDP, Cyphal/serial ve CAN FD bilinçli olarak kapsam dışıdır — bunlar bu biçimin daha uzun hâlleri değil, ayrı tel biçimleridir.',
+  'protocol.cyphal.option.transport.can': 'Cyphal/CAN (Classic CAN 2.0B)',
+  'protocol.cyphal.option.specVersion': 'Spec sürümü',
+  'protocol.cyphal.option.specVersion.description':
+    'v1.0 stable varsayılandır ve ayrılmış bit 7’nin sıfır olmasını ister. v1.1 deneyseldir ve bit 7’yi 16-bit subject-ID için bir sürüm ayırıcısı olarak yeniden yorumlar; bu yüzden yalnız açık opt-in ile geçerlidir.',
+  'protocol.cyphal.option.specVersion.v10': 'v1.0 (stable)',
+  'protocol.cyphal.option.specVersion.v11': 'v1.1 (deneysel)',
+  'protocol.cyphal.summary.notExtended': 'Geçersiz Cyphal/CAN çerçevesi (29-bit gerekli)',
+  'protocol.cyphal.summary.message':
+    '{frameRole} mesaj — subject {subjectId}, kaynak düğüm {sourceNodeId}',
+  'protocol.cyphal.summary.anonymousMessage':
+    '{frameRole} anonim mesaj — subject {subjectId}, pseudo-ID {sourceNodeId}',
+  'protocol.cyphal.summary.serviceRequest':
+    '{frameRole} servis isteği — servis {serviceId}, düğüm {sourceNodeId} → düğüm {destinationNodeId}',
+  'protocol.cyphal.summary.serviceResponse':
+    '{frameRole} servis yanıtı — servis {serviceId}, düğüm {sourceNodeId} → düğüm {destinationNodeId}',
+  'protocol.cyphal.documentation.summary':
+    'Classic CAN 2.0B üzerinden Cyphal/CAN: 29-bit identifier Priority/Service-not-message/Anonymous/Subject-ID/Source node-ID (ya da Service-ID/Destination node-ID) alanlarına ayrılır, tail byte’tan Start-of-transfer, End-of-transfer, Toggle ve modulo-32 Transfer-ID çözülür. ÇÖZÜLEN: mesaj, servis isteği ve servis yanıtı çerçeveleri, dört çerçeve rolü ve transfer CRC’sinin yeri. ÇÖZÜLMEYEN (bilinçli kapsam): Cyphal/UDP, Cyphal/serial ve CAN FD kapsam dışıdır ve açıkça reddedilir; DSDL derlenmediği için payload alanları ham kalır; transfer CRC’si transferin tüm çerçevelerini kapsadığı için gösterilir ama doğrulanmaz. Spec sürümü varsayılan v1.0’dır, v1.1 deneysel opt-in’dir.',
+  'protocol.cyphal.example.heartbeatMessage.name': 'Heartbeat mesajı (tek çerçeve)',
+  'protocol.cyphal.example.heartbeatMessage.description':
+    'Spec örneği 0x107D552A: nominal öncelik, subject-ID 7509 (Heartbeat), kaynak düğüm 42; tail byte 0xE0 = SOT=1, EOT=1, Toggle=1, Transfer-ID=0.',
+  'protocol.cyphal.example.anonymousMessage.name': 'Anonim mesaj (tek çerçeve)',
+  'protocol.cyphal.example.anonymousMessage.description':
+    'Spec örneğinin identifier’ı 0x11133775: anonymous biti (24) set, subject-ID 4919, kaynak alanı bir pseudo-ID taşıyor. Ayrılmış bit 22 ve 21 burada sıfır — alımda hiç denetlenmemelerinin sebebi budur. Payload Classic CAN’e sığsın diye kısaltıldı; spec’teki asıl örnek bir CAN FD çerçevesidir.',
+  'protocol.cyphal.example.serviceRequest.name': 'Servis isteği (tek çerçeve)',
+  'protocol.cyphal.example.serviceRequest.description':
+    'Spec örneği 0x136B957B: uavcan.node.GetInfo (service-ID 430) isteği, düğüm 123’ten düğüm 42’ye, payload yok — yalnız tail byte 0xE1.',
+  'protocol.cyphal.example.serviceResponseFirst.name': 'Servis yanıtı — ilk çerçeve',
+  'protocol.cyphal.example.serviceResponseFirst.description':
+    'Spec örneği 0x126BBDAA: çok çerçeveli yanıtın ilk çerçevesi, tail byte 0xA1 = SOT=1, EOT=0, Toggle=1. Son olmayan her çerçevede gerektiği gibi veri alanı tamamen dolu.',
+  'protocol.cyphal.example.serviceResponseMiddle.name': 'Servis yanıtı — ara çerçeve',
+  'protocol.cyphal.example.serviceResponseMiddle.description':
+    'Aynı transfer, tail byte 0x01 = SOT=0, EOT=0, Toggle=0. Parser çerçeveyi yalnız sınıflar; toggle sırasını çerçeveler arasında hiç izlemez.',
+  'protocol.cyphal.example.serviceResponseLast.name': 'Servis yanıtı — son çerçeve',
+  'protocol.cyphal.example.serviceResponseLast.description':
+    'Spec örneği: E7 61 verisi transfer CRC’si 0x9AE7’nin yalnız düşük baytını taşır, yüksek bayt bir önceki çerçevede gönderilmiştir — bölünmüş CRC vakası.',
+  'protocol.cyphal.example.v11ExperimentalMessage.name': 'v1.1 16-bit subject-ID (deneysel)',
+  'protocol.cyphal.example.v11ExperimentalMessage.description':
+    'Ayrılmış bit 7 set; v1.0 bunun atılmasını istiyor, bu yüzden varsayılanda hata basılır. Sürüm seçeneğini v1.1 yapınca çerçeve 16-bit subject-ID’li mesaj olarak çözülür ve deneysel uyarı basılır.',
+  'protocol.cyphal.example.droneCanToggleRejected.name':
+    'İlk çerçevede Toggle=0 (DroneCAN imzası)',
+  'protocol.cyphal.example.droneCanToggleRejected.description':
+    'Aynı Heartbeat kimliği ama tail byte 0xC0: transferin ilk çerçevesinde Toggle 0. Cyphal her zaman 1’den başlar, yani bu DroneCAN imzasıdır — çerçeve yine çözülür, uyarı UAVCAN Compatibility sayfasına yönlendirir.',
+  'protocol.cyphal.example.canFdRejected.name': 'CAN FD çerçevesi (ret yolu)',
+  'protocol.cyphal.example.canFdRejected.description':
+    'CAN FD kapsam dışıdır ve açıkça reddedilir: FD dolgu baytları transfer CRC’sinin içindedir, yani bir FD çerçevesi yalnızca daha uzun bir Classic çerçevesi değildir.',
+  'protocol.cyphal.example.notExtendedRejected.name': 'Extended olmayan çerçeve (ret yolu)',
+  'protocol.cyphal.example.notExtendedRejected.description':
+    '11-bit (base) identifier: Cyphal/CAN 29-bit zorunlu kılar, çerçeve yine gösterilir ama hata basılır.',
+
+  // --- UAVCAN Compatibility — sınıflandırıcı, tel protokolü değil ---
+  'protocol.uavcanCompatibility.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.uavcanCompatibility.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.uavcanCompatibility.error.canFdNotSupported':
+    'Bu aracın kapsamında iki hat da CAN FD tanımlamıyor, bu yüzden FD çerçevesi sınıflandırılamaz.',
+  'protocol.uavcanCompatibility.error.notExtended':
+    'İki hat da 29-bit extended identifier istiyor; 11-bit çerçeve ne DroneCAN ne Cyphal olabilir.',
+  'protocol.uavcanCompatibility.error.tailByteMissing':
+    'Veri alanı boş: tail byte olmadan sınıflandırmaya dayanak bir kanıt yok.',
+  'protocol.uavcanCompatibility.error.aborted': 'Sınıflandırma iptal edildi.',
+  'protocol.uavcanCompatibility.warning.classifierDoesNotDecode':
+    'Bu sayfa çözmez, sınıflandırır: burada protokol alanı, CRC ya da payload yorumu üretilmez.',
+  'protocol.uavcanCompatibility.warning.selectDroneCanPage':
+    'Kanıtlar DroneCAN (UAVCAN v0) gösteriyor. Çerçeveyi DroneCAN sayfasında çözün.',
+  'protocol.uavcanCompatibility.warning.selectCyphalPage':
+    'Kanıtlar Cyphal (UAVCAN v1) gösteriyor. Çerçeveyi Cyphal sayfasında çözün.',
+  'protocol.uavcanCompatibility.warning.ambiguousUserMustChoose':
+    'Çerçeve iki düzene de uyuyor: devam çerçevesi sürüm kanıtı taşımaz, çünkü toggle biti yalnız transferin ilk çerçevesinde ayırt edicidir. Hattı açıkça seçmelisiniz — belirsiz “UAVCAN” seçimi kabul edilmez.',
+  'protocol.uavcanCompatibility.warning.noCandidate':
+    'Çerçeve iki hattın da yapısal bir kuralını çiğniyor; ne DroneCAN ne Cyphal aday.',
+  'protocol.uavcanCompatibility.warning.notInAutoDetection':
+    'Bu kayıt otomatik algılamada hiç önerilmez: kendi tel biçimi yoktur, bilerek seçilmesi gerekir.',
+  'protocol.uavcanCompatibility.summary.notExtended':
+    'Sınıflandırılamaz (29-bit extended identifier gerekli)',
+  'protocol.uavcanCompatibility.summary.dronecan':
+    'DroneCAN / UAVCAN v0 adayı — güven {confidence} ({reason})',
+  'protocol.uavcanCompatibility.summary.cyphal':
+    'Cyphal / UAVCAN v1 adayı — güven {confidence} ({reason})',
+  'protocol.uavcanCompatibility.summary.ambiguous':
+    'Belirsiz — iki düzene de uyuyor, hattı siz seçmelisiniz',
+  'protocol.uavcanCompatibility.summary.none': 'Aday yok — hiçbir düzene uymuyor',
+  'protocol.uavcanCompatibility.documentation.summary':
+    'Tel protokolü değil, bir ayrıştırma katmanı: ham 29-bit CAN çerçevesini alır ve DroneCAN (UAVCAN v0) mı Cyphal (UAVCAN v1) mi göründüğünü raporlar, sonra onu gerçekten çözen kayda yönlendirir. Belirleyici kanıt, transferin ilk çerçevesindeki toggle bitidir — v0 0’dan, v1 1’den başlar — ve her iki düzenin yapısal kurallarıyla desteklenir. Alan çözmez, CRC hesaplamaz, payload’a dokunmaz; iki gerçek parser’ın çerçevesini çalmasın diye otomatik algılamanın dışında bırakılmıştır.',
+  'protocol.uavcanCompatibility.example.cyphalStartOfTransfer.name':
+    'Cyphal ilk çerçevesi (Toggle=1)',
+  'protocol.uavcanCompatibility.example.cyphalStartOfTransfer.description':
+    'Cyphal spec’inin Heartbeat çerçevesi: tail byte 0xE0 transferin ilk çerçevesinde toggle’ı set eder, bu da DroneCAN’i doğrudan dışlar.',
+  'protocol.uavcanCompatibility.example.droneCanStartOfTransfer.name':
+    'DroneCAN ilk çerçevesi (Toggle=0)',
+  'protocol.uavcanCompatibility.example.droneCanStartOfTransfer.description':
+    'Spec tail byte örneği 0xC5 ile bir DroneCAN mesaj yayını: transferin ilk çerçevesinde toggle sıfır, bu da Cyphal’i doğrudan dışlar.',
+  'protocol.uavcanCompatibility.example.ambiguousContinuation.name':
+    'Devam çerçevesi (belirsiz)',
+  'protocol.uavcanCompatibility.example.ambiguousContinuation.description':
+    'Çok çerçeveli bir transferin son çerçevesi. Start-of-transfer sıfır olduğu için toggle biti sürüm bilgisi taşımaz ve iki düzen de mümkün kalır — hattı kullanıcı seçmelidir.',
+  'protocol.uavcanCompatibility.example.noCandidate.name': 'Hiçbir düzen (aday yok)',
+  'protocol.uavcanCompatibility.example.noCandidate.description':
+    'Transferin ilk çerçevesinde toggle set — bu DroneCAN’i dışlar; ayrılmış bit 23 de set — Cyphal spec’i bunun atılmasını ister. Geriye bir şey kalmıyor.',
+  'protocol.uavcanCompatibility.example.notExtendedRejected.name':
+    'Extended olmayan çerçeve (ret yolu)',
+  'protocol.uavcanCompatibility.example.notExtendedRejected.description':
+    '11-bit (base) identifier: iki hat da 29-bit istiyor, bu yüzden aday raporlanmaz.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

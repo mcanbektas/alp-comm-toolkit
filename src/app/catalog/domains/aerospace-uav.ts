@@ -131,7 +131,14 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Transport-agnostic successor of the UAVCAN v1 line, organising avionics traffic into publish/subscribe subjects and request/response services over Cyphal/CAN, Cyphal/UDP or Cyphal/serial.',
           layer: 'multi-layer',
-          status: 'planned',
+          // `partial` BİLİNÇLİ KAPSAM KARARI (dalga 15b), kaynak eksikliği
+          // DEĞİL: motor Cyphal/CAN **Classic CAN 2.0B**'yi tam çözüyor;
+          // Cyphal/UDP, Cyphal/Serial ve CAN FD kapsam DIŞI. CAN FD ayrı
+          // sayılır çünkü dolgu baytları transfer CRC'sinin İÇİNDEDİR —
+          // "aynı biçim, daha uzun payload" değildir (bkz. cyphal.ts dosya
+          // başı). Emsal: iec-61850 GOOSE-only, cc-link-ie 0x890F-only.
+          status: 'partial',
+          pluginId: 'cyphal',
           tabs: [
             'overview',
             'live',
@@ -173,7 +180,12 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Bridge and disambiguation layer rather than a wire protocol: it maps the legacy UAVCAN v0 (DroneCAN) and UAVCAN v1 (Cyphal) lines onto the correct parser and reports auto-detection candidates from an ambiguous CAN capture.',
           layer: 'multi-layer',
-          status: 'planned',
+          // `partial`: kayıt ÇÖZMÜYOR, SINIFLANDIRIYOR — alan tablosu yerine
+          // aday tablosu üretir ve kullanıcıyı kanonik kayda yönlendirir.
+          // `decode` sekmesi AÇIK kalır (14a'nın parser'sız LoRa paterni
+          // BURAYA OTURMUYOR: gösterilecek gerçek bir şey var).
+          status: 'partial',
+          pluginId: 'uavcan-compatibility',
           tabs: ['overview', 'decode', 'diagnostics', 'examples'],
           tools: [
             'Naming Disambiguation Panel',

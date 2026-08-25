@@ -75,6 +75,34 @@ import type { ExampleFrame } from '@/protocol-core/types';
  */
 const STRICT_STRUCTURAL_DISCRIMINATOR_IDS = ['canopen', 'devicenet', 'can-2-0a', 'can-xl'];
 
+/**
+ * ── 15b EKİ (2026-08-25): `cyphal` kaydı geldi, ileri yön ölçümü GÜNCELLENDİ ─
+ *
+ * `dronecan.canParse` artık `cyphal`in iki örneğini kabul ediyor. İkisi de
+ * BİLEREK bırakıldı, çünkü ikisi de DroneCAN'in HAKLI olduğu vakalar:
+ *
+ *  • `cyphal/service-response-last` — devam çerçevesi (SOT=0). Bu rolde toggle
+ *    biti sürüm bilgisi TAŞIMAZ; referans uygulamanın kendi yorumu bunu
+ *    söylüyor — `OpenCyphal/libcanard`, `libcanard/canard.c` **satır 1118**
+ *    (https://github.com/OpenCyphal/libcanard/blob/master/libcanard/canard.c#L1117-L1120):
+ *    *"If this is not the first frame of a transfer, the version is not detectable, so we attempt to parse both."*
+ *    Bu deponun (`dronecan/libcanard`) v0 tarafı aynı sonucu koddan veriyor:
+ *    `canard.c:494` `rx_state->next_toggle = 0;` — v0 SIFIRDAN başlar.
+ *    Örtüşme protokolün İZİN VERDİĞİ sınırdır; kapatmanın tek yolu imzayı
+ *    UYDURMAK olurdu. Depo bunu bir KAYITLA çözüyor: `uavcan-compatibility`
+ *    tam bu belirsizliği raporlar (`decision === 'ambiguous'`).
+ *  • `cyphal/dronecan-toggle-rejected` — `cyphal.ts`in "bu Cyphal DEĞİL"
+ *    örneği: ilk çerçevede Toggle=0, yani DroneCAN İMZASI. DroneCAN'in bunu
+ *    kabul etmesi DOĞRU davranıştır, yanlış pozitif değil.
+ *
+ * `cyphalCanParseRegistry.test.ts` aynı örtüşmeyi TERS yönden ölçüyor ve
+ * SOT çerçevelerinde örtüşmenin SIFIR olduğunu bekçiliyor.
+ */
+const DOCUMENTED_CROSS_LINE_COLLISIONS = [
+  'cyphal/service-response-last',
+  'cyphal/dronecan-toggle-rejected',
+];
+
 /** dronecan'ın KENDİ `canParse`inin aday saydığı örnekler — bkz. dosya başı. */
 function ownCandidateExamples(): readonly ExampleFrame[] {
   return droneCanPlugin.exampleFrames.filter((example) => droneCanParser.canParse(example.bytes));
@@ -93,12 +121,15 @@ describe('DroneCAN canParse — registry çapında yanlış pozitif taraması', 
 
       for (const id of ids) {
         if (id === droneCanPlugin.id) continue;
+        // 15b EKİ: `uavcan-compatibility` bir SINIFLANDIRICIDIR ve örnekleri
+        // BİLEREK DroneCAN ile Cyphal'ın KENDİ çerçeveleridir (`dronecan-start-
+        // of-transfer` doğrudan 15a'nın mesaj yayınıdır). Orada "çarpışma"
+        // ölçmek anlamsızdır — kayıt zaten bu iki hattı ayırt etmek için var.
+        if (id === 'uavcan-compatibility') continue;
         const plugin = await registry.loadProtocolPlugin(id);
         for (const example of plugin.exampleFrames) {
           totalExamples += 1;
-          if (droneCanParser.canParse(example.bytes)) {
-            collisions.push(`${id}/${example.id} → dronecan canParse=true (${example.bytes.length} bayt)`);
-          }
+          if (droneCanParser.canParse(example.bytes)) collisions.push(`${id}/${example.id}`);
         }
       }
 
@@ -108,7 +139,9 @@ describe('DroneCAN canParse — registry çapında yanlış pozitif taraması', 
         totalExamples,
         'registry örnek sayısı beklenenden düşük — tarama gerçekten koştu mu?',
       ).toBeGreaterThan(700);
-      expect(collisions, `çarpışmalar (${collisions.length}):\n${collisions.join('\n')}`).toEqual([]);
+      expect(collisions.sort(), `çarpışmalar (${collisions.length}): ${collisions.join(', ')}`).toEqual(
+        [...DOCUMENTED_CROSS_LINE_COLLISIONS].sort(),
+      );
     },
     20000,
   );

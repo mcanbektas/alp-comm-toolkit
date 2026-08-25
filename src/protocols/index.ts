@@ -215,6 +215,22 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'dronecan', () =>
     import('./aerospace/dronecan/dronecan').then((module) => module.droneCanPlugin),
   );
+  // Cyphal (UAVCAN v1) — dalga 15b: aynı konteynerin DOKUZUNCU tüketicisi.
+  // `dronecan`dan BAĞIMSIZ dosya: aynı adı paylaşan iki AYRI protokol, CAN ID
+  // düzeni ve toggle semantiği TERS (bkz. cyphal.ts dosya başı). Kapsam
+  // Cyphal/CAN classic-only → rozet `partial`. Katalog CRC eklemesi yok:
+  // transfer CRC'si de `CRC16_CCITT_FALSE` (CRC-32C Cyphal/UDP'nindir).
+  registerOnce(registry, 'cyphal', () =>
+    import('./aerospace/cyphal/cyphal').then((module) => module.cyphalPlugin),
+  );
+  // UAVCAN Compatibility — dalga 15b: kendi teli YOK, SINIFLANDIRICI.
+  // `canParse` DAİMA `false` döner (bkz. uavcanCompatibility.ts dosya başı) —
+  // otomatik algılamaya girerse `dronecan`/`cyphal`in çerçevesini çalar.
+  registerOnce(registry, 'uavcan-compatibility', () =>
+    import('./aerospace/uavcanCompatibility/uavcanCompatibility').then(
+      (module) => module.uavcanCompatibilityPlugin,
+    ),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

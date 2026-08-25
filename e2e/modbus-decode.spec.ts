@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
+import { allEntries } from '../src/app/catalog';
 import { translations } from '../src/translations';
 
 /**
@@ -28,12 +29,24 @@ const ALIAS_DECODE_PATH = '/comm/building-automation/modbus-building/modbus-rtu?
  * bildirimini yalnız motoru OLAN sayfadan kaldırdı; motorsuz sayfada bildirimin
  * durması gerekir, yoksa boş bir sekme basılmış olur (spec §50).
  *
- * Dalga 3'te `automotive/can-family/can-2-0a`dan TAŞINDI: CAN motoru gelince
- * o sayfa artık "planlandı" basmıyor ve bekçi anlamını yitiriyordu. PSI5
- * bilinçli seçildi — akım modülasyonlu sensör arayüzü, plan-fazlar.md'deki
- * hiçbir dalga listesinde geçmiyor, yani yakın vadede motor almayacak.
+ * Dalga 3'te `automotive/can-family/can-2-0a`dan TAŞINDI, dalga 15b'de ise
+ * SABİT YOL OLMAKTAN ÇIKARILDI. Sabit yolun sorunu ölçüldü: hedef iki kez
+ * motor aldı (`can-2-0a` dalga 3'te, `psi5` dalga 14h'de) ve ikincisinde test
+ * iki alt dalga boyunca sessizce kırmızı kaldı, çünkü dalgalar yalnız kendi
+ * yeni spec'ini koşturuyordu. Hedef artık KATALOGDAN TÜRETİLİYOR: motoru
+ * olmayan, alias olmayan, `decode` sekmesi olan ilk `planned` kayıt. Bir
+ * sonraki dalga o kaydı da bağlarsa bekçi kendiliğinden bir sonrakine geçer;
+ * hiç `planned` kayıt kalmazsa test AÇIKÇA atlanır, sessizce yeşil kalmaz.
  */
-const PLANNED_DECODE_PATH = '/comm/automotive/sensor-interfaces/psi5?tab=decode';
+const plannedEntry = allEntries().find(
+  (entry) =>
+    entry.protocol.status === 'planned' &&
+    entry.protocol.aliasOf === undefined &&
+    entry.protocol.pluginId === undefined &&
+    entry.protocol.tabs.includes('decode'),
+);
+const PLANNED_DECODE_PATH =
+  plannedEntry === undefined ? undefined : `/comm/${plannedEntry.path}?tab=decode`;
 
 /** Spec §43 fixture'ı — eklentinin ilk örnek çerçevesi de birebir budur. */
 const FIXTURE_HEX = '01 03 00 00 00 02 C4 0B';
@@ -288,7 +301,11 @@ test('alias sayfası aynı motoru yükler', async ({ page }) => {
 });
 
 test('eklentisi olmayan protokol hâlâ "planlandı" bildirimi basıyor', async ({ page }) => {
-  await openPage(page, PLANNED_DECODE_PATH);
+  test.skip(
+    PLANNED_DECODE_PATH === undefined,
+    'katalogda motorsuz `planned` kayıt kalmadı — bekçinin koruduğu durum artık yok',
+  );
+  await openPage(page, PLANNED_DECODE_PATH as string);
 
   // Regresyon bekçisi: Faz 9 bildirimi yalnız motoru olan dalda kaldırdı.
   await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();

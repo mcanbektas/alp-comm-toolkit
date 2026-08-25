@@ -2722,6 +2722,146 @@ export const en: TranslationDictionary = {
   'protocol.dronecan.example.notExtendedRejected.description':
     '11-bit (base) identifier: DroneCAN requires 29-bit, so the frame is still shown but an error is raised.',
 
+  // --- Cyphal (UAVCAN v1) — Cyphal/CAN, Classic CAN only ---
+  'protocol.cyphal.error.frameTooShort':
+    'The record is not long enough to carry the identifier and length fields.',
+  'protocol.cyphal.error.frameTooLong': 'The record exceeds the fixed frame length.',
+  'protocol.cyphal.error.canFdNotSupported':
+    'CAN FD is out of scope: padding bytes are part of the transfer CRC, so an FD frame cannot be decoded as Classic CAN. Only Cyphal/CAN over Classic CAN 2.0B is decoded here.',
+  'protocol.cyphal.error.notExtended':
+    'Cyphal/CAN transport frames are CAN 2.0B frames; an 11-bit frame cannot be Cyphal.',
+  'protocol.cyphal.error.tailByteMissing':
+    'The data field is empty: a CAN frame with less than one byte of data is not a valid Cyphal/CAN frame.',
+  'protocol.cyphal.error.reservedBit23NotZero':
+    'Reserved bit 23 must be zero; the specification requires discarding a frame that sets it.',
+  'protocol.cyphal.error.v11RequiresOptIn':
+    'Reserved bit 7 is set: this is the experimental v1.1 16-bit subject-ID layout, which v1.0 requires to be discarded. Switch the spec version option to v1.1 to decode it.',
+  'protocol.cyphal.error.aborted': 'Decoding was cancelled.',
+  'protocol.cyphal.warning.dsdlRequiredForPayload':
+    'The data field is shown raw: its layout comes from the DSDL definition and this tool has no DSDL compiler.',
+  'protocol.cyphal.warning.transferCrcNeedsFullTransfer':
+    'Transfer CRC shown but not verified: it covers the payload of every frame in the transfer plus padding, so a single frame cannot verify it.',
+  'protocol.cyphal.warning.transferCrcSplitAcrossFrames':
+    'Only part of the transfer CRC is in this frame; the remaining byte lives in the previous frame.',
+  'protocol.cyphal.warning.experimentalSpecVersion':
+    'Spec version v1.1 is experimental: the 16-bit subject-ID layout is not part of the stable v1.0 specification.',
+  'protocol.cyphal.warning.remoteFrame':
+    'The remote flag is set; Cyphal/CAN does not define remote frames.',
+  'protocol.cyphal.warning.truncatedPayload':
+    'The record does not contain as many bytes as declared; the available bytes are shown.',
+  'protocol.cyphal.warning.toggleLooksLikeDroneCan':
+    'Toggle is 0 on a start-of-transfer frame; Cyphal always starts at 1, so this looks like DroneCAN (UAVCAN v0). Use the UAVCAN Compatibility page to classify it.',
+  'protocol.cyphal.warning.nonLastFrameNotFullMtu':
+    'Every frame of a multi-frame transfer except the last one must fully use the data field (DLC 8 on Classic CAN).',
+  'protocol.cyphal.warning.anonymousMustBeSingleFrame':
+    'Anonymous transfers can only be single-frame; a multi-frame anonymous transfer is not allowed.',
+  'protocol.cyphal.warning.selfAddressedService':
+    'Source and destination node-IDs are equal; self-addressed service transfers are not allowed.',
+  'protocol.cyphal.option.transport': 'Transport',
+  'protocol.cyphal.option.transport.description':
+    'Only Cyphal/CAN over Classic CAN 2.0B is decoded. Cyphal/UDP, Cyphal/serial and CAN FD are deliberately out of scope — they are separate wire formats, not longer variants of this one.',
+  'protocol.cyphal.option.transport.can': 'Cyphal/CAN (Classic CAN 2.0B)',
+  'protocol.cyphal.option.specVersion': 'Specification version',
+  'protocol.cyphal.option.specVersion.description':
+    'v1.0 is the stable default and requires reserved bit 7 to be zero. v1.1 is experimental and reinterprets bit 7 as a version discriminator for a 16-bit subject-ID, so it only applies on explicit opt-in.',
+  'protocol.cyphal.option.specVersion.v10': 'v1.0 (stable)',
+  'protocol.cyphal.option.specVersion.v11': 'v1.1 (experimental)',
+  'protocol.cyphal.summary.notExtended': 'Invalid Cyphal/CAN frame (29-bit required)',
+  'protocol.cyphal.summary.message':
+    '{frameRole} message — subject {subjectId}, source node {sourceNodeId}',
+  'protocol.cyphal.summary.anonymousMessage':
+    '{frameRole} anonymous message — subject {subjectId}, pseudo-ID {sourceNodeId}',
+  'protocol.cyphal.summary.serviceRequest':
+    '{frameRole} service request — service {serviceId}, node {sourceNodeId} → node {destinationNodeId}',
+  'protocol.cyphal.summary.serviceResponse':
+    '{frameRole} service response — service {serviceId}, node {sourceNodeId} → node {destinationNodeId}',
+  'protocol.cyphal.documentation.summary':
+    'Cyphal/CAN over Classic CAN 2.0B: the 29-bit identifier is split into Priority/Service-not-message/Anonymous/Subject-ID/Source node-ID (or Service-ID/Destination node-ID), and the tail byte yields Start-of-transfer, End-of-transfer, Toggle and a modulo-32 Transfer-ID. SOLVED: message, service request and service response frames, all four frame roles, and the transfer CRC location. NOT SOLVED (deliberate scope): Cyphal/UDP, Cyphal/serial and CAN FD are out of scope and rejected explicitly; payload fields stay raw because DSDL is not compiled here; the transfer CRC is shown but not verified because it spans every frame of the transfer. Spec version v1.0 is the default and v1.1 is experimental opt-in.',
+  'protocol.cyphal.example.heartbeatMessage.name': 'Heartbeat message (single frame)',
+  'protocol.cyphal.example.heartbeatMessage.description':
+    'Specification example 0x107D552A: nominal priority, subject-ID 7509 (Heartbeat), source node 42; tail byte 0xE0 = SOT=1, EOT=1, Toggle=1, Transfer-ID=0.',
+  'protocol.cyphal.example.anonymousMessage.name': 'Anonymous message (single frame)',
+  'protocol.cyphal.example.anonymousMessage.description':
+    'Specification example identifier 0x11133775: anonymous bit 24 set, subject-ID 4919, source field carries a pseudo-ID. Reserved bits 22 and 21 are zero here, which is why they are never checked on receive. The payload was shortened to fit Classic CAN; the original example is a CAN FD frame.',
+  'protocol.cyphal.example.serviceRequest.name': 'Service request (single frame)',
+  'protocol.cyphal.example.serviceRequest.description':
+    'Specification example 0x136B957B: uavcan.node.GetInfo (service-ID 430) request from node 123 to node 42, with no payload — only the tail byte 0xE1.',
+  'protocol.cyphal.example.serviceResponseFirst.name': 'Service response — first frame',
+  'protocol.cyphal.example.serviceResponseFirst.description':
+    'Specification example 0x126BBDAA: the first frame of the multi-frame response, tail byte 0xA1 = SOT=1, EOT=0, Toggle=1. The data field is fully used, as required for every non-last frame.',
+  'protocol.cyphal.example.serviceResponseMiddle.name': 'Service response — middle frame',
+  'protocol.cyphal.example.serviceResponseMiddle.description':
+    'Same transfer, tail byte 0x01 = SOT=0, EOT=0, Toggle=0. The parser classifies the frame; it never tracks toggle order across frames.',
+  'protocol.cyphal.example.serviceResponseLast.name': 'Service response — last frame',
+  'protocol.cyphal.example.serviceResponseLast.description':
+    'Specification example: data E7 61 carries only the low byte of transfer CRC 0x9AE7, because the high byte was already sent in the previous frame — a split-CRC case.',
+  'protocol.cyphal.example.v11ExperimentalMessage.name': 'v1.1 16-bit subject-ID (experimental)',
+  'protocol.cyphal.example.v11ExperimentalMessage.description':
+    'Reserved bit 7 is set, which v1.0 requires to be discarded — so an error is raised by default. Switch the spec version option to v1.1 and the frame decodes as a 16-bit subject-ID message with an experimental warning.',
+  'protocol.cyphal.example.droneCanToggleRejected.name': 'Toggle=0 on start of transfer (DroneCAN signature)',
+  'protocol.cyphal.example.droneCanToggleRejected.description':
+    'The same Heartbeat identifier but tail byte 0xC0: Toggle is 0 on a start-of-transfer frame. Cyphal always starts at 1, so this is the DroneCAN signature — the frame still decodes, with a warning pointing at the UAVCAN Compatibility page.',
+  'protocol.cyphal.example.canFdRejected.name': 'CAN FD frame (rejection path)',
+  'protocol.cyphal.example.canFdRejected.description':
+    'CAN FD is out of scope and rejected explicitly: FD padding bytes are included in the transfer CRC, so an FD frame is not simply a longer Classic frame.',
+  'protocol.cyphal.example.notExtendedRejected.name': 'Non-extended frame (rejection path)',
+  'protocol.cyphal.example.notExtendedRejected.description':
+    '11-bit (base) identifier: Cyphal/CAN requires 29-bit, so the frame is still shown but an error is raised.',
+
+  // --- UAVCAN Compatibility — classifier, not a wire protocol ---
+  'protocol.uavcanCompatibility.error.frameTooShort':
+    'The record is not long enough to carry the identifier and length fields.',
+  'protocol.uavcanCompatibility.error.frameTooLong': 'The record exceeds the fixed frame length.',
+  'protocol.uavcanCompatibility.error.canFdNotSupported':
+    'Neither line defines CAN FD within the scope of this tool, so an FD frame cannot be classified.',
+  'protocol.uavcanCompatibility.error.notExtended':
+    'Both lines require a 29-bit extended identifier; an 11-bit frame is neither DroneCAN nor Cyphal.',
+  'protocol.uavcanCompatibility.error.tailByteMissing':
+    'The data field is empty: without a tail byte there is no evidence to classify the frame.',
+  'protocol.uavcanCompatibility.error.aborted': 'Classification was cancelled.',
+  'protocol.uavcanCompatibility.warning.classifierDoesNotDecode':
+    'This page classifies, it does not decode: no protocol fields, no CRC and no payload interpretation are produced here.',
+  'protocol.uavcanCompatibility.warning.selectDroneCanPage':
+    'Evidence points at DroneCAN (UAVCAN v0). Decode the frame on the DroneCAN page.',
+  'protocol.uavcanCompatibility.warning.selectCyphalPage':
+    'Evidence points at Cyphal (UAVCAN v1). Decode the frame on the Cyphal page.',
+  'protocol.uavcanCompatibility.warning.ambiguousUserMustChoose':
+    'The frame fits both layouts: a continuation frame carries no version evidence, because the toggle bit only discriminates on a start-of-transfer frame. You must choose the line explicitly — an ambiguous "UAVCAN" selection is not accepted.',
+  'protocol.uavcanCompatibility.warning.noCandidate':
+    'The frame violates a structural rule of both lines, so neither DroneCAN nor Cyphal is a candidate.',
+  'protocol.uavcanCompatibility.warning.notInAutoDetection':
+    'This record is never offered by auto-detection: it has no wire format of its own, so it must be selected deliberately.',
+  'protocol.uavcanCompatibility.summary.notExtended':
+    'Not classifiable (29-bit extended identifier required)',
+  'protocol.uavcanCompatibility.summary.dronecan':
+    'DroneCAN / UAVCAN v0 candidate — confidence {confidence} ({reason})',
+  'protocol.uavcanCompatibility.summary.cyphal':
+    'Cyphal / UAVCAN v1 candidate — confidence {confidence} ({reason})',
+  'protocol.uavcanCompatibility.summary.ambiguous':
+    'Ambiguous — both layouts fit, you must choose the line',
+  'protocol.uavcanCompatibility.summary.none': 'No candidate — neither layout fits',
+  'protocol.uavcanCompatibility.documentation.summary':
+    'A disambiguation layer rather than a wire protocol: it takes a raw 29-bit CAN frame and reports whether it looks like DroneCAN (UAVCAN v0) or Cyphal (UAVCAN v1), then points at the record that actually decodes it. The decisive evidence is the toggle bit of a start-of-transfer frame — v0 starts at 0, v1 starts at 1 — backed by the structural rules of each layout. It never decodes fields, never checks a CRC and never touches the payload, and it is deliberately excluded from auto-detection so that it cannot steal frames from the two real parsers.',
+  'protocol.uavcanCompatibility.example.cyphalStartOfTransfer.name':
+    'Cyphal start of transfer (Toggle=1)',
+  'protocol.uavcanCompatibility.example.cyphalStartOfTransfer.description':
+    'The Cyphal specification Heartbeat frame: tail byte 0xE0 sets the toggle on a start-of-transfer frame, which excludes DroneCAN outright.',
+  'protocol.uavcanCompatibility.example.droneCanStartOfTransfer.name':
+    'DroneCAN start of transfer (Toggle=0)',
+  'protocol.uavcanCompatibility.example.droneCanStartOfTransfer.description':
+    'A DroneCAN message broadcast with the specification tail byte 0xC5: toggle is clear on a start-of-transfer frame, which excludes Cyphal outright.',
+  'protocol.uavcanCompatibility.example.ambiguousContinuation.name':
+    'Continuation frame (ambiguous)',
+  'protocol.uavcanCompatibility.example.ambiguousContinuation.description':
+    'A last frame of a multi-frame transfer. Start-of-transfer is clear, so the toggle bit carries no version information and both layouts remain possible — the user must choose.',
+  'protocol.uavcanCompatibility.example.noCandidate.name': 'Neither layout (no candidate)',
+  'protocol.uavcanCompatibility.example.noCandidate.description':
+    'Toggle is set on a start-of-transfer frame, which excludes DroneCAN, while reserved bit 23 is set, which the Cyphal specification requires to be discarded. Nothing is left.',
+  'protocol.uavcanCompatibility.example.notExtendedRejected.name':
+    'Non-extended frame (rejection path)',
+  'protocol.uavcanCompatibility.example.notExtendedRejected.description':
+    '11-bit (base) identifier: both lines require 29-bit, so no candidate is reported.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',
