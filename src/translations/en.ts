@@ -2665,6 +2665,63 @@ export const en: TranslationDictionary = {
   'protocol.mavlink.example.v1Truncated.description':
     "The header declares LEN 4, but there are not enough bytes left for the payload and checksum — reports truncated-frame while the header still shows.",
 
+  // --- DroneCAN ---
+  'protocol.dronecan.error.frameTooShort':
+    'The record is not long enough to carry the identifier and length fields.',
+  'protocol.dronecan.error.frameTooLong': 'The record exceeds the fixed frame size.',
+  'protocol.dronecan.error.canFdNotSupported':
+    'DroneCAN v0 uses CAN 2.0B only; CAN FD frames are not supported.',
+  'protocol.dronecan.error.notExtended':
+    'DroneCAN requires a 29-bit extended identifier; an 11-bit frame cannot be DroneCAN.',
+  'protocol.dronecan.error.tailByteMissing':
+    'The data field is empty: there is no tail byte, so the transfer type and Transfer ID cannot be decoded.',
+  'protocol.dronecan.error.aborted': 'Parsing was cancelled.',
+  'protocol.dronecan.warning.dsdlRequiredForPayload':
+    'The data field is shown raw: field layout comes from the DSDL definition, and this tool has no DSDL compiler.',
+  'protocol.dronecan.warning.transferCrcNeedsDataTypeSignature':
+    'The transfer CRC is shown but not verified: its input includes a data type signature, which comes from the DSDL definition and is not available here.',
+  'protocol.dronecan.warning.remoteFrame':
+    'The remote flag is set; DroneCAN does not define remote frames.',
+  'protocol.dronecan.warning.truncatedPayload':
+    'Bytes at the declared length are missing from the record; only the available bytes are shown.',
+  'protocol.dronecan.warning.unexpectedToggleOnSingleFrame':
+    'The Toggle bit should always be 0 on a single-frame transfer; this frame has a different value.',
+  'protocol.dronecan.summary.notExtended': 'Invalid DroneCAN frame (29-bit required)',
+  'protocol.dronecan.summary.messageBroadcast':
+    '{frameRole} message broadcast — type {messageTypeId}, source node {sourceNodeId}',
+  'protocol.dronecan.summary.anonymousMessage':
+    '{frameRole} anonymous message — discriminator {discriminator}',
+  'protocol.dronecan.summary.serviceRequest':
+    '{frameRole} service request — service {serviceTypeId}, node {sourceNodeId} → node {destinationNodeId}',
+  'protocol.dronecan.summary.serviceResponse':
+    '{frameRole} service response — service {serviceTypeId}, node {sourceNodeId} → node {destinationNodeId}',
+  'protocol.dronecan.documentation.summary':
+    'A masterless UAV networking protocol that splits the 29-bit CAN identifier into Priority/Message Type ID/Source Node ID (or Service Type ID/Destination Node ID) fields and decodes SOT/EOT/Toggle/Transfer ID from the tail byte. The transfer CRC only exists on multi-frame transfers and cannot be verified without a data type signature (DSDL), so the payload stays raw.',
+  'protocol.dronecan.example.messageBroadcastSingleFrame.name': 'Message broadcast (single frame)',
+  'protocol.dronecan.example.messageBroadcastSingleFrame.description':
+    'Priority 20, Message Type ID 1000, Source Node 42; tail byte is the spec example 0xC5 (SOT=1, EOT=1, Toggle=0, Transfer ID=5).',
+  'protocol.dronecan.example.anonymousMessageSingleFrame.name': 'Anonymous message (single frame)',
+  'protocol.dronecan.example.anonymousMessageSingleFrame.description':
+    'Source Node ID is always 0 — the node has not yet acquired a node ID (dynamic node ID allocation scenario).',
+  'protocol.dronecan.example.serviceRequestSingleFrame.name': 'Service request (single frame)',
+  'protocol.dronecan.example.serviceRequestSingleFrame.description':
+    'Request-Not-Response=1: a service request from client node 10 to server node 42.',
+  'protocol.dronecan.example.serviceResponseSingleFrame.name': 'Service response (single frame)',
+  'protocol.dronecan.example.serviceResponseSingleFrame.description':
+    'Request-Not-Response=0: a service response from server node 10 to client node 42.',
+  'protocol.dronecan.example.multiFrameFirst.name': 'Multi-frame transfer — first frame',
+  'protocol.dronecan.example.multiFrameFirst.description':
+    'The first two bytes are the transfer CRC: shown, but NOT verified without a data type signature.',
+  'protocol.dronecan.example.multiFrameMiddle.name': 'Multi-frame transfer — middle frame',
+  'protocol.dronecan.example.multiFrameMiddle.description':
+    'SOT=0, EOT=0; the Toggle bit alternates from the previous frame (the parser does not track state across frames).',
+  'protocol.dronecan.example.multiFrameLast.name': 'Multi-frame transfer — last frame',
+  'protocol.dronecan.example.multiFrameLast.description':
+    'EOT=1: the last frame of the transfer — the transfer CRC lives in the first frame, not this one.',
+  'protocol.dronecan.example.notExtendedRejected.name': 'Non-extended frame (rejection path)',
+  'protocol.dronecan.example.notExtendedRejected.description':
+    '11-bit (base) identifier: DroneCAN requires 29-bit, so the frame is still shown but an error is raised.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',

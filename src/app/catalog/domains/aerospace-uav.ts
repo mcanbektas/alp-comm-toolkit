@@ -91,7 +91,8 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Masterless CAN-based protocol for UAV and robotics distributed embedded networks, carrying DSDL-typed transfers over 29-bit CAN 2.0B identifiers to ESCs, GNSS units and airspeed sensors.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'dronecan',
           tabs: [
             'overview',
             'live',

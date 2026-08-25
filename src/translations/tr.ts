@@ -2667,6 +2667,63 @@ export const tr = {
   'protocol.mavlink.example.v1Truncated.description':
     'Header LEN 4 bildiriyor ama payload + checksum için yeterli bayt yok — truncated-frame basar, header yine görünür.',
 
+  // --- DroneCAN ---
+  'protocol.dronecan.error.frameTooShort':
+    'Kayıt identifier ve uzunluk alanlarını taşıyacak kadar uzun değil.',
+  'protocol.dronecan.error.frameTooLong': 'Kayıt sabit çerçeve boyunu aşıyor.',
+  'protocol.dronecan.error.canFdNotSupported':
+    'DroneCAN v0 yalnız CAN 2.0B kullanır; CAN FD çerçevesi desteklenmiyor.',
+  'protocol.dronecan.error.notExtended':
+    'DroneCAN 29-bit extended identifier gerektirir; 11-bit çerçeve DroneCAN olamaz.',
+  'protocol.dronecan.error.tailByteMissing':
+    'Veri alanı boş: tail byte yok, transfer türü ve Transfer ID çözülemez.',
+  'protocol.dronecan.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.dronecan.warning.dsdlRequiredForPayload':
+    'Veri alanı ham gösteriliyor: alan yerleşimi DSDL tanımından gelir, bu araçta DSDL derleyicisi yok.',
+  'protocol.dronecan.warning.transferCrcNeedsDataTypeSignature':
+    'Transfer CRC gösterildi ama doğrulanmadı: girdisi data type signature içerir, bu DSDL tanımından gelir ve burada yok.',
+  'protocol.dronecan.warning.remoteFrame':
+    'Remote bayrağı set; DroneCAN remote çerçeve tanımlamaz.',
+  'protocol.dronecan.warning.truncatedPayload':
+    'Bildirilen uzunluktaki bayt kayıtta yok; elde olan baytlar gösterildi.',
+  'protocol.dronecan.warning.unexpectedToggleOnSingleFrame':
+    'Single-frame transferde Toggle biti her zaman 0 olmalı; bu çerçevede farklı.',
+  'protocol.dronecan.summary.notExtended': 'Geçersiz DroneCAN çerçevesi (29-bit gerekli)',
+  'protocol.dronecan.summary.messageBroadcast':
+    '{frameRole} mesaj yayını — tip {messageTypeId}, kaynak düğüm {sourceNodeId}',
+  'protocol.dronecan.summary.anonymousMessage':
+    '{frameRole} anonim mesaj — discriminator {discriminator}',
+  'protocol.dronecan.summary.serviceRequest':
+    '{frameRole} servis isteği — servis {serviceTypeId}, düğüm {sourceNodeId} → düğüm {destinationNodeId}',
+  'protocol.dronecan.summary.serviceResponse':
+    '{frameRole} servis yanıtı — servis {serviceTypeId}, düğüm {sourceNodeId} → düğüm {destinationNodeId}',
+  'protocol.dronecan.documentation.summary':
+    '29-bit CAN identifier’ını Priority/Message Type ID/Source Node ID (ya da Service Type ID/Destination Node ID) alanlarına ayıran, tail byte’tan SOT/EOT/Toggle/Transfer ID çözen masterless UAV ağ protokolü. Transfer CRC yalnız multi-frame transferde vardır ve data type signature (DSDL) olmadan doğrulanamaz; payload bu yüzden ham kalır.',
+  'protocol.dronecan.example.messageBroadcastSingleFrame.name': 'Mesaj yayını (tek çerçeve)',
+  'protocol.dronecan.example.messageBroadcastSingleFrame.description':
+    'Priority 20, Message Type ID 1000, Source Node 42; tail byte spec örneği 0xC5 (SOT=1, EOT=1, Toggle=0, Transfer ID=5).',
+  'protocol.dronecan.example.anonymousMessageSingleFrame.name': 'Anonim mesaj (tek çerçeve)',
+  'protocol.dronecan.example.anonymousMessageSingleFrame.description':
+    'Source Node ID her zaman 0 — düğüm henüz node ID almamış (dynamic node ID allocation senaryosu).',
+  'protocol.dronecan.example.serviceRequestSingleFrame.name': 'Servis isteği (tek çerçeve)',
+  'protocol.dronecan.example.serviceRequestSingleFrame.description':
+    'Request-Not-Response=1: istemci düğüm 10’dan sunucu düğüm 42’ye servis isteği.',
+  'protocol.dronecan.example.serviceResponseSingleFrame.name': 'Servis yanıtı (tek çerçeve)',
+  'protocol.dronecan.example.serviceResponseSingleFrame.description':
+    'Request-Not-Response=0: sunucu düğüm 10’dan istemci düğüm 42’ye servis yanıtı.',
+  'protocol.dronecan.example.multiFrameFirst.name': 'Çok çerçeveli transfer — ilk çerçeve',
+  'protocol.dronecan.example.multiFrameFirst.description':
+    'İlk iki bayt transfer CRC’dir: gösterilir ama data type signature olmadan DOĞRULANMAZ.',
+  'protocol.dronecan.example.multiFrameMiddle.name': 'Çok çerçeveli transfer — ara çerçeve',
+  'protocol.dronecan.example.multiFrameMiddle.description':
+    'SOT=0, EOT=0; Toggle bir önceki çerçeveye göre alternates eder (parser çerçeveler arası izlemez).',
+  'protocol.dronecan.example.multiFrameLast.name': 'Çok çerçeveli transfer — son çerçeve',
+  'protocol.dronecan.example.multiFrameLast.description':
+    'EOT=1: transferin son çerçevesi, transfer CRC bu çerçevede DEĞİL ilk çerçevededir.',
+  'protocol.dronecan.example.notExtendedRejected.name': 'Extended olmayan çerçeve (ret yolu)',
+  'protocol.dronecan.example.notExtendedRejected.description':
+    '11-bit (base) identifier: DroneCAN 29-bit zorunlu kılar, çerçeve yine gösterilir ama hata basılır.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

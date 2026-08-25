@@ -208,6 +208,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mavlink', () =>
     import('./aerospace/mavlink/mavlink').then((module) => module.mavlinkPlugin),
   );
+  // DroneCAN (UAVCAN v0) — dalga 15a: `canFrame.ts`in SocketCAN konteynerini
+  // `isotp`/`j1939`/`canopen`/`devicenet`/`ccp`/`xcpOnCan`/`nmea2000`den sonra
+  // SEKİZİNCİ tüketen kayıt (bkz. dronecan.ts dosya başı). Katalog eklemesi
+  // yok: transfer CRC zaten `crcCatalogue.ts`teki `CRC16_CCITT_FALSE`.
+  registerOnce(registry, 'dronecan', () =>
+    import('./aerospace/dronecan/dronecan').then((module) => module.droneCanPlugin),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).
