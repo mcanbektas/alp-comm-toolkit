@@ -7,7 +7,7 @@
  * "sadeleştirme" ya da "iyileştirme" yapılmaz.
  */
 
-import { crc } from './crcEngine';
+import { crc, crcBits } from './crcEngine';
 import type { CrcParams } from './crcEngine';
 
 export const CRC_ALGORITHM_IDS = [
@@ -20,6 +20,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC8_AUTOSAR',
   'CRC8_MAXIM',
   'CRC8_BACNET_MSTP',
+  'CRC11_FLEXRAY',
   'CRC16_ARC',
   'CRC16_MODBUS',
   'CRC16_CCITT_FALSE',
@@ -31,6 +32,8 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_USB',
   'CRC24',
   'CRC24_Q',
+  'CRC24_FLEXRAY_A',
+  'CRC24_FLEXRAY_B',
   'CRC32',
   'CRC32C',
   'CRC64',
@@ -88,6 +91,31 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
    * uygulamayla — UBX 3c emsali).
    */
   CRC8_BACNET_MSTP: { width: 8, poly: 0x81n, init: 0xffn, refin: true, refout: true, xorout: 0xffn },
+  /**
+   * CRC-11/FLEXRAY — FlexRay header CRC'si (dalga 14e). reveng kataloğunda
+   * "CRC-11/FLEXRAY" adıyla ATTESTED sınıfında duruyor; kaynağı FlexRay
+   * Communications System Protocol Specification v3.0.1 §4.2.8 (poly/init/width)
+   * + §4.5 (sözde kod).
+   *
+   * BAYT HİZASIZ KULLANILIR: bu CRC başlığın tam 20 biti üzerinden koşar, bu
+   * yüzden `crc()` DEĞİL `crcBits(bytes, 20, ...)` ile çağrılır (gerekçe
+   * `crcEngine.ts` dosya başında). `check` değeri yine de "123456789" ASCII'si
+   * üzerinden, yani 72 bit üzerinden verilir — katalog kuralı bozulmasın diye.
+   *
+   * İkinci bağımsız kaynak: `dynm/pico-flexray` `utils/crc11_generator.c`
+   * (`#define FLEXRAY_CRC11_POLY 0x385`, tablo üretimi init 0x1A ile) ve
+   * `src/flexray_frame.c:29` `calculate_flexray_header_crc`. O tablo-tabanlı
+   * uygulamayla bu bit-serial motor 20000 rastgele başlıkta BİREBİR aynı
+   * sonucu verdi.
+   */
+  CRC11_FLEXRAY: {
+    width: 11,
+    poly: 0x385n,
+    init: 0x01an,
+    refin: false,
+    refout: false,
+    xorout: 0x000n,
+  },
   CRC16_ARC: {
     width: 16,
     poly: 0x8005n,
@@ -235,6 +263,41 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     refout: false,
     xorout: 0x000000n,
   },
+  /**
+   * CRC-24/FLEXRAY-A ve -B — FlexRay frame (trailer) CRC'si (dalga 14e).
+   * Polinom AYNI (0x5D6DCB), TEK FARK `init`: kanal A 0xFEDCBA, kanal B
+   * 0xABCDEF. Bu bir tuhaflık değil, KASITLI tasarım — reveng kataloğunun
+   * kendi notu: "Channels A and B have different initial vectors to prevent
+   * frames crossing channels." Kaynak: FlexRay Protocol Specification v3.0.1
+   * §4.4 (tanım) + §4.5 (sözde kod), reveng'de ATTESTED.
+   *
+   * Bu yüzden `flexray.ts` bir `channel` decodeOptions kanalı AÇAR: doğrulama
+   * hangi init'in kullanılacağına bağlıdır ve kanal çerçevenin İÇİNDE YOKTUR.
+   *
+   * `CRC24` (OpenPGP, poly 0x864CFB) ve `CRC24_Q` ile KARIŞTIRMA — üçünün
+   * polinomu da farklı; FlexRay'inki yalnız burada.
+   *
+   * İkinci bağımsız kaynak: `dynm/pico-flexray` `utils/crc24_generator.c`
+   * (`#define FLEXRAY_CRC24_POLYNOMIAL 0x5D6DCB`, "Initial: 0xABCDEF"). Ayrıca
+   * FlexRay Protocol Conformance Test Specification v3.0.1 §2.7.5'in 5+5
+   * codeword'ünün ONU DA bu motorla yeniden ürettik (crcEngine.test.ts).
+   */
+  CRC24_FLEXRAY_A: {
+    width: 24,
+    poly: 0x5d6dcbn,
+    init: 0xfedcban,
+    refin: false,
+    refout: false,
+    xorout: 0x000000n,
+  },
+  CRC24_FLEXRAY_B: {
+    width: 24,
+    poly: 0x5d6dcbn,
+    init: 0xabcdefn,
+    refin: false,
+    refout: false,
+    xorout: 0x000000n,
+  },
   CRC32: {
     width: 32,
     poly: 0x04c11db7n,
@@ -264,4 +327,17 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
 /** Katalogdan parametreleri alıp `crc()`'yi çağıran kolaylık fonksiyonu. */
 export function computeNamedCrc(bytes: Uint8Array, id: CrcAlgorithmId): bigint {
   return crc(bytes, CRC_CATALOGUE[id]);
+}
+
+/**
+ * `computeNamedCrc`in bit uzunluğu alan kardeşi — bayt sınırına oturmayan
+ * katalog girişleri için (bugün yalnız `CRC11_FLEXRAY`, 20 bit). Gerekçe
+ * `crcEngine.ts` dosya başındaki "açık soru 4" notunda.
+ */
+export function computeNamedCrcBits(
+  bytes: Uint8Array,
+  bitLength: number,
+  id: CrcAlgorithmId,
+): bigint {
+  return crcBits(bytes, bitLength, CRC_CATALOGUE[id]);
 }

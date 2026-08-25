@@ -5505,6 +5505,62 @@ export const tr = {
     'Packet ID 0x02 ne 0xFF (CRM) ne 0xFE (Event) — bir DAQ list PID’i; ölçüm baytları bu motorun sahip olmadığı bir DAQ list konfigürasyonu ister.',
   'protocol.ccp.example.emptyPayload.name': 'Boş payload',
   'protocol.ccp.example.emptyPayload.description': 'DLC 0 — çözülecek bir Command/Packet ID baytı yok.',
+  'protocol.flexray.documentation.summary':
+    'Tek bir FlexRay çerçevesini çözer — 5 baytlık başlık, payload ve 24 bitlik trailer CRC’si. Başlık bit bit okunur: beş gösterge biti (reserved, payload preamble, null frame, sync frame, startup frame), 11 bitlik Frame ID, 7 bitlik Payload Length ve 6 bitlik Cycle Count. Payload Length BAYT DEĞİL 2 BAYTLIK SÖZCÜK sayar — ham sözcük sayısı da bayt karşılığı da gösterilir. İki CRC de yalnız GÖSTERİLMEZ, GERÇEKTEN DOĞRULANIR: 11 bitlik header CRC’si tam 20 başlık biti üzerinden (sync + startup göstergesi, Frame ID, Payload Length — reserved, payload preamble ve null frame bitleri ile Cycle Count KAPSAM DIŞIDIR), 24 bitlik frame CRC’si ise başlık + payload üzerinden. Frame CRC’sinin başlangıç değeri kanala göre değişir (A 0xFEDCBA, B 0xABCDEF); kanal çerçevenin içinde değil yakalama bilgisi olduğu için seçilebilir. Bütün CRC parametreleri iki bağımsız açık kaynakla çapraz doğrulandı ve 14 conformance test codeword’ünden yeniden üretildi. Payload’ın kendisi ham kalır: yapısı telden değil FIBEX ya da AUTOSAR ARXML tanımından gelir. Çevrim ve slot korelasyonu analyzer işidir.',
+  'protocol.flexray.option.channel': 'Kanal',
+  'protocol.flexray.option.channel.description':
+    'Frame CRC’si her kanalda farklı bir başlangıç değeri kullanır ve kanal çerçevenin içinde taşınmaz. Yanlış seçim geçerli bir çerçeveyi bozuk gösterir.',
+  'protocol.flexray.option.channel.a': 'Kanal A (init 0xFEDCBA)',
+  'protocol.flexray.option.channel.b': 'Kanal B (init 0xABCDEF)',
+  'protocol.flexray.error.frameTooShort':
+    'Çerçeve 8 baytlık asgari boydan kısa (5 bayt başlık + 3 bayt frame CRC).',
+  'protocol.flexray.error.payloadTruncated':
+    'Payload Length çerçevede olandan fazla bayt vaat ediyor; bu bir akış parçasına benziyor.',
+  'protocol.flexray.error.headerCrcMismatch': 'Header CRC’si kapsadığı 20 başlık bitiyle tutmuyor.',
+  'protocol.flexray.error.frameCrcMismatch':
+    'Frame CRC’si seçilen kanal için başlık ve payload ile tutmuyor.',
+  'protocol.flexray.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.flexray.warning.headerCrcMismatch':
+    'Header CRC’si tutmuyor — Frame ID ya da Payload Length bozulmuş olabilir, bu yüzden payload sınırı güvenilir değil.',
+  'protocol.flexray.warning.frameCrcMismatch':
+    'Frame CRC’si tutmuyor. Header CRC’si geçerliyse veriyi bozuk saymadan önce kanalın doğru seçilip seçilmediğine bak.',
+  'protocol.flexray.warning.reservedBitSet':
+    'Reserved biti set; spec bu biti 0 olarak gönderiyor. Header CRC kapsamının dışında olduğu için korunmuyor.',
+  'protocol.flexray.warning.payloadNeedsDefinition':
+    'Payload’ın yapısı telden çıkmaz — FIBEX ya da AUTOSAR ARXML tanımı gerekir. Ham gösteriliyor.',
+  'protocol.flexray.warning.payloadPreamblePresent':
+    'Payload preamble göstergesi set: payload bir network management vector ya da message ID ile başlıyor. Hangisi olduğu çerçevenin statik mi dinamik segmentte mi olduğuna bağlı, o da çerçevede yok — bu yüzden preamble ayrıştırılmıyor.',
+  'protocol.flexray.warning.nullFrameHasData':
+    'Null frame göstergesi bunun null frame olduğunu söylüyor ama payload tamamen sıfır değil.',
+  'protocol.flexray.warning.channelAssumed':
+    'Kanal verilmedi, frame CRC’si için kanal A varsayıldı. Aynı çerçeve kanal B’de CRC uyuşmazlığı bildirirdi.',
+  'protocol.flexray.warning.trailingBytes': 'Frame CRC’sinden sonra artan baytlar var.',
+  'protocol.flexray.summary.dataFrame': 'FlexRay veri çerçevesi',
+  'protocol.flexray.summary.nullFrame': 'FlexRay null çerçevesi',
+  'protocol.flexray.example.conformanceChannelA.name': 'Conformance codeword (kanal A)',
+  'protocol.flexray.example.conformanceChannelA.description':
+    'FlexRay Conformance Test Specification’dan sync + startup çerçevesi; Frame ID 2, Payload Length 1 sözcük (2 bayt), çevrim 8. Kanal A’da iki CRC de geçerli.',
+  'protocol.flexray.example.conformanceChannelB.name': 'Aynı çerçeve (kanal B)',
+  'protocol.flexray.example.conformanceChannelB.description':
+    'Bayt bayt aynı mesaj, kanal B’nin frame CRC’siyle. Kanal A’da açarsan frame CRC’si geçersiz çıkar — başlangıç değeri farkının görünür hâli.',
+  'protocol.flexray.example.dataFrame.name': 'Veri çerçevesi, 8 baytlık payload',
+  'protocol.flexray.example.dataFrame.description':
+    'Frame ID 100, Payload Length 4 sözcük = 8 BAYT, çevrim 17. Uzunluğu bayt okumak frame CRC’sini 4 bayt öne kaydırırdı.',
+  'protocol.flexray.example.nullFrame.name': 'Null çerçeve',
+  'protocol.flexray.example.nullFrame.description':
+    'Null frame göstergesi 0; payload alanı ayrılmış ama veri taşımıyor.',
+  'protocol.flexray.example.payloadPreamble.name': 'Payload preamble set',
+  'protocol.flexray.example.payloadPreamble.description':
+    'Preamble göstergesi set ama preamble ayrıştırılmıyor: network management vector mı message ID mi olduğu çerçevede yok.',
+  'protocol.flexray.example.badHeaderCrc.name': 'Bozuk başlık',
+  'protocol.flexray.example.badHeaderCrc.description':
+    'Bir başlık baytı çevrildi: header CRC’si tutmuyor ve bayt frame CRC’sinin de kapsamında olduğu için o da tutmuyor. İki ayrı hata, kendi offset’leriyle.',
+  'protocol.flexray.example.badFrameCrc.name': 'Bozuk frame CRC',
+  'protocol.flexray.example.badFrameCrc.description':
+    'Yalnız son trailer baytı çevrildi: header CRC’si GEÇERLİ kalırken frame CRC’si tutmuyor — ikisi birbirinden bağımsız doğrulanıyor.',
+  'protocol.flexray.example.truncatedFrame.name': 'Eksik çerçeve',
+  'protocol.flexray.example.truncatedFrame.description':
+    'Payload Length 4 sözcük (8 bayt) vaat ediyor, yani 16 bayt gerek ama 10 bayt var.',
 
   // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':

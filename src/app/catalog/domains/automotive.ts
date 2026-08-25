@@ -299,10 +299,15 @@ export const automotiveDomain: CatalogDomain = {
           id: 'flexray',
           name: 'FlexRay',
           summary:
-            'Deterministic, time-triggered dual-channel network for chassis and safety domains, splitting each communication cycle into static and dynamic segments.',
+            'Deterministic, time-triggered dual-channel network for chassis and safety domains, splitting each communication cycle into static and dynamic segments. The frame decoder resolves the 5-byte header bit by bit — indicators, Frame ID, Payload Length (counted in 2-byte words, not bytes) and Cycle Count — and verifies both CRCs separately: the 11-bit header CRC over exactly 20 header bits, and the 24-bit frame CRC whose initial value differs between channel A and channel B.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'flexray',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
+          // `calculatorIds` YOK: çift kanal/topoloji hesabını `flexray-phy`
+          // kaydı zaten karşılıyor (`flexray-phy-timing`). Bağlantı 14e'ye kadar
+          // TEK YÖNLÜYDÜ — PHY buraya bakıyordu, burası oraya bakmıyordu.
+          related: ['interfaces-framing/vehicle-field-physical-layers/flexray-phy'],
           tools: [
             'Channel A/B',
             'Communication Cycle',

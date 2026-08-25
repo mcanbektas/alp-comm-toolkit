@@ -5521,6 +5521,62 @@ export const en: TranslationDictionary = {
     'Packet ID 0x02 is neither 0xFF (CRM) nor 0xFE (Event) — it is a DAQ list PID; the measurement bytes need a DAQ list configuration this engine does not have.',
   'protocol.ccp.example.emptyPayload.name': 'Empty payload',
   'protocol.ccp.example.emptyPayload.description': 'DLC 0 — no Command/Packet ID byte to decode.',
+  'protocol.flexray.documentation.summary':
+    'Decodes a single FlexRay frame — 5-byte header, payload and 24-bit trailer CRC. The header is read bit by bit: five indicator bits (reserved, payload preamble, null frame, sync frame, startup frame), an 11-bit Frame ID, a 7-bit Payload Length and a 6-bit Cycle Count. Payload Length counts 2-BYTE WORDS, not bytes — the raw word count and its byte equivalent are both shown. Both CRCs are GENUINELY VERIFIED, not merely displayed: the 11-bit header CRC over exactly 20 header bits (sync + startup indicator, Frame ID, Payload Length — the reserved, payload-preamble and null-frame bits and the Cycle Count are NOT covered), and the 24-bit frame CRC over header plus payload. The frame CRC uses a different initial value per channel (A 0xFEDCBA, B 0xABCDEF), so the channel — which is capture metadata, not part of the frame — is selectable. Every CRC parameter was cross-checked against two independent open sources and re-derived from the 14 conformance-test codewords. The payload itself stays raw: its structure comes from a FIBEX or AUTOSAR ARXML definition, not from the wire. Cycle and slot correlation is analyzer work.',
+  'protocol.flexray.option.channel': 'Channel',
+  'protocol.flexray.option.channel.description':
+    'The frame CRC uses a different initial value on each channel, and the channel is not carried inside the frame. Picking the wrong one makes a valid frame look corrupted.',
+  'protocol.flexray.option.channel.a': 'Channel A (init 0xFEDCBA)',
+  'protocol.flexray.option.channel.b': 'Channel B (init 0xABCDEF)',
+  'protocol.flexray.error.frameTooShort':
+    'Frame is shorter than the 8-byte minimum (5-byte header + 3-byte frame CRC).',
+  'protocol.flexray.error.payloadTruncated':
+    'Payload Length promises more bytes than the frame contains; this looks like a stream fragment.',
+  'protocol.flexray.error.headerCrcMismatch': 'Header CRC does not match the 20 header bits it covers.',
+  'protocol.flexray.error.frameCrcMismatch':
+    'Frame CRC does not match the header and payload for the selected channel.',
+  'protocol.flexray.error.aborted': 'Decoding was cancelled.',
+  'protocol.flexray.warning.headerCrcMismatch':
+    'Header CRC mismatch — Frame ID or Payload Length may be corrupted, so the payload boundary is not trustworthy.',
+  'protocol.flexray.warning.frameCrcMismatch':
+    'Frame CRC mismatch. If the header CRC is valid, check whether the channel is set correctly before assuming the data is corrupted.',
+  'protocol.flexray.warning.reservedBitSet':
+    'The reserved bit is set; the specification transmits it as 0. It is outside the header CRC, so it is not protected.',
+  'protocol.flexray.warning.payloadNeedsDefinition':
+    'Payload structure does not come from the wire — it needs a FIBEX or AUTOSAR ARXML definition. Shown raw.',
+  'protocol.flexray.warning.payloadPreamblePresent':
+    'Payload preamble indicator is set: the payload starts with a network management vector or a message ID. Which one depends on whether the frame sits in the static or dynamic segment, which is not in the frame, so the preamble is not split out.',
+  'protocol.flexray.warning.nullFrameHasData':
+    'Null frame indicator says this is a null frame, but the payload is not all zeros.',
+  'protocol.flexray.warning.channelAssumed':
+    'No channel was given, so channel A was assumed for the frame CRC. On channel B the same frame would report a CRC mismatch.',
+  'protocol.flexray.warning.trailingBytes': 'Bytes remain after the frame CRC.',
+  'protocol.flexray.summary.dataFrame': 'FlexRay data frame',
+  'protocol.flexray.summary.nullFrame': 'FlexRay null frame',
+  'protocol.flexray.example.conformanceChannelA.name': 'Conformance codeword (channel A)',
+  'protocol.flexray.example.conformanceChannelA.description':
+    'Sync + startup frame from the FlexRay Conformance Test Specification, Frame ID 2, Payload Length 1 word (2 bytes), cycle 8. Both CRCs valid on channel A.',
+  'protocol.flexray.example.conformanceChannelB.name': 'Same frame (channel B)',
+  'protocol.flexray.example.conformanceChannelB.description':
+    'Byte-for-byte the same message with the channel B frame CRC. Open it on channel A and the frame CRC turns invalid — that is the initial-value difference made visible.',
+  'protocol.flexray.example.dataFrame.name': 'Data frame, 8-byte payload',
+  'protocol.flexray.example.dataFrame.description':
+    'Frame ID 100, Payload Length 4 words = 8 BYTES, cycle 17. Reading the length as bytes would put the frame CRC 4 bytes too early.',
+  'protocol.flexray.example.nullFrame.name': 'Null frame',
+  'protocol.flexray.example.nullFrame.description':
+    'Null frame indicator is 0, so the payload area is reserved but carries no data.',
+  'protocol.flexray.example.payloadPreamble.name': 'Payload preamble set',
+  'protocol.flexray.example.payloadPreamble.description':
+    'The preamble indicator is set but the preamble is not split out: whether it is a network management vector or a message ID is not in the frame.',
+  'protocol.flexray.example.badHeaderCrc.name': 'Corrupted header',
+  'protocol.flexray.example.badHeaderCrc.description':
+    'A header byte was flipped: the header CRC fails and, since the byte is also inside the frame CRC, that one fails too. Two separate errors with their own offsets.',
+  'protocol.flexray.example.badFrameCrc.name': 'Corrupted frame CRC',
+  'protocol.flexray.example.badFrameCrc.description':
+    'Only the last trailer byte was flipped: the header CRC stays VALID while the frame CRC fails — the two are verified independently.',
+  'protocol.flexray.example.truncatedFrame.name': 'Truncated frame',
+  'protocol.flexray.example.truncatedFrame.description':
+    'Payload Length promises 4 words (8 bytes), so 16 bytes are needed but only 10 are present.',
 
   // --- PROFINET ---
   'protocol.profinet.error.frameTooShort':

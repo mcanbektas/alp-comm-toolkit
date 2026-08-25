@@ -91,6 +91,27 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'doip', () =>
     import('./automotive/doip/doip').then((module) => module.doipPlugin),
   );
+  // FlexRay — dalga 14e: dalganın görünmez-değişmez riski EN YÜKSEK kaydı, iki
+  // CRC'si de katalogda YOKTU ve biri BAYT HİZASIZ. Üçü de eklendi
+  // (`CRC11_FLEXRAY`, `CRC24_FLEXRAY_A`, `CRC24_FLEXRAY_B`) ve `crcEngine.ts`e
+  // `crcBits` kardeşi geldi — 20 bitlik header CRC `crc()`ye VERİLEMEZ, sessiz
+  // yanlış sonuç verirdi (açık soru 4, gerekçe crcEngine.ts dosya başında).
+  //
+  // Kaynak turunun dört sonucu (hepsi İKİ bağımsız kaynakla, bkz. flexray.ts):
+  // Payload Length 2 BAYTLIK SÖZCÜK sayar (bayt değil); Header CRC tam 20 biti
+  // kapsar (5 gösterge bitinin YALNIZ ikisi: sfi + stfi); Frame CRC init'i
+  // KANALA GÖRE DEĞİŞİR (A 0xFEDCBA / B 0xABCDEF); gösterge bitleri 5 tane ve
+  // sırası res/ppi/nfi/sfi/stfi. `BitOrder` msb-first.
+  //
+  // `decodeOptions` AÇILDI (`channel`) — brief'in "son çare" kuralının tanıdığı
+  // TEK meşru gerekçe gerçekleşti: doğrulama kanala bağlı ve kanal çerçevenin
+  // içinde yok. Çözüm sırası options → `ParseContext.channel` → varsayılan A.
+  // Cycle/slot korelasyonu ANALYZER işidir (12c DNS, 12d PTP emsali), hammaddesi
+  // `RawFrame.metadata`ya yazılır; kayıt `ready` kapanır. `calculatorIds` YOK —
+  // çift kanal/topoloji hesabı `flexray-phy` kaydında, `related` ile bağlandı.
+  registerOnce(registry, 'flexray', () =>
+    import('./automotive/flexray/flexray').then((module) => module.flexRayPlugin),
+  );
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );

@@ -13,6 +13,32 @@
  * yüzden width kaç olursa olsun (CRC-4 dahil) TEK bir aritmetik yol kullanılır,
  * "küçük width'lerde number, büyüklerde bigint" gibi bir ayrım YOKTUR — böyle bir
  * ayrım iki ayrı test edilmiş yol demektir, hata payını ikiye katlar.
+ *
+ * ## Neden `crcBits` var — açık soru 4'ün kararı (Faz 10, dalga 14e)
+ *
+ * FlexRay'in header CRC'si başlığın TAM 20 biti üzerinden hesaplanır (Sync Frame
+ * Indicator + Startup Frame Indicator + Frame ID[11] + Payload Length[7]). 20 bit
+ * = 2.5 bayttır; `crc()` ise bayt bayt döner (`for (const byte of bytes)`) ve 8'in
+ * katı olmayan girdiyi ALAMAZ. 2.5 baytlık veriyi `crc()`ye vermek hata DEĞİL,
+ * sessiz yanlış sonuç üretir.
+ *
+ * İki şık vardı: (a) bit uzunluğunu parametre alan bir kardeş fonksiyon,
+ * (b) çağıranın 20 biti belgelenmiş bir dolgu kuralıyla 3 bayta paketleyip
+ * `crc()`ye vermesi. (a) SEÇİLDİ. Gerekçe: bir CRC'nin kaç bit üzerinden koştuğu
+ * CRC TANIMININ PARÇASIDIR — polinom ve init kadar tanıma aittir. (b) bunu
+ * çağırana devreder ve her çağıran kendi dolgu kuralını uydurur; kural yanlışsa
+ * CRC küçük örneklerde doğru görünüp büyüklerde bozulur (12f'in "chunk boyutunu
+ * ondalık okumak küçük örneklerde çalışır" tuzağının aynı sınıfı). (b) bir sonraki
+ * bayt-hizasız CRC'de aynı kuralın yeniden uydurulmasını da engellemezdi.
+ *
+ * Ekleme ADDITIVE'dir: `types.ts` sözleşmesine DOKUNMAZ, `protocol-core` yüzeyine
+ * yalnız bir dışa aktarım ekler. Emsal `berReader.ts`in 12e'de iki kardeşle
+ * büyümesi — "paylaşım gerçekse ayrı modül değil, var olan dosyaya kardeş eklenir".
+ *
+ * `crc()` artık `crcBits()`e DELEGE EDİYOR, gövdesi kopyalanmadı: yukarıdaki "TEK
+ * bir aritmetik yol" ilkesi tam olarak budur. İki CRC çekirdeği iki ayrı test
+ * edilmiş yol demek olurdu ve biri diğerinden sessizce ayrışırdı. Katalogdaki
+ * `check` fixture'larının tamamı bu delegasyonun bekçisidir.
  */
 
 /** Her byte tam 8 bit taşır; iç bit döngüsünün sınırı ve `reflectByte`'ın genişliği. */
@@ -78,15 +104,49 @@ export function reflectByte(byte: number): bigint {
  * olmadan doğru sonucu verir (aşağıdaki 18 fixture bunun kanıtı).
  */
 export function crc(bytes: Uint8Array, params: CrcParams): bigint {
+  return crcBits(bytes, bytes.length * BITS_PER_BYTE, params);
+}
+
+/**
+ * `crc()`nin bit uzunluğu alan kardeşi: `bytes`in İLK `bitLength` bitini işler,
+ * gerisini yok sayar. Son bayt kısmiyse yalnız o baytın ÜST `bitLength % 8` biti
+ * girer — bu, tel üzerindeki msb-first bit sırasının doğrudan karşılığıdır
+ * (`decoding/bitCursor.ts`in varsayılanı da budur, iki modül aynı yönde sayar).
+ *
+ * `bitLength % 8 === 0` iken sonuç `crc()` ile BİREBİR aynıdır; testte de böyle
+ * doğrulanır. Neden var olduğu ve neden dolgu kuralı yerine bu seçildiği dosya
+ * başındaki "açık soru 4" notunda.
+ *
+ * `refin` KISMİ BAYTTA REDDEDİLİR: `refin` bir baytın 8 bitini kendi içinde ters
+ * çevirir, elde yalnız 5 biti olan bir bayt için bu işlemin TANIMI YOKTUR. Sessizce
+ * bir yorum seçmek (eldeki bitleri ters çevir? sıfırla doldur sonra çevir?) tam da
+ * bu fonksiyonun engellemek için var olduğu şeydir, o yüzden atar.
+ */
+export function crcBits(bytes: Uint8Array, bitLength: number, params: CrcParams): bigint {
+  if (!Number.isInteger(bitLength) || bitLength < 0) {
+    throw new RangeError(`Bit uzunluğu negatif olmayan tam sayı olmalı: ${bitLength}`);
+  }
+  const availableBits = bytes.length * BITS_PER_BYTE;
+  if (bitLength > availableBits) {
+    throw new RangeError(`${bitLength} bit ${bytes.length} baytlık arabelleği aşıyor`);
+  }
+
   const width = BigInt(params.width);
   const topBit = SINGLE_BIT << BigInt(params.width - 1);
   const mask = (SINGLE_BIT << width) - SINGLE_BIT;
 
   let register = params.init & mask;
+  let remainingBits = bitLength;
 
   for (const byte of bytes) {
+    if (remainingBits <= 0) break;
+    const bitsFromByte = Math.min(BITS_PER_BYTE, remainingBits);
+    if (params.refin && bitsFromByte < BITS_PER_BYTE) {
+      throw new RangeError('refin kısmi bayt üzerinde tanımsızdır; bitLength 8’in katı olmalı');
+    }
     const inputByte = params.refin ? reflectByte(byte) : BigInt(byte);
-    for (let bitIndex = BITS_PER_BYTE - 1; bitIndex >= 0; bitIndex--) {
+    // Kısmi baytta ALT bitler atılır: döngü en üst bitten başlar ve erken durur.
+    for (let bitIndex = BITS_PER_BYTE - 1; bitIndex >= BITS_PER_BYTE - bitsFromByte; bitIndex--) {
       const inputBit = (inputByte >> BigInt(bitIndex)) & SINGLE_BIT;
       const topBitWasSet = (register & topBit) !== EMPTY_REGISTER ? SINGLE_BIT : EMPTY_REGISTER;
       register = (register << SINGLE_BIT) & mask;
@@ -94,6 +154,7 @@ export function crc(bytes: Uint8Array, params: CrcParams): bigint {
         register ^= params.poly;
       }
     }
+    remainingBits -= bitsFromByte;
   }
 
   if (params.refout) {

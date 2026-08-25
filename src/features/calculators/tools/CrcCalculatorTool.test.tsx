@@ -69,11 +69,12 @@ describe('CrcCalculatorTool', () => {
     renderTool();
 
     const options = within(screen.getByTestId('crc-algorithm')).getAllByRole('option');
-    // 23 katalog CRC'si (dalga 10/7c'de IEEE 802.15.4 FCS için CRC16_KERMIT,
+    // 26 katalog CRC'si (dalga 10/7c'de IEEE 802.15.4 FCS için CRC16_KERMIT,
     // dalga 11j'de USB veri paketi için CRC16_USB, dalga 13a'da Wireless
-    // M-Bus link-layer block CRC'si için CRC16_EN13757 eklendi) + 7 basit
-    // toplam + 1 özel.
-    expect(options).toHaveLength(31);
+    // M-Bus link-layer block CRC'si için CRC16_EN13757, dalga 14e'de FlexRay
+    // için CRC11_FLEXRAY + CRC24_FLEXRAY_A + CRC24_FLEXRAY_B eklendi) + 7
+    // basit toplam + 1 özel.
+    expect(options).toHaveLength(34);
   });
 
   it('shows no computed value before any data is entered', () => {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { crc } from './crcEngine';
+import { crc, crcBits } from './crcEngine';
 import type { CrcParams } from './crcEngine';
-import { computeNamedCrc, CRC_ALGORITHM_IDS } from './crcCatalogue';
+import { computeNamedCrc, computeNamedCrcBits, CRC_ALGORITHM_IDS, CRC_CATALOGUE } from './crcCatalogue';
 import type { CrcAlgorithmId } from './crcCatalogue';
 
 /**
@@ -25,6 +25,10 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   // üretildi, ayrıca Annex G test vektörüyle (5 bayt → 0x73/0x8C/residue 0x55)
   // bağımsızca doğrulandı.
   CRC8_BACNET_MSTP: 0x89n,
+  // CRC-11/FLEXRAY (FlexRay header CRC, dalga 14e) — reveng kataloğunun yayımlı
+  // check değeri. Bu CRC telde 20 BİT üzerinden koşar ama check değeri katalog
+  // kuralı gereği "123456789"un 72 biti üzerindendir (crcCatalogue.ts notu).
+  CRC11_FLEXRAY: 0x5a3n,
   CRC16_ARC: 0xbb3dn,
   CRC16_MODBUS: 0x4b37n,
   CRC16_CCITT_FALSE: 0x29b1n,
@@ -48,6 +52,12 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   // (0x864CFB), yalnız init 0x000000 — bu yüzden check değeri de farklı
   // (crcCatalogue.ts'teki CRC24_Q girdisinin dosya başı notuna bak).
   CRC24_Q: 0xcde703n,
+  // CRC-24/FLEXRAY-A ve -B (FlexRay frame CRC, dalga 14e) — reveng kataloğunun
+  // yayımlı check değerleri. AYNI polinom, farklı init: kanal A 0xFEDCBA,
+  // kanal B 0xABCDEF (reveng: "Channels A and B have different initial vectors
+  // to prevent frames crossing channels").
+  CRC24_FLEXRAY_A: 0x7979bdn,
+  CRC24_FLEXRAY_B: 0x1f23b8n,
   CRC32: 0xcbf43926n,
   CRC32C: 0xe3069283n,
   CRC64: 0x995dc9bbdf1939fan,
@@ -78,5 +88,135 @@ describe('crc — custom (katalog dışı elle verilmiş) parametrelerle çağr�
     };
 
     expect(crc(CHECK_INPUT, customCrc32)).toBe(computeNamedCrc(CHECK_INPUT, 'CRC32'));
+  });
+});
+
+/**
+ * `crcBits` — bit uzunluğu alan kardeş (Faz 10 dalga 14e, açık soru 4).
+ *
+ * `crc()` artık BUNA DELEGE EDİYOR, bu yüzden yukarıdaki katalog fixture'larının
+ * tamamı zaten delegasyonun bekçisi. Buradaki testler ek olarak KISMİ BAYT
+ * yolunu kanıtlıyor — `crc()` o yolu hiç kullanmaz.
+ */
+describe('crcBits — bayt hizasız CRC', () => {
+  const bytes = new TextEncoder().encode('123456789');
+
+  it.each(CRC_ALGORITHM_IDS)(
+    '%s için bitLength = 8 × bayt sayısı iken crc() ile BİREBİR aynı sonucu verir',
+    (id) => {
+      expect(crcBits(bytes, bytes.length * 8, CRC_CATALOGUE[id])).toBe(
+        computeNamedCrc(bytes, id),
+      );
+    },
+  );
+
+  it('bitLength baytın katıysa sondaki baytları yok sayar', () => {
+    // İlk 4 baytı 32 bit olarak işlemek, o 4 baytı crc()'ye vermekle aynıdır.
+    expect(crcBits(bytes, 32, CRC_CATALOGUE.CRC32)).toBe(
+      crc(bytes.slice(0, 4), CRC_CATALOGUE.CRC32),
+    );
+  });
+
+  it('kısmi baytın ALT bitleri sonucu DEĞİŞTİRMEZ (yalnız üst bitLength%8 bit girer)', () => {
+    // 20 bit istendiğinde üçüncü baytın yalnız üst 4 biti işlenir; alt 4 bit ne
+    // olursa olsun sonuç aynı kalmalı. Yanlış bir dolgu kuralı tam burada
+    // yakalanır — (b) şıkkının reddedilme gerekçesi bu.
+    const a = Uint8Array.from([0xc0, 0x01, 0x00]);
+    const b = Uint8Array.from([0xc0, 0x01, 0x0f]);
+    expect(crcBits(a, 20, CRC_CATALOGUE.CRC11_FLEXRAY)).toBe(
+      crcBits(b, 20, CRC_CATALOGUE.CRC11_FLEXRAY),
+    );
+    // Ama ÜST bit değişirse sonuç da değişmeli — testin boş yere geçmediğinin kanıtı.
+    const c = Uint8Array.from([0xc0, 0x01, 0x80]);
+    expect(crcBits(c, 20, CRC_CATALOGUE.CRC11_FLEXRAY)).not.toBe(
+      crcBits(a, 20, CRC_CATALOGUE.CRC11_FLEXRAY),
+    );
+  });
+
+  it('bitLength 0 iken init ile xorout birleşimini döner', () => {
+    expect(crcBits(bytes, 0, CRC_CATALOGUE.CRC11_FLEXRAY)).toBe(
+      CRC_CATALOGUE.CRC11_FLEXRAY.init ^ CRC_CATALOGUE.CRC11_FLEXRAY.xorout,
+    );
+  });
+
+  it('arabelleği aşan bitLength RangeError atar', () => {
+    expect(() => crcBits(bytes, bytes.length * 8 + 1, CRC_CATALOGUE.CRC32)).toThrow(RangeError);
+  });
+
+  it('negatif ya da tam sayı olmayan bitLength RangeError atar', () => {
+    expect(() => crcBits(bytes, -1, CRC_CATALOGUE.CRC32)).toThrow(RangeError);
+    expect(() => crcBits(bytes, 20.5, CRC_CATALOGUE.CRC32)).toThrow(RangeError);
+  });
+
+  it('refin + KISMİ bayt RangeError atar (tanımsız bileşim, sessizce yorumlanmaz)', () => {
+    // CRC32 refin:true — 20 bit istemek son baytı yarım bırakır, "5 bitlik bir
+    // baytı kendi içinde ters çevir" tanımsızdır.
+    expect(() => crcBits(bytes, 20, CRC_CATALOGUE.CRC32)).toThrow(RangeError);
+    // Ama bayt hizalıysa refin sorunsuz çalışır.
+    expect(() => crcBits(bytes, 24, CRC_CATALOGUE.CRC32)).not.toThrow();
+  });
+});
+
+/**
+ * FlexRay CRC'lerinin ASIL kanıtı: FlexRay Protocol Conformance Test
+ * Specification v3.0.1 §2.7.5'in codeword'leri (reveng kataloğu üzerinden).
+ * Bir codeword = mesaj + CRC; motor mesajı işleyince CRC'yi YENİDEN üretmeli.
+ *
+ * Bu, "123456789" check değerinden DAHA GÜÇLÜ bir kanıttır: check değeri
+ * parametrelerin doğru kopyalandığını gösterir, codeword ise parametrelerin
+ * GERÇEK FlexRay çerçevelerinde doğru sonucu verdiğini gösterir.
+ */
+describe('FlexRay CRC — conformance test codeword doğrulaması', () => {
+  /** 31 bitlik header codeword'leri: 20 bit mesaj + 11 bit CRC. */
+  const HEADER_CODEWORDS = [
+    '1100000000010000000100000100110',
+    '1100000000001000100000100011011',
+    '1100000000010000100001100000100',
+    '0000000000011000100010111010010',
+  ] as const;
+
+  it.each(HEADER_CODEWORDS)('header codeword %s: ilk 20 bitten son 11 bit üretilir', (codeword) => {
+    // 20 biti sola dayalı 3 bayta paketle — crcBits'in beklediği msb-first düzen.
+    const message = codeword.slice(0, 20).padEnd(24, '0');
+    const packed = Uint8Array.from([
+      Number.parseInt(message.slice(0, 8), 2),
+      Number.parseInt(message.slice(8, 16), 2),
+      Number.parseInt(message.slice(16, 24), 2),
+    ]);
+    const expected = BigInt(Number.parseInt(codeword.slice(20), 2));
+    expect(computeNamedCrcBits(packed, 20, 'CRC11_FLEXRAY')).toBe(expected);
+  });
+
+  /** Frame codeword'leri: başlık(5B) + payload, ardından 3 baytlık CRC. */
+  const FRAME_CODEWORDS = [
+    { hex: '18020209880000F339C1', id: 'CRC24_FLEXRAY_A' },
+    { hex: '600A0248C80102646D70', id: 'CRC24_FLEXRAY_A' },
+    { hex: '205606C848102030405060474380', id: 'CRC24_FLEXRAY_A' },
+    { hex: '202E06C84810203040506096C9D1', id: 'CRC24_FLEXRAY_A' },
+    { hex: '201A06C848102030405060B072EB', id: 'CRC24_FLEXRAY_A' },
+    { hex: '18020209880000D5B910', id: 'CRC24_FLEXRAY_B' },
+    { hex: '600A0248C8010242EDA1', id: 'CRC24_FLEXRAY_B' },
+    { hex: '205606C848102030405060E6D9BE', id: 'CRC24_FLEXRAY_B' },
+    { hex: '202E06C8481020304050603753EF', id: 'CRC24_FLEXRAY_B' },
+    { hex: '201A06C84810203040506011E8D5', id: 'CRC24_FLEXRAY_B' },
+  ] as const;
+
+  it.each(FRAME_CODEWORDS)('frame codeword $hex ($id) yeniden üretilir', ({ hex, id }) => {
+    const all = Uint8Array.from(
+      hex.match(/../g)?.map((pair) => Number.parseInt(pair, 16)) ?? [],
+    );
+    const message = all.slice(0, all.length - 3);
+    const expected =
+      (BigInt(all[all.length - 3] ?? 0) << 16n) |
+      (BigInt(all[all.length - 2] ?? 0) << 8n) |
+      BigInt(all[all.length - 1] ?? 0);
+    expect(computeNamedCrc(message, id)).toBe(expected);
+  });
+
+  it('AYNI mesaj kanal A ve B için FARKLI CRC üretir (init kanala göre değişir)', () => {
+    // Bu, `flexray.ts`in `channel` decodeOptions kanalını açmasının gerekçesi.
+    const message = Uint8Array.from([0x18, 0x02, 0x02, 0x09, 0x88, 0x00, 0x00]);
+    expect(computeNamedCrc(message, 'CRC24_FLEXRAY_A')).toBe(0xf339c1n);
+    expect(computeNamedCrc(message, 'CRC24_FLEXRAY_B')).toBe(0xd5b910n);
   });
 });

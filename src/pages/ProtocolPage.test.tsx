@@ -29,7 +29,11 @@ const PLUGGED_PATH = 'industrial-automation/modbus/modbus-rtu';
 // yakın bir dalgada `ready` olma sırası yok. O da bağlanınca başka bir
 // planned kayda taşı (`status: 'planned'` olan 82 kayıttan `decode` sekmesi
 // olan herhangi biri iş görür).
-const PLANNED_PATH = 'automotive/vehicle-network-protocols/flexray';
+// `flexray` dalga 14e'de `ready` oldu ve motora bağlandı; bu test EKLENTİSİZ
+// bir kayda ihtiyaç duyuyor. Automotive'in kalan `planned` kayıtları 14f-14h'de
+// kapanacağı için fixture DOMAIN DIŞINA taşındı — aksi hâlde aynı test iki alt
+// dalga sonra yine kırılırdı.
+const PLANNED_PATH = 'marine-navigation/legacy-proprietary-marine/seatalk';
 
 function renderAt(path: string): RenderResult {
   return render(
