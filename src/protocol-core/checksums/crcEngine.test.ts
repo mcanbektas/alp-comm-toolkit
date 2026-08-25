@@ -58,6 +58,16 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   // to prevent frames crossing channels").
   CRC24_FLEXRAY_A: 0x7979bdn,
   CRC24_FLEXRAY_B: 0x1f23b8n,
+  // CRC-8/DVB-S2 (CRSF frame CRC, dalga 15d) — reveng kataloğunun yayımlı
+  // check değeri; Betaflight `common/crc.h:33` + TBS'in resmî CRSF spec'i
+  // ("CRC" bölümü) bağımsızca örtüşüyor (crcCatalogue.ts'teki CRC8_DVB_S2
+  // girdisinin dosya başı notuna bak).
+  CRC8_DVB_S2: 0xbcn,
+  // CRC-8/CRSF-COMMAND (CRSF komut çerçevesi — 0x32 — CRC'si, dalga 15d) —
+  // reveng kataloğunda AYRI bir girdisi yok, bu depoya özgü ad; TBS spec'i +
+  // Betaflight `common/crc.h:36` bağımsızca örtüşüyor (crcCatalogue.ts'teki
+  // CRC8_CRSF_COMMAND girdisinin dosya başı notuna bak).
+  CRC8_CRSF_COMMAND: 0x20n,
   CRC32: 0xcbf43926n,
   CRC32C: 0xe3069283n,
   CRC64: 0x995dc9bbdf1939fan,

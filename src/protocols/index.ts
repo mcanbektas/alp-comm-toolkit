@@ -240,6 +240,12 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // ile seçilir. i-BUS2 kaynaksız kaldığı için rozet `partial` (bkz. ibus.ts
   // dosya başı).
   registerOnce(registry, 'ibus', () => import('./aerospace/ibus/ibus').then((module) => module.ibusPlugin));
+  // CRSF — dalga 15d: `packedChannels.ts`i (15c) TÜKETEN ikinci kayıt. İKİ
+  // AYRI CRC-8 (frame + yalnız `0x32`e özel command), genişletilmiş/broadcast
+  // başlık ayrımı `0x28` sınırında. Payload yalnız `0x16` için çözülür, kalan
+  // tipler ham + uyarı — bu bir kapsam daraltması değil (bkz. crsf.ts dosya
+  // başı).
+  registerOnce(registry, 'crsf', () => import('./aerospace/crsf/crsf').then((module) => module.crsfPlugin));
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

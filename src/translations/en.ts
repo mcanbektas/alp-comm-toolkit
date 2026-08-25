@@ -2920,6 +2920,60 @@ export const en: TranslationDictionary = {
   'protocol.ibus.example.ia6Typical.description':
     'A 31-byte iA6 frame — the same 14 channel values, with a different sync byte and checksum algorithm.',
 
+  // --- CRSF ---
+  'protocol.crsf.error.bufferTooShort':
+    'Fewer than 3 bytes available — Device Address, Frame Length and Type cannot be read.',
+  'protocol.crsf.error.frameTruncated': 'Not enough bytes for the length this frame declares.',
+  'protocol.crsf.error.lengthTooShort':
+    "Frame Length declares fewer bytes than this frame type's structure requires (broadcast frames need Type+CRC, extended frames also need Destination+Origin, Command frames additionally need both CRC bytes).",
+  'protocol.crsf.error.lengthTooLong':
+    "Frame Length exceeds the protocol's maximum — a CRSF frame cannot exceed 64 bytes including the sync and CRC bytes.",
+  'protocol.crsf.error.unknownAddress':
+    'First byte is not one of the known CRSF device addresses — this may not be a CRSF frame, but the remaining fields are still shown.',
+  'protocol.crsf.error.frameCrcMismatch':
+    "Frame CRC (CRC-8/DVB-S2, scope Type through the last payload byte) does not match — the sync byte and Frame Length are deliberately excluded from this CRC's scope.",
+  'protocol.crsf.error.commandCrcMismatch':
+    'Command CRC (CRC-8/CRSF-COMMAND) does not match — this is a second, separate CRC used only by Command frames, independent of the Frame CRC below.',
+  'protocol.crsf.error.aborted': 'Parsing was cancelled.',
+  'protocol.crsf.warning.payloadNotDecodedForFrameType':
+    "This frame type's payload is shown raw and is not interpreted — only 0x16 (RC Channels Packed) is decoded by this engine.",
+  'protocol.crsf.warning.frameTypeDiscouragedByVendor':
+    'TBS’s own specification marks this frame type as discouraged for implementation ("Revision is in progress") — its payload is shown raw rather than decoded against an unstable definition.',
+  'protocol.crsf.warning.trailingBytes':
+    'More bytes are present than the declared Frame Length accounts for — the extra bytes were ignored and may be the start of another frame.',
+  'protocol.crsf.option.baudProfile': 'Baud Profile',
+  'protocol.crsf.option.baudProfile.description':
+    'CRSF frames are fully self-describing via the Frame Length byte — baud rate is only a UART timing parameter and never changes a decoded field. This selection feeds the timing view, not the frame fields below.',
+  'protocol.crsf.option.baudProfile.standard': 'Standard (416666 baud, default)',
+  'protocol.crsf.option.baudProfile.fcCompatibility': 'FC compatibility (420000 baud)',
+  'protocol.crsf.option.baudProfile.negotiated': 'Negotiated (value supplied externally)',
+  'protocol.crsf.documentation.summary':
+    "TBS Crossfire (CRSF): a variable-length frame — Device/Sync Address, Frame Length, Type, an extended header (Destination + Origin) for types 0x28 and above, payload, and a Frame CRC (CRC-8/DVB-S2) whose scope starts at Type and excludes the sync byte and Frame Length. Command frames (0x32) carry a second, separate Command CRC (CRC-8/CRSF-COMMAND). Only 0x16 (RC Channels Packed) has its payload decoded — 16×11-bit channels, lsb-first, shown as raw ticks AND as a protocol-defined derived microsecond value; every other type is named from a verified dictionary but shown raw. 0x17 and 0x18 are additionally flagged as discouraged by the vendor's own specification.",
+  'protocol.crsf.example.rcChannelsPacked.name': 'RC Channels Packed (0x16)',
+  'protocol.crsf.example.rcChannelsPacked.description':
+    'Sixteen channels carrying 0, 100, 200 … 1500 (identical to the packedChannels.ts BitOrder fixture) — decoded as raw ticks and as the protocol-defined microsecond value, Frame CRC PASSes.',
+  'protocol.crsf.example.subsetRcChannelsPacked.name': 'Subset RC Channels Packed (0x17, vendor-discouraged)',
+  'protocol.crsf.example.subsetRcChannelsPacked.description':
+    "TBS's own specification marks this frame type discouraged for implementation — the payload is shown raw with a vendor-discouraged warning, Frame CRC still PASSes.",
+  'protocol.crsf.example.batterySensor.name': 'Battery Sensor (0x08, undecoded payload)',
+  'protocol.crsf.example.batterySensor.description':
+    'A recognized frame type outside 0x16 — the type is named from the verified dictionary, but the payload is shown raw since only RC Channels Packed is decoded.',
+  'protocol.crsf.example.devicePing.name': 'Device Ping (0x28, extended header)',
+  'protocol.crsf.example.devicePing.description':
+    'An extended-header frame with an empty payload — Destination and Origin are decoded as separate address fields, Frame CRC PASSes.',
+  'protocol.crsf.example.command.name': 'Command (0x32), both CRCs PASS',
+  'protocol.crsf.example.command.description':
+    'An extended Command frame — Destination, Origin, Command CRC and Frame CRC are all shown as separate fields; both PASS.',
+  'protocol.crsf.example.commandCrcMismatch.name': 'Command (0x32), Command CRC FAILs',
+  'protocol.crsf.example.commandCrcMismatch.description':
+    'The Command CRC byte is corrupted; the Frame CRC is recomputed over the corrupted byte and still PASSes — proof the two CRCs are verified independently.',
+  'protocol.crsf.example.unrecognizedAddress.name': 'Unrecognized address (error path)',
+  'protocol.crsf.example.unrecognizedAddress.description':
+    'Same body as the RC Channels Packed example, but the first byte is not a known CRSF device address — raises an error, yet the channels are still decoded.',
+  'protocol.crsf.example.frameCrcMismatch.name': 'Frame CRC mismatch (error path)',
+  'protocol.crsf.example.frameCrcMismatch.description':
+    'Same body as the RC Channels Packed example, with the final CRC byte corrupted.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',

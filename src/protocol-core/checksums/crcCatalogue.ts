@@ -1,10 +1,15 @@
 /**
  * reveng.sourceforge.io "Catalogue of parametrised CRC algorithms" kaynağından
- * BİREBİR alınan 19 standart CRC tanımı (18'i dalga 1'den, `CRC24_Q` dalga
- * 10/3c'de RTCM için eklendi). `poly`/`init`/`xorout` değerleri UYDURULMADI ya
- * da yuvarlanmadı — değiştirilirse `crcEngine.test.ts`'teki `check` fixture'ları
- * (ASCII "123456789" girdisinin beklenen CRC'si) tutmaz. Bu yüzden burada elle
- * "sadeleştirme" ya da "iyileştirme" yapılmaz.
+ * BİREBİR alınan standart CRC tanımları (18'i dalga 1'den; sonraki dalgalar —
+ * 3c RTCM `CRC24_Q`, 7c Zigbee `CRC16_KERMIT`, 11j USB `CRC16_USB`, 13a
+ * Wireless M-Bus `CRC16_EN13757`, 14e FlexRay `CRC11_FLEXRAY`+
+ * `CRC24_FLEXRAY_A/B`, 6 BACnet `CRC8_BACNET_MSTP`, 15d CRSF `CRC8_DVB_S2`+
+ * `CRC8_CRSF_COMMAND` — kendi girişlerinde ayrıca kaynaklanır) ekledikçe
+ * `CRC_ALGORITHM_IDS`in uzunluğu büyüdü; güncel sayı `CRC_ALGORITHM_IDS.length`
+ * ile okunur, burada elle sabitlenmez. `poly`/`init`/`xorout` değerleri
+ * UYDURULMADI ya da yuvarlanmadı — değiştirilirse `crcEngine.test.ts`'teki
+ * `check` fixture'ları (ASCII "123456789" girdisinin beklenen CRC'si) tutmaz.
+ * Bu yüzden burada elle "sadeleştirme" ya da "iyileştirme" yapılmaz.
  */
 
 import { crc, crcBits } from './crcEngine';
@@ -34,6 +39,8 @@ export const CRC_ALGORITHM_IDS = [
   'CRC24_Q',
   'CRC24_FLEXRAY_A',
   'CRC24_FLEXRAY_B',
+  'CRC8_DVB_S2',
+  'CRC8_CRSF_COMMAND',
   'CRC32',
   'CRC32C',
   'CRC64',
@@ -297,6 +304,66 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     refin: false,
     refout: false,
     xorout: 0x000000n,
+  },
+  /**
+   * CRC-8/DVB-S2 (Faz 10 dalga 15d, CRSF frame CRC) — width 8, poly 0xD5,
+   * init 0x00, refin/refout false, xorout 0x00. Katalogdaki beş CRC8'in
+   * (`CRC8` 0x07, `CRC8_SAE_J1850` 0x1D, `CRC8_AUTOSAR` 0x2F, `CRC8_MAXIM`
+   * 0x31, `CRC8_BACNET_MSTP` 0x81) HİÇBİRİ bu polinomla AYNI DEĞİL — "aynı
+   * bit genişliği aynı CRC algoritması değildir" kuralının altıncı vakası
+   * (dalga 13 dersi 2, 14g/14h'te iki kez uygulanmıştı).
+   *
+   * İki bağımsız kaynak, ana thread'in 2026-08-25 kaynak turunda örtüştü:
+   *   1. Betaflight `common/crc.h:33`: `#define crc8_dvb_s2(crc, a)
+   *      crc8_calc(crc, a, 0xD5)`; kullanımı `rx/crsf.c:334-336`
+   *      (`crc = crc8_dvb_s2(0, crsfFrame.frame.type)` sonra payload).
+   *   2. TBS'in resmî CRSF spec'i (`tbs-fpv/tbs-crsf-spec/crsf.md`, "CRC"
+   *      bölümü): *"CRC8 implementation with polynom = x7+x6+x4+x2+x0
+   *      (0xD5)"*; kapsam notu AYRICA örtüşüyor — *"CRC includes Type and
+   *      Payload of each frame (doesn't include sync byte and frame
+   *      length)"* (`crsf.ts` dosya başında bu kapsam kararı işlenir).
+   * Ad reveng.sourceforge.io kataloğunun "CRC-8/DVB-S2" (DVB uydu yayını)
+   * girdisiyle BİREBİR örtüşüyor — bu bir tesadüf değil, aynı standart
+   * polinomun (x^8+x^7+x^5+x^3+x^1, 0xD5 üstte) farklı alanlarda yeniden
+   * kullanılmasıdır. `check` değeri ("123456789" ASCII) bu motorla üretildi
+   * VE reveng'in yayımlı "CRC-8/DVB-S2" check değeriyle (0xBC) örtüşüyor.
+   */
+  CRC8_DVB_S2: { width: 8, poly: 0xd5n, init: 0x00n, refin: false, refout: false, xorout: 0x00n },
+  /**
+   * CRC-8/CRSF-COMMAND (Faz 10 dalga 15d) — CRSF'in "Command Frame"
+   * (`0x32`) çerçevelerine özel, frame CRC'den (`CRC8_DVB_S2`, yukarıda)
+   * TAMAMEN AYRI bir İKİNCİ CRC-8: width 8, poly 0xBA, init 0x00, refin/
+   * refout false, xorout 0x00. Katalogdaki ALTI CRC8'in (beş orijinal +
+   * `CRC8_DVB_S2`) hiçbiriyle AYNI değil. `CRC8_BACNET_MSTP` girişindeki
+   * gibi (dosya başı notu, yukarı bakınız) bu da reveng kataloğunda AYRI bir
+   * "CRC-8/CRSF-COMMAND" adıyla listelenmiyor — bu yüzden ad bu depoya özgü,
+   * protokolün kendi adından türetildi (`CRC8_DVB_S2` örneğindeki gibi).
+   *
+   * İki bağımsız kaynak:
+   *   1. TBS'in resmî CRSF spec'i (`crsf.md`, "0x32 Direct Commands"):
+   *      *"Command_CRC8 implementation with polynom = x7+x5+x4+x3+x1
+   *      (0xBA)"*. KAPSAM AYRICA verilir: *"The CRC includes frame type
+   *      (byte 0x32), Destination, Origin, Command ID and Payload of each
+   *      Command Frame"* — yani Command CRC, çerçevenin sonundaki Frame
+   *      CRC'nin YERİNE değil ONA EK olarak hesaplanır; spec kendi notuyla
+   *      uyarıyor: *"Command CRC doesn't exclude CRC at the end of each
+   *      CRSF frame. You will also need to include CRC at the end for the
+   *      full frame."* (`crsf.ts` dosya başında iki CRC'nin kapsamı ayrı
+   *      ayrı işlenir.)
+   *   2. Betaflight `common/crc.h:36`: `#define crc8_poly_0xba(crc, a)
+   *      crc8_calc(crc, a, 0xBA)`.
+   * `check` değeri ("123456789" ASCII) bu motorla üretildi: 0x20 — aynı
+   * motorun `CRC8` (poly 0x07) için ürettiği, bu depoda zaten belgeli
+   * referans değerle (0xF4) birebir aynı topolojiden geçtiği için güven
+   * ölçütü olarak kullanıldı (`crcEngine.test.ts` fixture'ı, dosya başı).
+   */
+  CRC8_CRSF_COMMAND: {
+    width: 8,
+    poly: 0xban,
+    init: 0x00n,
+    refin: false,
+    refout: false,
+    xorout: 0x00n,
   },
   CRC32: {
     width: 32,

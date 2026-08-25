@@ -2924,6 +2924,60 @@ export const tr = {
   'protocol.ibus.example.ia6Typical.description':
     '31 baytlık iA6 çerçevesi — aynı 14 kanal değeri, farklı senkron baytı ve checksum algoritmasıyla.',
 
+  // --- CRSF ---
+  'protocol.crsf.error.bufferTooShort':
+    '3 bayttan az veri var — Device Address, Frame Length ve Type okunamıyor.',
+  'protocol.crsf.error.frameTruncated': 'Bu çerçevenin bildirdiği uzunluk için yeterli bayt yok.',
+  'protocol.crsf.error.lengthTooShort':
+    'Frame Length, bu çerçeve tipinin yapısının gerektirdiğinden daha az bayt bildiriyor (broadcast çerçeveler Type+CRC, genişletilmiş çerçeveler ayrıca Destination+Origin, Command çerçeveleri ek olarak iki CRC baytının ikisini de gerektirir).',
+  'protocol.crsf.error.lengthTooLong':
+    'Frame Length protokolün üst sınırını aşıyor — bir CRSF çerçevesi sync ve CRC baytları dahil 64 baytı geçemez.',
+  'protocol.crsf.error.unknownAddress':
+    'İlk bayt bilinen CRSF cihaz adreslerinden biri değil — bu bir CRSF çerçevesi olmayabilir, ama kalan alanlar yine de gösterilir.',
+  'protocol.crsf.error.frameCrcMismatch':
+    'Frame CRC (CRC-8/DVB-S2, kapsam Type’tan son payload baytına kadar) tutmuyor — sync baytı ve Frame Length bu CRC’nin kapsamından bilerek DIŞLANMIŞTIR.',
+  'protocol.crsf.error.commandCrcMismatch':
+    'Command CRC (CRC-8/CRSF-COMMAND) tutmuyor — bu, yalnız Command çerçevelerinde bulunan, aşağıdaki Frame CRC’den BAĞIMSIZ ikinci ve ayrı bir CRC’dir.',
+  'protocol.crsf.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.crsf.warning.payloadNotDecodedForFrameType':
+    'Bu çerçeve tipinin payload’ı ham gösterilir, yorumlanmaz — bu motor yalnız 0x16’yı (RC Channels Packed) çözer.',
+  'protocol.crsf.warning.frameTypeDiscouragedByVendor':
+    'TBS’in kendi spec’i bu çerçeve tipini uygulanması önerilmeyen ("Revision is in progress") olarak işaretliyor — payload’ı kararsız bir tanıma göre çözmek yerine ham gösterilir.',
+  'protocol.crsf.warning.trailingBytes':
+    'Bildirilen Frame Length’in kapsadığından daha fazla bayt var — fazla baytlar yok sayıldı, başka bir çerçevenin başlangıcı olabilir.',
+  'protocol.crsf.option.baudProfile': 'Baud Profili',
+  'protocol.crsf.option.baudProfile.description':
+    'CRSF çerçeveleri Frame Length baytı sayesinde kendi kendine tam tanımlıdır — baud hızı yalnız bir UART zamanlama parametresidir ve hiçbir çözülen alanı DEĞİŞTİRMEZ. Bu seçim timing görünümünü besler, aşağıdaki çerçeve alanlarını değil.',
+  'protocol.crsf.option.baudProfile.standard': 'Standart (416666 baud, varsayılan)',
+  'protocol.crsf.option.baudProfile.fcCompatibility': 'FC uyumluluk (420000 baud)',
+  'protocol.crsf.option.baudProfile.negotiated': 'Pazarlıklı (değer dışarıdan verilir)',
+  'protocol.crsf.documentation.summary':
+    'TBS Crossfire (CRSF): değişken uzunluklu bir çerçeve — Device/Sync Address, Frame Length, Type, 0x28 ve üzeri tipler için genişletilmiş başlık (Destination + Origin), payload ve kapsamı Type’tan başlayıp sync baytını/Frame Length’i dışlayan bir Frame CRC (CRC-8/DVB-S2). Command çerçeveleri (0x32) ayrıca ikinci, ayrı bir Command CRC (CRC-8/CRSF-COMMAND) taşır. Yalnız 0x16’nın (RC Channels Packed) payload’ı çözülür — 16×11 bit kanal, lsb-first, ham tik değeri VE protokolce tanımlı türetilmiş mikrosaniye değeri olarak gösterilir; diğer her tip doğrulanmış bir sözlükten adlandırılır ama ham gösterilir. 0x17 ve 0x18 ayrıca satıcının kendi spec’ince önerilmeyen olarak işaretlenir.',
+  'protocol.crsf.example.rcChannelsPacked.name': 'RC Channels Packed (0x16)',
+  'protocol.crsf.example.rcChannelsPacked.description':
+    '0, 100, 200 … 1500 taşıyan 16 kanal (packedChannels.ts’in BitOrder fixture’ıyla AYNI) — ham tik ve protokolce tanımlı mikrosaniye değeri olarak çözülür, Frame CRC PASS eder.',
+  'protocol.crsf.example.subsetRcChannelsPacked.name': 'Subset RC Channels Packed (0x17, satıcı önermiyor)',
+  'protocol.crsf.example.subsetRcChannelsPacked.description':
+    'TBS’in kendi spec’i bu çerçeve tipini uygulanması önerilmeyen olarak işaretliyor — payload ham gösterilir ve satıcı uyarısı basılır, Frame CRC yine de PASS eder.',
+  'protocol.crsf.example.batterySensor.name': 'Battery Sensor (0x08, çözülmeyen payload)',
+  'protocol.crsf.example.batterySensor.description':
+    '0x16 dışında tanınan bir çerçeve tipi — tip doğrulanmış sözlükten adlandırılır, ama payload ham gösterilir çünkü yalnız RC Channels Packed çözülür.',
+  'protocol.crsf.example.devicePing.name': 'Device Ping (0x28, genişletilmiş başlık)',
+  'protocol.crsf.example.devicePing.description':
+    'Boş payload’lu genişletilmiş başlıklı bir çerçeve — Destination ve Origin ayrı adres alanları olarak çözülür, Frame CRC PASS eder.',
+  'protocol.crsf.example.command.name': 'Command (0x32), iki CRC de PASS',
+  'protocol.crsf.example.command.description':
+    'Genişletilmiş bir Command çerçevesi — Destination, Origin, Command CRC ve Frame CRC ayrı alanlar olarak gösterilir; ikisi de PASS eder.',
+  'protocol.crsf.example.commandCrcMismatch.name': 'Command (0x32), Command CRC FAIL eder',
+  'protocol.crsf.example.commandCrcMismatch.description':
+    'Command CRC baytı bozuldu; Frame CRC bu bozuk bayt üzerinden yeniden hesaplandığı için yine PASS eder — iki CRC’nin BAĞIMSIZ doğrulandığının kanıtı.',
+  'protocol.crsf.example.unrecognizedAddress.name': 'Tanınmayan adres (hata yolu)',
+  'protocol.crsf.example.unrecognizedAddress.description':
+    'RC Channels Packed örneğiyle AYNI gövde, yalnız ilk bayt bilinen bir CRSF cihaz adresi değil — hata verir, ama kanallar yine de çözülür.',
+  'protocol.crsf.example.frameCrcMismatch.name': 'Frame CRC uyuşmazlığı (hata yolu)',
+  'protocol.crsf.example.frameCrcMismatch.description':
+    'RC Channels Packed örneğiyle AYNI gövde, yalnız son CRC baytı bozuldu.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

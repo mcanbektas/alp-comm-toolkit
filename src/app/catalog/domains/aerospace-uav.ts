@@ -294,7 +294,13 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             "TBS Crossfire's bidirectional low-latency serial protocol between radio, receiver and flight controller, carrying packed RC channels, link statistics, telemetry and device configuration.",
           layer: 'data-link',
-          status: 'planned',
+          // Kaynak MÜKEMMEL: TBS'in resmî spec'i ve Betaflight'ın referans
+          // uygulaması birbirini örtüyor. Çerçeve düzeyi (adres, uzunluk,
+          // tip, iki AYRI CRC-8, RC kanalları) TAM çözülür ve doğrulanır;
+          // payload yalnız `0x16` için çözülür ama bu bir kapsam daraltması
+          // DEĞİL (bkz. crsf.ts dosya başı). Faz 10 dalga 15d.
+          status: 'ready',
+          pluginId: 'crsf',
           tabs: [
             'overview',
             'live',

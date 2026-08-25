@@ -23,10 +23,17 @@
  * `bitCursor.ts`in `readBitsAsNumber`ını ARDIŞIK kanallara döngüyle uygular:
  * `offset` baytından başlayarak `channelCount` adet `bitsPerChannel` genişliğinde
  * alanı, aralarında boşluk BIRAKMADAN, `bitOrder`a göre okur. `bitsPerChannel`
- * PARAMETREDİR çünkü CRSF'in 0x17 alt-küme çerçevesi 10/11/12/13 bit
- * kullanabiliyor (`rx/crsf.c:140-143` — ana thread doğruladı; brifin
- * `crsf_protocol.h:141-142` atfı YANLIŞ, o satırlar adres enum'udur).
- * SBUS'un sabit 11 bitine kilitli bir imza burada YAZILMAZ.
+ * PARAMETREDİR — gerekçe TARİHSEL: CRSF'in 0x17 "Subset RC Channels Packed"
+ * çerçevesi 10/11/12/13 bit kullanabiliyor (`rx/crsf.c:140-143`), bu yüzden
+ * imza baştan SBUS'un sabit 11 bitine KİLİTLENMEDİ. 15d'de 0x17 TBS'in kendi
+ * spec'indeki *"discouraged for implementation"* uyarısı yüzünden KAPSAM DIŞI
+ * bırakıldı (`crsf.ts` dosya başı) — yani BUGÜN bu parametrenin tek gerçek
+ * tüketicisi sabit 11 bit (SBUS ve CRSF 0x16, ikisi de `readPackedChannels(...,
+ * 11, 'lsb-first')` çağırıyor). Parametre yine de KALIR: 0x17 ileride bir
+ * spec revizyonuyla kapsama girerse gerekir, ve o zaman sabit-11'e kilitli bir
+ * imza baştan yanlış olurdu — bunu bugünden doğru kurmanın maliyeti sıfıra
+ * yakın, yanlış kurup sonra düzeltmenin maliyeti (14g'nin taşıma turu gibi)
+ * değil.
  *
  * ── Ne YAPMAZ (bilerek) ──────────────────────────────────────────────────
  * Değerin ANLAMINI türetmez: SBUS'ta ham paketli tam sayı 173–1812 aralığında
@@ -55,8 +62,10 @@ const BITS_PER_BYTE = 8;
  * bitlik alanı okur ve ham (ölçeklenmemiş) sayı dizisi döner. Alanlar arasında
  * BOŞLUK YOKTUR — kanal `i`, bit konumu `offset*8 + i*bitsPerChannel`den başlar.
  *
- * `bitsPerChannel <= 53` olmalıdır (`readBitsAsNumber`in sınırı) — SBUS'un 11
- * biti ve CRSF'in 10-13 biti bu sınırın çok altında, pratikte hiç sorun değil.
+ * `bitsPerChannel <= 53` olmalıdır (`readBitsAsNumber`in sınırı) — bugünkü tek
+ * tüketici SBUS'un ve CRSF `0x16`nın sabit 11 biti, bu sınırın çok altında ve
+ * pratikte hiç sorun değil (`bitsPerChannel`ın yine de parametre kalma
+ * gerekçesi dosya başında).
  */
 export function readPackedChannels(
   bytes: Uint8Array,
