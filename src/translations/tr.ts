@@ -2978,6 +2978,132 @@ export const tr = {
   'protocol.crsf.example.frameCrcMismatch.description':
     'RC Channels Packed örneğiyle AYNI gövde, yalnız son CRC baytı bozuldu.',
 
+  // --- PPM ---
+  'protocol.ppm.error.empty': 'Nabız günlüğü boş.',
+  'protocol.ppm.error.oddLength':
+    'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.ppm.error.missingSync':
+    'Hiçbir nabız sync gap eşiğine ulaşmıyor — çerçeve sınırı bulunamadı, kanallar ayrılamıyor.',
+  'protocol.ppm.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ppm.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.ppm.option.syncGapUs': 'Sync Gap (µs)',
+  'protocol.ppm.option.syncGapUs.description':
+    'Çerçeve sınırını belirleyen tek şey. Verilmezse nabızlar ham sırayla listelenir, kanallar ayrılmaz — evrensel bir sync gap uzunluğu yoktur.',
+  'protocol.ppm.option.channelCount': 'Kanal Sayısı',
+  'protocol.ppm.option.channelCount.description':
+    'Opsiyonel: verilirse gözlenen kanal sayısı buna göre denetlenir (Too Many/Too Few Channels). 0 bırakılırsa denetim yapılmaz.',
+  'protocol.ppm.option.polarity': 'Kutupluluk',
+  'protocol.ppm.option.polarity.description':
+    'Yakalamanın elektriksel kutupluluğunu kayıt altına alır. Nabız-günlüğü konteyneri seviye bilgisini zaten atmış olduğu için bu, hesaplanan hiçbir değeri değiştirmez — şeffaflık için ilk alan olarak gösterilir.',
+  'protocol.ppm.option.polarity.activeHigh': 'Active-high',
+  'protocol.ppm.option.polarity.activeLow': 'Active-low',
+  'protocol.ppm.option.pulseEncoding': 'Nabız Kodlaması',
+  'protocol.ppm.option.pulseEncoding.description':
+    'Bu nabız günlüğünü hangi yakalama kuralının ürettiğini belirtir. Konteyner ham seviye geçişleri yerine ÖNCEDEN HESAPLANMIŞ süreler taşıdığı için bu ayrıntı seviyesinde iki şık da AYNI sonucu üretir — seçenek, kural sessizce varsayılmak yerine AÇIKÇA belirtilsin diye var.',
+  'protocol.ppm.option.pulseEncoding.unspecified': 'Belirtilmedi',
+  'protocol.ppm.option.pulseEncoding.pulseWidth': 'Pulse-width',
+  'protocol.ppm.option.pulseEncoding.pulseToPulse': 'Pulse-to-pulse',
+  'protocol.ppm.option.minPulseUs': 'Minimum Nabız (µs)',
+  'protocol.ppm.option.minPulseUs.description':
+    'Kalibrasyon alt sınırı. Normalizasyon yalnız Minimum, Center ve Maximum üçü de verildiğinde gösterilir.',
+  'protocol.ppm.option.centerPulseUs': 'Merkez Nabız (µs)',
+  'protocol.ppm.option.centerPulseUs.description':
+    'Kalibrasyon merkezi (nötr) değeri — normalize alanın sıfır noktası.',
+  'protocol.ppm.option.maxPulseUs': 'Maksimum Nabız (µs)',
+  'protocol.ppm.option.maxPulseUs.description':
+    'Kalibrasyon üst sınırı. Normalizasyon yalnız Minimum, Center ve Maximum üçü de verildiğinde gösterilir.',
+  'protocol.ppm.warning.syncGapRequiredForChannelSplit':
+    'Sync Gap verilmedi — nabızlar ham sırayla listelenir, kanallar ayrılmaz.',
+  'protocol.ppm.warning.pulseEncodingUnspecified':
+    'Pulse Encoding belirtilmedi — spec iki yakalama kuralına da izin veriyor ve birinin sessizce varsayılmasını yasaklıyor (bu konteyner ayrıntı seviyesinde iki şık da aynı sonucu üretir).',
+  'protocol.ppm.warning.pulseReserved':
+    'Bu nabız rezerve değerdir (0) — ölçülemedi, süreye çevrilmedi.',
+  'protocol.ppm.warning.pulseMayBeSaturated':
+    'Bu nabız konteynerin taşıyabildiği en uzun süreye (6553.5 µs) eşit — gerçek süre daha uzun olabilir; gösterilen değer kesin bir ölçüm değil, bir ALT SINIRDIR.',
+  'protocol.ppm.warning.pulseOutOfRange':
+    'Bu nabız verilen Minimum/Maximum kalibrasyon aralığının dışında.',
+  'protocol.ppm.warning.tooManyChannels':
+    'Verilen Channel Count’tan daha fazla kanal nabzı gözlendi.',
+  'protocol.ppm.warning.tooFewChannels':
+    'Verilen Channel Count’tan daha az kanal nabzı gözlendi.',
+  'protocol.ppm.warning.trailingPulsesIgnored':
+    'Sync gap’ten sonra bu tek-çerçeve çözümünün tükettiğinden fazla nabız var — bunlar bir sonraki çerçevenin başlangıcı olabilir.',
+  'protocol.ppm.warning.calibrationInvalid':
+    'Minimum, Center ve Maximum üçü de verildi ama artan sırada değil — normalizasyon atlandı.',
+  'protocol.ppm.warning.framePeriodUncertain':
+    'Frame Period rezerve (ölçülemedi) bir nabız içeriyor — toplam eksik.',
+  'protocol.ppm.documentation.summary':
+    'PPM (Pulse Position Modulation): birden fazla RC kanalının tek bir nabız treninde zaman-kodlandığı, bayttan değil yakalanmış bir nabız-süresi günlüğünden çözülen sinyal. Evrensel bir pulse-width eşlemesi yoktur — Sync Gap, Channel Count, Polarity ve Minimum/Center/Maximum kalibrasyonunun hepsi kullanıcının verdiği çözümleme seçenekleridir. Sync Gap verilmezse nabızlar ham gösterilir; verilirse kanallar ayrılır ve konteynerin 6553.5 µs sınırına ulaşıldığında (gerçek bir 20 ms çerçeve için TİPİK vaka) sync gap nabzı ve çerçeve periyodu bir ALT SINIR olarak sunulur.',
+  'protocol.ppm.example.twoChannelWorkedExample.name': 'İki kanallı çalışılmış örnek (spec)',
+  'protocol.ppm.example.twoChannelWorkedExample.description':
+    'Spec’in kendi kenarları (0/1502/3001 µs) kanal sürelerine çevrilmiş hâli: CH1=1502 µs, CH2=1499 µs, ardından konteyner sınırının güvenle içinde kalan 4000 µs’lik bir sync gap.',
+  'protocol.ppm.example.typicalEightChannelCapture.name': 'Tipik 8 kanallı yakalama (sync gap doygunlaşır)',
+  'protocol.ppm.example.typicalEightChannelCapture.description':
+    'Sekiz kanal (1000-1700 µs) ve tipik 20 ms’lik bir çerçeve periyodunun gerektirdiği sync gap (9200 µs) — bu, 6553.5 µs’lik konteyner sınırını aşar ve register’ın azami değerine kırpılır.',
+  'protocol.ppm.example.missingSyncCandidate.name': 'Sync gap adayı YOK (hata yolu)',
+  'protocol.ppm.example.missingSyncCandidate.description':
+    'Dört nabız, hepsi tipik kanal aralığında (1400-1600 µs) — bir Sync Gap ayarlanınca hiçbiri uymuyor ve Missing Sync tetikleniyor.',
+  'protocol.ppm.example.reservedMidFrame.name': 'Çerçeve ortasında rezerve nabız',
+  'protocol.ppm.example.reservedMidFrame.description':
+    'İkinci kanal nabzı rezerve değerdir (0) — uyarıyla birlikte çözülmemiş gösterilir, diğer kanallar etkilenmez.',
+  'protocol.ppm.example.truncated.name': 'Eksik çerçeve',
+  'protocol.ppm.example.truncated.description':
+    '3 baytlık bir arabellek — nabızları her zaman 2 bayt olan bir konteyner için tek (çift olmayan) bir uzunluk.',
+
+  // --- PWM Servo ---
+  'protocol.pwmServo.error.empty': 'Nabız günlüğü boş.',
+  'protocol.pwmServo.error.oddLength':
+    'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.pwmServo.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.pwmServo.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.pwmServo.option.initialPulseLevel': 'İlk Nabız Seviyesi',
+  'protocol.pwmServo.option.initialPulseLevel.description':
+    'Günlükteki ilk nabzın hangi seviyeyi temsil ettiği. Bir PWM servo çevrimi HIGH+LOW çiftidir; konteyner için bilinmeyen tek şey ilk nabzın seviyesidir, gerisi alterne eder. Yanlış seçim her duty cycle’ı tersine çevirir.',
+  'protocol.pwmServo.option.initialPulseLevel.high': 'High (varsayılan)',
+  'protocol.pwmServo.option.initialPulseLevel.low': 'Low',
+  'protocol.pwmServo.option.minPulseUs': 'Minimum Nabız (µs)',
+  'protocol.pwmServo.option.minPulseUs.description':
+    'Kalibrasyon alt sınırı. Servo Position yalnız Minimum, Center ve Maximum üçü de verildiğinde gösterilir.',
+  'protocol.pwmServo.option.centerPulseUs': 'Merkez Nabız (µs)',
+  'protocol.pwmServo.option.centerPulseUs.description':
+    'Kalibrasyon merkezi (nötr) değeri — Servo Position’ın %0 noktası.',
+  'protocol.pwmServo.option.maxPulseUs': 'Maksimum Nabız (µs)',
+  'protocol.pwmServo.option.maxPulseUs.description':
+    'Kalibrasyon üst sınırı. Servo Position yalnız Minimum, Center ve Maximum üçü de verildiğinde gösterilir.',
+  'protocol.pwmServo.option.expectedPeriodUs': 'Beklenen Çerçeve Periyodu (µs)',
+  'protocol.pwmServo.option.expectedPeriodUs.description':
+    'Gerçek dünya periyot beklentisi (ör. 50 Hz için 20000 µs) — konteynerin tek-nabız 6553.5 µs sınırıyla İLGİSİZDİR. Verilirse her çevrimin ölçülen periyodu bununla karşılaştırılır ve sapma gösterilir.',
+  'protocol.pwmServo.warning.missingPulse':
+    'Bu çevrimin eşleşen nabzı eksik — ya günlük o nabız gelmeden bitiyor ya da nabız rezerve değerdir (0). Frame Period, Frequency ve Duty Cycle bu çevrim için hesaplanmaz.',
+  'protocol.pwmServo.warning.pulseMayBeSaturated':
+    'Bu nabız konteynerin taşıyabildiği en uzun süreye (6553.5 µs) eşit — gerçek süre daha uzun olabilir. Bu, gerçek bir 20 ms/50 Hz yakalama için TİPİK vakadır: LOW nabzı tek başına genelde ~18.5 ms’dir.',
+  'protocol.pwmServo.warning.framePeriodError':
+    'Ölçülen Frame Period, Expected Frame Period ile tam eşleşmiyor.',
+  'protocol.pwmServo.warning.calibrationInvalid':
+    'Minimum, Center ve Maximum üçü de verildi ama artan sırada değil — Servo Position atlandı.',
+  'protocol.pwmServo.warning.jitterExcludesUncertainPulses':
+    'Bir veya daha fazla Pulse Width değeri, nabzı doygun olduğu (süresi belirsiz) için Jitter istatistiğinden dışlandı.',
+  'protocol.pwmServo.documentation.summary':
+    'PWM Servo: yakalanmış bir nabız-süresi günlüğünden okunan, HIGH süresi + LOW süresi çiftlerinden oluşan klasik kanal-başına RC aktüatör sinyali. Frame Period, Frequency ve Duty Cycle her çevrim için hesaplanır; Servo Position yalnız bir Minimum/Center/Maximum kalibrasyonu verildiğinde, PPM’le AYNI normalizasyon formülüyle ama yüzde olarak sunulur. Evrensel bir 50 Hz/20 ms eşlemesi yoktur — yalnız bir konfigürasyon örneğidir. LOW nabzı konteynerin 6553.5 µs sınırına ulaştığında (gerçek bir 20 ms periyot için TİPİK vaka) Period, Frequency ve Duty Cycle kesin değer yerine YÖNÜ BELLİ birer sınır olarak gösterilir.',
+  'protocol.pwmServo.example.singleCycleTypical.name': 'Tek çevrim, konteynerin içinde (temiz yol)',
+  'protocol.pwmServo.example.singleCycleTypical.description':
+    'HIGH=1500 µs (spec’in Pulse değeri), LOW=2000 µs — konteyner sınırının içinde kalması için küçültüldü (gerçek 18500 µs sığmaz).',
+  'protocol.pwmServo.example.lowSaturatesRealisticPeriod.name': 'LOW gerçekçi bir periyotta doygunlaşır',
+  'protocol.pwmServo.example.lowSaturatesRealisticPeriod.description':
+    'HIGH=1500 µs, LOW hedefi 18500 µs (spec’in gerçek 20 ms/50 Hz kalibrasyonu) — register’ın azami değerine kırpılır; Period, Frequency ve Duty Cycle birer sınır olarak gösterilir.',
+  'protocol.pwmServo.example.multiChannelServoPositions.name': 'Çok kanallı servo pozisyonları (spec)',
+  'protocol.pwmServo.example.multiChannelServoPositions.description':
+    'Spec’in kendi multi-channel örneği: Servo1=1501, Servo2=1230, Servo3=1782, Servo4=1500 µs, her biri güvenli bir 2000 µs LOW ile eşleşti.',
+  'protocol.pwmServo.example.jitterSample.name': 'Jitter örneği (spec)',
+  'protocol.pwmServo.example.jitterSample.description':
+    'Spec’in kendi jitter örneği: HIGH = 1498, 1502, 1501, 1497, 1503 µs → Mean=1500.2 µs, Peak-to-Peak=6 µs.',
+  'protocol.pwmServo.example.missingPulse.name': 'Eksik nabız (rezerve LOW)',
+  'protocol.pwmServo.example.missingPulse.description':
+    'Çevrimin LOW yarısı rezerve değerdir (0) — ölçülemedi; Frame Period, Frequency ve Duty Cycle hesaplanmaz.',
+  'protocol.pwmServo.example.truncated.name': 'Eksik çerçeve',
+  'protocol.pwmServo.example.truncated.description':
+    '3 baytlık bir arabellek — nabızları her zaman 2 bayt olan bir konteyner için tek (çift olmayan) bir uzunluk.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

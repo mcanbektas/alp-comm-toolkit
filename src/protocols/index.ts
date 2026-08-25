@@ -246,6 +246,20 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // tipler ham + uyarı — bu bir kapsam daraltması değil (bkz. crsf.ts dosya
   // başı).
   registerOnce(registry, 'crsf', () => import('./aerospace/crsf/crsf').then((module) => module.crsfPlugin));
+  // PPM — dalga 15e: `rc-control-links` ailesini KAPATAN ilk kayıt.
+  // `packedChannels.ts` DEĞİL, `sae-j1850-pwm`/`vpw` (14f) ve `sent`/`spc`
+  // (14g) ile paylaşılan `protocol-core/decoding/pulseLog.ts`i tüketir —
+  // aerospace domain'inin bu konteynerin İLK tüketicisi. `canParse`
+  // kalibrasyonsuz DAİMA `false` (`uavcanCompatibility` sınıfı karar, bkz.
+  // ppm.ts dosya başı).
+  registerOnce(registry, 'ppm', () => import('./aerospace/ppm/ppm').then((module) => module.ppmPlugin));
+  // PWM Servo — dalga 15e: `rc-control-links` ailesini KAPATAN ikinci kayıt.
+  // Aynı konteyner (`pulseLog.ts`), AYRI yorum (HIGH/LOW çifti) — `ppm`den
+  // BAĞIMSIZ modül, aralarında import YOK (Karar 15e-1, bkz. pwmServo.ts
+  // dosya başı).
+  registerOnce(registry, 'pwm-servo', () =>
+    import('./aerospace/pwmServo/pwmServo').then((module) => module.pwmServoPlugin),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

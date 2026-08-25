@@ -344,7 +344,13 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Legacy pulse-position signal that time-encodes several RC channels inside a single pulse train delimited by a sync gap, decoded from capture edges rather than from bytes.',
           layer: 'physical',
-          status: 'planned',
+          // Konteyner (`pulseLog.ts`) `canParse` KALİBRASYONSUZ DAİMA `false`
+          // döner (`uavcanCompatibility` sınıfı karar) — bu bir eksiklik
+          // değil, evrensel bir pulse-width bandı olmadığı için otomatik
+          // algılamanın bilinçli olarak dışarıda bırakılmasıdır. Faz 10
+          // dalga 15e, bkz. ppm.ts dosya başı.
+          status: 'ready',
+          pluginId: 'ppm',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Pulse Width',
@@ -367,7 +373,11 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Classic per-channel RC actuator signal where the pulse high time sets servo position, analysed for pulse width, frame period, frequency, duty cycle, jitter and missing pulses.',
           layer: 'physical',
-          status: 'planned',
+          // Aynı konteyner, AYRI yorum (HIGH/LOW çifti) — `ppm`den BAĞIMSIZ
+          // modül (Karar 15e-1). `canParse` aynı gerekçeyle DAİMA `false`.
+          // Faz 10 dalga 15e, bkz. pwmServo.ts dosya başı.
+          status: 'ready',
+          pluginId: 'pwm-servo',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Pulse Width',

@@ -2974,6 +2974,132 @@ export const en: TranslationDictionary = {
   'protocol.crsf.example.frameCrcMismatch.description':
     'Same body as the RC Channels Packed example, with the final CRC byte corrupted.',
 
+  // --- PPM ---
+  'protocol.ppm.error.empty': 'The pulse log is empty.',
+  'protocol.ppm.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.ppm.error.missingSync':
+    'No pulse reaches the sync gap threshold — the frame boundary cannot be found, so channels are not separated.',
+  'protocol.ppm.error.aborted': 'Decoding was cancelled.',
+  'protocol.ppm.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.ppm.option.syncGapUs': 'Sync Gap (µs)',
+  'protocol.ppm.option.syncGapUs.description':
+    'The only signal that marks a frame boundary; without it, pulses are listed raw and channels are not separated — there is no universal sync gap length.',
+  'protocol.ppm.option.channelCount': 'Channel Count',
+  'protocol.ppm.option.channelCount.description':
+    'Optional: if given, the observed channel count is checked against it (Too Many/Too Few Channels). Left at 0, no check is made.',
+  'protocol.ppm.option.polarity': 'Polarity',
+  'protocol.ppm.option.polarity.description':
+    'Records the electrical polarity of the capture for reference. The pulse-log container already strips level information, so this does not change any computed value; it is shown as the first field for transparency.',
+  'protocol.ppm.option.polarity.activeHigh': 'Active-high',
+  'protocol.ppm.option.polarity.activeLow': 'Active-low',
+  'protocol.ppm.option.pulseEncoding': 'Pulse Encoding',
+  'protocol.ppm.option.pulseEncoding.description':
+    'States which capture convention produced this pulse log. Because the container stores pre-computed durations rather than raw level transitions, both choices currently read identically at this level of detail — the option exists so the convention is stated rather than silently assumed.',
+  'protocol.ppm.option.pulseEncoding.unspecified': 'Not specified',
+  'protocol.ppm.option.pulseEncoding.pulseWidth': 'Pulse-width',
+  'protocol.ppm.option.pulseEncoding.pulseToPulse': 'Pulse-to-pulse',
+  'protocol.ppm.option.minPulseUs': 'Minimum Pulse (µs)',
+  'protocol.ppm.option.minPulseUs.description':
+    'Calibration lower bound. Normalization is only shown once Minimum, Center and Maximum are all given.',
+  'protocol.ppm.option.centerPulseUs': 'Center Pulse (µs)',
+  'protocol.ppm.option.centerPulseUs.description':
+    'Calibration center (neutral) value — the zero point of the normalized field.',
+  'protocol.ppm.option.maxPulseUs': 'Maximum Pulse (µs)',
+  'protocol.ppm.option.maxPulseUs.description':
+    'Calibration upper bound. Normalization is only shown once Minimum, Center and Maximum are all given.',
+  'protocol.ppm.warning.syncGapRequiredForChannelSplit':
+    'No Sync Gap was given — pulses are listed in raw order and channels are not separated.',
+  'protocol.ppm.warning.pulseEncodingUnspecified':
+    'Pulse Encoding was not stated — the spec allows two capture conventions and warns against silently assuming one; at this level of container detail, both choices compute the same result.',
+  'protocol.ppm.warning.pulseReserved':
+    'This pulse is the reserved value (0) — unmeasured, not converted to a duration.',
+  'protocol.ppm.warning.pulseMayBeSaturated':
+    'This pulse equals the maximum duration the container can represent (6553.5 µs) — the true duration may be longer; the value shown is a lower bound, not an exact measurement.',
+  'protocol.ppm.warning.pulseOutOfRange':
+    'This pulse falls outside the given Minimum/Maximum calibration range.',
+  'protocol.ppm.warning.tooManyChannels':
+    'More channel pulses were observed than the given Channel Count.',
+  'protocol.ppm.warning.tooFewChannels':
+    'Fewer channel pulses were observed than the given Channel Count.',
+  'protocol.ppm.warning.trailingPulsesIgnored':
+    'More pulses follow the sync gap than this single-frame decode consumes — they may be the start of the next frame.',
+  'protocol.ppm.warning.calibrationInvalid':
+    'Minimum, Center and Maximum were all given but are not in increasing order — normalization was skipped.',
+  'protocol.ppm.warning.framePeriodUncertain':
+    'Frame Period includes a reserved (unmeasured) pulse — the total is incomplete.',
+  'protocol.ppm.documentation.summary':
+    'PPM (Pulse Position Modulation): several RC channels time-encoded into a single pulse train, decoded from a captured pulse-duration log rather than from bytes. There is no universal pulse-width mapping — Sync Gap, Channel Count, Polarity and Minimum/Center/Maximum calibration are all user-supplied decode options. Without a Sync Gap, pulses are shown raw; with one, channels are separated, and the sync gap pulse (and the frame period) is shown as a lower bound whenever the container reaches its 6553.5 µs limit — the typical case for a real 20 ms frame.',
+  'protocol.ppm.example.twoChannelWorkedExample.name': 'Two-channel worked example (spec)',
+  'protocol.ppm.example.twoChannelWorkedExample.description':
+    'The edges from the spec itself (0/1502/3001 µs) turned into channel durations: CH1=1502 µs, CH2=1499 µs, followed by a 4000 µs sync gap safely inside the container range.',
+  'protocol.ppm.example.typicalEightChannelCapture.name': 'Typical 8-channel capture (sync gap saturates)',
+  'protocol.ppm.example.typicalEightChannelCapture.description':
+    'Eight channels (1000-1700 µs) followed by the sync gap a typical 20 ms frame period requires (9200 µs) — this exceeds the 6553.5 µs container limit and is clipped to the maximum register value.',
+  'protocol.ppm.example.missingSyncCandidate.name': 'No sync gap candidate (error path)',
+  'protocol.ppm.example.missingSyncCandidate.description':
+    'Four pulses, all inside the typical channel range (1400-1600 µs) — once a Sync Gap is set, none of them qualify and Missing Sync is raised.',
+  'protocol.ppm.example.reservedMidFrame.name': 'Reserved pulse mid-frame',
+  'protocol.ppm.example.reservedMidFrame.description':
+    'The second channel pulse is the reserved value (0) — shown unresolved with a warning, the other channels are unaffected.',
+  'protocol.ppm.example.truncated.name': 'Truncated frame',
+  'protocol.ppm.example.truncated.description':
+    'A 3-byte buffer — an odd length for a container whose pulses are always 2 bytes.',
+
+  // --- PWM Servo ---
+  'protocol.pwmServo.error.empty': 'The pulse log is empty.',
+  'protocol.pwmServo.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.pwmServo.error.aborted': 'Decoding was cancelled.',
+  'protocol.pwmServo.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.pwmServo.option.initialPulseLevel': 'Initial Pulse Level',
+  'protocol.pwmServo.option.initialPulseLevel.description':
+    'Which level the first pulse in the log represents. A PWM servo cycle is a HIGH+LOW pair; only the level of the first pulse is unknown to the container, the rest alternate. Choosing wrong flips every duty cycle.',
+  'protocol.pwmServo.option.initialPulseLevel.high': 'High (default)',
+  'protocol.pwmServo.option.initialPulseLevel.low': 'Low',
+  'protocol.pwmServo.option.minPulseUs': 'Minimum Pulse (µs)',
+  'protocol.pwmServo.option.minPulseUs.description':
+    'Calibration lower bound. Servo Position is only shown once Minimum, Center and Maximum are all given.',
+  'protocol.pwmServo.option.centerPulseUs': 'Center Pulse (µs)',
+  'protocol.pwmServo.option.centerPulseUs.description':
+    'Calibration center (neutral) value — the 0% point of Servo Position.',
+  'protocol.pwmServo.option.maxPulseUs': 'Maximum Pulse (µs)',
+  'protocol.pwmServo.option.maxPulseUs.description':
+    'Calibration upper bound. Servo Position is only shown once Minimum, Center and Maximum are all given.',
+  'protocol.pwmServo.option.expectedPeriodUs': 'Expected Frame Period (µs)',
+  'protocol.pwmServo.option.expectedPeriodUs.description':
+    'A real-world period expectation (for example 20000 µs for 50 Hz) — unrelated to the single-pulse 6553.5 µs container limit. If given, the measured period of each cycle is compared against it and the deviation is shown.',
+  'protocol.pwmServo.warning.missingPulse':
+    'The matching pulse for this cycle is missing — either the log ends before it arrives, or it is the reserved value (0). Frame Period, Frequency and Duty Cycle are not computed for it.',
+  'protocol.pwmServo.warning.pulseMayBeSaturated':
+    'This pulse equals the maximum duration the container can represent (6553.5 µs) — the true duration may be longer. This is the TYPICAL case for a real 20 ms/50 Hz capture: the LOW pulse alone is usually around 18.5 ms.',
+  'protocol.pwmServo.warning.framePeriodError':
+    'The measured Frame Period does not exactly match the Expected Frame Period.',
+  'protocol.pwmServo.warning.calibrationInvalid':
+    'Minimum, Center and Maximum were all given but are not in increasing order — Servo Position was skipped.',
+  'protocol.pwmServo.warning.jitterExcludesUncertainPulses':
+    'One or more Pulse Width values were excluded from the Jitter statistics because their pulse was saturated (duration uncertain).',
+  'protocol.pwmServo.documentation.summary':
+    'PWM Servo: a classic per-channel RC actuator signal, HIGH time plus LOW time pairs read from a captured pulse-duration log. Frame Period, Frequency and Duty Cycle are computed per cycle; Servo Position is only shown once a Minimum/Center/Maximum calibration is given, using the same normalization formula as PPM but presented as a percentage. There is no universal 50 Hz/20 ms mapping — it is only a configuration example. Whenever the LOW pulse reaches the 6553.5 µs container limit — the typical case for a real 20 ms period — Period, Frequency and Duty Cycle are shown as directional bounds rather than exact values.',
+  'protocol.pwmServo.example.singleCycleTypical.name': 'Single cycle, inside the container (clean path)',
+  'protocol.pwmServo.example.singleCycleTypical.description':
+    'HIGH=1500 µs (the Pulse value from the spec), LOW=2000 µs — shrunk to stay inside the container range (the real 18500 µs does not fit).',
+  'protocol.pwmServo.example.lowSaturatesRealisticPeriod.name': 'LOW saturates at a realistic period',
+  'protocol.pwmServo.example.lowSaturatesRealisticPeriod.description':
+    'HIGH=1500 µs, LOW targeting 18500 µs (the real 20 ms/50 Hz calibration from the spec) — clipped to the maximum register value; Period, Frequency and Duty Cycle are shown as bounds.',
+  'protocol.pwmServo.example.multiChannelServoPositions.name': 'Multi-channel servo positions (spec)',
+  'protocol.pwmServo.example.multiChannelServoPositions.description':
+    'The multi-channel example from the spec itself: Servo1=1501, Servo2=1230, Servo3=1782, Servo4=1500 µs, each paired with a safe 2000 µs LOW.',
+  'protocol.pwmServo.example.jitterSample.name': 'Jitter sample (spec)',
+  'protocol.pwmServo.example.jitterSample.description':
+    'The jitter example from the spec itself: HIGH = 1498, 1502, 1501, 1497, 1503 µs, giving Mean=1500.2 µs, Peak-to-Peak=6 µs.',
+  'protocol.pwmServo.example.missingPulse.name': 'Missing pulse (reserved LOW)',
+  'protocol.pwmServo.example.missingPulse.description':
+    'The LOW half of the cycle is the reserved value (0) — unmeasured; Frame Period, Frequency and Duty Cycle are not computed.',
+  'protocol.pwmServo.example.truncated.name': 'Truncated frame',
+  'protocol.pwmServo.example.truncated.description':
+    'A 3-byte buffer — an odd length for a container whose pulses are always 2 bytes.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',
