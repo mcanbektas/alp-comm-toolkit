@@ -5387,6 +5387,93 @@ export const en: TranslationDictionary = {
   'protocol.xcpEth.example.emptyPacketHeaderOnly.description':
     'Only the 4-byte transport header is present — there is no PID byte to decode, so the frame is reported invalid.',
 
+  // --- SOME/IP + SOME/IP-SD ---
+  'protocol.someip.documentation.summary':
+    'Decodes a single SOME/IP message: Message ID (Service ID | Method ID), Length, Request ID (Client ID | Session ID), versions, Message Type and Return Code. When the Message ID is 0xFFFF8100 the message is opened as SOME/IP-SD and its entries and options (IPv4/IPv6 endpoints, load balancing, configuration strings) are decoded field by field. The input is a single SOME/IP message, NOT a MAC/IP/UDP/TCP frame — decode the lower layers on their own pages. The Length field counts from offset 8 (Request ID) to the end of the message, so the total message is 8 + Length; that base was cross-checked against AUTOSAR FO R23-11 (PRS_SOMEIP_00042), Wireshark and Scapy. The payload stays RAW: its structure does not come from the wire, it comes from the service interface definition.',
+  'protocol.someip.error.aborted': 'Decoding was cancelled.',
+  'protocol.someip.error.headerTooShort':
+    'The frame is shorter than the 16-byte SOME/IP header — Length cannot be read, so the message boundary is unknown.',
+  'protocol.someip.error.frameTooLong': 'The frame exceeds the configured maximum length.',
+  'protocol.someip.error.lengthTooSmall':
+    'The Length field is below 8, which is structurally impossible: Length must cover at least the Request ID, both versions, the Message Type and the Return Code (8 bytes). The fixed-offset header fields are still shown, but no message boundary could be established.',
+  'protocol.someip.error.tpLengthTooSmall':
+    'The Message Type carries the TP flag (0x20) but Length does not cover the 4-byte TP header — the TP fields were not decoded.',
+  'protocol.someip.error.messageIncomplete':
+    'The message promised by Length does not fit in the buffer. This is a stream (TCP) fragment: this engine does NOT reassemble segments, more data is required.',
+  'protocol.someip.warning.payloadNeedsServiceDefinition':
+    'The payload is shown raw: the field structure of a SOME/IP payload does not come from the wire, it comes from the service interface definition (ARXML / service definition). This tool does not invent a speculative field breakdown.',
+  'protocol.someip.warning.trailingBytes':
+    'There are bytes past the message boundary — possibly a next message glued on by TCP. Only the first message was decoded; consumedBytes reports that boundary.',
+  'protocol.someip.warning.unknownMessageType':
+    'The Message Type is not in AUTOSAR FO R23-11 Table 4.4. Scapy and Wireshark recognise ACK variants (the 0x40 bit) but the AUTOSAR table does not list them — since the sources disagree, the value was NOT named.',
+  'protocol.someip.warning.unknownReturnCode':
+    'The Return Code is neither named nor in a reserved range of AUTOSAR FO R23-11 Table 4.11.',
+  'protocol.someip.warning.reservedReturnCode':
+    'The Return Code falls in a reserved range of Table 4.11 — its meaning is given by the service/method interface definition, not by this specification.',
+  'protocol.someip.warning.unexpectedProtocolVersion':
+    'Protocol Version is not 1 (PRS_SOMEIP_00051: “shall be 1”). The field layout was still read assuming version 1.',
+  'protocol.someip.warning.returnCodeShouldBeEOk':
+    'For this Message Type the Return Code should have been 0x00 (E_OK) (AUTOSAR Table 4.5).',
+  'protocol.someip.warning.errorReturnCodeIsEOk':
+    'An ERROR message must NOT carry Return Code 0x00 (E_OK) (AUTOSAR Table 4.5).',
+  'protocol.someip.warning.methodEventSplitRecommended':
+    'The method (0x0000–0x7FFF) / event (0x8000–0xFFFF) split is an AUTOSAR NOTE (PRS_SOMEIP_00245: “common practise and recommended”), not a normative rule. The derived class rests on that recommendation alone.',
+  'protocol.someip.warning.serviceDiscoveryTpSegment':
+    'The Message ID points at SOME/IP-SD (0xFFFF8100) but the message is a TP segment. SD is only carried over UDP (PRS_SOMEIPSD_00220) — SD decoding was skipped and the payload left raw.',
+  'protocol.someip.error.sdPayloadTooShort':
+    'The SOME/IP-SD payload is shorter than 12 bytes — Flags, Reserved and the two array lengths do not fit.',
+  'protocol.someip.error.sdEntriesOverflow':
+    'The Entries Array Length runs past the message boundary (or leaves no room for the Options Array Length) — entries were not decoded.',
+  'protocol.someip.error.sdOptionsOverflow':
+    'The Options Array Length runs past the message boundary — options were not decoded.',
+  'protocol.someip.warning.sdEntriesLengthNotMultiple':
+    'The Entries Array Length is not a multiple of 16; every SD entry is exactly 16 bytes. Only whole entries were decoded, the remainder was skipped.',
+  'protocol.someip.warning.sdUnknownEntryType':
+    'Unknown SD entry type (known: 0x00 Find, 0x01 Offer / Stop Offer when TTL=0, 0x06 Subscribe / Stop Subscribe, 0x07 Subscribe Ack / Nack). The last 4 bytes of the entry were left raw because their structure is unknown.',
+  'protocol.someip.warning.sdUnknownOptionType':
+    'Unknown SD option type — its body is shown raw, no field breakdown is invented.',
+  'protocol.someip.warning.sdOptionLengthMismatch':
+    'A fixed-size SD option declares an unexpected Length — the field layout cannot be trusted, so the body is shown raw.',
+  'protocol.someip.warning.sdOptionTruncated':
+    'The size declared by an SD option runs past the end of the options array — the remaining bytes are shown raw and decoding stopped.',
+  'protocol.someip.warning.sdUnknownL4Protocol':
+    'The transport protocol of the endpoint option is not recognised (expected 0x06 TCP, 0x11 UDP).',
+  'protocol.someip.warning.sdTrailingBytes':
+    'There are leftover bytes after the SD arrays — the array lengths do not line up with the message boundary.',
+  'protocol.someip.warning.sdConfigStringTruncated':
+    'The length prefix of a configuration string runs past the end of the option — the remaining bytes are shown raw.',
+  'protocol.someip.summary.request': 'SOME/IP request',
+  'protocol.someip.summary.requestNoReturn': 'SOME/IP fire & forget request',
+  'protocol.someip.summary.notification': 'SOME/IP notification / event',
+  'protocol.someip.summary.response': 'SOME/IP response',
+  'protocol.someip.summary.error': 'SOME/IP error response',
+  'protocol.someip.summary.serviceDiscovery': 'SOME/IP-SD message',
+  'protocol.someip.summary.unknown': 'SOME/IP message (unrecognised Message Type)',
+  'protocol.someip.example.request.name': 'Request (method call)',
+  'protocol.someip.example.request.description':
+    'Service 0x1234, Method 0x0421, Message Type 0x00 = REQUEST. Length 12 → 20 bytes total, leaving a 4-byte raw payload.',
+  'protocol.someip.example.response.name': 'Response (same Request ID)',
+  'protocol.someip.example.response.description':
+    'Same Client/Session identity as the request, Message Type 0x80 = RESPONSE. Follow correlation through this pair.',
+  'protocol.someip.example.notification.name': 'Notification (event)',
+  'protocol.someip.example.notification.description':
+    'Event ID 0x8001 (the recommended event range), Message Type 0x02 = NOTIFICATION — the derived class reads “Notification / Event”.',
+  'protocol.someip.example.error.name': 'ERROR — E_UNKNOWN_METHOD',
+  'protocol.someip.example.error.description':
+    'Message Type 0x81 = ERROR, Return Code 0x03 = E_UNKNOWN_METHOD. No payload, so Length is exactly 8.',
+  'protocol.someip.example.tpSegment.name': 'SOME/IP-TP segment',
+  'protocol.someip.example.tpSegment.description':
+    'Message Type 0x20 = TP_REQUEST. A 4-byte TP header follows the header: the Offset field is a multiple of 16 bytes and the More Segments flag is 1.',
+  'protocol.someip.example.sdOfferService.name': 'SOME/IP-SD — Offer Service',
+  'protocol.someip.example.sdOfferService.description':
+    'Message ID 0xFFFF8100 opens the message as SD. One Offer Service entry and the IPv4 Endpoint option it references (192.168.1.10, UDP 30509) are decoded.',
+  'protocol.someip.example.sdFindService.name': 'SOME/IP-SD — Find Service',
+  'protocol.someip.example.sdFindService.description':
+    'A Find Service entry with no options: the Instance/Major/Minor fields carry their “ANY” values and the Options Array Length is zero.',
+  'protocol.someip.example.truncatedMessage.name': 'Incomplete message (stream fragment)',
+  'protocol.someip.example.truncatedMessage.description':
+    'Length promises a 20-byte message but only 18 bytes are present — consumedBytes returns 0 and the caller must collect more data.',
+
   // --- CCP ---
   'protocol.ccp.documentation.summary':
     'Decodes CAN Calibration Protocol frames: a CRO’s Command/Counter/Parameters, or a DTO’s Command Return Message (Return Code table), Event Message or DAQ data marker. Command and return-code tables cross-checked byte-for-byte against two independent open-source CCP implementations (pySART/cccp, CanCat). Every successful decode carries a legacy warning — ASAM classifies CCP as obsolete, superseded by XCP.',

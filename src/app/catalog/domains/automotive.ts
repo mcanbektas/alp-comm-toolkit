@@ -700,7 +700,18 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'AUTOSAR service-oriented middleware over automotive Ethernet, correlating requests and responses by session ID and announcing services through its own discovery protocol.',
           layer: 'application',
-          status: 'planned',
+          // dalga 14d: TEK kayıt, İKİ modül — `someip/someip.ts` (başlık,
+          // Message Type türetimi, TP başlığı) + `someip/someipSd.ts` (Service
+          // Discovery girdileri/opsiyonları). SD ayrı bir tel biçimi DEĞİL,
+          // SOME/IP başlığını kullanan bir payload olduğu için ikinci bir
+          // `ProtocolRecord` AÇILMADI (dnsWire.ts emsali). `decodeOptions` YOK:
+          // SD ayrımı çerçeveden çıkar (Message ID 0xFFFF8100), yön/rol Message
+          // Type'ta. Payload HAM kalır — yapısı servis arayüzü tanımından gelir,
+          // telden çıkmaz (12g RTP kararı); `Payload`/`Service Browser` araçları
+          // bu yüzden bu kaydın DEĞİL, analyzer'ın işi (12c DNS, 12d PTP emsali)
+          // ve kayıt yine `ready` kapanır. `Length` offset 8'den sayar.
+          status: 'ready',
+          pluginId: 'some-ip',
           tabs: ['overview', 'live', 'decode', 'build', 'data', 'diagnostics', 'examples'],
           tools: [
             'Service',

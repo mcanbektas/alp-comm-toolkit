@@ -5371,6 +5371,93 @@ export const tr = {
   'protocol.xcpEth.example.emptyPacketHeaderOnly.description':
     'Yalnız 4 baytlık taşıma başlığı var — çözülecek bir PID baytı yok, çerçeve geçersiz bildirilir.',
 
+  // --- SOME/IP + SOME/IP-SD ---
+  'protocol.someip.documentation.summary':
+    'Tek bir SOME/IP mesajını çözer: Message ID (Service ID | Method ID), Length, Request ID (Client ID | Session ID), sürümler, Message Type ve Return Code. Message ID 0xFFFF8100 ise mesaj SOME/IP-SD olarak açılır; girdiler ve opsiyonlar (IPv4/IPv6 uç nokta, yük dengeleme, konfigürasyon dizeleri) alan alan çözülür. Girdi MAC/IP/UDP/TCP çerçevesi DEĞİL, tek bir SOME/IP mesajıdır — alt katmanları kendi sayfalarında çözün. Length alanı offset 8’den (Request ID) mesajın sonuna sayar, yani toplam mesaj 8 + Length’tir; bu taban AUTOSAR FO R23-11 (PRS_SOMEIP_00042), Wireshark ve Scapy ile çapraz doğrulandı. Payload HAM kalır: yapısı telden çıkmaz, servis arayüzü tanımından gelir.',
+  'protocol.someip.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.someip.error.headerTooShort':
+    'Çerçeve 16 baytlık SOME/IP başlığından kısa — Length okunamıyor, mesaj sınırı bilinmiyor.',
+  'protocol.someip.error.frameTooLong': 'Çerçeve yapılandırılmış azami uzunluğu aşıyor.',
+  'protocol.someip.error.lengthTooSmall':
+    'Length alanı 8’den küçük: yapısal olarak imkânsız, çünkü Length en az Request ID + iki sürüm + Message Type + Return Code’u (8 bayt) saymak zorundadır. Sabit ofsetli başlık alanları yine gösteriliyor ama mesaj sınırı kurulamadı.',
+  'protocol.someip.error.tpLengthTooSmall':
+    'Message Type TP bayrağını (0x20) taşıyor ama Length 4 baytlık TP başlığını kapsamıyor — TP alanları çözülmedi.',
+  'protocol.someip.error.messageIncomplete':
+    'Length’in vaat ettiği mesaj tamponda tamamlanmıyor. Bu bir akış (TCP) parçasıdır: bu motor segment BİRLEŞTİRMEZ, daha çok veri gerekiyor.',
+  'protocol.someip.warning.payloadNeedsServiceDefinition':
+    'Payload ham gösteriliyor: SOME/IP payload’ının alan yapısı telden çıkmaz, servis arayüzü tanımından (ARXML / servis tanımı) gelir. Bu araç tahmine dayalı bir alan kırılımı üretmez.',
+  'protocol.someip.warning.trailingBytes':
+    'Mesaj sınırından sonra bayt var — TCP’de yapışmış bir sonraki mesaj olabilir. Yalnız ilk mesaj çözüldü; consumedBytes bu sınırı bildiriyor.',
+  'protocol.someip.warning.unknownMessageType':
+    'Message Type AUTOSAR FO R23-11 Tablo 4.4’te yok. ACK varyantlarını (0x40 biti) Scapy ve Wireshark tanıyor ama AUTOSAR tablosunda yer almıyorlar — iki kaynak örtüşmediği için değer ADLANDIRILMADI.',
+  'protocol.someip.warning.unknownReturnCode':
+    'Return Code AUTOSAR FO R23-11 Tablo 4.11’de ne adlandırılmış ne de ayrılmış bir aralıkta.',
+  'protocol.someip.warning.reservedReturnCode':
+    'Return Code Tablo 4.11’in ayrılmış aralığında — anlamı bu belgede değil, servis/metot arayüz tanımında verilir.',
+  'protocol.someip.warning.unexpectedProtocolVersion':
+    'Protocol Version 1 değil (PRS_SOMEIP_00051: “shall be 1”). Alan yerleşimi yine de sürüm 1 varsayılarak okundu.',
+  'protocol.someip.warning.returnCodeShouldBeEOk':
+    'Bu Message Type için Return Code 0x00 (E_OK) olmalıydı (AUTOSAR Tablo 4.5).',
+  'protocol.someip.warning.errorReturnCodeIsEOk':
+    'ERROR mesajının Return Code’u 0x00 (E_OK) OLAMAZ (AUTOSAR Tablo 4.5).',
+  'protocol.someip.warning.methodEventSplitRecommended':
+    'Metot (0x0000–0x7FFF) / olay (0x8000–0xFFFF) bölünmesi AUTOSAR’ın NOTUdur (PRS_SOMEIP_00245: “common practise and recommended”), normatif bir kural DEĞİL. Türetilen sınıf yalnız bu tavsiyeye dayanır.',
+  'protocol.someip.warning.serviceDiscoveryTpSegment':
+    'Message ID SOME/IP-SD’yi (0xFFFF8100) gösteriyor ama mesaj bir TP segmenti. SD yalnız UDP üzerinde taşınır (PRS_SOMEIPSD_00220) — SD çözümü yapılmadı, payload ham bırakıldı.',
+  'protocol.someip.error.sdPayloadTooShort':
+    'SOME/IP-SD payload’u 12 bayttan kısa — Flags, Reserved ve iki dizi uzunluğu sığmıyor.',
+  'protocol.someip.error.sdEntriesOverflow':
+    'Entries Array Length mesaj sınırını aşıyor (ya da Options Array Length için yer bırakmıyor) — girdiler çözülmedi.',
+  'protocol.someip.error.sdOptionsOverflow':
+    'Options Array Length mesaj sınırını aşıyor — opsiyonlar çözülmedi.',
+  'protocol.someip.warning.sdEntriesLengthNotMultiple':
+    'Entries Array Length 16’nın katı değil; her SD girdisi tam 16 bayttır. Yalnız tam girdiler çözüldü, artan baytlar atlandı.',
+  'protocol.someip.warning.sdUnknownEntryType':
+    'SD girdi tipi bilinmiyor (bilinenler: 0x00 Find, 0x01 Offer / TTL=0 ise Stop Offer, 0x06 Subscribe / Stop Subscribe, 0x07 Subscribe Ack / Nack). Girdinin son 4 baytının yapısı bilinmediği için ham bırakıldı.',
+  'protocol.someip.warning.sdUnknownOptionType':
+    'SD opsiyon tipi bilinmiyor — gövdesi ham gösteriliyor, alan kırılımı uydurulmuyor.',
+  'protocol.someip.warning.sdOptionLengthMismatch':
+    'Sabit boylu bir SD opsiyonu beklenmeyen bir Length bildiriyor — alan yerleşimine güvenilemez, gövde ham gösteriliyor.',
+  'protocol.someip.warning.sdOptionTruncated':
+    'SD opsiyonunun bildirdiği boy opsiyon dizisinin sonunu aşıyor — kalan baytlar ham gösteriliyor ve çözüm durduruldu.',
+  'protocol.someip.warning.sdUnknownL4Protocol':
+    'Uç nokta opsiyonunun taşıma protokolü tanınmıyor (beklenen: 0x06 TCP, 0x11 UDP).',
+  'protocol.someip.warning.sdTrailingBytes':
+    'SD dizilerinden sonra artan bayt var — dizi uzunlukları mesaj sınırıyla örtüşmüyor.',
+  'protocol.someip.warning.sdConfigStringTruncated':
+    'Konfigürasyon dizesinin uzunluk öneki opsiyonun sonunu aşıyor — kalan baytlar ham gösteriliyor.',
+  'protocol.someip.summary.request': 'SOME/IP isteği',
+  'protocol.someip.summary.requestNoReturn': 'SOME/IP tek yönlü isteği (yanıt beklenmiyor)',
+  'protocol.someip.summary.notification': 'SOME/IP bildirimi / olayı',
+  'protocol.someip.summary.response': 'SOME/IP yanıtı',
+  'protocol.someip.summary.error': 'SOME/IP hata yanıtı',
+  'protocol.someip.summary.serviceDiscovery': 'SOME/IP-SD mesajı',
+  'protocol.someip.summary.unknown': 'SOME/IP mesajı (tanınmayan Message Type)',
+  'protocol.someip.example.request.name': 'Request (metot çağrısı)',
+  'protocol.someip.example.request.description':
+    'Service 0x1234, Method 0x0421, Message Type 0x00 = REQUEST. Length 12 → toplam 20 bayt, geriye 4 baytlık ham payload kalır.',
+  'protocol.someip.example.response.name': 'Response (aynı Request ID)',
+  'protocol.someip.example.response.description':
+    'İstekle AYNI Client/Session kimliği, Message Type 0x80 = RESPONSE. Korelasyonu bu çift üzerinden izleyin.',
+  'protocol.someip.example.notification.name': 'Notification (olay)',
+  'protocol.someip.example.notification.description':
+    'Event ID 0x8001 (tavsiye edilen olay aralığı), Message Type 0x02 = NOTIFICATION — türetilen sınıf “Notification / Event”.',
+  'protocol.someip.example.error.name': 'ERROR — E_UNKNOWN_METHOD',
+  'protocol.someip.example.error.description':
+    'Message Type 0x81 = ERROR, Return Code 0x03 = E_UNKNOWN_METHOD. Payload yok, Length tam olarak 8.',
+  'protocol.someip.example.tpSegment.name': 'SOME/IP-TP segmenti',
+  'protocol.someip.example.tpSegment.description':
+    'Message Type 0x20 = TP_REQUEST. Başlıktan sonra 4 baytlık TP başlığı gelir: Offset alanı 16 baytın katıdır, More Segments bayrağı 1.',
+  'protocol.someip.example.sdOfferService.name': 'SOME/IP-SD — Offer Service',
+  'protocol.someip.example.sdOfferService.description':
+    'Message ID 0xFFFF8100 mesajı SD olarak açar. Bir Offer Service girdisi ve ona bağlı bir IPv4 Endpoint opsiyonu (192.168.1.10, UDP 30509) çözülür.',
+  'protocol.someip.example.sdFindService.name': 'SOME/IP-SD — Find Service',
+  'protocol.someip.example.sdFindService.description':
+    'Opsiyonsuz bir Find Service girdisi: Instance/Major/Minor alanları “ANY” değerlerini taşır, Options Array Length sıfırdır.',
+  'protocol.someip.example.truncatedMessage.name': 'Eksik mesaj (akış parçası)',
+  'protocol.someip.example.truncatedMessage.description':
+    'Length 20 baytlık bir mesaj vaat ediyor ama tamponda 18 bayt var — consumedBytes 0 döner, çağıran daha çok veri toplamalıdır.',
+
   // --- CCP ---
   'protocol.ccp.documentation.summary':
     'CAN Calibration Protocol çerçevelerini çözer: bir CRO’nun Command/Counter/Parameters alanları, ya da bir DTO’nun Command Return Message (Return Code tablosu), Event Message veya DAQ verisi işareti. Komut ve dönüş kodu tabloları iki bağımsız açık kaynak CCP implementasyonuyla (pySART/cccp, CanCat) bayt bayt çapraz doğrulandı. Her başarılı çözüm bir legacy uyarısı taşır — ASAM CCP’yi obsolete ilan etti, yerine XCP öneriyor.',

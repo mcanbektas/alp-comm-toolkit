@@ -125,6 +125,21 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // ayrımıyla aynı gerekçe). `ccp/` klasörü bilerek `xcp/`nin İÇİNE DEĞİL
   // yanına kondu.
   registerOnce(registry, 'ccp', () => import('./automotive/ccp/ccp').then((module) => module.ccpPlugin));
+  // SOME/IP — dalga 14d: `automotive-ethernet` ailesini KAPATIR. TEK kayıt,
+  // İKİ modül (`someip.ts` + `someipSd.ts`) — SD ayrı bir tel biçimi değil,
+  // SOME/IP başlığını kullanan bir PAYLOAD'dır, bu yüzden katalogda ikinci bir
+  // `ProtocolRecord` AÇILMADI (dnsWire.ts/iec104Asdu.ts emsali).
+  // `decodeOptions` BİLEREK YOK, bir eksiklik değil karar: SD ayrımı
+  // çerçeveden çıkar (Message ID 0xFFFF8100, üç kaynakla doğrulandı),
+  // yön/rol Message Type'ta, payload yapısı ise kanal açmakla çözülmez —
+  // servis tanımı olmadan telden çıkmaz (12g RTP kararı), HAM + uyarılı basılır.
+  // `Length` offset 8'den (Request ID) mesaj sonuna sayar, toplam = 8 + Length
+  // (AUTOSAR PRS_SOMEIP_00042 + Wireshark SOMEIP_HDR_PART1_LEN + Scapy
+  // LEN_OFFSET). Korelasyon/servis ağacı analyzer işidir (12c DNS, 12d PTP);
+  // Client/Session kimliği `RawFrame.metadata`ya yazılır, kayıt `ready` kapanır.
+  registerOnce(registry, 'some-ip', () =>
+    import('./automotive/someip/someip').then((module) => module.someIpPlugin),
+  );
   // v1 (0xFE) ve v2 (0xFD) AYNI modülden gelir: magic'e göre dallanan tek
   // parser, tek kayıt (can-2-0a/can-2-0b'nin iki-plugin deseninin BİLEREK
   // kullanılmadığı yer — bkz. mavlink.ts dosya başı).
