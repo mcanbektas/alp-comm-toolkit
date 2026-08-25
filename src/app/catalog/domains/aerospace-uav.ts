@@ -409,7 +409,13 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Widely used civil avionics data bus that broadcasts 32-bit words split into Label, SDI, Data, SSM and Parity between guidance, navigation, flight control and communication equipment.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Beş alanın hepsi çözülüyor ve parite GERÇEKTEN doğrulanıyor; Label
+          // bit sırası dört bağımsız kaynakla çaprazlandı. Çözülmeyen tek şey
+          // Label/SDI/Discrete-bit ANLAMI ve o çerçevede DEĞİL equipment
+          // ICD'sinde — bir kapsam daraltması değil (Faz 10 dalga 15f,
+          // bkz. arinc429.ts dosya başı).
+          status: 'ready',
+          pluginId: 'arinc-429',
           tabs: [
             'overview',
             'decode',

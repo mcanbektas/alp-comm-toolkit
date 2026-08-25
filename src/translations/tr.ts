@@ -3104,6 +3104,110 @@ export const tr = {
   'protocol.pwmServo.example.truncated.description':
     '3 baytlık bir arabellek — nabızları her zaman 2 bayt olan bir konteyner için tek (çift olmayan) bir uzunluk.',
 
+  // --- ARINC 429 (Faz 10, dalga 15f) ---
+  'protocol.arinc429.documentation.summary':
+    'ARINC 429 32-bit word çözümü: Label (bit 8:1), SDI (bit 10:9), Data (bit 29:11), SSM (bit 31:30) ve bit 32 paritesi. Girdi 32-bit ham word / HEX / CSV / adapter log dosyasıdır; analog bipolar RZ dalgası çözülmez. Label ve SDI ANLAMI equipment ICD\'sine bağlıdır ve basılmaz.',
+  'protocol.arinc429.error.empty': 'Girdi boş.',
+  'protocol.arinc429.error.notWordAligned':
+    'Girdi 4 baytın katı değil — ARINC 429 word\'ü tam 32 bittir, artan baytlar eksik bir word demektir.',
+  'protocol.arinc429.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.arinc429.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.arinc429.error.parity': 'Word paritesi tutmuyor (PARITY ERROR).',
+
+  'protocol.arinc429.option.wordByteOrder': 'Word Bayt Sırası',
+  'protocol.arinc429.option.wordByteOrder.description':
+    'Adapter word\'ü hangi bayt sırasıyla yazıyor. Tahmin edilmez: yanlış seçim Label\'i tamamen kaydırır. Seçilmezse yalnız ham 4 bayt ve parite basılır.',
+  'protocol.arinc429.option.wordByteOrder.unset': 'Seçilmedi (ham word)',
+  'protocol.arinc429.option.wordByteOrder.littleEndian': 'Little-endian (bayt 0 = Label okteti)',
+  'protocol.arinc429.option.wordByteOrder.bigEndian': 'Big-endian (bayt 0 = parite/SSM)',
+
+  'protocol.arinc429.option.labelBitOrder': 'Label Bit Sırası',
+  'protocol.arinc429.option.labelBitOrder.description':
+    'Standartta Label MSB-first iletilir, geri kalan alanlar LSB-first — bu yüzden oktal Label okteti terslenerek okunur. Bazı alıcı-vericiler bunu donanımda zaten yapar. Seçilmezse oktal gösterim BASILMAZ.',
+  'protocol.arinc429.option.labelBitOrder.unset': 'Seçilmedi (oktal basılmaz)',
+  'protocol.arinc429.option.labelBitOrder.standard': 'Standart (bit 1 = MSB, oktet terslenir)',
+  'protocol.arinc429.option.labelBitOrder.preReversed': 'Önceden terslenmiş (adapter donanımda çevirdi)',
+
+  'protocol.arinc429.option.dataEncoding': 'Data Kodlaması',
+  'protocol.arinc429.option.dataEncoding.description':
+    'Data alanının ve SSM\'in yorumu buna bağlıdır. Seçilmezse ikisi de ham kalır.',
+  'protocol.arinc429.option.dataEncoding.raw': 'Ham (yorumlanmaz)',
+  'protocol.arinc429.option.dataEncoding.bnr': 'BNR (iki tümleyen ikilik sayı)',
+  'protocol.arinc429.option.dataEncoding.bcd': 'BCD (ikilik kodlu ondalık)',
+  'protocol.arinc429.option.dataEncoding.discrete': 'Discrete (bit alanları)',
+
+  'protocol.arinc429.option.parityMode': 'Parite Kipi',
+  'protocol.arinc429.option.parityMode.description':
+    'ARINC 429 kanalları TİPİK olarak tek (odd) parite kullanır, ama bu bir garanti değildir — alıcı-verici sürücüleri iki kipi de yapılandırılabilir sunar.',
+  'protocol.arinc429.option.parityMode.odd': 'Tek (odd)',
+  'protocol.arinc429.option.parityMode.even': 'Çift (even)',
+
+  'protocol.arinc429.option.resolution': 'Çözünürlük (Resolution)',
+  'protocol.arinc429.option.resolution.description':
+    'BNR/BCD için Physical = Raw × Resolution. Değer equipment ICD\'sinden gelir ve koda gömülmez; verilmezse fiziksel değer BASILMAZ (0 = verilmedi).',
+  'protocol.arinc429.option.dataLowBit': 'Data Alt Biti',
+  'protocol.arinc429.option.dataLowBit.description':
+    'Bazı Label\'lerde anlamlı bitler 11–29\'un alt kümesidir; aralık ICD\'den gelir (0 = verilmedi, tam 11–29 kullanılır).',
+  'protocol.arinc429.option.dataHighBit': 'Data Üst Biti',
+  'protocol.arinc429.option.dataHighBit.description':
+    'Seçilen Data alt aralığının en yüksek biti (0 = verilmedi, tam 11–29 kullanılır).',
+
+  'protocol.arinc429.warning.wordByteOrderNotSelected':
+    'Bayt sırası seçilmedi — alan sınırları yerinden oynayacağı için word\'ler HAM 4 bayt olarak basıldı; yalnız parite doğrulandı (parite bayt sırasından bağımsızdır).',
+  'protocol.arinc429.warning.labelBitOrderNotSelected':
+    'Label bit sırası seçilmedi — Label HAM 8 bit olarak basıldı, oktal gösterim üretilmedi.',
+  'protocol.arinc429.warning.parityModeAssumedOdd':
+    'Tek (odd) parite varsayıldı. ARINC 429 kanalları tipik olarak tek parite kullanır, ama bu bir garanti değildir.',
+  'protocol.arinc429.warning.dataBitRangeInvalid':
+    'Verilen Data bit aralığı geçersiz (11 ≤ alt ≤ üst ≤ 29 olmalı ve ikisi de verilmeli) — tam 11–29 aralığı kullanıldı.',
+
+  'protocol.arinc429.field.labelMeaningRequiresIcd':
+    'Label ANLAMI equipment ICD\'sine bağlıdır ve global olarak aynı olduğu varsayılamaz — yalnız sayı/oktal basılır.',
+  'protocol.arinc429.field.labelBitOrderNotSelected':
+    'Label bit sırası seçilmediği için oktal gösterim basılmadı; değer telin/adapter\'ın ham okteti.',
+  'protocol.arinc429.field.sdiSemanticNameRequiresIcd':
+    'SDI\'nin semantik adı (örn. "IRS #1") yalnız yapılandırılmış bir equipment eşlemesi varsa verilebilir — ICD veritabanı bu sürümün kapsamı dışında.',
+  'protocol.arinc429.field.ssmMeaningRequiresEncoding':
+    'SSM\'in anlamı seçilen data kodlamasına bağlıdır — kodlama seçilmediği için iki bit ham basıldı.',
+  'protocol.arinc429.field.ssmStatusCodeNotCrossVerified':
+    'SSM\'in iki bitten duruma (Normal Operation / Functional Test / Failure Warning / No Computed Data) SAYISAL eşlemesi iki bağımsız uygulamada ÇELİŞTİĞİ için adlandırılmadı; doğru tablo seçilen standart revizyonundan ve ICD\'den yüklenmelidir.',
+  'protocol.arinc429.field.dataEncodingNotSelected':
+    'Data kodlaması seçilmedi — 19 bit ham basıldı, yorumlanmadı.',
+  'protocol.arinc429.field.resolutionRequiredForPhysicalValue':
+    'Çözünürlük verilmediği için fiziksel değer hesaplanmadı; gösterilen sayı ölçeklenmemiş ham değerdir.',
+  'protocol.arinc429.field.discreteBitMeaningRequiresIcd':
+    'Discrete bitlerinin anlamı equipment ICD\'sinden gelir ve gömülmez — yalnız bitlerin kendisi gösterilir.',
+  'protocol.arinc429.field.bcdDigitOutOfRange':
+    'En az bir 4 bitlik grup 9\'dan büyük — bu alan geçerli bir BCD değeri değil.',
+  'protocol.arinc429.field.parityFailed': 'Parite tutmuyor.',
+  'protocol.arinc429.field.wordByteOrderNotSelected':
+    'Bayt sırası seçilmediği için alanlar ayrılmadı — word ham 4 bayt olarak gösteriliyor.',
+
+  'protocol.arinc429.example.label213Bnr.name': 'Label 213₈, BNR çalışılmış örneği',
+  'protocol.arinc429.example.label213Bnr.description':
+    'Label okteti 0xD1 → 213₈ (referansın kendi sayısal vektörü), SDI 01, Data 12345, SSM 11. Little-endian. Çözünürlük 0.1 verilirse BNR değeri 1234.5 olur (spec örneği).',
+  'protocol.arinc429.example.label041NegativeBnr.name': 'Label 041₈, negatif BNR',
+  'protocol.arinc429.example.label041NegativeBnr.description':
+    'Label okteti 0x84 → 041₈ (bağımsız bir uygulamanın yayımlanmış fixture\'ı). Data 19 bitlik iki tümleyende −12345; bit 29 işaret bitidir.',
+  'protocol.arinc429.example.label107Bcd.name': 'Label 107₈, beş basamaklı BCD',
+  'protocol.arinc429.example.label107Bcd.description':
+    'Label okteti 0xE2 → 107₈. Data 0x12345 → basamaklar 1 2 3 4 5; 19 bit dört tam basamak artı 3 bitlik en anlamlı basamağa bölünür.',
+  'protocol.arinc429.example.label206Discrete.name': 'Label 206₈, discrete bitler',
+  'protocol.arinc429.example.label206Discrete.description':
+    'Label okteti 0x61 → 206₈, SDI 11. Discrete bit anlamları ICD\'ye bağlı olduğu için basılmaz; yalnız 19 bitin ikilik gösterimi verilir.',
+  'protocol.arinc429.example.bigEndianAdapter.name': 'Big-endian adapter word\'ü',
+  'protocol.arinc429.example.bigEndianAdapter.description':
+    'İlk örneğin MANTIKSAL olarak aynısı, big-endian yazılmış: parite baytların ilkinin en yüksek bitinde, Label okteti sonuncu baytta. Bayt sırası little-endian seçilirse alanlar tamamen kayar.',
+  'protocol.arinc429.example.twoWordCapture.name': 'İki word\'lük yakalama',
+  'protocol.arinc429.example.twoWordCapture.description':
+    'Tek bir blokta iki word — her alanın kimliği word indeksini taşır, ikinci word\'ün alanları birincininkiyle çakışmaz.',
+  'protocol.arinc429.example.parityError.name': 'Parite hatası',
+  'protocol.arinc429.example.parityError.description':
+    'İlk örneğin parite biti kasten ters çevrildi — tek (odd) parite kipinde word reddedilir.',
+  'protocol.arinc429.example.notWordAligned.name': 'Word hizasız girdi',
+  'protocol.arinc429.example.notWordAligned.description':
+    '3 baytlık bir arabellek — 32 bitlik word\'lerden oluşan bir bloğa göre eksik.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

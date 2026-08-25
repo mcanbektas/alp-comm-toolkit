@@ -260,6 +260,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'pwm-servo', () =>
     import('./aerospace/pwmServo/pwmServo').then((module) => module.pwmServoPlugin),
   );
+  // ARINC 429 — dalga 15f: `avionics-data-buses` ailesinin ilk kaydı. CRC YOK
+  // (yalnız bit 32 tek parite), `crcEngine` çağrılmaz. Label'in oktal
+  // gösterimi bir ADAPTER değişkenidir (`labelBitOrder`) ve bayt sırası da
+  // öyle (`wordByteOrder`) — ikisinin de varsayılanı YOK; `canParse`
+  // paritenin ötesinde imza taşımaz (bkz. arinc429.ts dosya başı).
+  registerOnce(registry, 'arinc-429', () =>
+    import('./aerospace/arinc429/arinc429').then((module) => module.arinc429Plugin),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

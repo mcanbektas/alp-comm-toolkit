@@ -3100,6 +3100,110 @@ export const en: TranslationDictionary = {
   'protocol.pwmServo.example.truncated.description':
     'A 3-byte buffer — an odd length for a container whose pulses are always 2 bytes.',
 
+  // --- ARINC 429 (phase 10, wave 15f) ---
+  'protocol.arinc429.documentation.summary':
+    'ARINC 429 32-bit word decoding: Label (bit 8:1), SDI (bit 10:9), Data (bit 29:11), SSM (bit 31:30) and the bit 32 parity. Input is a raw 32-bit word / HEX / CSV / adapter log file; the analogue bipolar RZ waveform is not decoded. Label and SDI MEANING depend on the equipment ICD and are not printed.',
+  'protocol.arinc429.error.empty': 'Input is empty.',
+  'protocol.arinc429.error.notWordAligned':
+    'Input is not a multiple of 4 bytes — an ARINC 429 word is exactly 32 bits, so leftover bytes mean an incomplete word.',
+  'protocol.arinc429.error.aborted': 'Decoding was cancelled.',
+  'protocol.arinc429.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.arinc429.error.parity': 'Word parity does not hold (PARITY ERROR).',
+
+  'protocol.arinc429.option.wordByteOrder': 'Word Byte Order',
+  'protocol.arinc429.option.wordByteOrder.description':
+    'Which byte order the adapter writes the word in. Not guessed: the wrong choice shifts the Label entirely. If unset, only the raw 4 bytes and the parity are shown.',
+  'protocol.arinc429.option.wordByteOrder.unset': 'Not selected (raw word)',
+  'protocol.arinc429.option.wordByteOrder.littleEndian': 'Little-endian (byte 0 = Label octet)',
+  'protocol.arinc429.option.wordByteOrder.bigEndian': 'Big-endian (byte 0 = parity/SSM)',
+
+  'protocol.arinc429.option.labelBitOrder': 'Label Bit Order',
+  'protocol.arinc429.option.labelBitOrder.description':
+    'The standard transmits the Label MSB-first and the remaining fields LSB-first, which is why the octal Label is read by reversing the octet. Some transceivers already do this in hardware. If unset, the octal form is NOT printed.',
+  'protocol.arinc429.option.labelBitOrder.unset': 'Not selected (no octal shown)',
+  'protocol.arinc429.option.labelBitOrder.standard': 'Standard (bit 1 = MSB, octet is reversed)',
+  'protocol.arinc429.option.labelBitOrder.preReversed': 'Pre-reversed (adapter flipped it in hardware)',
+
+  'protocol.arinc429.option.dataEncoding': 'Data Encoding',
+  'protocol.arinc429.option.dataEncoding.description':
+    'The interpretation of both the Data field and the SSM depends on this. If unset, both stay raw.',
+  'protocol.arinc429.option.dataEncoding.raw': 'Raw (not interpreted)',
+  'protocol.arinc429.option.dataEncoding.bnr': "BNR (two's complement binary)",
+  'protocol.arinc429.option.dataEncoding.bcd': 'BCD (binary-coded decimal)',
+  'protocol.arinc429.option.dataEncoding.discrete': 'Discrete (bit fields)',
+
+  'protocol.arinc429.option.parityMode': 'Parity Mode',
+  'protocol.arinc429.option.parityMode.description':
+    'ARINC 429 channels TYPICALLY use odd parity, but that is not a guarantee — transceiver drivers expose both modes as configurable.',
+  'protocol.arinc429.option.parityMode.odd': 'Odd',
+  'protocol.arinc429.option.parityMode.even': 'Even',
+
+  'protocol.arinc429.option.resolution': 'Resolution',
+  'protocol.arinc429.option.resolution.description':
+    'Physical = Raw × Resolution for BNR/BCD. The value comes from the equipment ICD and is never hard-coded; without it no physical value is printed (0 = not given).',
+  'protocol.arinc429.option.dataLowBit': 'Data Low Bit',
+  'protocol.arinc429.option.dataLowBit.description':
+    'For some Labels the significant bits are a subset of 11–29; the range comes from the ICD (0 = not given, the full 11–29 range is used).',
+  'protocol.arinc429.option.dataHighBit': 'Data High Bit',
+  'protocol.arinc429.option.dataHighBit.description':
+    'The highest bit of the selected Data sub-range (0 = not given, the full 11–29 range is used).',
+
+  'protocol.arinc429.warning.wordByteOrderNotSelected':
+    'Byte order was not selected — because the field boundaries would move, the words are shown as RAW 4 bytes and only the parity was verified (parity is byte-order independent).',
+  'protocol.arinc429.warning.labelBitOrderNotSelected':
+    'Label bit order was not selected — the Label is shown as RAW 8 bits and no octal form was produced.',
+  'protocol.arinc429.warning.parityModeAssumedOdd':
+    'Odd parity was assumed. ARINC 429 channels typically use odd parity, but that is not a guarantee.',
+  'protocol.arinc429.warning.dataBitRangeInvalid':
+    'The given Data bit range is invalid (11 ≤ low ≤ high ≤ 29 and both must be given) — the full 11–29 range was used instead.',
+
+  'protocol.arinc429.field.labelMeaningRequiresIcd':
+    'The Label MEANING depends on the equipment ICD and must not be assumed to be globally the same — only the number/octal form is shown.',
+  'protocol.arinc429.field.labelBitOrderNotSelected':
+    'No octal form was printed because the Label bit order was not selected; the value is the raw octet as written by the wire/adapter.',
+  'protocol.arinc429.field.sdiSemanticNameRequiresIcd':
+    'A semantic SDI name (e.g. "IRS #1") can only be given when a configured equipment mapping exists — the ICD database is out of scope for this release.',
+  'protocol.arinc429.field.ssmMeaningRequiresEncoding':
+    'The meaning of the SSM depends on the selected data encoding — no encoding was selected, so the two bits are shown raw.',
+  'protocol.arinc429.field.ssmStatusCodeNotCrossVerified':
+    'The NUMERIC mapping from the two SSM bits to a status (Normal Operation / Functional Test / Failure Warning / No Computed Data) was not named because two independent implementations CONFLICT on it; the correct table must be loaded from the chosen standard revision and the ICD.',
+  'protocol.arinc429.field.dataEncodingNotSelected':
+    'No data encoding was selected — the 19 bits are shown raw and were not interpreted.',
+  'protocol.arinc429.field.resolutionRequiredForPhysicalValue':
+    'No resolution was given, so no physical value was computed; the number shown is the unscaled raw value.',
+  'protocol.arinc429.field.discreteBitMeaningRequiresIcd':
+    'The meaning of the discrete bits comes from the equipment ICD and is not hard-coded — only the bits themselves are shown.',
+  'protocol.arinc429.field.bcdDigitOutOfRange':
+    'At least one 4-bit group is greater than 9 — this field is not a valid BCD value.',
+  'protocol.arinc429.field.parityFailed': 'Parity does not hold.',
+  'protocol.arinc429.field.wordByteOrderNotSelected':
+    'Fields were not split because no byte order was selected — the word is shown as raw 4 bytes.',
+
+  'protocol.arinc429.example.label213Bnr.name': 'Label 213₈, worked BNR example',
+  'protocol.arinc429.example.label213Bnr.description':
+    "Label octet 0xD1 → 213₈ (the reference's own numeric vector), SDI 01, Data 12345, SSM 11. Little-endian. With resolution 0.1 the BNR value becomes 1234.5 (the spec example).",
+  'protocol.arinc429.example.label041NegativeBnr.name': 'Label 041₈, negative BNR',
+  'protocol.arinc429.example.label041NegativeBnr.description':
+    "Label octet 0x84 → 041₈ (a published fixture from an independent implementation). Data is −12345 in 19-bit two's complement; bit 29 is the sign bit.",
+  'protocol.arinc429.example.label107Bcd.name': 'Label 107₈, five BCD digits',
+  'protocol.arinc429.example.label107Bcd.description':
+    'Label octet 0xE2 → 107₈. Data 0x12345 → digits 1 2 3 4 5; the 19 bits split into four full digits plus a 3-bit most significant digit.',
+  'protocol.arinc429.example.label206Discrete.name': 'Label 206₈, discrete bits',
+  'protocol.arinc429.example.label206Discrete.description':
+    'Label octet 0x61 → 206₈, SDI 11. Discrete bit meanings depend on the ICD and are not printed; only the binary form of the 19 bits is given.',
+  'protocol.arinc429.example.bigEndianAdapter.name': 'Big-endian adapter word',
+  'protocol.arinc429.example.bigEndianAdapter.description':
+    'Logically the SAME word as the first example, written big-endian: the parity sits in the top bit of the first byte and the Label octet in the last. Selecting little-endian shifts every field.',
+  'protocol.arinc429.example.twoWordCapture.name': 'Two-word capture',
+  'protocol.arinc429.example.twoWordCapture.description':
+    "Two words in a single block — every field id carries the word index, so the second word's fields never collide with the first's.",
+  'protocol.arinc429.example.parityError.name': 'Parity error',
+  'protocol.arinc429.example.parityError.description':
+    "The first example's parity bit was deliberately flipped — in odd parity mode the word is rejected.",
+  'protocol.arinc429.example.notWordAligned.name': 'Word-misaligned input',
+  'protocol.arinc429.example.notWordAligned.description':
+    'A 3-byte buffer — incomplete for a block made of 32-bit words.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',
