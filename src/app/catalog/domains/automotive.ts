@@ -459,9 +459,20 @@ export const automotiveDomain: CatalogDomain = {
           id: 'psi5',
           name: 'PSI5',
           summary:
-            'Current-modulated two-wire peripheral sensor interface used mainly for airbag and chassis safety sensors, multiplexing several sensors into time slots after a sync pulse.',
+            'Current-modulated two-wire peripheral sensor interface used mainly for airbag and chassis safety sensors, multiplexing several sensors into time slots after a sync pulse. The decoder covers one upstream sensor-to-ECU data frame: the two start bits, the payload region read least-significant-bit first, and the error check — both the even parity bit and the three bit CRC are recomputed and reported as pass or fail against two vendors’ published test vectors. What it does not resolve: the slot timeline and the sensor identity, because the upstream frame carries no sensor address at all and the slot counter is produced by the receiver, not sent on the wire. Payload width, parity-versus-CRC and the optional sub-field widths are configuration held in the receiver, so you supply them as options; no application-profile preset is shipped because the airbag, vehicle dynamics control and powertrain substandards are not published anywhere. Downstream ECU-to-sensor frames, which use a different format with three or nine start bits, are out of scope.',
           layer: 'data-link',
-          status: 'planned',
+          // Karar (dalga 14h): PSI5 Association spec'leri kayıt duvarının
+          // arkasında, ama V2.1 metni + Infineon KP405/iLLD + NXP MMA51xxKW +
+          // Pico decoder belgesiyle ÇERÇEVE BİÇİMİ iki bağımsız kaynağın
+          // ötesinde teyitli ve 3 bitlik CRC İKİ satıcının YAYIMLANMIŞ test
+          // vektörüyle (9 + 1) hesapla doğrulandı — bu yüzden CRC GÖSTERİLMEZ,
+          // DOĞRULANIR (sent.ts'in tersi, gerekçesi psi5.ts dosya başında).
+          // Rozet yine de 'partial': slot zaman çizelgesi (spec `:175`) ve
+          // sensör kimliği çerçevede YOK, profil preset'leri substandard
+          // belgeleri kamuya açık olmadığı için GÖNDERİLMEDİ (iec-61850
+          // GOOSE-only / cc-link link-cihazı emsali).
+          status: 'partial',
+          pluginId: 'psi5',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           // Tek global frame formatı yoktur: CRC, frame boyu ve slot kuralları
           // seçilen application profile'dan (Airbag/Chassis/Powertrain) gelir.

@@ -137,6 +137,22 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // darbesi) — İKİNCİ bir nibble çözücü YAZILMADI, `spc.test.ts` bunu kanıtlar.
   registerOnce(registry, 'sent', () => import('./automotive/sent/sent').then((module) => module.sentPlugin));
   registerOnce(registry, 'spc', () => import('./automotive/sent/spc').then((module) => module.spcPlugin));
+  // PSI5 — dalga 14h: `sensor-interfaces` ailesinin ve `automotive` domain'inin
+  // SON kaydı. Nabız konteynerini KULLANMAZ: `dali.ts`in "Manchester decoder'a
+  // girmez" kararı burada birebir geçerli, girdi ÇÖZÜLMÜŞ çerçeve bitleridir
+  // (spec `:171` "pulse/frame log import" esnekliğine açıkça izin veriyor).
+  // KAPSAM SINIRI (rozet `partial`): yalnız YUKARI YÖN (sensör → ECU) veri
+  // çerçevesi çözülür — iki start biti, yük bölgesi (LSB-first) ve parity /
+  // 3 bit CRC. Yük genişliği ile parity/CRC seçimi telin İÇİNDE YOKTUR
+  // (Infineon iLLD: `payloadLength[slot]`, `crcOrParity[slot]` — SLOT BAŞINA
+  // yazmaç), o yüzden `decodeOptions` ZORUNLU kanaldır. SLOT ZAMAN ÇİZELGESİ
+  // ve sensör kimliği ÇÖZÜLMEZ: çerçevede sensör adresi alanı YOK, kimlik
+  // zaman slotuyla belirlenir ve slot sayacı ALICININ verisidir (12c/12d/14e
+  // emsali). Application profile YALNIZ METADATA: üç substandard belgesi
+  // (airbag / vehicle dynamics control / powertrain) kamuya açık değil, preset
+  // GÖNDERİLMEDİ (`microwire.ts`in 93xx66 kararı). Aşağı yön (ECU → sensör)
+  // çerçeveleri KAPSAM DIŞI — 3/9 start biti ve 6 bit CRC ile ayrı bir biçim.
+  registerOnce(registry, 'psi5', () => import('./automotive/psi5/psi5').then((module) => module.psi5Plugin));
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );

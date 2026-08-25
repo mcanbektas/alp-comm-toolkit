@@ -292,24 +292,88 @@ plugin kanalı değil.) Yani bu dalga automotive'de kanalı İLK KEZ açar.
 
 ## Açık sorular
 
-1. **Nabız-günlüğü girdi sözleşmesi (bulgu 1) — dalganın tek büyük kararı.**
-   Beş kaydı ilgilendiriyor. Öneri: **karma (c)** — J1850 ×2 + SENT + SPC için
-   belgelenmiş bir nabız konteyneri (`canFrame.ts`in SocketCAN konteyneri emsali) +
-   `decodeOptions`; PSI5 için `partial` + `calculatorIds`. `types.ts`e DOKUNULMAZ.
-   Reddedilirse beşi de (a) yoluna düşer ve domain beş çözücüsüz kayıtla kapanır.
-2. **`k-line` `partial` + `calculatorIds` olarak mı kapansın?** Depo 2. dalgada
-   "motor ALMAZ, `planned` kalır" demiş ve bunu iki motor dosyasına yazmış (bulgu 6).
-   `planned` bırakılırsa domain 11/12 ile kapanır. Öneri: `partial`'a taşı.
-3. **`automotive-ethernet` parser almadan `partial` kapansın mı?** (bulgu 4) Stack'in
-   yedi halkası da zaten `ready`; yeni parser yazmak `ethernet-ii`/`vlan-802-1q`/`ipv4`
-   çözücülerini ikinci kez yazmak olurdu. Öneri: parser YOK.
-4. **`crcEngine.ts`e bit-uzunluğu alan bir kardeş fonksiyon eklenecek mi?** (bulgu 7)
-   FlexRay header CRC'si 20 bit; mevcut `crc()` bayt hizalı. `types.ts` değil ama
-   `protocol-core` yüzeyi — 14e'nin ilk adımı bu kararı vermek olmalı.
-5. **SOME/IP-SD ayrı bir kayıt mı, `some-ip` içinde bir alt çözücü mü?** Katalogda
-   ayrı kayıt YOK; spec `:343` *"ayrı decoder modülüyle gösterilmelidir"* diyor.
-   Öneri: tek kayıt, iki modül (`someip.ts` + `someipSd.ts`), `mdns`in `dns` ile aynı
-   dosyayı paylaşmasının analoğu — ama 14d bunu kodla sınamalı.
+1. ~~**Nabız-günlüğü girdi sözleşmesi (bulgu 1) — dalganın tek büyük kararı.**~~
+   → **KULLANICI KARARI: karma (c).** Konteyner 14f'te tanımlandı, 14g'de
+   `protocol-core/decoding/pulseLog.ts`e taşındı, `types.ts`e DOKUNULMADI.
+   **AMA "beş kaydı ilgilendiriyor" ÖNGÖRÜSÜ ÇÜRÜDÜ: dördünü ilgilendirdi.**
+   PSI5 (14h) konteyneri HİÇ KULLANMADI — `dali.ts`in "Manchester decoder'a
+   girmez" kararı oraya birebir oturdu ve girdi çözülmüş çerçeve bitleri oldu.
+   PSI5 için önerilen "`partial` + `calculatorIds`, motor YOK" yolu da çürüdü;
+   aşağı bak.
+2. ~~**`k-line` `partial` + `calculatorIds` olarak mı kapansın?**~~ → **14a'da
+   KARARA BAĞLANDI: EVET.** `timing/kLine.ts` yazıldı, rozet `partial` oldu,
+   parser YAZILMADI.
+3. ~~**`automotive-ethernet` parser almadan `partial` kapansın mı?**~~ → **14a'da
+   KARARA BAĞLANDI: parser YOK.** `related` yedi halkaya genişletildi, motor
+   `calculatorIds: ['spe-plca']` ile var olan `singlePairEthernet.ts`e bağlandı.
+4. ~~**`crcEngine.ts`e bit-uzunluğu alan bir kardeş fonksiyon eklenecek mi?**~~ →
+   **14e'de KARARA BAĞLANDI: EVET, (a).** `crcBits(bytes, bitLength, params)`
+   eklendi, `crc()` ona delege ediyor, `refin` + kısmi bayt bileşimi ATIYOR.
+5. ~~**SOME/IP-SD ayrı bir kayıt mı, `some-ip` içinde bir alt çözücü mü?**~~ →
+   **14d'de KARARA BAĞLANDI: tek kayıt, iki modül.** Öneri kodla sınandı ve
+   doğrulandı.
+
+## Çürüyen tahminler — dalga 14 kapanışında (2026-08-24) yazıldı
+
+Dalga 12/13'te kural hâline gelen bölüm: brief'in yanlış çıkan öngörüleri dosyada
+İŞARETLENİR, silinmez. Bir sonraki keşif turu bu listeye bakarak kendi
+kesinliğini kalibre eder.
+
+**14b — `decodeOptions` kanalının ŞEKLİ.** Brief tek bir
+`packetInterpretation: raw|cto|dto` kanalı öngörüyordu. Kaynak taraması bunu
+çürüttü: CTO/DTO ayrımı PID baytının SAYISAL ARALIĞINDAN çerçeveden zaten
+çıkıyor; asıl belirsizlik `role`dür (AYNI 0xFF baytı hem CONNECT hem RES).
+Kanal `role` + `byteOrder` olarak açıldı.
+
+**14b — "byte order ilk sürümde açılmasın, A2L'den gelir".** YANLIŞ. Byte
+order CONNECT yanıtının `comm_mode_basic` bayrağından müzakere edilir (Scapy ve
+pyxcp aynı `INTEL=0/MOTOROLA=1` kodlamasını taşıyor) ve HER çok baytlı alanı
+etkiler; kanal AÇILDI.
+
+**14c — CCP için "kaynak yetersiz, `partial` kalabilir" kötümserliği.** ÇÜRÜDÜ.
+İki bağımsız açık kaynak uygulama komut ve hata tablolarında 28/28 ve 18/18
+örtüştü; kayıt `ready` oldu.
+
+**14e — FlexRay Header CRC'sinin kapsamı.** Brief CRC'nin "gösterge bitlerini"
+de kapsadığını varsayıyordu; YANLIŞ — yalnız Sync Frame Indicator ve Startup
+Frame Indicator girer. Ayrıca brief "katalogda İKİ yeni CRC girdisi" diyordu,
+gerçekte ÜÇ gerekti: kanal A ve kanal B aynı polinomu farklı `init` ile
+kullanıyor.
+
+**14f — `canParse`in naif imzası.** Yalnız `pulses[0]`a bakan ilk sürüm 761
+örnek çerçevenin 413'ünü (%54) yanlış pozitif kabul etti. Ölçüm bir defalık
+düzeltme olarak kalmadı, KALICI BİR TESTE dönüştü ve 14g/14h onu devraldı.
+
+**14h — "spec bu kayıt için doğrulanmış tek bir sayısal fixture VERMİYOR".**
+ÇÜRÜDÜ, hem de dalganın en güçlü doğrulamasıyla. PSI5 Association spec'i kayıt
+duvarının arkasında olsa da İKİ SATICI kendi veri sayfasında YAYIMLANMIŞ CRC
+test vektörü veriyor: NXP MMA51xxKW'nin dokuz 10-bit vektörü ve Infineon
+KP405'in `0xAD2C → 0b100` 16-bit örneği. Onu da ayrıca Infineon'un AURIX kod
+örneği çalışılmış bir parite/LSB-first fixture'ıyla (`0001110000` → `RD = 0x38`)
+destekliyor. **Sonuç: brief'in "PSI5 için (a) yolu — `partial` + `calculatorIds`,
+motor YOK" önerisi uygulanmadı; kayıt gerçek bir motorla, GERÇEKTEN doğrulanan
+CRC ve parite ile `partial` oldu.** Ders: "spec kapalı" ile "sayı bulunamaz"
+aynı şey değildir — kapalı spec'in sayıları satıcı belgelerinde yaşar.
+
+**14h — `decodeOptions` listesinin içeriği.** Alt brief `applicationProfile`ın
+`airbag | chassis-safety | powertrain` preset'leri taşıyacağını varsayıyordu.
+Üçü de ÇÜRÜDÜ: (a) resmî üçüncü profil adı **"vehicle dynamics control"**,
+"chassis & safety" resmî ad DEĞİL (DigiKey soyundan geliyor); (b) üç substandard
+belgesinin HİÇBİRİ kamuya açık değil ve base standard onları KASITLI olarak
+dışarıda bırakıyor, dolayısıyla **hiçbir preset gönderilemedi** — profil yalnız
+metadata; (c) `syncMode`un `auto` şıkkı İMKÂNSIZ çıktı: sync/async ayrımı
+çerçevede hiçbir bitle temsil edilmiyor, ECU'nun GERİLİM darbesiyle yapılıyor.
+Onun yerine spec'in KENDİ beş harfli mod taksonomisi (`A/P/U/D/V`) kullanıldı.
+
+**14h — `dataBitCount` tek başına yetmez.** Alt brief yalnız veri bit sayısını
+sayıyordu; Infineon iLLD `crcOrParity[slot]` ile parity/CRC seçiminin de SLOT
+BAŞINA yazmaç olduğunu, yani telden çıkarılamadığını kanıtladı. `errorCheck`
+kanalı bu yüzden eklendi.
+
+**14h — spec özetinin "Sensor Address" analyzer alanı** (`04-otomotiv.md:173`)
+yukarı yön çerçevesinde YOKTUR. Kimlik zaman slotuyla belirlenir; çerçevede
+sensörü tanımlayabilecek tek şey OPSİYONEL `Frame Control` alanıdır ve genişliği
+yapılandırmadan gelir.
 
 ## Kaynak satır haritası (spec `04-otomotiv.md`)
 
@@ -337,5 +401,7 @@ Correlation, Trigger sistemi, Otomatik Hata Korelasyonu (`:415-503`).
 - *"Zamanlama sabitleri evrensel değildir"* (`:512`) — 14f/14g/14h'in `decodeOptions`
   gerekçesi bu.
 
-Bağlam: [[alp-comm-dalga13-industrial]], [[alp-comm-dalga12-network]]. Bu dosya henüz
-kapanmamış bir dalganın keşif turudur — uygulama başlamadı, onay bekliyor.
+Bağlam: [[alp-comm-dalga13-industrial]], [[alp-comm-dalga12-network]]. **Bu dalga
+2026-08-24'te TAMAMEN KAPANDI** (14a-14h, 12 kanonik kayıt; kapanış özeti
+`docs/plan-fazlar.md`de). Yukarıdaki keşif metni tarihsel olarak korunuyor;
+yanlış çıkan öngörüler "Çürüyen tahminler" bölümünde işaretli.

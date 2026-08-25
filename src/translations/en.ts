@@ -6518,6 +6518,73 @@ export const en: TranslationDictionary = {
   'protocol.sent.example.truncated.name': 'Truncated frame',
   'protocol.sent.example.truncated.description':
     'Only 4 pulses are present; not enough for the default profile (6 data nibbles).',
+  'protocol.psi5.documentation.summary':
+    'PSI5: a two-wire, current-modulated automotive sensor interface. This decoder reads the upstream (sensor to ECU) data frame: two start bits, the LSB-first payload region, and either an even parity bit or a three bit CRC. The payload width and the parity/CRC choice are NOT in the frame; they come from the options.',
+  'protocol.psi5.option.applicationProfile': 'Application Profile',
+  'protocol.psi5.option.applicationProfile.description':
+    'Kept as metadata only and printed on the first row of the field table; it changes NO bit width. The three substandard documents (airbag / vehicle dynamics control / powertrain) are not public, so no preset is shipped — you supply the numbers.',
+  'protocol.psi5.option.applicationProfile.unspecified': 'Unspecified',
+  'protocol.psi5.option.revision': 'PSI5 Revision',
+  'protocol.psi5.option.revision.description':
+    "Versions and dates come from psi5.org's official table. The field layout was verified against the V2.1 text; the revision only sets the allowed payload range (V1.3: 8-24 bits, V2.x: 10-28 bits).",
+  'protocol.psi5.option.communicationMode': 'Communication Mode',
+  'protocol.psi5.option.communicationMode.description':
+    "Synchronous versus asynchronous is represented by NO bit in the frame: the ECU signals it with a voltage sync pulse. That is why there is no 'auto' choice — the mode is metadata you provide.",
+  'protocol.psi5.option.payloadBitCount': 'Payload Bit Count',
+  'protocol.psi5.option.payloadBitCount.description':
+    'Total bit count of the payload region. It CANNOT be derived from the wire — the receiver holds it in a per-slot register. A warning is raised if it leaves the selected revision range.',
+  'protocol.psi5.option.errorCheck': 'Error Detection',
+  'protocol.psi5.option.errorCheck.description':
+    'A single even parity bit or a three bit CRC. This choice is not in the frame either; it is configured per slot in the receiver. CRC g(x)=x^3+x+1, initial value "111", start bits excluded.',
+  'protocol.psi5.option.messagingBits': 'Messaging (M) Bit Count',
+  'protocol.psi5.option.messagingBits.description':
+    'Optional serial data channel; the standard defines 0 or 2 bits. It sits in the LOWEST bits of the payload.',
+  'protocol.psi5.option.frameControlBits': 'Frame Control (F) Bit Count',
+  'protocol.psi5.option.frameControlBits.description':
+    'Optional, 0-4 bits. It may carry the frame type or the SENSOR IDENTITY — its width comes from the system configuration, it is never guessed.',
+  'protocol.psi5.option.statusBits': 'Status (E) Bit Count',
+  'protocol.psi5.option.statusBits.description': 'Optional status field, 0-2 bits.',
+  'protocol.psi5.option.regionBBits': 'Data Region B Bit Count',
+  'protocol.psi5.option.regionBBits.description':
+    'Optional secondary measurement region, 0-12 bits. Whatever remains is the mandatory Data Region A.',
+  'protocol.psi5.error.empty': 'The frame is empty.',
+  'protocol.psi5.error.truncated':
+    'Not enough bits for the selected payload width and error detection; the frame is truncated.',
+  'protocol.psi5.error.subFieldsExceedPayload':
+    'The sub-field widths add up to more than the payload bit count; no bits are left for Data Region A.',
+  'protocol.psi5.error.parityMismatch': 'Parity mismatch.',
+  'protocol.psi5.error.crcMismatch': 'CRC mismatch.',
+  'protocol.psi5.warning.startBitsNotZero':
+    'The start bits are not 0b00. In PSI5 both start bits are ALWAYS zero — the alignment has slipped, or this is not a PSI5 frame.',
+  'protocol.psi5.warning.trailingBits':
+    'More than a byte of bits remains after the frame — the selected payload width or error detection may not match this capture.',
+  'protocol.psi5.warning.paddingNotZero':
+    'The padding bits up to the byte boundary are not zero; the input may not use the expected packing.',
+  'protocol.psi5.warning.payloadOutOfRevisionRange':
+    'The selected payload bit count is outside the range the selected revision allows (V1.3: 8-24, V2.x: 10-28).',
+  'protocol.psi5.warning.regionABelowMinimum':
+    'Data Region A fell below the mandatory minimum of the standard; review the sub-field widths.',
+  'protocol.psi5.warning.slotTimelineNotResolved':
+    'The slot timeline and the sensor identity are NOT resolved: the upstream frame has no sensor address field, identity is set by the time slot, and the slot counter is data the receiver produces. That is analyzer work.',
+  'protocol.psi5.warning.profileMetadataOnly':
+    'The application profile was recorded as metadata only; because the substandard documents are not public, NO bit width comes from the profile.',
+  'protocol.psi5.warning.messagingWidth':
+    'The Messaging field is 0 or 2 bits in the standard; 1 bit is not a documented configuration.',
+  'protocol.psi5.example.airbag10Parity.name': '10 bit payload + parity (Infineon AURIX example)',
+  'protocol.psi5.example.airbag10Parity.description':
+    "The worked frame from Infineon's PSI5 sensor emulator code example: 10 data bits “0001110000”, parity 1. The same document reports 0x38 in the receive register — proof of the LSB-first reading. It decodes with the default options.",
+  'protocol.psi5.example.airbag16Crc.name': '16 bit payload + 3 bit CRC (Infineon KP405 example)',
+  'protocol.psi5.example.airbag16Crc.description':
+    "The worked CRC example from the KP405 datasheet: payload 0xAD2C, CRC 0b100. To decode it, set Payload Bit Count to 16 and Error Detection to CRC.",
+  'protocol.psi5.example.badParity.name': 'Bad parity',
+  'protocol.psi5.example.badParity.description':
+    'The same payload with the parity bit deliberately inverted — the computed value appears in the field table.',
+  'protocol.psi5.example.startBitError.name': 'Start bit error',
+  'protocol.psi5.example.startBitError.description':
+    'The second start bit was sent as 1; in PSI5 both must always be 0.',
+  'protocol.psi5.example.truncated.name': 'Truncated frame',
+  'protocol.psi5.example.truncated.description':
+    'A single byte: the default configuration needs 13 bits and only 8 are present.',
   'protocol.spc.documentation.summary':
     "SPC: a request-response transaction on the SENT line, started by a trigger pulse. The response frame is read with SENT's own decoder — there is no second decoder.",
   'protocol.spc.option.sensorProfile': 'Sensor Profile',

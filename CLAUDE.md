@@ -125,12 +125,12 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-23, dalga 13h'den sonra,
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-24, dalga 14h'den sonra,
   KODDAN doğrulandı — tek kullanımlık sayım script'i)
-  106 `ready` / 47 `planned` / 19 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+  115 `ready` / 35 `planned` / 22 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **121 `ready` / 32 `planned` / 19 `partial`**; gerçekten yapılacak iş **32 kanonik
-  kayıt** (automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3,
+  **130 `ready` / 20 `planned` / 22 `partial`**; gerçekten yapılacak iş **20 kanonik
+  kayıt** (aerospace-uav 12, wireless-iot 4, marine-navigation 3,
   building-automation 1). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
   KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
   13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
@@ -139,20 +139,34 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   16 kanonik kayıt, 12 `ready` + 4 `partial`); domain'in 8 ailesi de (`modbus`,
   `metering`, `scada-utility`, `cip-can-based`, `industrial-ethernet`,
   `classic-fieldbus`, `sensors-device-integration`, `process-instrumentation`) kapandı.
-  Kalan beş domain'de (`automotive`, `aerospace-uav`, `wireless-iot`,
+  **`automotive` (25 kayıt) dalga 14 ile TAMAMEN KAPANDI** (14a automotive-ethernet/
+  k-line + 14b xcp-on-can + 14c xcp-on-ethernet/ccp + 14d some-ip + 14e flexray +
+  14f sae-j1850-pwm/vpw + 14g sent/spc + 14h psi5 — 8 alt dalga, 12 kanonik kayıt;
+  domain toplamı 18 `ready` + 6 `partial` + 1 alias, `planned` KALMADI); domain'in 7
+  ailesi de (`can-family`, `vehicle-network-protocols`, `sensor-interfaces`,
+  `legacy-diagnostics`, `diagnostics`, `automotive-ethernet`, `calibration`) kapandı.
+  Kalan dört domain'de (`aerospace-uav`, `wireless-iot`,
   `marine-navigation`, `building-automation`) henüz hiç iş başlamadı; sıradaki domain
   seçimi YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
   `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
-  sınırlayıcıları bayt bile değil) — gerekçeler ilgili `.ts` dosyalarının başında ve
-  `docs/plan-fazlar.md`nin 13g notunda. `hart` ve `io-link` (13h) ikisi de `ready`:
+  sınırlayıcıları bayt bile değil), `psi5` yukarı-yön-tek-çerçeve (slot zaman çizelgesi
+  çerçevede YOK) — gerekçeler ilgili `.ts` dosyalarının başında ve
+  `docs/plan-fazlar.md`nin 13g/14h notlarında. `hart` ve `io-link` (13h) ikisi de `ready`:
   HART'ın checksum'ı `lrc.ts` DEĞİL, paylaşılan `xor8Checksum`; IO-Link'in 6-bit
   checksum'ı resmi spec formülüyle (seed+XOR+8→6 bit sıkıştırma) doğrulanır ve
   `messageSide` adlı yeni bir `decodeOptions` deseniyle (alan YERLEŞİMİNİ değiştiren
   seçenek — `ccLink.ts`/`iec101.ts` emsalinin genişletilmiş hâli) Master/Device
   mesajları ayrı çözülür — ikisinin gerekçesi `hart.ts`/`ioLink.ts` dosya başında ve
   `docs/plan-fazlar.md`nin 13h notunda.
+  **Aynı bit genişliği aynı CRC algoritması DEĞİLDİR ve bu artık ÖLÇÜLMÜŞ bir kural**
+  (dalga 13 dersi 2'nin 14g/14h'teki iki uygulaması): 14g'de `CRC4_ITU` SENT'in
+  nibble-özyinelemeli CRC-4'ü için reddedildi; 14h'te PSI5'in 3 bitlik CRC'si
+  `crcEngine.ts`in "direct" döngüsüne aynı polinom ve aynı seed'le konulduğunda 1024
+  olası yükün SIFIRINDA doğru sonuç veriyor (`psi5.test.ts` bu sayıyı bekçiliyor) —
+  doğru karşılık augmented topoloji ya da seed `010`. Yeni bir CRC'yi
+  `crcCatalogue.ts`ten almadan önce YAYIMLANMIŞ bir test vektörüyle sına.
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

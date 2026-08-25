@@ -6502,6 +6502,73 @@ export const tr = {
   'protocol.sent.example.truncated.name': 'Eksik çerçeve',
   'protocol.sent.example.truncated.description':
     'Yalnız 4 nabız var; varsayılan profil (6 veri nibble’ı) için yetersiz.',
+  'protocol.psi5.documentation.summary':
+    'PSI5: iki telli, akım modülasyonlu otomotiv sensör arayüzü. Bu çözücü YUKARI YÖN (sensör → ECU) veri çerçevesini okur: iki start biti, LSB-first gönderilen yük bölgesi ve çift parite ya da 3 bitlik CRC. Yük genişliği ile parity/CRC seçimi telin içinde YOKTUR, seçeneklerden gelir.',
+  'protocol.psi5.option.applicationProfile': 'Uygulama Profili',
+  'protocol.psi5.option.applicationProfile.description':
+    'Yalnız metadata olarak saklanır ve alan tablosunun ilk satırında görünür — hiçbir bit genişliğini DEĞİŞTİRMEZ. Üç substandard belgesi (airbag / vehicle dynamics control / powertrain) kamuya açık olmadığı için preset gönderilmedi; sayıları siz verirsiniz.',
+  'protocol.psi5.option.applicationProfile.unspecified': 'Belirtilmedi',
+  'protocol.psi5.option.revision': 'PSI5 Revizyonu',
+  'protocol.psi5.option.revision.description':
+    'Sürüm ve tarihler psi5.org’un resmî tablosundan. Alan düzeni V2.1 metniyle doğrulandı; revizyon yalnız izin verilen yük aralığını belirler (V1.3: 8–24 bit, V2.x: 10–28 bit).',
+  'protocol.psi5.option.communicationMode': 'İletişim Modu',
+  'protocol.psi5.option.communicationMode.description':
+    'Senkron/asenkron ayrımı ÇERÇEVEDE hiçbir bitle temsil edilmez: ECU’nun gerilim senkron darbesiyle yapılır. Bu yüzden “otomatik” şıkkı yoktur, mod bilgisi metadata olarak sizden gelir.',
+  'protocol.psi5.option.payloadBitCount': 'Yük Bit Sayısı',
+  'protocol.psi5.option.payloadBitCount.description':
+    'Yük bölgesinin toplam bit sayısı. Telden ÇIKARILAMAZ — alıcıda slot başına yazmaçtan gelir. Seçilen revizyonun aralığı dışına çıkarsanız uyarı basılır.',
+  'protocol.psi5.option.errorCheck': 'Hata Denetimi',
+  'protocol.psi5.option.errorCheck.description':
+    'Tek bit çift parite mi, üç bit CRC mi. Bu seçim de telin içinde yoktur; alıcıda slot başına yapılandırılır. CRC g(x)=x³+x+1, başlangıç “111”, start bitleri hariç.',
+  'protocol.psi5.option.messagingBits': 'Messaging (M) Bit Sayısı',
+  'protocol.psi5.option.messagingBits.description':
+    'Opsiyonel seri veri kanalı; standartta 0 ya da 2 bittir. Yükün EN DÜŞÜK bitlerinde durur.',
+  'protocol.psi5.option.frameControlBits': 'Frame Control (F) Bit Sayısı',
+  'protocol.psi5.option.frameControlBits.description':
+    'Opsiyonel, 0–4 bit. Çerçevenin türünü ya da SENSÖR KİMLİĞİNİ taşıyabilir — genişliği sistem yapılandırmasından gelir, tahmin edilmez.',
+  'protocol.psi5.option.statusBits': 'Status (E) Bit Sayısı',
+  'protocol.psi5.option.statusBits.description': 'Opsiyonel durum alanı, 0–2 bit.',
+  'protocol.psi5.option.regionBBits': 'Data Region B Bit Sayısı',
+  'protocol.psi5.option.regionBBits.description':
+    'Opsiyonel ikincil ölçüm bölgesi, 0–12 bit. Geriye kalan bitler zorunlu Data Region A’dır.',
+  'protocol.psi5.error.empty': 'Çerçeve boş.',
+  'protocol.psi5.error.truncated':
+    'Seçilen yük genişliği ve hata denetimi için yeterli bit yok; çerçeve eksik.',
+  'protocol.psi5.error.subFieldsExceedPayload':
+    'Alt alanların toplam genişliği yük bit sayısını aşıyor; Data Region A için bit kalmıyor.',
+  'protocol.psi5.error.parityMismatch': 'Parite uyuşmuyor.',
+  'protocol.psi5.error.crcMismatch': 'CRC uyuşmuyor.',
+  'protocol.psi5.warning.startBitsNotZero':
+    'Start bitleri 0b00 değil. PSI5’te iki start biti DAİMA sıfırdır — hizalama kaymış ya da bu bir PSI5 çerçevesi değil.',
+  'protocol.psi5.warning.trailingBits':
+    'Çerçeveden sonra bir bayttan fazla bit artıyor — seçilen yük genişliği ya da hata denetimi bu yakalamayla uyuşmuyor olabilir.',
+  'protocol.psi5.warning.paddingNotZero':
+    'Bayt sınırına kadarki dolgu bitleri sıfır değil; girdi beklenen paketleme biçiminde olmayabilir.',
+  'protocol.psi5.warning.payloadOutOfRevisionRange':
+    'Seçilen yük bit sayısı, seçilen revizyonun izin verdiği aralığın dışında (V1.3: 8–24, V2.x: 10–28).',
+  'protocol.psi5.warning.regionABelowMinimum':
+    'Data Region A, standardın zorunlu alt sınırının altında kaldı; alt alan genişliklerini gözden geçirin.',
+  'protocol.psi5.warning.slotTimelineNotResolved':
+    'Slot zaman çizelgesi ve sensör kimliği ÇÖZÜLMEZ: yukarı yön çerçevesinde sensör adresi alanı yoktur, kimlik zaman slotuyla belirlenir ve slot sayacı alıcının ürettiği veridir. Bu bir analyzer işidir.',
+  'protocol.psi5.warning.profileMetadataOnly':
+    'Uygulama profili yalnız metadata olarak kaydedildi; substandard belgeleri kamuya açık olmadığı için hiçbir bit genişliği profilden GELMEZ.',
+  'protocol.psi5.warning.messagingWidth':
+    'Messaging alanı standartta 0 ya da 2 bittir; 1 bit belgelenmiş bir yapılandırma değil.',
+  'protocol.psi5.example.airbag10Parity.name': '10 bit yük + parite (Infineon AURIX örneği)',
+  'protocol.psi5.example.airbag10Parity.description':
+    'Infineon’un PSI5 sensör emülatörü kod örneğinin çalışılmış çerçevesi: 10 veri biti “0001110000”, parite 1. Aynı belge alıcı yazmacında 0x38 okunduğunu söylüyor — LSB-first okumanın kanıtı. Varsayılan seçeneklerle çözülür.',
+  'protocol.psi5.example.airbag16Crc.name': '16 bit yük + 3 bit CRC (Infineon KP405 örneği)',
+  'protocol.psi5.example.airbag16Crc.description':
+    'KP405 veri sayfasının çalışılmış CRC örneği: yük 0xAD2C, CRC 0b100. Çözmek için Yük Bit Sayısı’nı 16, Hata Denetimi’ni CRC yapın.',
+  'protocol.psi5.example.badParity.name': 'Bozuk parite',
+  'protocol.psi5.example.badParity.description':
+    'Aynı yük, parite biti kasten ters çevrildi — hesaplanan değer alan tablosunda görünür.',
+  'protocol.psi5.example.startBitError.name': 'Start biti hatası',
+  'protocol.psi5.example.startBitError.description':
+    'İkinci start biti 1 gönderildi; PSI5’te ikisi de daima 0 olmalıdır.',
+  'protocol.psi5.example.truncated.name': 'Eksik çerçeve',
+  'protocol.psi5.example.truncated.description':
+    'Tek bayt: varsayılan yapılandırma 13 bit istiyor, elde 8 bit var.',
   'protocol.spc.documentation.summary':
     'SPC: SENT hattında bir tetik darbesiyle başlatılan istek-yanıt işlemi. Yanıt çerçevesi SENT’in KENDİ çözücüsüyle okunur — ikinci bir çözücü yok.',
   'protocol.spc.option.sensorProfile': 'Sensör Profili',

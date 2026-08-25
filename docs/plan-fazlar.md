@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-22 itibarıyla dalga 12 KAPANDI — `network-ethernet` domain'i de tamamen bitti, `interfaces-framing`ten sonra ikinci kapanan domain). Kalan iş **48 kanonik kayıt**: industrial-automation 16, automotive 12, aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-24 itibarıyla dalga 14 KAPANDI — `automotive` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet` ve `industrial-automation`dan sonra dördüncü kapanan domain). Kalan iş **20 kanonik kayıt**: aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -41,11 +41,13 @@
 ## Sıradaki adım
 
 Comm SPA'sında **Faz 9 bitti; Faz 10 (protokol dalgaları) SÜRÜYOR** —
-`interfaces-framing`, `network-ethernet` VE `industrial-automation`
-domain'leri bitti, öteki beş domain'de 32 kanonik kayıt duruyor. (Bu başlık
-2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle `interfaces-framing`in
-bittiğini kastediyordu ama fazın tamamı gibi okunuyordu — 2026-08-22'de
-düzeltildi. Sayım 2026-08-23'te dalga 13 kapanışıyla 48'den 32'ye indi.)
+`interfaces-framing`, `network-ethernet`, `industrial-automation` VE
+`automotive` domain'leri bitti, öteki dört domain'de 20 kanonik kayıt duruyor.
+(Bu başlık 2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle
+`interfaces-framing`in bittiğini kastediyordu ama fazın tamamı gibi okunuyordu
+— 2026-08-22'de düzeltildi. Sayım 2026-08-23'te dalga 13 kapanışıyla 48'den
+32'ye, 2026-08-24'te dalga 14 kapanışıyla 32'den 20'ye indi; her iki sayım da
+KODDAN doğrulandı.)
 
 **Dalga 12 (network-ethernet, 19 kayıt) 2026-08-22'de TAMAMEN KAPANDI**
 (12a icmp/icmpv6 · 12b arp/lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e
@@ -66,9 +68,8 @@ KANITLI paylaşım (13b bunu tüketecek); `canopen.ts` ise yalnız tek
 büyük ölçüde ticari konsorsiyum spec'lerine (PI/CLPA/FieldComm Group)
 dayanıyor — spec bulunabilirlik riski dalga 12'den köklü bir fark.
 
-**Dalga 14 (automotive, 12 kanonik kayıt) 2026-08-23'te BAŞLADI — keşif turu
-bitti, `docs/brief-faz10-dalga14.md` yazıldı, uygulama SÜRÜYOR (14a bitti,
-ayrıntı aşağıda).** Ham `planned` 13'tür ama `canopen` bir ALIAS'tır
+**Dalga 14 (automotive, 12 kanonik kayıt) 2026-08-23'te BAŞLADI, 2026-08-24'te
+TAMAMEN KAPANDI** (kapanış özeti aşağıda; keşif turu `docs/brief-faz10-dalga14.md`). Ham `planned` 13'tür ama `canopen` bir ALIAS'tır
 (`aliasOf: industrial-automation/cip-can-based/canopen`, dalga 13'te `ready`
 oldu) — gerçek iş 12 kayıt. 8 alt dalga önerildi: 14a automotive-ethernet/
 k-line · 14b xcp-on-can · 14c xcp-on-ethernet/ccp · 14d some-ip · 14e flexray ·
@@ -93,9 +94,10 @@ hesaplanamıyor.
 Bağımlılık zinciri: 14c → 14b (`xcpPacket.ts` 14b'de doğar) · 14g → 14f (nabız
 konteyneri 14f'te tanımlanır) · 14h → 14g · 14d → 14a (aile kapanış sayımı) ·
 14e bağımsız. **14f/14g/14h ana brifin açık soru 1'i (nabız-günlüğü girdi
-sözleşmesi) karara bağlanmadan başlamaz.** Domain kapanış işleri (CLAUDE.md borç
-sayımı 32 → 20, plan kapanış özeti, çürüyen tahminlerin işaretlenmesi) 14h'in
-görev listesinde.
+sözleşmesi) karara bağlanmadan başlamaz.** Açık soru 1 kullanıcı tarafından
+**karma (c)** olarak karara bağlandı ve üçü de o çizgide koştu. Domain kapanış
+işleri (CLAUDE.md borç sayımı 32 → 20, plan kapanış özeti, çürüyen tahminlerin
+işaretlenmesi) 14h'te YAPILDI.
 
 **14a (automotive-ethernet + k-line) BİTTİ** (uygulama; brief
 `docs/brief-faz10-dalga14a.md`). İkisi de brief'in önerdiği gibi HİÇ parser
@@ -151,6 +153,123 @@ satırı `it.each` ile ayrı fixture) + 8 e2e (gerçek tarayıcı,
 paket (4882 test) yeşil. `calibration` ailesinde iki kayıt kaldı
 (xcp-on-ethernet, ccp — 14c'de kapanacak, `xcpPacket.ts`in ikinci tüketicisi
 orada doğacak).
+
+**14c (xcp-on-ethernet + ccp) BİTTİ — `calibration` KAPANDI** (`2ec57da`).
+`xcpPacket.ts` iki tüketicili oldu: `xcpOnEthernet.ts` `decodeXcpPacket`i ve
+`role`/`byteOrder` seçenek dizisini `xcpOnCan.ts` ile AYNI REFERANSTAN paylaşıyor
+(test `toBe` ile kanıtlıyor). Taşıma başlığının LEN/CTR alanları HAM kaldı: konum ve
+genişlik iki kaynakta örtüşüyor ama BAYT SIRASI çelişiyor (Scapy big-endian, pyxcp
+little-endian) — "iki kaynak örtüşmezse alan adlandırılmaz" kuralı burada işledi.
+
+**14d (some-ip + some-ip-sd) BİTTİ — `automotive-ethernet` KAPANDI** (`05492fd`).
+Ana brifin açık soru 5'i (ayrı kayıt mı, alt çözücü mü) kodla sınandı ve önerisi
+doğrulandı: TEK katalog kaydı, İKİ modül (`someip.ts` + `someipSd.ts`).
+
+**14e (flexray) BİTTİ** (`781166e`). Dalganın görünmez-değişmez riski en yüksek
+kaydı; açık soru 4 **(a)** olarak kapandı: `crcEngine.ts`e
+`crcBits(bytes, bitLength, params)` kardeşi eklendi ve `crc()` ona delege ediyor
+(gövde kopyalanmadı). Katalogda ÜÇ yeni CRC girdisi (brief İKİ diyordu — kanal A/B
+ayrı `init` taşıdığı için üç oldu): `CRC11_FLEXRAY`, `CRC24_FLEXRAY_A`,
+`CRC24_FLEXRAY_B`; üçü de CRC RevEng'de attested ve 14 conformance codeword'ü
+fixture olarak duruyor. İkisi de GERÇEKTEN doğrulanıyor.
+
+**14f (sae-j1850-pwm + sae-j1850-vpw) BİTTİ — `vehicle-network-protocols` KAPANDI**
+(`a48db80`). Nabız günlüğü konteyneri BU alt dalgada tanımlandı (nabız başına
+2 bayt `Uint16LE`, birim 0.1 µs, 0 rezerve); `types.ts`e DOKUNULMADI. `canParse`
+tuzağı ÖLÇÜLDÜ: naif imza (yalnız `pulses[0]`) 761 örneğin 413'ünü yanlış pozitif
+kabul ediyordu; ölçüm kalıcı bir teste dönüştü (`j1850CanParseRegistry.test.ts`).
+
+**14g (sent + spc) BİTTİ** (`c210e36`). Konteyner `protocol-core/decoding/
+pulseLog.ts`e TAŞINDI (yalnız gerçekten ortak olan kısım). SENT sabitleri dört
+bağımsız kaynakta örtüştü; CRC-4 ise yalnız GÖSTERİLİYOR — algoritma tek açık
+kaynak koduyla görülebildi, üç çakışmayan varyantı var ve `CRC4_ITU` sahte dost
+olarak REDDEDİLDİ. `spc.ts` `decodeSentNibbles`ı GERÇEKTEN çağırıyor.
+
+**14h (psi5) BİTTİ — `sensor-interfaces` ve `automotive` domain'i KAPANDI**
+(uygulama; brief `docs/brief-faz10-dalga14h.md`). Ana brifin bu kayıt için önerisi
+"partial + `calculatorIds`, motor YOK"tu; **kaynak turu bu kötümserliği ÇÜRÜTTÜ**
+ve kayıt gerçek bir motorla `partial` oldu. PSI5 nabız konteynerini KULLANMIYOR:
+`dali.ts`in "Manchester decoder'a girmez" kararı birebir uygulandı, girdi çözülmüş
+çerçeve bitleridir (spec `:171` buna açıkça izin veriyor); `currentLoop.ts` sahte
+dost olarak çağrılmadı (PSI5 4-20 mA değil, taban akımın üstüne ΔI_S).
+
+Kaynak turu beş bağımsız kamuya açık kaynağa ulaştı — PSI5 Technical Specification
+V2.1 metni, Infineon KP405 datasheet'i, Infineon iLLD `IfxPsi5_Psi5.h` +
+PSI5 sensör emülatörü kod örneği, NXP MMA51xxKW datasheet'i, Pico Technology
+decoder belgesi — ve **çerçeve biçimi ikiden fazla kaynakta örtüştü**: iki start
+biti (daima 0), 10-28 bitlik yük bölgesi (LSB-first), 1 bit çift parite ya da
+3 bit CRC. **3 bitlik CRC İKİ SATICININ YAYIMLADIĞI test vektörüyle (NXP'nin
+dokuz 10-bit vektörü + KP405'in 16-bit `0xAD2C → 0b100` örneği) hesapla
+doğrulandı**, bu yüzden 14g'nin tersine CRC yalnız gösterilmiyor, GERÇEKTEN
+doğrulanıp PASS/FAIL basılıyor. Parite ayrıca AURIX kod örneğinin çalışılmış
+çerçevesiyle (`0001110000` → `RD = 0x38`, parity 1) doğrulandı — aynı fixture
+LSB-first okumanın da kanıtı.
+
+**REDDEDİLEN İDDİA:** psi5.org/overview'in (ve onu kopyalayan Wikipedia'nın)
+*"8…24 data bits"* cümlesi. Aynı paragraf *"fixed 125kbps"* ve *"unidirectional"*
+da diyor; ikisi de V2.x'te geçersiz. O özet V1.3 dönemi kalıntısı — V2.x'in gerçek
+aralığı `k = 10…28`, `8` yalnız V1.3 mirası. Aralık bu yüzden REVİZYONA BAĞLI
+yapıldı ve dışına çıkan değer uyarı basıyor. Dolaşımdaki "8/10/12/16/20/24"
+listesindeki **12 hiçbir kaynakta yok** ve kullanılmadı.
+
+**KAPSAM SINIRI (rozet `partial`, `iec-61850` GOOSE-only sınıfı):** slot zaman
+çizelgesi ve sensör kimliği ÇÖZÜLMÜYOR — yukarı yön çerçevesinde sensör adresi
+alanı YOK, kimlik zaman slotuyla belirleniyor ve slot sayacı ALICININ verisi
+(iLLD `slotCounter : 3`, `timestamp : 24`). Application profile YALNIZ METADATA:
+üç substandard belgesi (airbag / vehicle dynamics control / powertrain) kamuya
+açık olmadığı için **hiçbir preset gönderilmedi** — `microwire.ts`in "93xx66 gibi
+tablosu doğrulanmamış aileler yalnız `custom` yolundan kullanılır" kararının
+genelleştirilmiş hâli. Aşağı yön (ECU → sensör) çerçeveleri kapsam dışı (3 ya da
+9 start biti, ayrı biçim, 6 bit CRC'si tek kaynaklı ve test vektörsüz).
+
+**`canParse` CRC-ONLY ve bu ÖLÇÜLMÜŞ bir karar:** 1 bitlik parite eleği 777 kayıt
+örneğinden İKİSİNİ yanlış pozitif kabul ediyordu (`as-interface/end-bit-error`,
+`ble-advertisement/unknown-pdu-type` — ikisi de bayt bayt geçerli birer PSI5-10P
+çerçevesi, yapısal olarak ayrılamazlar). 3 bitlik CRC eleği aynı taramada SIFIR
+çarpışma veriyor; `psi5CanParseRegistry.test.ts` her iki ölçümü de bekçiliyor.
+**`crcEngine.ts` KULLANILMADI ve gerekçesi ölçüldü:** PSI5'in CRC'si augmented
+(non-direct) topolojidir; aynı polinom ve aynı seed "direct" döngüye konulduğunda
+1024 olası 10-bit yükün SIFIRINDA doğru sonuç veriyor (doğru direct karşılığı
+seed `010`). `crcCatalogue.ts`e giriş de AÇILMADI — `CrcParams` bu bit-seviyesi
+LSB-first beslemeyi ifade edemiyor, sahte bir satır tuzağı yayınlamak olurdu.
+
+Yeni/değişen dosyalar: `protocols/automotive/psi5/psi5.ts` (+`psi5.test.ts`,
++`psi5CanParseRegistry.test.ts`, üçü de yeni), `protocols/index.ts` (1 kayıt) +
+`index.test.ts` (sayaç + kategori haritası), `app/catalog/domains/automotive.ts`
+(`planned` → `partial` + `pluginId` + dürüst `summary`), `translations/{tr,en}.ts`
+(2×43 anahtar), `e2e/psi5-decode.spec.ts` (yeni, 8 test), `CLAUDE.md` (borç sayımı
+KODDAN doğrulandı: 32 → 20 kanonik, automotive 1 → 0). 37 yeni birim testi +
+8 e2e + `npm run typecheck` + tam paket (5249 test) yeşil.
+
+**`automotive` domain'i TAMAMEN BİTTİ — dalga 14 kapandı.**
+
+**Dalga 14 kapanış özeti (14a-14h, 8 alt dalga / 12 kanonik kayıt, 2026-08-23 →
+2026-08-24):** `automotive`in 7 ailesinin HEPSİ kapandı — can-family,
+vehicle-network-protocols (14e flexray + 14f j1850×2), sensor-interfaces
+(14g sent/spc + 14h psi5), legacy-diagnostics (14a k-line), diagnostics,
+automotive-ethernet (14a automotive-ethernet + 14d some-ip), calibration
+(14b xcp-on-can + 14c xcp-on-ethernet/ccp). 12 kayıttan **9'u `ready`**
+(xcp-on-can, xcp-on-ethernet, ccp, some-ip, flexray, sae-j1850-pwm,
+sae-j1850-vpw, sent, spc), **3'ü `partial`** (automotive-ethernet ve k-line —
+ikisi de bilinçli olarak parser ALMADAN kapandı, LoRa paterni; psi5 — kapsam
+kararı). Domain toplamı: 25 kayıt = 18 `ready` + 6 `partial` + 1 alias, `planned`
+KALMADI.
+
+Dalganın kalıcı dersleri: (1) **`decodeOptions` bu domain'de kural oldu** — 14b
+`role`/`byteOrder` ile açtı, 14f/14g profil, 14h dokuz seçenekle en uç örneği
+verdi; ortak ölçüt hep aynı: parametre çerçeveden ÇIKARILAMIYORSA sorulur,
+çıkarılıyorsa sorulmaz (14g'nin tick süresi TELDEN çıktığı için kanala GİRMEDİ).
+(2) **"İki kaynak örtüşmezse alan adlandırılmaz" kuralı üç kez işledi** —
+14c'nin LEN/CTR bayt sırası, 14g'nin CRC-4 varyantları, 14h'in psi5.org bayat
+özeti. (3) **CRC sahte dostluğu ölçülebilir bir şeydir**: 14e üç CRC'yi
+katalogda attested değerlerle açtı, 14g `CRC4_ITU`yu reddetti, 14h `crcEngine`in
+direct döngüsünün 1024/1024 yanlış verdiğini SAYIYLA gösterdi. (4) **`canParse`
+imzası ölçülmeden yazılmaz** — 14f'in 413 yanlış pozitifi kalıcı bir test
+desenine dönüştü ve 14g/14h onu devraldı.
+
+Sıradaki domain seçimi HENÜZ YAPILMADI — kalan dört domain'de (`aerospace-uav` 12,
+`wireless-iot` 4, `marine-navigation` 3, `building-automation` 1) hiç iş
+başlamadı, toplam 20 kanonik kayıt açık.
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular
