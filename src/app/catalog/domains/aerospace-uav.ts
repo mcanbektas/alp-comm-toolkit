@@ -453,7 +453,15 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'Military command/response time-division multiplex avionics bus where a Bus Controller drives Remote Terminals over redundant Bus A/B while a passive Bus Monitor records every transaction.',
           layer: 'multi-layer',
-          status: 'planned',
+          // Command / Status / Data sözcüklerinin alan sınırları dört bağımsız
+          // uygulamayla çaprazlandı ve gerçekten çözülüyor. Çözülmeyen tek şey
+          // sözcük TİPİdir ve o çerçevede DEĞİL 3 bitlik senkron darbesindedir
+          // — üstelik Command ile Status aynı senkronu paylaşır. Tip
+          // kullanıcıdan alınır (`wordType`), tahmin EDİLMEZ; bu bir kapsam
+          // daraltması değil, girdinin kendisinde olmayan bir bilgidir
+          // (Faz 10 dalga 15g, bkz. mil1553.ts dosya başı).
+          status: 'ready',
+          pluginId: 'mil-std-1553',
           tabs: [
             'overview',
             'decode',

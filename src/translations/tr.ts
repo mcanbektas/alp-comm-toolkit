@@ -3208,6 +3208,84 @@ export const tr = {
   'protocol.arinc429.example.notWordAligned.description':
     '3 baytlık bir arabellek — 32 bitlik word\'lerden oluşan bir bloğa göre eksik.',
 
+  // --- MIL-STD-1553 (Faz 10, dalga 15g) ---
+  'protocol.mil1553.documentation.summary':
+    'MIL-STD-1553 16-bit sözcük çözümü: Command Word (RT Address bit 15:11, T/R bit 10, Subaddress/Mode bit 9:5, Word Count/Mode Code bit 4:0), Status Word (RT Address + dokuz bayrak + bit 7:5 rezerve) ve 16 bitlik ham Data Word. Girdi çözülmüş sözcük listesi / HEX / CSV / adapter log dosyasıdır; Manchester dalgası çözülmez. Sözcük tipi SENKRON DARBESİNDE taşınır ve 16 bitlik yükte YOKTUR — üstelik Command ile Status aynı senkronu paylaşır — bu yüzden tip kullanıcıdan alınır, TAHMİN EDİLMEZ. Mode code ADI, ICD engineering değeri ve kabul limitleri basılmaz.',
+  'protocol.mil1553.error.empty': 'Girdi boş.',
+  'protocol.mil1553.error.notWordAligned':
+    'Girdi 2 baytın katı değil — MIL-STD-1553 sözcüğünün yükü tam 16 bittir, artan bayt eksik bir sözcük demektir.',
+  'protocol.mil1553.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.mil1553.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+
+  'protocol.mil1553.option.wordType': 'Sözcük Tipi',
+  'protocol.mil1553.option.wordType.description':
+    'Sözcüğün Command / Status / Data olduğu bilgisi 3 bitlik SENKRON DARBESİNDEDİR, 16 bitlik yükte değil — üstelik Command ile Status aynı senkron desenini paylaşır, yani senkron korunsa bile ayrım çerçeveden çıkmaz. Varsayılan YOKTUR: yanlış bir tip her sözcükte sessizce yanlış alan adı basar. Seçilmezse 16 bit ham gösterilir.',
+  'protocol.mil1553.option.wordType.unset': 'Seçilmedi (16 bit ham)',
+  'protocol.mil1553.option.wordType.command': 'Command Word (BC → RT komutu)',
+  'protocol.mil1553.option.wordType.status': 'Status Word (RT → BC durumu)',
+  'protocol.mil1553.option.wordType.data': 'Data Word (16 bit ham veri)',
+
+  'protocol.mil1553.option.wordByteOrder': 'Sözcük Bayt Sırası',
+  'protocol.mil1553.option.wordByteOrder.description':
+    'Adapter 16 bitlik sözcüğü hangi bayt sırasıyla yazıyor. Tahmin edilmez: yanlış seçim bütün alan sınırlarını kaydırır. Seçilmezse yalnız ham 2 bayt basılır.',
+  'protocol.mil1553.option.wordByteOrder.unset': 'Seçilmedi (ham bayt)',
+  'protocol.mil1553.option.wordByteOrder.bigEndian': 'Big-endian (bayt 0 = bit 15:8)',
+  'protocol.mil1553.option.wordByteOrder.littleEndian': 'Little-endian (bayt 0 = bit 7:0)',
+
+  'protocol.mil1553.warning.wordTypeUnknown':
+    'Sözcük tipi seçilmedi — tip senkron darbesindedir ve 16 bitlik yükte YOKTUR, tahmin edilemez. Sözcükler 16 bit ham basıldı, alt alanlar adlandırılmadı.',
+  'protocol.mil1553.warning.wordByteOrderNotSelected':
+    'Bayt sırası seçilmedi — bit numaraları anlamsız kalacağı için sözcükler HAM 2 bayt olarak basıldı.',
+  'protocol.mil1553.warning.wordTypeAppliedToAllWords':
+    'Seçilen sözcük tipi yakalamadaki BÜTÜN sözcüklere uygulandı. Bir 1553 işlemi (Command + Status + Data) tek bir tiple çözülemez — her tipi ayrı çözün; işlem zaman çizelgesi çerçeveler arası bir analizdir ve bu çözümleyicinin işi değildir.',
+  'protocol.mil1553.warning.parityNotInInput':
+    'Parite biti girdide YOKTUR ve DOĞRULANMADI: 1553 sözcüğü 3 bit senkron + 16 bit yük + 1 bit tek (odd) paritedir, adapter yükü verirken pariteyi tüketip ayrı bir bayrağa taşır. Bu çözümleyici yalnız 16 bitlik yükü alır.',
+  'protocol.mil1553.warning.statusReservedBitsNotZero':
+    'Status Word\'ün rezerve bitleri (7:5) sıfır değil — bu sözcük büyük olasılıkla bir Status Word DEĞİLDİR; sözcük tipi seçimini gözden geçirin.',
+
+  'protocol.mil1553.field.wordTypeUnknown':
+    'Sözcük tipi seçilmediği için alt alanlar ayrılmadı — 16 bitin kendisi gösteriliyor.',
+  'protocol.mil1553.field.wordByteOrderNotSelected':
+    'Bayt sırası seçilmediği için alanlar ayrılmadı — sözcük ham 2 bayt olarak gösteriliyor.',
+  'protocol.mil1553.field.modeCodeNameRequiresRevision':
+    'Mode code ADI (örn. "Transmitter Shutdown") basılmaz: mode-code veritabanı seçilen standart revizyonundan yüklenmelidir. Yalnız sayı gösterilir.',
+  'protocol.mil1553.field.wordCountUnusedInModeCommand':
+    'Subaddress 0 ya da 31 olduğu için bu alan Word Count değil Mode Code taşır.',
+  'protocol.mil1553.field.subaddressMeaningRequiresIcd':
+    'Subaddress\'in hangi alt sisteme baktığı equipment ICD\'sine bağlıdır ve gömülmez — yalnız sayı gösterilir.',
+  'protocol.mil1553.field.dataMeaningRequiresIcd':
+    'Data Word 16 bit hamdır ve mühendislik anlamı equipment ICD\'sinden gelir; sabit offset\'le alan adı yakıştırılmaz.',
+  'protocol.mil1553.field.reservedBitsNotZero':
+    'Rezerve bitler sıfır olmalıdır — sıfırdan farklı bir değer sözcüğün Status Word olmadığına işaret eder.',
+
+  'protocol.mil1553.example.commandRt3Transmit.name': 'Command Word — RT 3, transmit, 1 sözcük',
+  'protocol.mil1553.example.commandRt3Transmit.description':
+    '0x1C21 = 0b0001110000100001: RT Address 3, T/R 1 (RT gönderir), Subaddress 1, Word Count 1. Referansın adım adım anlattığı BC→RT işleminin komut sözcüğü.',
+  'protocol.mil1553.example.statusRt3AllClear.name': 'Status Word — RT 3, bütün bayraklar temiz',
+  'protocol.mil1553.example.statusRt3AllClear.description':
+    '0x1800 = 0b0001100000000000: RT Address 3, rezerve bitler sıfır, hiçbir durum bayrağı set değil. Aynı işlemin durum sözcüğü.',
+  'protocol.mil1553.example.dataWordValue2.name': 'Data Word — değer 2',
+  'protocol.mil1553.example.dataWordValue2.description':
+    'Aynı işlemde istenen tek veri sözcüğü. 16 bit hamdır; mühendislik anlamı equipment ICD\'sinden gelir ve basılmaz.',
+  'protocol.mil1553.example.modeCommandSubaddress31.name': 'Mode command — subaddress 31',
+  'protocol.mil1553.example.modeCommandSubaddress31.description':
+    '0x1BE2: RT Address 3, Subaddress 31 (0b11111). Subaddress 0 ya da 31 "bu bir mode command\'dır" demektir; son 5 bit Word Count değil Mode Code taşır. Kodun ADI basılmaz.',
+  'protocol.mil1553.example.broadcastModeSubaddress0.name': 'Broadcast mode command — subaddress 0',
+  'protocol.mil1553.example.broadcastModeSubaddress0.description':
+    '0xF801: RT Address 31 (broadcast için rezerve), Subaddress 0 → yine mode command, Mode Code 1. Mode command\'ın iki subaddress değeriyle de geldiğini gösterir.',
+  'protocol.mil1553.example.statusReservedNotZero.name': 'Rezerve bitleri sıfır olmayan sözcük',
+  'protocol.mil1553.example.statusReservedNotZero.description':
+    '0x18E0: bit 7:5 = 111. Status Word olarak çözülürse rezerve alan geçersiz işaretlenir ve uyarı basılır — sözcük tipinin yanlış seçilmiş olabileceğinin en güçlü göstergesi.',
+  'protocol.mil1553.example.littleEndianAdapter.name': 'Little-endian adapter sözcüğü',
+  'protocol.mil1553.example.littleEndianAdapter.description':
+    'İlk örneğin MANTIKSAL olarak aynısı, bayt sırası ters yazılmış. Big-endian seçilirse bütün alanlar kayar — bayt sırasının neden tahmin edilmediğini gösterir.',
+  'protocol.mil1553.example.threeWordTransaction.name': 'Üç sözcüklük BC→RT işlemi',
+  'protocol.mil1553.example.threeWordTransaction.description':
+    'Command + Status + Data tek bir blokta. Seçilen sözcük tipi ÜÇÜNE BİRDEN uygulanır — bu yüzden uyarı basılır; her sözcüğü kendi tipiyle ayrı çözün. Alan kimlikleri sözcük indeksi taşır, çakışmaz.',
+  'protocol.mil1553.example.notWordAligned.name': 'Sözcük hizasız girdi',
+  'protocol.mil1553.example.notWordAligned.description':
+    '3 baytlık bir arabellek — 16 bitlik sözcüklerden oluşan bir bloğa göre eksik.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

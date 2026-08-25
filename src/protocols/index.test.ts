@@ -81,6 +81,7 @@ const BUILT_IN_IDS = [
   'mavlink',
   'mdns',
   'microwire',
+  'mil-std-1553',
   'modbus-ascii',
   'modbus-rtu',
   'modbus-tcp',
@@ -146,6 +147,7 @@ const BUILT_IN_IDS = [
 
 const EXPECTED_CATEGORY: Record<string, string> = {
   'arinc-429': 'aerospace-uav',
+  'mil-std-1553': 'aerospace-uav',
   ais: 'marine-navigation',
   arp: 'network-ethernet',
   'art-net': 'building-automation',

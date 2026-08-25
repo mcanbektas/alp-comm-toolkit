@@ -268,6 +268,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'arinc-429', () =>
     import('./aerospace/arinc429/arinc429').then((module) => module.arinc429Plugin),
   );
+  // Sözcük TİPİ (Command/Status/Data) 3 bitlik SENKRON DARBESİNDEDİR, 16 bitlik
+  // yükte YOKTUR — üstelik Command ile Status aynı senkronu paylaşır, yani
+  // senkron korunsa bile ayrım çerçeveden çıkmaz. Tip `wordType` seçeneğiyle
+  // kullanıcıdan alınır, `canParse` yapısal olarak `false` döner
+  // (bkz. mil1553.ts dosya başı).
+  registerOnce(registry, 'mil-std-1553', () =>
+    import('./aerospace/mil1553/mil1553').then((module) => module.mil1553Plugin),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

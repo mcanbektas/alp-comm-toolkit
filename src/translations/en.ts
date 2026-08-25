@@ -3204,6 +3204,84 @@ export const en: TranslationDictionary = {
   'protocol.arinc429.example.notWordAligned.description':
     'A 3-byte buffer — incomplete for a block made of 32-bit words.',
 
+  // --- MIL-STD-1553 (Phase 10, wave 15g) ---
+  'protocol.mil1553.documentation.summary':
+    'MIL-STD-1553 16-bit word decoding: Command Word (RT Address bit 15:11, T/R bit 10, Subaddress/Mode bit 9:5, Word Count/Mode Code bit 4:0), Status Word (RT Address plus nine flags and reserved bits 7:5) and the raw 16-bit Data Word. Input is a decoded word list / HEX / CSV / adapter log file; the Manchester waveform is not decoded. The word type lives in the SYNC PULSE and is absent from the 16-bit payload — and Command and Status share the same sync — so the type is taken from the user and never guessed. Mode code names, ICD engineering values and acceptance limits are not printed.',
+  'protocol.mil1553.error.empty': 'Input is empty.',
+  'protocol.mil1553.error.notWordAligned':
+    'Input is not a multiple of 2 bytes — a MIL-STD-1553 word payload is exactly 16 bits, so a leftover byte means an incomplete word.',
+  'protocol.mil1553.error.aborted': 'Decoding was aborted.',
+  'protocol.mil1553.error.frameTooLong': 'The frame exceeds the allowed maximum length.',
+
+  'protocol.mil1553.option.wordType': 'Word Type',
+  'protocol.mil1553.option.wordType.description':
+    'Whether a word is Command / Status / Data is carried by the 3-bit SYNC PULSE, not by the 16-bit payload — and Command and Status share the same sync pattern, so even a preserved sync would not separate them. There is NO default: a wrong type silently prints wrong field names on every word. If not selected, the raw 16 bits are shown.',
+  'protocol.mil1553.option.wordType.unset': 'Not selected (raw 16 bits)',
+  'protocol.mil1553.option.wordType.command': 'Command Word (BC → RT command)',
+  'protocol.mil1553.option.wordType.status': 'Status Word (RT → BC status)',
+  'protocol.mil1553.option.wordType.data': 'Data Word (raw 16-bit data)',
+
+  'protocol.mil1553.option.wordByteOrder': 'Word Byte Order',
+  'protocol.mil1553.option.wordByteOrder.description':
+    'Which byte order the adapter writes the 16-bit word in. Not guessed: a wrong choice shifts every field boundary. If not selected, only the raw 2 bytes are shown.',
+  'protocol.mil1553.option.wordByteOrder.unset': 'Not selected (raw bytes)',
+  'protocol.mil1553.option.wordByteOrder.bigEndian': 'Big-endian (byte 0 = bit 15:8)',
+  'protocol.mil1553.option.wordByteOrder.littleEndian': 'Little-endian (byte 0 = bit 7:0)',
+
+  'protocol.mil1553.warning.wordTypeUnknown':
+    'Word type not selected — the type lives in the sync pulse and is ABSENT from the 16-bit payload, so it cannot be inferred. Words are shown as raw 16 bits and no sub-field is named.',
+  'protocol.mil1553.warning.wordByteOrderNotSelected':
+    'Byte order not selected — bit numbers would be meaningless, so words are shown as RAW 2 bytes.',
+  'protocol.mil1553.warning.wordTypeAppliedToAllWords':
+    'The selected word type was applied to EVERY word in the capture. A 1553 transaction (Command + Status + Data) cannot be decoded under a single type — decode each type separately; the transaction timeline is a cross-frame analysis and not this decoder\'s job.',
+  'protocol.mil1553.warning.parityNotInInput':
+    'The parity bit is ABSENT from the input and was NOT verified: a 1553 word is 3 sync bits + 16 payload bits + 1 odd parity bit, and the adapter consumes the parity and reports it out of band. This decoder receives only the 16-bit payload.',
+  'protocol.mil1553.warning.statusReservedBitsNotZero':
+    'The Status Word reserved bits (7:5) are not zero — this word is most likely NOT a Status Word; review the word type selection.',
+
+  'protocol.mil1553.field.wordTypeUnknown':
+    'Sub-fields were not split because the word type was not selected — the 16 bits themselves are shown.',
+  'protocol.mil1553.field.wordByteOrderNotSelected':
+    'Fields were not split because the byte order was not selected — the word is shown as raw 2 bytes.',
+  'protocol.mil1553.field.modeCodeNameRequiresRevision':
+    'The mode code NAME (e.g. "Transmitter Shutdown") is not printed: the mode-code database must be loaded from the active standard revision. Only the number is shown.',
+  'protocol.mil1553.field.wordCountUnusedInModeCommand':
+    'Because the subaddress is 0 or 31, this field carries a Mode Code rather than a Word Count.',
+  'protocol.mil1553.field.subaddressMeaningRequiresIcd':
+    'Which subsystem a subaddress refers to depends on the equipment ICD and is not embedded — only the number is shown.',
+  'protocol.mil1553.field.dataMeaningRequiresIcd':
+    'A Data Word is raw 16 bits and its engineering meaning comes from the equipment ICD; no field name is attached at a fixed offset.',
+  'protocol.mil1553.field.reservedBitsNotZero':
+    'Reserved bits must be zero — a non-zero value indicates that this word is not a Status Word.',
+
+  'protocol.mil1553.example.commandRt3Transmit.name': 'Command Word — RT 3, transmit, 1 word',
+  'protocol.mil1553.example.commandRt3Transmit.description':
+    '0x1C21 = 0b0001110000100001: RT Address 3, T/R 1 (the RT transmits), Subaddress 1, Word Count 1. The command word of the BC→RT transaction the reference walks through step by step.',
+  'protocol.mil1553.example.statusRt3AllClear.name': 'Status Word — RT 3, all flags clear',
+  'protocol.mil1553.example.statusRt3AllClear.description':
+    '0x1800 = 0b0001100000000000: RT Address 3, reserved bits zeroed, no status flag set. The status word of the same transaction.',
+  'protocol.mil1553.example.dataWordValue2.name': 'Data Word — value 2',
+  'protocol.mil1553.example.dataWordValue2.description':
+    'The single data word requested in the same transaction. It is raw 16 bits; the engineering meaning comes from the equipment ICD and is not printed.',
+  'protocol.mil1553.example.modeCommandSubaddress31.name': 'Mode command — subaddress 31',
+  'protocol.mil1553.example.modeCommandSubaddress31.description':
+    '0x1BE2: RT Address 3, Subaddress 31 (0b11111). A subaddress of 0 or 31 means "this is a mode command"; the last 5 bits then carry a Mode Code rather than a Word Count. The code NAME is not printed.',
+  'protocol.mil1553.example.broadcastModeSubaddress0.name': 'Broadcast mode command — subaddress 0',
+  'protocol.mil1553.example.broadcastModeSubaddress0.description':
+    '0xF801: RT Address 31 (reserved for broadcast), Subaddress 0 → again a mode command, Mode Code 1. Shows that a mode command arrives under both subaddress values.',
+  'protocol.mil1553.example.statusReservedNotZero.name': 'Word with non-zero reserved bits',
+  'protocol.mil1553.example.statusReservedNotZero.description':
+    '0x18E0: bits 7:5 = 111. Decoded as a Status Word the reserved field is marked invalid and a warning is raised — the strongest hint that the word type may have been chosen wrongly.',
+  'protocol.mil1553.example.littleEndianAdapter.name': 'Little-endian adapter word',
+  'protocol.mil1553.example.littleEndianAdapter.description':
+    'Logically the SAME as the first example, written with the byte order reversed. Choosing big-endian shifts every field — which is why the byte order is never guessed.',
+  'protocol.mil1553.example.threeWordTransaction.name': 'Three-word BC→RT transaction',
+  'protocol.mil1553.example.threeWordTransaction.description':
+    'Command + Status + Data in a single block. The selected word type applies to ALL THREE — hence the warning; decode each word under its own type. Field ids carry the word index so they never collide.',
+  'protocol.mil1553.example.notWordAligned.name': 'Word-misaligned input',
+  'protocol.mil1553.example.notWordAligned.description':
+    'A 3-byte buffer — incomplete for a block made of 16-bit words.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',
