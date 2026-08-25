@@ -6475,4 +6475,78 @@ export const en: TranslationDictionary = {
   'protocol.j1850.vpw.example.truncated.name': 'Truncated frame',
   'protocol.j1850.vpw.example.truncated.description':
     'The pulse count after SOF does not fill a whole byte (not a multiple of 8).',
+
+  // --- SENT + SPC (Phase 10, wave 14g) ---
+  'protocol.sent.documentation.summary':
+    'SAE J2716 SENT: a one-way pulse train decoded into nibbles using a tick time derived from the calibration pulse. The CRC is shown as received, not computed — its nibble-recursive algorithm could not be confirmed with a second independent source.',
+  'protocol.sent.option.profile': 'Profile',
+  'protocol.sent.option.profile.description':
+    'Selecting a preset ignores the Data Nibble Count field, and the first row of the field table shows the profile in effect, by name.',
+  'protocol.sent.option.profile.custom': 'Custom (use the number field)',
+  'protocol.sent.option.dataNibbleCount': 'Data Nibble Count',
+  'protocol.sent.option.dataNibbleCount.description':
+    'The number of data nibbles in the Fast Channel frame. Only applies under the "Custom" profile.',
+  'protocol.sent.error.empty': 'The pulse log is empty.',
+  'protocol.sent.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.sent.error.tooShort': 'Not enough pulses for Sync + Status + the data nibbles + CRC.',
+  'protocol.sent.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.sent.error.aborted': 'Decoding was cancelled.',
+  'protocol.sent.error.nibbleOutOfRange': "A nibble pulse's tick count falls outside the valid range (12-27).",
+  'protocol.sent.warning.syncReserved':
+    'The Sync/Calibration pulse is the reserved value (0) — the tick time could not be estimated, so nibbles could not be decoded.',
+  'protocol.sent.warning.nibbleReserved':
+    'This nibble pulse is the reserved value (0) — unmeasured, its value could not be decoded.',
+  'protocol.sent.warning.nibbleOutOfBand':
+    "This nibble pulse's tick count falls outside the valid range (12-27); its value could not be decoded.",
+  'protocol.sent.warning.crcNotVerified':
+    "The CRC nibble is shown as received but NOT verified: SAE J2716's nibble-recursive CRC-4 algorithm differs across legacy/recommended/vendor variants and could not be fully confirmed with two independent primary sources. General-purpose 4-bit catalog entries (e.g. CRC4_ITU) are a DIFFERENT algorithm and would be a false friend.",
+  'protocol.sent.warning.trailingPulses':
+    'There are extra pulses after the expected frame length (including any Pause); they were ignored.',
+  'protocol.sent.warning.slowChannelPartial':
+    "This nibble also carries Slow Channel information (it is derived from the Fast Channel's status/communication nibble) but only a single frame's partial contribution is shown here; reconstructing the full Slow Channel message needs multiple frames and is the Analyzer's job. No source in this repository maps which bit(s) carry the Slow Channel.",
+  'protocol.sent.summary.frame': 'SENT frame ({dataNibbleCount} data nibbles)',
+  'protocol.sent.example.validFrame.name': 'Valid frame (6 data nibbles, no Pause)',
+  'protocol.sent.example.validFrame.description':
+    'Sync + Status + 6 data nibbles + CRC; every nibble falls within the valid tick band.',
+  'protocol.sent.example.withPause.name': 'With a Pause Pulse',
+  'protocol.sent.example.withPause.description':
+    'Includes the optional Pause pulse that pads the frame to a constant length.',
+  'protocol.sent.example.invalidNibble.name': 'Invalid nibble (out-of-band tick count)',
+  'protocol.sent.example.invalidNibble.description':
+    "One data nibble's pulse duration was deliberately pushed outside the valid [12,27] tick band.",
+  'protocol.sent.example.truncated.name': 'Truncated frame',
+  'protocol.sent.example.truncated.description':
+    'Only 4 pulses are present; not enough for the default profile (6 data nibbles).',
+  'protocol.spc.documentation.summary':
+    "SPC: a request-response transaction on the SENT line, started by a trigger pulse. The response frame is read with SENT's own decoder — there is no second decoder.",
+  'protocol.spc.option.sensorProfile': 'Sensor Profile',
+  'protocol.spc.option.sensorProfile.description':
+    "The SENT response frame's profile — shares the SAME choices as SENT's own Profile option.",
+  'protocol.spc.error.empty': 'The pulse log is empty.',
+  'protocol.spc.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.spc.error.tooShort':
+    'The response after the trigger pulse does not contain enough pulses for a complete SENT frame.',
+  'protocol.spc.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.spc.error.aborted': 'Decoding was cancelled.',
+  'protocol.spc.error.noResponse': 'No response pulse follows the trigger pulse (No response).',
+  'protocol.spc.error.triggerTooShort':
+    'The trigger pulse is the reserved value (0) — unmeasured, not accepted as a valid trigger.',
+  'protocol.spc.warning.triggerTooShort':
+    'The trigger pulse is the reserved value (0) — unmeasured. The spec gives no numeric "too short" threshold, so only unmeasured pulses are flagged.',
+  'protocol.spc.warning.noResponse':
+    'No pulses follow the trigger — either the sensor did not respond, or the capture is incomplete.',
+  'protocol.spc.summary.frame': 'SPC transaction (response: {hasResponse})',
+  'protocol.spc.example.validResponse.name': 'Valid trigger + response',
+  'protocol.spc.example.validResponse.description':
+    "The trigger pulse is followed by a valid response frame, read with the SAME SENT decoder.",
+  'protocol.spc.example.noResponse.name': 'No response',
+  'protocol.spc.example.noResponse.description': 'Only the trigger pulse is present; no response pulses arrived from the sensor.',
+  'protocol.spc.example.triggerReserved.name': 'Reserved trigger pulse',
+  'protocol.spc.example.triggerReserved.description':
+    'The trigger pulse is 0x0000 (reserved/unmeasured) — a stand-in for the "Trigger too short" class.',
+  'protocol.spc.example.truncatedResponse.name': 'Truncated response',
+  'protocol.spc.example.truncatedResponse.description':
+    'A response starts after the trigger but is cut off before a complete SENT frame.',
 };

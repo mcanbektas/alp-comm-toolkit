@@ -399,7 +399,16 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'SAE J2716 single-edge nibble transmission, encoding sensor values as pulse durations on a one-way line used by throttle, pressure and position sensors.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 14g: 14f'in nabız-günlüğü konteynerini DEVRALIR (artık
+          // `@/protocol-core/decoding/pulseLog`de yaşıyor). Tick süresi
+          // kalibrasyon darbesinden ÇIKARILIR, sorulmaz. SAE J2716 ücretli;
+          // 56 tick/12-27 tick nibble bandı/6 varsayılan veri nibble'ı İKİ+
+          // bağımsız kamuya açık kaynakla çaprazlandı. CRC'nin nibble-
+          // özyinelemeli algoritması (legacy/recommended/vendor varyantları
+          // ÇAKIŞMIYOR) ikinci bağımsız birincil kaynakla teyit edilemedi —
+          // Received GÖSTERİLİR, Calculated/PASS-FAIL HESAPLANMAZ.
+          status: 'ready',
+          pluginId: 'sent',
           tabs: ['overview', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           // Tick time capture'dan kestirilir; sabit varsayılmaz. Tolerans ve
           // nibble sayısı seçilen J2716 revizyonuna/profiline göre değişir.
@@ -423,7 +432,17 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Short PWM Code extension of SENT in which the ECU drives a trigger pulse on the sensor line to request a response frame or switch the sensor mode.',
           layer: 'physical',
-          status: 'planned',
+          // dalga 14g: SPC = tetik darbesi + BİR SENT ÇERÇEVESİ (spec `:163`).
+          // Yanıt çerçevesi `sent.ts`in nibble çözücüsünün TA KENDİSİDİR —
+          // İKİNCİ bir çözücü YAZILMADI (12g'nin RTCP vakasının aynı sınıfı,
+          // `spc.test.ts`te kanıtlı). Yedi hata sınıfından (`:167`) yalnız
+          // "No response" ve "Trigger too short" (rezerve-darbe vekiliyle) bu
+          // dalgada GERÇEKTEN çözülüyor; kalan dördü sayısal eşik ya da
+          // konteynerin taşımadığı bilgi (hat-öncesi durum, tetik-yanıt
+          // arası boşluk) istiyor — çeviri sözlüğünde AD olarak var, koda
+          // bağlanmadı (dosya başı gerekçesi `spc.ts`te).
+          status: 'ready',
+          pluginId: 'spc',
           tabs: ['overview', 'decode', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Trigger Pulse',

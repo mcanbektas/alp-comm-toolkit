@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { encodePulseLog } from './j1850Pulse';
+import { encodePulseLog } from '@/protocol-core/decoding/pulseLog';
+
 import { buildPwmPulseLog, j1850PwmParser, j1850PwmPlugin, parseJ1850Pwm } from './j1850Pwm';
 import type { ParseFailure, ParseResult, ParseSuccess, ParsedField, ParsedFrame } from '@/protocol-core/types';
 

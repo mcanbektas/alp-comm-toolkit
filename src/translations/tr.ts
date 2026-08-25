@@ -6460,6 +6460,79 @@ export const tr = {
   'protocol.j1850.vpw.example.truncated.name': 'Eksik çerçeve',
   'protocol.j1850.vpw.example.truncated.description':
     'SOF sonrası nabız sayısı bayta tamamlanmıyor (8’in katı değil).',
+
+  // --- SENT + SPC (Faz 10, dalga 14g) ---
+  'protocol.sent.documentation.summary':
+    'SAE J2716 SENT: kalibrasyon darbesinden çıkarılan tick süresiyle nibble’lara çözülen tek yönlü darbe treni. CRC alındığı gibi gösterilir, hesaplanmaz — nibble-özyinelemeli algoritma ikinci bağımsız kaynakla teyit edilemedi.',
+  'protocol.sent.option.profile': 'Profil',
+  'protocol.sent.option.profile.description':
+    'Bir preset seçilirse Veri Nibble Sayısı alanı yok sayılır ve alan tablosunun ilk satırı yürürlükteki profili adıyla gösterir.',
+  'protocol.sent.option.profile.custom': 'Özel (sayı alanını kullan)',
+  'protocol.sent.option.dataNibbleCount': 'Veri Nibble Sayısı',
+  'protocol.sent.option.dataNibbleCount.description':
+    'Fast Channel çerçevesindeki veri nibble sayısı. Yalnız "Özel" profilinde geçerlidir.',
+  'protocol.sent.error.empty': 'Nabız günlüğü boş.',
+  'protocol.sent.error.oddLength': 'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.sent.error.tooShort': 'Sync + Status + veri nibble’ları + CRC için yetersiz nabız var.',
+  'protocol.sent.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.sent.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.sent.error.nibbleOutOfRange': 'Bir nibble darbesinin tick sayısı geçerli aralığın (12-27) dışında.',
+  'protocol.sent.warning.syncReserved':
+    'Sync/Calibration darbesi rezerve (0) değerinde — tick süresi kestirilemedi, nibble’lar çözülemedi.',
+  'protocol.sent.warning.nibbleReserved':
+    'Bu nibble darbesi rezerve (0) değerinde — ölçülemedi, değer çözülemedi.',
+  'protocol.sent.warning.nibbleOutOfBand':
+    'Nibble darbesinin tick sayısı geçerli aralığın (12-27) dışında; değer çözülemedi.',
+  'protocol.sent.warning.crcNotVerified':
+    'CRC nibble’ı alındığı gibi gösterilir ama DOĞRULANMAZ: SAE J2716’nın nibble-özyinelemeli CRC-4 algoritması legacy/recommended/üretici varyantlarına göre değişir ve iki bağımsız birincil kaynakla tam teyit edilemedi. Genel CRC kataloğundaki 4-bit girişler (ör. CRC4_ITU) FARKLI bir algoritmadır, sahte dost olur.',
+  'protocol.sent.warning.trailingPulses':
+    'Beklenen çerçeve uzunluğundan (Pause dahil) sonra fazladan nabız var; yok sayıldı.',
+  'protocol.sent.warning.slowChannelPartial':
+    'Bu nibble Slow Channel bilgisini de taşır (Fast Channel’ın status/communication nibble’ından türer) ama TEK çerçevede yalnız kısmi katkı görünür; tam Slow Channel mesajı birden çok çerçeve ister ve Analyzer’ın işidir. Hangi bit(ler)in Slow Channel’a ait olduğuna dair bu depoda bit-düzeyi bir kaynak yok.',
+  'protocol.sent.summary.frame': 'SENT çerçevesi ({dataNibbleCount} veri nibble’ı)',
+  'protocol.sent.example.validFrame.name': 'Geçerli çerçeve (6 veri nibble’ı, Pause yok)',
+  'protocol.sent.example.validFrame.description':
+    'Sync + Status + 6 veri nibble’ı + CRC; tüm nibble’lar geçerli tick bandında.',
+  'protocol.sent.example.withPause.name': 'Pause Pulse ile',
+  'protocol.sent.example.withPause.description':
+    'Çerçeveyi sabit uzunluğa tamamlayan isteğe bağlı Pause darbesi içerir.',
+  'protocol.sent.example.invalidNibble.name': 'Geçersiz nibble (bant dışı tick sayısı)',
+  'protocol.sent.example.invalidNibble.description':
+    'Bir veri nibble’ının darbe süresi kasten geçerli [12,27] tick bandının dışına taşındı.',
+  'protocol.sent.example.truncated.name': 'Eksik çerçeve',
+  'protocol.sent.example.truncated.description':
+    'Yalnız 4 nabız var; varsayılan profil (6 veri nibble’ı) için yetersiz.',
+  'protocol.spc.documentation.summary':
+    'SPC: SENT hattında bir tetik darbesiyle başlatılan istek-yanıt işlemi. Yanıt çerçevesi SENT’in KENDİ çözücüsüyle okunur — ikinci bir çözücü yok.',
+  'protocol.spc.option.sensorProfile': 'Sensör Profili',
+  'protocol.spc.option.sensorProfile.description':
+    'SENT yanıt çerçevesinin profili — SENT’in Profil şıkkıyla AYNI seçenekleri paylaşır.',
+  'protocol.spc.error.empty': 'Nabız günlüğü boş.',
+  'protocol.spc.error.oddLength': 'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.spc.error.tooShort':
+    'Tetik darbesinden sonraki yanıt, tam bir SENT çerçevesi için yetersiz nabız içeriyor.',
+  'protocol.spc.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.spc.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.spc.error.noResponse': 'Tetik darbesinden sonra hiçbir yanıt nabzı yok (No response).',
+  'protocol.spc.error.triggerTooShort':
+    'Tetik darbesi rezerve (0) değerinde — ölçülemedi, geçerli bir tetik olarak kabul edilmedi.',
+  'protocol.spc.warning.triggerTooShort':
+    'Tetik darbesi rezerve (0) değerinde — ölçülemedi. Sayısal bir "çok kısa" eşiği spec’te yok, bu yüzden yalnız ölçülemeyen darbeler işaretlenir.',
+  'protocol.spc.warning.noResponse':
+    'Tetik darbesinden sonra hiçbir nabız yok — sensör yanıt vermedi ya da yakalama eksik.',
+  'protocol.spc.summary.frame': 'SPC işlemi (yanıt: {hasResponse})',
+  'protocol.spc.example.validResponse.name': 'Geçerli tetik + yanıt',
+  'protocol.spc.example.validResponse.description':
+    'Tetik darbesini AYNI SENT çözücüsüyle okunan geçerli bir yanıt çerçevesi izler.',
+  'protocol.spc.example.noResponse.name': 'Yanıt yok',
+  'protocol.spc.example.noResponse.description':
+    'Yalnız tetik darbesi var; sensörden hiçbir yanıt nabzı gelmedi.',
+  'protocol.spc.example.triggerReserved.name': 'Tetik darbesi rezerve',
+  'protocol.spc.example.triggerReserved.description':
+    'Tetik darbesi 0x0000 (rezerve/ölçülemedi) — "Trigger too short" sınıfının vekili.',
+  'protocol.spc.example.truncatedResponse.name': 'Yarıda kesilmiş yanıt',
+  'protocol.spc.example.truncatedResponse.description':
+    'Tetikten sonra yanıt BAŞLIYOR ama tam bir SENT çerçevesi için yetersiz nabızda kesiliyor.',
 } as const;
 
 /**

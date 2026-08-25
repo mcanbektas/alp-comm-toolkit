@@ -79,19 +79,22 @@ import type {
   ProtocolWarning,
 } from '@/protocol-core/types';
 import { parseObd } from '../obd/obd';
+import {
+  decodePulseLog,
+  encodePulseLog,
+  isWithinPulseBand,
+  pulseByteSpan,
+} from '@/protocol-core/decoding/pulseLog';
+
 import type { PulseLevel } from './j1850Pulse';
 import {
   VPW_DATA_PULSE_MAX_US,
   VPW_DATA_PULSE_MIN_US,
   VPW_SOF_MAX_US,
   VPW_SOF_MIN_US,
-  decodePulseLog,
   deriveAlternatingLevels,
-  encodePulseLog,
   isShortPulse,
-  isWithinPulseBand,
   packBitsToBytes,
-  pulseByteSpan,
   unpackBytesToBits,
 } from './j1850Pulse';
 

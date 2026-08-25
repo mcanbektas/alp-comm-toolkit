@@ -128,6 +128,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'sae-j1850-vpw', () =>
     import('./automotive/j1850/j1850Vpw').then((module) => module.j1850VpwPlugin),
   );
+  // SENT + SPC — dalga 14g: `sensor-interfaces` ailesinin üç kaydından İKİSİNİ
+  // kapatır (üçüncüsü `psi5`, dalga 14h, AYRI bir yoldan). Nabız-günlüğü
+  // konteynerini (J1850 ile PAYLAŞILAN kısmı) artık `@/protocol-core/decoding/
+  // pulseLog` taşıyor — 14g karar 1, `j1850Pulse.ts`ten TAŞINDI. `spc`, `sent`in
+  // nibble çözücüsünü (`decodeSentNibbles`) GERÇEKTEN çağırır (12g'nin RTCP
+  // vakasının aynı sınıfı: iki kayıt aynı teli okur, tek fark girişteki tetik
+  // darbesi) — İKİNCİ bir nibble çözücü YAZILMADI, `spc.test.ts` bunu kanıtlar.
+  registerOnce(registry, 'sent', () => import('./automotive/sent/sent').then((module) => module.sentPlugin));
+  registerOnce(registry, 'spc', () => import('./automotive/sent/spc').then((module) => module.spcPlugin));
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );

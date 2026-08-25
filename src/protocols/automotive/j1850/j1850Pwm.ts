@@ -81,16 +81,19 @@ import type {
   ProtocolWarning,
 } from '@/protocol-core/types';
 import {
+  decodePulseLog,
+  encodePulseLog,
+  isWithinPulseBand,
+  pulseByteSpan,
+} from '@/protocol-core/decoding/pulseLog';
+
+import {
   PWM_DATA_PULSE_MAX_US,
   PWM_DATA_PULSE_MIN_US,
   PWM_SOF_MAX_US,
   PWM_SOF_MIN_US,
-  decodePulseLog,
-  encodePulseLog,
   isShortPulse,
-  isWithinPulseBand,
   packBitsToBytes,
-  pulseByteSpan,
   unpackBytesToBits,
 } from './j1850Pulse';
 
