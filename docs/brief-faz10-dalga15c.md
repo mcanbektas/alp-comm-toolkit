@@ -284,3 +284,80 @@ i-BUS2 kapsam-dışı uyarısı sayfada; `rcCanParseRegistry.test.ts` registry'n
 `rc-control-links` ailesinde `planned` 5'ten 3'e düşüyor.
 
 **KAYIT KAYIT bitir:** önce yardımcı + `sbus` tamamen, sonra `ibus`.
+
+---
+
+## Çürüyen tahminler
+
+*(Dalga kapanışında doldurulacak. Dalga 12/13/14/15a/15b'te kural hâline gelen
+bölüm: brifin yanlış çıkan öngörüleri dosyada İŞARETLENİR, silinmez.)*
+
+Ana thread'in uygulamadan ÖNCE yaptığı bağımsız Betaflight/ArduPilot kaynak
+turu bu brifin dört noktasını düzeltti/tamamladı:
+
+1. **"Dijital kanal bayrakları `sbus_channels.h:25-28`de tanımlı."** KISMEN
+   ÇÜRÜDÜ — değerler (bit0 Digital CH17, bit1 Digital CH18) doğru çıktı ama
+   dosya atfı yanlıştı: gerçek kaynak `sbus_channels.c:38-39`
+   (`SBUS_FLAG_CHANNEL_17`/`SBUS_FLAG_CHANNEL_18`). `sbus_channels.h` yalnız
+   `SBUS_FLAG_SIGNAL_LOSS`/`SBUS_FLAG_FAILSAFE_ACTIVE`i (bit2/bit3) taşıyor.
+   `sbus.ts` dosya başında düzeltilmiş atıfla yazılı.
+
+2. **"IBUS checksum'ları yalnız tohum ve işaretle (+/−) ayrışır."** EKSİK
+   ÇIKTI — brif tohumu (iA6 `0x0000` toplama / iA6B `0xFFFF` çıkarma) doğru
+   veriyordu ama checksum'ın KAPSAMINI (hangi baytların dahil olduğunu) hiç
+   belirtmiyordu. Ana thread'in kaynak turu netleştirdi: iA6B checksum'ı
+   UZUNLUK VE KOMUT BAYTLARI DAHİL checksum'dan önceki BÜTÜN 30 baytı
+   kapsıyor (`ibus_shared.c:493-511`, `dataSize = ibusPacket[0] −
+   IBUS_CHECKSUM_SIZE`); iA6 ise SENKRON BAYTINI (byte0) KAPSAM DIŞI bırakıp
+   yalnız 14 kanal yuvasının 16-bit LE SÖZCÜKLERİNİ topluyor
+   (`ibus.c:133-144`). Ayrım yalnız işaretten değil KAPSAMDAN ve BİRİMDEN
+   (tek tek bayt vs 16-bit sözcük) da ibaret — bu yüzden `computeIa6Checksum`/
+   `computeIa6bChecksum` tek bir `seed`/`sign` parametreli ortak fonksiyona
+   SIKIŞTIRILMADI, iki ayrı fonksiyon yazıldı (`ibus.ts` dosya başı).
+
+3. **"Üst nibble'ın anlamı için doğrulanmış kaynak YOK, bu yüzden ham
+   basılır."** ÇÜRÜDÜ — SONUÇ (ham + uyarı) doğru çıktı ama GEREKÇE
+   yanlıştı. Kaynak YOK değil, İKİ kaynak VAR ve BİRBİRİYLE ÇELİŞİYOR:
+   - Betaflight `rx/ibus.c:163-164` üç FARKLI kanalın üst nibble'ını
+     birleştirip dört ek 12-bit "ek kanal" (indeks 14-17) türetiyor.
+   - ArduPilot `AP_RCProtocol_IBUS.cpp:45-49` AYNI baytların üst nibble'ını
+     FAILSAFE göstergesi sayıyor.
+   Ana thread kararı (uygulandı): üst nibble HAM alan olarak, HER kanal
+   yuvası için AYRI basılır; ne "ek kanal" ne "failsafe" adlandırılır, her
+   alana İKİ yorumu da kaynağıyla adlandıran bir uyarı eklenir
+   (`protocol.ibus.warning.upperNibbleAmbiguous`, `ibus.ts` dosya başı).
+   Nihai davranış brifin önerdiğiyle AYNI kaldı — yalnız gerekçesi "kaynak
+   yok"tan "kaynaklar çelişiyor"a düzeltildi. Kanal DEĞERİNİN kendisi (12
+   bit, alt bayt + üst baytın ALT nibble'ı) iki kaynakta da BİREBİR aynı —
+   orada çelişki yok.
+
+4. **"SBUS'ta üçüncü kanıt yok, çakışma sayısını ölç ve raporla."**
+   DOĞRULANDI ve tam öngörüldüğü gibi çıktı: `rcCanParseRegistry.test.ts`
+   ileri yönde (yabancı çerçeveler sbus/ibus'a kaçıyor mu) SIFIR çakışma
+   ölçtü, ama ters yönde (sbus/ibus'un KENDİ örnekleri başka parser'lara
+   kaçıyor mu) **448/1048 çift (%43)** çakıştı — 63 benzersiz "genel
+   bayt-akışı" protokolünde (`uart`/`rs-232`/`rs-485`/`tcp`/`udp`/`spi`/
+   `i2c`/`hdlc`/… — tam liste test dosyası başında). Bu,
+   `dronecanCanParseRegistry.test.ts`in KENDİ ters-yön ölçümüyle (380/762,
+   "%50") AYNI SINIFTA bir sonuç ve AYNI kök sebep: çarpışan protokollerin
+   `canParse`i yapısal bir başlık doğrulamıyor — bu ONLARIN kendi tasarım
+   tercihi, bu dalganın (63 ilgisiz dosyaya dokunmak gerekirdi) kapsamı
+   DIŞINDA. Sıfıra ZORLANMADI, dronecan'ın 3. testiyle AYNI karar.
+
+---
+
+## Uygulama sonucu (2026-08-25, KAPANDI)
+
+`sbus` **Hazır**, `ibus` **Kısmi** rozetiyle açıldı. `packedChannels.ts`
+doğdu (`src/protocol-core/decoding/packedChannels.ts`), `BitOrder` testi
+motordan ÖNCE yazıldı ve elle türetilmiş 22 baytlık fixture'la `lsb-first`/
+`msb-first`in FARKLI sonuç ürettiğini kanıtladı. IBUS'ta profil değişimi
+checksum sonucunu GERÇEKTEN değiştiriyor (birim + e2e'de ayrı ayrı kanıtlı);
+i-BUS2 kapsam-dışı uyarısı hem seçenek açıklamasında hem her çözümde basılan
+bir çerçeve uyarısında görünür. `rcCanParseRegistry.test.ts` iki yönü de
+sınıyor (madde 4). Birim testler (`packedChannels`/`sbus`/`ibus`/
+`rcCanParseRegistry`, 50 test) ve iki e2e spec'i (`sbus-decode.spec.ts` 6,
+`ibus-decode.spec.ts` 10 — ikisi de gerçek tarayıcıda en az bir kez KOŞTU ve
+yeşil) yeşil; `npx tsc --noEmit` temiz. `rc-control-links` ailesinde
+`planned` 5'ten **3**'e düştü (`crsf`/`ppm`/`pwm-servo` kaldı, sıradaki 15d
+`crsf` bu dalganın `packedChannels.ts`sini tüketecek).

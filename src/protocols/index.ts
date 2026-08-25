@@ -231,6 +231,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
       (module) => module.uavcanCompatibilityPlugin,
     ),
   );
+  // SBUS — dalga 15c: `rc-control-links` ailesinin ilk motoru. 16×11-bit
+  // paketli kanal okuyucusu (`protocol-core/decoding/packedChannels.ts`) bu
+  // kayıtta DOĞUYOR, `crsf` (15d) onu tüketecek. Checksum yok, `canParse`
+  // yalnız uzunluk+start byte'a dayanıyor (bkz. sbus.ts dosya başı).
+  registerOnce(registry, 'sbus', () => import('./aerospace/sbus/sbus').then((module) => module.sbusPlugin));
+  // IBUS — dalga 15c: iA6/iA6B iki modeli TEK kayıt, `decodeOptions.profile`
+  // ile seçilir. i-BUS2 kaynaksız kaldığı için rozet `partial` (bkz. ibus.ts
+  // dosya başı).
+  registerOnce(registry, 'ibus', () => import('./aerospace/ibus/ibus').then((module) => module.ibusPlugin));
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).

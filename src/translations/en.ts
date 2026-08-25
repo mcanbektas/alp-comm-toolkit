@@ -2862,6 +2862,64 @@ export const en: TranslationDictionary = {
   'protocol.uavcanCompatibility.example.notExtendedRejected.description':
     '11-bit (base) identifier: both lines require 29-bit, so no candidate is reported.',
 
+  // --- SBUS ---
+  'protocol.sbus.error.frameTooShort': 'Frame is shorter than 25 bytes: SBUS is a fixed-length frame.',
+  'protocol.sbus.error.frameTooLong': 'Frame exceeds 25 bytes: SBUS is a fixed-length frame.',
+  'protocol.sbus.error.invalidStartByte':
+    'First byte is not 0x0F (SBUS_FRAME_BEGIN_BYTE) — this cannot be an SBUS frame, but the remaining fields are still shown.',
+  'protocol.sbus.error.aborted': 'Parsing was cancelled.',
+  'protocol.sbus.documentation.summary':
+    'Futaba SBUS: a fixed 25-byte frame — start byte (0x0F), 22 bytes of packed 16×11-bit channel data (lsb-first bit order), a flag byte (Digital CH17/CH18, Signal Loss, Failsafe Active — four SEPARATE fields) and an end byte. No checksum; channel values are shown as raw packed numbers — the 173–1812 microsecond mapping is a calibration choice and is never embedded.',
+  'protocol.sbus.example.typicalFrame.name': 'Typical frame',
+  'protocol.sbus.example.typicalFrame.description':
+    'All 16 channels carry 0, 100, 200 … 1500, no flags set.',
+  'protocol.sbus.example.failsafeAndSignalLoss.name': 'Failsafe + Signal Loss',
+  'protocol.sbus.example.failsafeAndSignalLoss.description':
+    'Bit2 (Signal Loss) AND bit3 (Failsafe Active) both set — shows the two flags as SEPARATE fields.',
+  'protocol.sbus.example.digitalChannels1718.name': 'Digital channel 17/18',
+  'protocol.sbus.example.digitalChannels1718.description':
+    'Bit0 (Digital Channel 17) and bit1 (Digital Channel 18) set, remaining flags clear.',
+  'protocol.sbus.example.invalidStartByte.name': 'Invalid start byte (error path)',
+  'protocol.sbus.example.invalidStartByte.description':
+    'Start byte is 0x00 instead of 0x0F — raises start-delimiter-not-found, remaining fields are still decoded.',
+
+  // --- IBUS ---
+  'protocol.ibus.error.frameTooShort':
+    'Frame is shorter than the selected profile’s minimum length (iA6: 31, iA6B: 32 bytes).',
+  'protocol.ibus.error.invalidLengthByte':
+    'First byte is not 0x20 (32) — in the iA6B profile the first byte declares the frame length.',
+  'protocol.ibus.error.invalidSyncByte': 'First byte is not 0x55 — that is the iA6 profile’s sync byte.',
+  'protocol.ibus.error.checksumMismatch':
+    'Checksum does not match: the selected profile (iA6/iA6B) may be wrong, or the data is corrupt.',
+  'protocol.ibus.error.aborted': 'Parsing was cancelled.',
+  'protocol.ibus.warning.unexpectedCommandByte':
+    'Second byte is not 0x40 ("RC Channel Command") — ArduPilot rejects this, Betaflight’s receive path does not check it; this engine follows Betaflight, showing the raw value and warning instead of refusing to decode.',
+  'protocol.ibus.warning.upperNibbleAmbiguous':
+    'The meaning of the upper nibble is contested between sources: Betaflight combines three channels’ upper nibbles into an extra 12-bit channel (rx/ibus.c:163), while ArduPilot treats the SAME bytes as a failsafe indicator (AP_RCProtocol_IBUS.cpp:45). Shown raw, with no interpretation assumed.',
+  'protocol.ibus.warning.ibus2OutOfScope':
+    'i-BUS2 tree topology is out of scope for this engine — FlySky never published it and Betaflight never implemented it; no public wire-format source could be found.',
+  'protocol.ibus.warning.trailingBytes':
+    'More bytes are present than the selected profile expects — the extra bytes were ignored and may be the start of another frame.',
+  'protocol.ibus.option.profile': 'Profile',
+  'protocol.ibus.option.profile.description':
+    'iA6 and iA6B use a different sync byte, channel offset and checksum algorithm — picking the wrong one makes the checksum FAIL on every frame. Only the classic i-BUS models are decoded; i-BUS2 is out of scope because no source could be found.',
+  'protocol.ibus.option.profile.ia6b': 'iA6B (32 bytes, default)',
+  'protocol.ibus.option.profile.ia6': 'iA6 (31 bytes)',
+  'protocol.ibus.documentation.summary':
+    'FlySky IBUS: iA6 (31 bytes, sync 0x55, sync byte excluded from the checksum, 16-bit LE channel words summed) and iA6B (32 bytes, length+command header, all 30 bytes before the checksum subtracted from 0xFFFF) are two SEPARATE models — chosen via the profile option, never auto-guessed. Each channel is 12 bits (low byte plus the low nibble of the high byte); the upper nibble’s meaning is contested between two reference sources, so it is shown raw. i-BUS2 is out of scope for lack of a source, which is why the badge is Partial.',
+  'protocol.ibus.example.ia6bTypical.name': 'iA6B typical frame',
+  'protocol.ibus.example.ia6bTypical.description':
+    '14 channels carry 1000, 1050 … 1650, command byte 0x40, checksum PASSes.',
+  'protocol.ibus.example.ia6bNonStandardCommand.name': 'iA6B, non-standard command byte',
+  'protocol.ibus.example.ia6bNonStandardCommand.description':
+    'Command byte is 0x08 instead of 0x40 — the checksum covers this byte too so it still PASSes, only a warning fires.',
+  'protocol.ibus.example.ia6bChecksumMismatch.name': 'iA6B, corrupted checksum (error path)',
+  'protocol.ibus.example.ia6bChecksumMismatch.description':
+    'Same body as the typical frame, checksum byte deliberately corrupted — raises checksum-mismatch.',
+  'protocol.ibus.example.ia6Typical.name': 'iA6 typical frame',
+  'protocol.ibus.example.ia6Typical.description':
+    'A 31-byte iA6 frame — the same 14 channel values, with a different sync byte and checksum algorithm.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',

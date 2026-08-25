@@ -2865,6 +2865,65 @@ export const tr = {
   'protocol.uavcanCompatibility.example.notExtendedRejected.description':
     '11-bit (base) identifier: iki hat da 29-bit istiyor, bu yüzden aday raporlanmaz.',
 
+  // --- SBUS ---
+  'protocol.sbus.error.frameTooShort':
+    'Çerçeve 25 bayttan kısa: SBUS sabit uzunluklu bir çerçevedir.',
+  'protocol.sbus.error.frameTooLong': 'Çerçeve 25 baytı aşıyor: SBUS sabit uzunluklu bir çerçevedir.',
+  'protocol.sbus.error.invalidStartByte':
+    'İlk bayt 0x0F değil (SBUS_FRAME_BEGIN_BYTE) — bu bir SBUS çerçevesi olamaz, ama kalan alanlar yine de gösterilir.',
+  'protocol.sbus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.sbus.documentation.summary':
+    'Futaba SBUS: 25 baytlık sabit çerçeve — start byte (0x0F), 22 baytlık paketli 16×11-bit kanal verisi (lsb-first bit sırası), bayrak baytı (Digital CH17/CH18, Signal Loss, Failsafe Active — dördü AYRI alan) ve end byte. Checksum yok; kanal değerleri ham paketli sayı olarak basılır, 173–1812 mikrosaniye eşlemesi bir kalibrasyon kararıdır ve gömülmez.',
+  'protocol.sbus.example.typicalFrame.name': 'Tipik çerçeve',
+  'protocol.sbus.example.typicalFrame.description':
+    '16 kanal 0, 100, 200 … 1500 değerlerini taşır, hiçbir bayrak set değil.',
+  'protocol.sbus.example.failsafeAndSignalLoss.name': 'Failsafe + Signal Loss',
+  'protocol.sbus.example.failsafeAndSignalLoss.description':
+    'Bit2 (Signal Loss) VE bit3 (Failsafe Active) birlikte set — iki bayrağın AYRI alanlar olduğu görülür.',
+  'protocol.sbus.example.digitalChannels1718.name': 'Dijital kanal 17/18',
+  'protocol.sbus.example.digitalChannels1718.description':
+    'Bit0 (Digital Channel 17) ve bit1 (Digital Channel 18) set, kalan bayraklar temiz.',
+  'protocol.sbus.example.invalidStartByte.name': 'Geçersiz start byte (hata yolu)',
+  'protocol.sbus.example.invalidStartByte.description':
+    'Start byte 0x0F yerine 0x00 — start-delimiter-not-found basar, kalan alanlar yine de çözülür.',
+
+  // --- IBUS ---
+  'protocol.ibus.error.frameTooShort':
+    'Çerçeve, seçili profilin gerektirdiği asgari uzunluktan (iA6: 31, iA6B: 32 bayt) kısa.',
+  'protocol.ibus.error.invalidLengthByte':
+    'İlk bayt 0x20 (32) değil — iA6B profilinde ilk bayt çerçeve uzunluğunu bildirir.',
+  'protocol.ibus.error.invalidSyncByte': 'İlk bayt 0x55 değil — iA6 profilinin senkron baytı budur.',
+  'protocol.ibus.error.checksumMismatch':
+    'Checksum uyuşmuyor: seçili profil (iA6/iA6B) yanlış olabilir ya da veri bozuk.',
+  'protocol.ibus.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.ibus.warning.unexpectedCommandByte':
+    'İkinci bayt 0x40 ("RC Channel Command") değil — ArduPilot bunu reddeder, Betaflight’ın alım yolu denetlemez; bu motor Betaflight’ı izler, ham gösterip uyarır ama çözmeyi reddetmez.',
+  'protocol.ibus.warning.upperNibbleAmbiguous':
+    'Üst nibble’ın anlamı kaynaklar arasında çelişkili: Betaflight üç kanalın üst nibble’ını birleştirip ek 12-bit kanal türetir (rx/ibus.c:163), ArduPilot AYNI baytları failsafe göstergesi sayar (AP_RCProtocol_IBUS.cpp:45). Ham basılır, hiçbir yorum varsayılmaz.',
+  'protocol.ibus.warning.ibus2OutOfScope':
+    'i-BUS2 ağaç topolojisi bu motorun kapsamı dışındadır — FlySky yayınlamamış, Betaflight uygulamamış; halka açık bir tel biçimi kaynağı bulunamadı.',
+  'protocol.ibus.warning.trailingBytes':
+    'Seçili profilin beklediğinden fazla bayt var — fazlalık yok sayıldı, sonraki bir çerçevenin başı olabilir.',
+  'protocol.ibus.option.profile': 'Profil',
+  'protocol.ibus.option.profile.description':
+    'iA6 ve iA6B farklı senkron baytı, kanal offset’i ve checksum algoritması kullanır — yanlış seçim checksum’ı her çerçevede FAIL gösterir. Yalnız klasik i-BUS modelleri çözülür; i-BUS2 için kaynak bulunamadığından kapsam dışıdır.',
+  'protocol.ibus.option.profile.ia6b': 'iA6B (32 bayt, varsayılan)',
+  'protocol.ibus.option.profile.ia6': 'iA6 (31 bayt)',
+  'protocol.ibus.documentation.summary':
+    'FlySky IBUS: iA6 (31 bayt, sync 0x55, senkron baytı checksum dışı, 16-bit LE kanal sözcükleri toplanır) ve iA6B (32 bayt, uzunluk+komut header’ı, checksum’dan önceki 30 baytın tamamı 0xFFFF’ten çıkarılır) iki AYRI model — profil seçeneğiyle seçilir, otomatik tahmin yapılmaz. Her kanal 12 bit (alt bayt + üst baytın alt nibble’ı); üst nibble’ın anlamı iki referans kaynakta çelişkili olduğu için ham basılır. i-BUS2 kaynaksızlık nedeniyle kapsam dışı, rozet bu yüzden Kısmi.',
+  'protocol.ibus.example.ia6bTypical.name': 'iA6B tipik çerçeve',
+  'protocol.ibus.example.ia6bTypical.description':
+    '14 kanal 1000, 1050 … 1650 değerlerini taşır, komut baytı 0x40, checksum PASS.',
+  'protocol.ibus.example.ia6bNonStandardCommand.name': 'iA6B, standart olmayan komut baytı',
+  'protocol.ibus.example.ia6bNonStandardCommand.description':
+    'Komut baytı 0x40 yerine 0x08 — checksum bu baytı da kapsadığı için yine PASS eder, yalnız uyarı tetiklenir.',
+  'protocol.ibus.example.ia6bChecksumMismatch.name': 'iA6B, bozuk checksum (hata yolu)',
+  'protocol.ibus.example.ia6bChecksumMismatch.description':
+    'Tipik çerçeveyle aynı gövde, checksum baytı bilerek bozuldu — checksum-mismatch basar.',
+  'protocol.ibus.example.ia6Typical.name': 'iA6 tipik çerçeve',
+  'protocol.ibus.example.ia6Typical.description':
+    '31 baytlık iA6 çerçevesi — aynı 14 kanal değeri, farklı senkron baytı ve checksum algoritmasıyla.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

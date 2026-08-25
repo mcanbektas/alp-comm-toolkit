@@ -213,7 +213,12 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             "Futaba's inverted 100000-baud serial bus that packs sixteen 11-bit RC channels plus flag bits into a 25-byte frame shared by receiver, servos and flight controller.",
           layer: 'data-link',
-          status: 'planned',
+          // Alan yapısının tamamı çözülür, iki bağımsız kaynak (spec +
+          // Betaflight) örtüşüyor. Checksum YOK — doğrulanacak bir bütünlük
+          // alanı olmaması `partial` gerekçesi DEĞİL (protokolde yok, eksik
+          // uygulama değil). Faz 10 dalga 15c, bkz. sbus.ts dosya başı.
+          status: 'ready',
+          pluginId: 'sbus',
           tabs: [
             'overview',
             'live',
@@ -250,7 +255,13 @@ export const aerospaceUavDomain: CatalogDomain = {
           summary:
             'FlySky serial RC and telemetry bus running at 115200 baud with two-byte channel slots inside a 32-byte packet, plus a newer i-BUS2 tree topology for sensors and peripherals.',
           layer: 'data-link',
-          status: 'planned',
+          // Klasik i-BUS (iA6/iA6B) TAM çözülür, checksum DOĞRULANIR.
+          // `partial`: yalnız i-BUS2 kapsam dışı — FlySky yayınlamamış,
+          // Betaflight uygulamamış, halka açık tel biçimi kaynağı YOK
+          // (kaynaksız kayıt politikası, dalga 15 ana brif). Faz 10 dalga
+          // 15c, bkz. ibus.ts dosya başı.
+          status: 'partial',
+          pluginId: 'ibus',
           tabs: [
             'overview',
             'live',
