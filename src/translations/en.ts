@@ -6387,4 +6387,92 @@ export const en: TranslationDictionary = {
     '2 bytes of body (whether Process or On-request Data depends on the paired master message, hence raw) plus Event pending and Process Data invalid.',
   'protocol.ioLink.example.deviceChecksumMismatch.name': 'Device checksum mismatch',
   'protocol.ioLink.example.deviceChecksumMismatch.description': "CKS's 6-bit checksum was deliberately broken.",
+
+  // --- SAE J1850 PWM/VPW (Phase 10, wave 14f) ---
+  'protocol.j1850.pwm.documentation.summary':
+    'SAE J1850 PWM: a 41.6 kbit/s pulse-width-modulated Class-B vehicle network. The input is a pulse log (not a byte stream); the bit threshold and profile are chosen via decodeOptions.',
+  'protocol.j1850.pwm.option.bitThreshold': 'Bit Threshold (µs)',
+  'protocol.j1850.pwm.option.bitThreshold.description':
+    'The duration boundary separating a short pulse from a long one. Ignored when "Profile" selects a preset.',
+  'protocol.j1850.pwm.option.profile': 'Profile',
+  'protocol.j1850.pwm.option.profile.description':
+    'Selecting a preset ignores the Bit Threshold field, and the first row of the field table shows the profile in effect, by name.',
+  'protocol.j1850.pwm.option.profile.custom': 'Custom (use the number field)',
+  'protocol.j1850.pwm.error.empty': 'The pulse log is empty.',
+  'protocol.j1850.pwm.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.j1850.pwm.error.misalignedBits':
+    'The pulse count after SOF is not a multiple of 8; it does not fill whole bytes.',
+  'protocol.j1850.pwm.error.tooShort': 'Not enough pulses for a Header and a CRC.',
+  'protocol.j1850.pwm.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.j1850.pwm.error.crcMismatch': 'CRC-8 (SAE J1850) does not match the computed value.',
+  'protocol.j1850.pwm.error.aborted': 'Decoding was cancelled.',
+  'protocol.j1850.pwm.warning.sofReserved':
+    'The SOF pulse is the reserved value (0) — unmeasured, not converted to a duration.',
+  'protocol.j1850.pwm.warning.reservedPulseInFrame':
+    "The frame contains at least one reserved (unmeasured) pulse; that byte's bit was treated as a placeholder 0.",
+  'protocol.j1850.pwm.warning.headerUnresolved':
+    'The Header is shown raw: its exact meaning depends on a higher-layer document such as J2178/J1979, which this tool does not map.',
+  'protocol.j1850.pwm.warning.crcMismatch': 'CRC-8 (SAE J1850) does not match.',
+  'protocol.j1850.pwm.summary.frame': 'SAE J1850 PWM frame',
+  'protocol.j1850.pwm.example.validFrame.name': 'Valid frame (header + 3 data bytes)',
+  'protocol.j1850.pwm.example.validFrame.description':
+    'A complete frame whose CRC-8 (SAE J1850) verifies; the header stays raw.',
+  'protocol.j1850.pwm.example.noDataFrame.name': 'No data bytes (Header + CRC only)',
+  'protocol.j1850.pwm.example.noDataFrame.description':
+    'The shortest frame that is still valid without a Data field.',
+  'protocol.j1850.pwm.example.badCrc.name': 'Bad CRC',
+  'protocol.j1850.pwm.example.badCrc.description':
+    'The CRC byte was deliberately broken; the frame still decodes but is marked invalid.',
+  'protocol.j1850.pwm.example.truncated.name': 'Truncated frame',
+  'protocol.j1850.pwm.example.truncated.description':
+    'The pulse count after SOF does not fill a whole byte (not a multiple of 8).',
+  'protocol.j1850.vpw.documentation.summary':
+    'SAE J1850 VPW: a 10.4 kbit/s variable-pulse-width, single-wire Class-B vehicle network. Bit meaning depends on duration TOGETHER WITH the active/passive state; the initial level is chosen via decodeOptions.',
+  'protocol.j1850.vpw.option.bitThreshold': 'Bit Threshold (µs)',
+  'protocol.j1850.vpw.option.bitThreshold.description':
+    'The duration boundary separating a short pulse from a long one.',
+  'protocol.j1850.vpw.option.initialLevel': 'Initial Level (SOF)',
+  'protocol.j1850.vpw.option.initialLevel.description':
+    'Pulses alternate with certainty; the only unknown is whether the first pulse (SOF) is active or passive.',
+  'protocol.j1850.vpw.option.initialLevel.active': 'Active',
+  'protocol.j1850.vpw.option.initialLevel.passive': 'Passive',
+  'protocol.j1850.vpw.option.payloadInterpretation': 'Payload Interpretation',
+  'protocol.j1850.vpw.option.payloadInterpretation.description':
+    'Whether the Data field carries an OBD-II message cannot be extracted from the frame; the user knows this from system context. Selecting it decodes the SAME bytes with the OBD-II engine.',
+  'protocol.j1850.vpw.option.payloadInterpretation.raw': 'Raw data',
+  'protocol.j1850.vpw.option.payloadInterpretation.obdIi': 'OBD-II',
+  'protocol.j1850.vpw.error.empty': 'The pulse log is empty.',
+  'protocol.j1850.vpw.error.oddLength':
+    'The pulse log has an odd length; every pulse must be 2 bytes (Uint16LE).',
+  'protocol.j1850.vpw.error.misalignedBits':
+    'The pulse count after SOF is not a multiple of 8; it does not fill whole bytes.',
+  'protocol.j1850.vpw.error.tooShort': 'Not enough pulses for a Header and a CRC.',
+  'protocol.j1850.vpw.error.frameTooLong': 'The frame exceeds the maximum allowed length.',
+  'protocol.j1850.vpw.error.crcMismatch': 'CRC-8 (SAE J1850) does not match the computed value.',
+  'protocol.j1850.vpw.error.aborted': 'Decoding was cancelled.',
+  'protocol.j1850.vpw.warning.sofReserved':
+    'The SOF pulse is the reserved value (0) — unmeasured, not converted to a duration.',
+  'protocol.j1850.vpw.warning.reservedPulseInFrame':
+    "The frame contains at least one reserved (unmeasured) pulse; that byte's bit was treated as a placeholder 0.",
+  'protocol.j1850.vpw.warning.headerUnresolved':
+    'The Header is shown raw: its exact meaning depends on a higher-layer document such as J2178/J1979, which this tool does not map.',
+  'protocol.j1850.vpw.warning.crcMismatch': 'CRC-8 (SAE J1850) does not match.',
+  'protocol.j1850.vpw.warning.dataMayBeObd':
+    'The Data field is shown raw. If you know it carries an OBD-II message, set Payload Interpretation to "OBD-II".',
+  'protocol.j1850.vpw.warning.obdParseFailed':
+    'The Data field could not be decoded by the OBD-II engine; shown raw.',
+  'protocol.j1850.vpw.summary.frame': 'SAE J1850 VPW frame',
+  'protocol.j1850.vpw.example.validFrame.name': 'Valid frame (OBD-II Engine RPM response)',
+  'protocol.j1850.vpw.example.validFrame.description':
+    "The Data field is obd.ts's own verified Engine RPM example (A=0x1A, B=0xF8 → 1726 rpm); selecting \"OBD-II\" for Payload Interpretation decodes it with the same engine.",
+  'protocol.j1850.vpw.example.noDataFrame.name': 'No data bytes (Header + CRC only)',
+  'protocol.j1850.vpw.example.noDataFrame.description':
+    'The shortest frame that is still valid without a Data field.',
+  'protocol.j1850.vpw.example.badCrc.name': 'Bad CRC',
+  'protocol.j1850.vpw.example.badCrc.description':
+    'The CRC byte was deliberately broken; the frame still decodes but is marked invalid.',
+  'protocol.j1850.vpw.example.truncated.name': 'Truncated frame',
+  'protocol.j1850.vpw.example.truncated.description':
+    'The pulse count after SOF does not fill a whole byte (not a multiple of 8).',
 };

@@ -112,6 +112,22 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'flexray', () =>
     import('./automotive/flexray/flexray').then((module) => module.flexRayPlugin),
   );
+  // SAE J1850 PWM/VPW — dalga 14f: `vehicle-network-protocols` ailesini KAPATIR.
+  // İkisi de `j1850Pulse.ts`in PAYLAŞTIĞI nabız-günlüğü konteynerini (bayt
+  // DEĞİL) tüketir — ana brifin açık soru 1'i "karma (c)" kararıyla kapandı.
+  // `CRC8_SAE_J1850`nin (katalogda dalga 1'den beri YETİM duran girdi) İLK
+  // tüketicisi burası. `j1850Pwm.ts`/`j1850Vpw.ts` BİLEREK AYRI dosyalar
+  // (12f'nin `mqtt.ts`/`mqttSn.ts` kararı): PWM'de bit süre TEK BAŞINA yeter,
+  // VPW'de süre aktif/pasif DURUMLA birlikte okunur — akraba görünen iki
+  // biçim yan yana durup farkı GÖSTERİR. OBD-II zinciri (`payloadInterpretation`)
+  // yalnız VPW'de AÇILIR (spec zinciri yalnız VPW için istiyor); PWM'de bu
+  // kanal YOK.
+  registerOnce(registry, 'sae-j1850-pwm', () =>
+    import('./automotive/j1850/j1850Pwm').then((module) => module.j1850PwmPlugin),
+  );
+  registerOnce(registry, 'sae-j1850-vpw', () =>
+    import('./automotive/j1850/j1850Vpw').then((module) => module.j1850VpwPlugin),
+  );
   registerOnce(registry, 'lin', () =>
     import('./automotive/lin/lin').then((module) => module.linPlugin),
   );

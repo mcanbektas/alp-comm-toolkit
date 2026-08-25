@@ -328,10 +328,16 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Legacy Class-B vehicle network in its 41.6 kbit/s pulse-width-modulated two-wire form, decoded from raw pulse widths rather than byte-clocked serial data.',
           layer: 'data-link',
-          status: 'planned',
+          // dalga 14f: girdi TELİN KENDİSİ değil, `j1850Pulse.ts`nin PWM/VPW
+          // arasında PAYLAŞTIĞI belgelenmiş nabız-günlüğü konteyneridir (ana
+          // brifin açık soru 1'i "karma (c)" kararıyla kapandı). Bit eşiği
+          // profile bağlıdır; "8 us = 1" gibi sabitler evrensel değildir —
+          // `bitThreshold`/`profile` decodeOptions bunu karşılar. Header HAM
+          // kalır (spec `:401` semantiği vermiyor, J2178/J1979'a bırakıyor).
+          // `CRC8_SAE_J1850`nin İLK tüketicisi.
+          status: 'ready',
+          pluginId: 'sae-j1850-pwm',
           tabs: ['overview', 'decode', 'timing', 'diagnostics', 'examples'],
-          // Bit eşiği profile bağlıdır; "8 us = 1" gibi sabitler evrensel
-          // değildir, decoder eşiği seçilen J1850 profilinden almalıdır.
           tools: [
             'Pulse Analyzer',
             'Pulse Width',
@@ -352,7 +358,15 @@ export const automotiveDomain: CatalogDomain = {
           summary:
             'Single-wire 10.4 kbit/s variable-pulse-width variant of J1850 where a bit follows from the active/passive state combined with the pulse duration, commonly carrying legacy OBD-II traffic.',
           layer: 'data-link',
-          status: 'planned',
+          // dalga 14f: AYNI nabız-günlüğü konteyneri (`j1850Pulse.ts`), ama bit
+          // kuralı FARKLI — süre TEK BAŞINA yetmez, `initialLevel` ile
+          // türetilen aktif/pasif durumla BİRLİKTE okunur (nabızlar KESİN
+          // alterne ettiği için konteynere bit çalınmadan tek şıkla sorulur).
+          // `payloadInterpretation` OPT-IN OBD-II zinciri açar (spec `:413`,
+          // `devicenet.ts`in `cip-explicit` deseni birebir emsal); varsayılan
+          // ham + uyarı, PWM'de bu kanal YOK.
+          status: 'ready',
+          pluginId: 'sae-j1850-vpw',
           tabs: ['overview', 'decode', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Pulse Capture',

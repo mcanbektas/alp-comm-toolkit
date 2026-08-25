@@ -6375,6 +6375,91 @@ export const tr = {
     '2 baytlık gövde (Process mi On-request Data mı olduğu eşleşen master çerçevesine bağlı, bu yüzden ham) + Event pending + Process Data invalid.',
   'protocol.ioLink.example.deviceChecksumMismatch.name': 'Device checksum hatası',
   'protocol.ioLink.example.deviceChecksumMismatch.description': 'CKS\'nin 6-bit checksum\'ı kasten bozuldu.',
+
+  // --- SAE J1850 PWM/VPW (Faz 10, dalga 14f) ---
+  'protocol.j1850.pwm.documentation.summary':
+    'SAE J1850 PWM: 41.6 kbit/s darbe-genişlik modülasyonlu Class-B araç ağı. Girdi bir nabız günlüğüdür (bayt akışı değil); bit eşiği ve profil decodeOptions üzerinden seçilir.',
+  'protocol.j1850.pwm.option.bitThreshold': 'Bit Eşiği (µs)',
+  'protocol.j1850.pwm.option.bitThreshold.description':
+    'Kısa ve uzun darbeyi ayıran süre sınırı. "Profil" bir preset seçiyorsa bu alan YOK SAYILIR.',
+  'protocol.j1850.pwm.option.profile': 'Profil',
+  'protocol.j1850.pwm.option.profile.description':
+    'Bir preset seçilirse Bit Eşiği alanı yok sayılır ve alan tablosunun ilk satırı yürürlükteki profili adıyla gösterir.',
+  'protocol.j1850.pwm.option.profile.custom': 'Özel (sayı alanını kullan)',
+  'protocol.j1850.pwm.error.empty': 'Nabız günlüğü boş.',
+  'protocol.j1850.pwm.error.oddLength': 'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.j1850.pwm.error.misalignedBits':
+    'SOF sonrası nabız sayısı 8’in katı değil; bayta tamamlanamıyor.',
+  'protocol.j1850.pwm.error.tooShort': 'Header ve CRC için yetersiz nabız var.',
+  'protocol.j1850.pwm.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.j1850.pwm.error.crcMismatch': 'CRC-8 (SAE J1850) hesaplanan değerle tutmuyor.',
+  'protocol.j1850.pwm.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.j1850.pwm.warning.sofReserved':
+    'SOF nabzı rezerve (0) değerinde — ölçülemedi, süreye çevrilmedi.',
+  'protocol.j1850.pwm.warning.reservedPulseInFrame':
+    'Çerçeve içinde en az bir rezerve (ölçülemedi) nabız var; o baytın biti yer tutucu olarak 0 kabul edildi.',
+  'protocol.j1850.pwm.warning.headerUnresolved':
+    'Header ham gösteriliyor: tam anlamı J2178/J1979 gibi üst dokümanlara bağlıdır, bu araç eşlemiyor.',
+  'protocol.j1850.pwm.warning.crcMismatch': 'CRC-8 (SAE J1850) tutmuyor.',
+  'protocol.j1850.pwm.summary.frame': 'SAE J1850 PWM çerçevesi',
+  'protocol.j1850.pwm.example.validFrame.name': 'Geçerli çerçeve (header + 3 bayt veri)',
+  'protocol.j1850.pwm.example.validFrame.description':
+    'CRC-8 (SAE J1850) doğrulanan tam bir çerçeve; header ham kalır.',
+  'protocol.j1850.pwm.example.noDataFrame.name': 'Veri baytı olmadan (yalnız Header + CRC)',
+  'protocol.j1850.pwm.example.noDataFrame.description':
+    'Data alanı olmadan da geçerli olan en kısa çerçeve.',
+  'protocol.j1850.pwm.example.badCrc.name': 'Bozuk CRC',
+  'protocol.j1850.pwm.example.badCrc.description':
+    'CRC baytı kasten bozuldu; çerçeve yine çözülür ama geçersiz işaretlenir.',
+  'protocol.j1850.pwm.example.truncated.name': 'Eksik çerçeve',
+  'protocol.j1850.pwm.example.truncated.description':
+    'SOF sonrası nabız sayısı bayta tamamlanmıyor (8’in katı değil).',
+  'protocol.j1850.vpw.documentation.summary':
+    'SAE J1850 VPW: 10.4 kbit/s değişken darbe-genişlikli tek telli Class-B araç ağı. Bit anlamı süre ile aktif/pasif durumun BİRLİKTE değerlendirilmesine bağlıdır; ilk seviye decodeOptions ile seçilir.',
+  'protocol.j1850.vpw.option.bitThreshold': 'Bit Eşiği (µs)',
+  'protocol.j1850.vpw.option.bitThreshold.description': 'Kısa ve uzun darbeyi ayıran süre sınırı.',
+  'protocol.j1850.vpw.option.initialLevel': 'İlk Seviye (SOF)',
+  'protocol.j1850.vpw.option.initialLevel.description':
+    'Nabızlar kesin alterne eder; tek bilinmeyen ilk nabzın (SOF) aktif mi pasif mi olduğudur.',
+  'protocol.j1850.vpw.option.initialLevel.active': 'Aktif',
+  'protocol.j1850.vpw.option.initialLevel.passive': 'Pasif',
+  'protocol.j1850.vpw.option.payloadInterpretation': 'Payload Yorumu',
+  'protocol.j1850.vpw.option.payloadInterpretation.description':
+    'Data alanının OBD-II mesajı taşıdığı çerçeveden çıkarılamaz; kullanıcı sistem bağlamından bilir. Seçilirse AYNI baytlar OBD-II motoruyla çözülür.',
+  'protocol.j1850.vpw.option.payloadInterpretation.raw': 'Ham veri',
+  'protocol.j1850.vpw.option.payloadInterpretation.obdIi': 'OBD-II',
+  'protocol.j1850.vpw.error.empty': 'Nabız günlüğü boş.',
+  'protocol.j1850.vpw.error.oddLength': 'Nabız günlüğü tek uzunlukta; her nabız 2 bayt (Uint16LE) olmalı.',
+  'protocol.j1850.vpw.error.misalignedBits':
+    'SOF sonrası nabız sayısı 8’in katı değil; bayta tamamlanamıyor.',
+  'protocol.j1850.vpw.error.tooShort': 'Header ve CRC için yetersiz nabız var.',
+  'protocol.j1850.vpw.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.j1850.vpw.error.crcMismatch': 'CRC-8 (SAE J1850) hesaplanan değerle tutmuyor.',
+  'protocol.j1850.vpw.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.j1850.vpw.warning.sofReserved':
+    'SOF nabzı rezerve (0) değerinde — ölçülemedi, süreye çevrilmedi.',
+  'protocol.j1850.vpw.warning.reservedPulseInFrame':
+    'Çerçeve içinde en az bir rezerve (ölçülemedi) nabız var; o baytın biti yer tutucu olarak 0 kabul edildi.',
+  'protocol.j1850.vpw.warning.headerUnresolved':
+    'Header ham gösteriliyor: tam anlamı J2178/J1979 gibi üst dokümanlara bağlıdır, bu araç eşlemiyor.',
+  'protocol.j1850.vpw.warning.crcMismatch': 'CRC-8 (SAE J1850) tutmuyor.',
+  'protocol.j1850.vpw.warning.dataMayBeObd':
+    'Data alanı ham gösteriliyor. OBD-II mesajı taşıdığını biliyorsanız Payload Yorumu’nu "OBD-II" yapın.',
+  'protocol.j1850.vpw.warning.obdParseFailed':
+    'Data alanı OBD-II motoruyla çözülemedi; ham gösteriliyor.',
+  'protocol.j1850.vpw.summary.frame': 'SAE J1850 VPW çerçevesi',
+  'protocol.j1850.vpw.example.validFrame.name': 'Geçerli çerçeve (OBD-II Engine RPM yanıtı)',
+  'protocol.j1850.vpw.example.validFrame.description':
+    'Data alanı obd.ts’in doğrulanmış Engine RPM örneğidir (A=0x1A, B=0xF8 → 1726 rpm); Payload Yorumu "OBD-II" yapılınca aynı motorla çözülür.',
+  'protocol.j1850.vpw.example.noDataFrame.name': 'Veri baytı olmadan (yalnız Header + CRC)',
+  'protocol.j1850.vpw.example.noDataFrame.description':
+    'Data alanı olmadan da geçerli olan en kısa çerçeve.',
+  'protocol.j1850.vpw.example.badCrc.name': 'Bozuk CRC',
+  'protocol.j1850.vpw.example.badCrc.description':
+    'CRC baytı kasten bozuldu; çerçeve yine çözülür ama geçersiz işaretlenir.',
+  'protocol.j1850.vpw.example.truncated.name': 'Eksik çerçeve',
+  'protocol.j1850.vpw.example.truncated.description':
+    'SOF sonrası nabız sayısı bayta tamamlanmıyor (8’in katı değil).',
 } as const;
 
 /**
