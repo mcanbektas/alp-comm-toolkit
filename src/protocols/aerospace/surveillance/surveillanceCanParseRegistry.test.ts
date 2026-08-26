@@ -34,31 +34,38 @@ import { modeSBytesFromHex, modeSParser, modeSPlugin } from '../modeS/modeS';
 const REGISTRY_EXAMPLE_HEALTH_THRESHOLD = 700;
 
 /**
- * `mode-s`in registry'deki yanlış pozitif SAYISI — **dalga 18a'da yeniden
- * ölçüldü (888 yabancı örnek)**. Tavan değil, ÖLÇÜLMÜŞ değer: artarsa yeni
+ * `mode-s`in registry'deki yanlış pozitif SAYISI — **dalga 18e'de yeniden
+ * ölçüldü (916 yabancı örnek)**. Tavan değil, ÖLÇÜLMÜŞ değer: artarsa yeni
  * bir çerçeve imzaya sızmıştır, azalırsa imza daralmıştır; iki durumda da
  * bakılması gerekir.
  *
- * 888 örneğin **7'si** (%0,79) kabul ediliyor ve yedisi de AP sınıfından
+ * 916 örneğin **13'ü** (%1,42) kabul ediliyor ve on üçü de AP sınıfından
  * (DF0/4/5/16/20/21) geçiyor, yani üçüncü kanıtın (CRC) BULUNMADIĞI daldan:
  *   `hart/long-request-secondary-master` (14 bayt) ·
  *   `length-based-protocol/valid-frame` (7) · `mavlink/v2-large-message-id` (14) ·
  *   `profibus-dp/sd3-fixed-data` (14) · `telnet/terminal-type-subnegotiation` (14) ·
- *   `tftp/data-final-block` (7) · **`wifi/ack` (14) — dalga 18a'da eklendi**
+ *   `tftp/data-final-block` (7) · **`wifi/ack` (14) — dalga 18a'da eklendi** ·
+ *   **`rf-telemetry-custom-frame`in ALTI 14 baytlık örneği — dalga 18e'de
+ *   eklendi** (`default-profile`, `whitened`, `crc-mismatch`,
+ *   `length-overflow`, `modbus-crc`, `length-includes-crc`)
  *
- * > **Yedinci giriş bir REGRESYON DEĞİL, bekçinin İŞİNİ YAPMASIDIR.** Dalga
- * > 18a `wifi`nin 14 baytlık ACK örneğini registry'ye soktu ve `mode-s`in
- * > imzası uzunluk + DF atanmışlığına dayandığı için onu sahiplendi. `wifi`
- * > tarafında bir düzeltme YOK: `wifi.canParse` aynı çerçeveyi FCS'le
- * > doğruluyor ve `mode-s`in örneklerinden HİÇBİRİNİ almıyor (18a'nın kendi
- * > bekçisi bunu 0 olarak ölçüyor). Ayrım sıralamada değil, KANITTA.
+ * > **Ne yedinci ne de sonraki altı giriş bir REGRESYONDUR; bekçi İŞİNİ
+ * > YAPIYOR.** Dalga 18a `wifi`nin 14 baytlık ACK örneğini, dalga 18e ise
+ * > `rf-telemetry-custom-frame`in altı 14 baytlık örneğini registry'ye soktu.
+ * > `mode-s`in imzası uzunluk + DF atanmışlığına dayanıyor ve bu çerçevelerin
+ * > ilk baytı `0xAA` (DF = 21, Comm-B identity reply — ATANMIŞ bir DF ve
+ * > 112 bitlik uzunlukla TUTARLI), dolayısıyla AP dalından geçiyorlar.
+ * > Karşı tarafta düzeltme YOK ve gerekmiyor: her iki kaydın kendi bekçisi
+ * > ters yönü **0** olarak ölçüyor (`wifi.canParse` FCS istiyor,
+ * > `rf-telemetry.canParse` önbelleme + sync sözcüğü istiyor ve registry'nin
+ * > 937 örneğinin hiçbirini almıyor). Ayrım sıralamada değil, KANITTA.
  *
- * Karşılaştırma: üç kanıttan yalnız uzunluk kalsaydı (7 ya da 14 bayt) **27**
- * örnek (%3,0) kabul edilirdi — DF'in atanmışlığı ve uzunlukla tutarlılığı
- * yanlış pozitifi dörtte birine indiriyor, ama SIFIRA indiremiyor ve
- * indiremez: `modeS.ts` dosya başındaki AP tuzağı bunun matematiksel sebebi.
+ * Karşılaştırma: üç kanıttan yalnız uzunluk kalsaydı (7 ya da 14 bayt) **33**
+ * örnek (%3,6) kabul edilirdi — DF'in atanmışlığı ve uzunlukla tutarlılığı
+ * yanlış pozitifi hâlâ üçte birinden aşağı indiriyor, ama SIFIRA indiremiyor
+ * ve indiremez: `modeS.ts` dosya başındaki AP tuzağı bunun matematiksel sebebi.
  */
-const MODE_S_REGISTRY_FALSE_POSITIVE_COUNT = 7;
+const MODE_S_REGISTRY_FALSE_POSITIVE_COUNT = 13;
 
 /**
  * `ads-b` için beklenen SIFIR ve bu bir tavan DEĞİL kesin bir beklentidir:

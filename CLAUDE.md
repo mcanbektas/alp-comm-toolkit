@@ -125,13 +125,24 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 17'den sonra,
-  KODDAN doğrulandı — tek kullanımlık sayım script'i)
-  124 `ready` / 19 `planned` / 29 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
-  hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **139 `ready` / 4 `planned` / 29 `partial`**; gerçekten yapılacak iş **4 kanonik
-  kayıt** ve dördü de AYNI domain'de (wireless-iot — thread, wifi, esp-now,
-  rf-telemetry-custom-frame). **Geriye TEK domain kaldı.** **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
+- **🏁 KATALOG BORCU SIFIRLANDI (2026-08-27, dalga 18e) — kanonik `planned`
+  kayıt KALMADI.** Bu, deponun tarihinde ilk kez katalogdaki her kaydın ya bir
+  motoru olduğu ya da kanonik bir kayda alias'landığı anlamına gelir.
+  **8 domain · 54 aile · 172 kayıt**, hepsi kapalı; dalga 10'dan 18'e uzanan
+  zincirin sonu.
+
+  Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-27, dalga 18e'den
+  sonra, KODDAN doğrulandı — tek kullanımlık sayım script'i)
+  125 `ready` / 15 `planned` / 32 `partial`**, ama ham sayı yanıltıcı: **15 alias
+  kaydın hepsinde `status` `planned` yazarken kanonik kayıt `ready` ya da
+  `partial`dır** — ham `planned` sayısının sıfır OLMAMASININ tek sebebi budur ve
+  bir borç DEĞİLDİR (`resolveStatus()` rozeti kanonik kayıttan okur, `FamilyPage`
+  ve `ProtocolPage` ikisi de oradan basar). Alias zinciri çözülünce
+  **140 `ready` / 0 `planned` / 32 `partial`**; **gerçekten yapılacak kanonik iş
+  SIFIR.** Domain dağılımı (çözülmüş, ready+partial):
+  `interfaces-framing` 34+6 · `industrial-automation` 20+5 · `automotive` 19+6 ·
+  `marine-navigation` 9+2 · `aerospace-uav` 11+5 · `building-automation` 10+1 ·
+  `network-ethernet` 28+0 · `wireless-iot` 9+7. **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
   KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
   13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
   cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii/cc-link-ie + 13g
@@ -158,8 +169,16 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **`building-automation` (11 kayıt) dalga 17 ile TAMAMEN KAPANDI** — YEDİNCİ
   kapanan domain (tek commit, alt dalga YOK, 1 kanonik kayıt: `lonworks`,
   `partial`); domain toplamı **7 `ready` + 1 `partial` + 3 alias**, `planned`
-  KALMADI. Kalan TEK domain `wireless-iot` (4 kanonik kayıt); sıradaki domain
-  seçimi YAPILMADI ve zaten seçenek kalmadı. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
+  KALMADI.
+  **`wireless-iot` (16 kayıt) dalga 18 ile TAMAMEN KAPANDI — SEKİZİNCİ ve SON
+  kapanan domain** (18a wifi MAC katmanı + 18b wifi yönetim gövdeleri/IE +
+  18c esp-now + 18d thread + 18e rf-telemetry-custom-frame — 5 alt dalga,
+  4 kanonik kayıt: 1 `ready` (`esp-now`) + 3 `partial`); domain toplamı
+  **9 `ready` + 7 `partial` + 3 alias**, `planned` KALMADI.
+  Sıradaki domain seçimi YAPILMADI ve **zaten seçenek kalmadı**: bir sonraki iş
+  sınıfı katalog DIŞIDIR (çerçeveler-arası panolar, `custom-schema` paneli,
+  Log Analyzer, `pcap.ts` tüketicisi) ve seçim kullanıcınındır.
+  **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
   `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
@@ -168,7 +187,7 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   çerçeveleme, farklı FEC), `iec-61162` `UdPbC`-only (`-450`nin İKİNCİ teli olan
   `RaUdP`/`RpUdP`/`RrUdP` binary dosya transferi ayrı bir tel biçimidir; Ed.2'nin
   PGN kapsüllemesinin token'ı ve `a:` authentication tag'inin biçimi kamuya açık
-  DEĞİL), `lonworks` ISO/IEC 14908-4 (CN/IP) tek-tel — gerekçeler ilgili `.ts`
+  DEĞİL), `lonworks` ISO/IEC 14908-4 (CN/IP) tek-tel, `wifi` FCS'li çıplak 802.11 MAC + yönetim gövdeleri (radiotap/PPI/Prism/AVS AYRI link-type'lardır, şifreli gövde AÇILMAZ), `thread` şifresiz MLE Discovery-only (öteki MLE komutları anahtar olmadan OKUNAMAZ, `[KARAR 18-3]`), `rf-telemetry-custom-frame` demodüle-bayt-only (bit akışı / nabız süresi / SDR dışa aktarımı birer GİRDİ DÖNÜŞÜMÜdür, `decodeOptions` şıkkı değil) — gerekçeler ilgili `.ts`
   dosyalarının başında ve `docs/plan-fazlar.md`nin 13g/14h/15h/16c/17
   notlarında.
   **`lonworks`un kapsam gerekçesi bu listedeki ötekilerden FARKLI bir cinstir
@@ -301,3 +320,78 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).
   O sekmeler görünür ama içleri "planlandı" bildirimi taşır. **Boş kart basmak yasak** —
   bir sekme açılıyorsa ya gerçek bir motoru vardır ya da neyin geleceğini söyler.
+
+  ### Dalga 18'in kalıcı dersleri
+
+  **Bir yakalamanın LINK-TYPE'ı içinde ne olduğunun cevabı DEĞİLDİR** (18d):
+  `6LoWPAN.pcap` DLT 1'dir (Ethernet) ama içinde ZEP v2 ile taşınan 331 gerçek
+  802.15.4 çerçevesi vardır ve FCS'leri **331/331** doğrudur. Bir kaynağı zarf
+  tipine bakıp elemek, dalga 17'nin "spec ücretli diye aramayı bırakma"sının
+  konteyner düzeyindeki eşidir.
+  **Kapsam çizgisini libpcap'in link-type tablosu ÇİZEBİLİR** (18a): radiotap
+  802.11'den ayrı bir DLT'dir (105 ↔ 127) ve FCS varlığı 802.15.4'te bir DLT
+  ayrımıdır (195 ↔ 230). *"Bu ayrı bir konteyner"* iddiası artık
+  KANITLANABİLİR bir iddiadır.
+  **`canParse`ı CHECKSUM taşıyabilir** (18a/18d): hem `thread` (T4) hem `wifi`
+  (W12) yalnız FCS sayesinde 0 çakışmaya iniyor; FCS'siz aynı imzalar 18 ve
+  216. **Checksum bir doğrulama alanı OLMAKLA KALMAZ, bir KİMLİK alanıdır.**
+  **Yorum ile kod ayrışırsa KOD kazanır — ÜÇÜNCÜ vaka ve ilk kez BİRİNCİ SINIF
+  bir uygulamada** (18d): OpenThread'in `SecuritySuite` enum yorumları takas
+  edilmiş (`mle.hpp:1498-1502`); doğru anlam yalnız `mle.cpp`nin kullanımından
+  okunur. Yanlış okuma "şifreli"yi "şifresiz" sanıp ciphertext'i alan olarak
+  basardı.
+  **DEPONUN KENDİ SPEC'İ DE BİR KAYNAKTIR VE ÇÜRÜYEBİLİR** (18e, yeni sınıf):
+  `docs/spec/ozet/09-kablosuz-iot.md:171`in CRC'si (`C9 21`) **65.535 polinomun
+  hiçbiriyle** (init/yansıma/xorout çarpanları ve 6..12 arası tüm bayt
+  aralıklarıyla), `:173`ün whitening örneği **8.192 LFSR kombinasyonunun ve 40
+  BLE kanalının hiçbiriyle** yeniden üretilemedi. **Spec'in sayısal örneği bir
+  fixture DEĞİLDİR** — aritmetiği kontrol edilene kadar. Doğru davranış:
+  ALAN YERLEŞİMİNİ koru (o bilgi geçerli), SAYILARI motordan üret ve nereden
+  geldiğini örnek açıklamasına YAZ. Dalga 17'nin "keşfin elle çözdüğü her
+  çerçeve şüphelidir" dersinin dördüncü vakası ve ilk kez şüpheli olan şey
+  deponun kendi belgesi.
+  **Paylaşılan çekirdek deseni DÖRDÜNCÜ ve BEŞİNCİ kez uygulandı** (18a/18d):
+  `wifi/dot11Frame.ts` üç tüketiciye (18a `wifi`, 18b yönetim gövdeleri,
+  18c `esp-now`) ve `protocol-core/framing/ieee802154Frame.ts` iki tüketiciye
+  (`zigbee`, `thread`) hizmet ediyor. İkincisi bir ÇIKARMA işlemiydi: MAC
+  çözücüsü `zigbee.ts`in İÇİNDEydi ve hiçbir yardımcısı `export` edilmemişti;
+  çıkarma "kes-yapıştır" değil, `pulseLog.ts` biçiminde **konteyner/türetme
+  ayrımı** gerektirdi (çekirdek `payloadStart`/`payloadEnd` döndürür, gövdeyi
+  TÜKETİCİ araya sokar) — ve `zigbee`nin FCS'i NWK'dan ÖNCE, `thread`inki EN
+  SONDA basıldığı için alan SIRASI tüketiciye bırakıldı.
+  **`DecodeOption.kind` yalnız `'select' | 'number'`dır ve bu bir KAPSAM
+  KISITIDIR** (18d'de bir kanalı, 18e'de DÖRT kanalı kapattı): serbest metin
+  (hex önbelleme, sync sözcüğü, whitening polinomu) isteyen bir kanal
+  `protocol-core/types.ts` genişletilmeden YAZILAMAZ. 18e bunları uzunluk ve
+  tohum `number` kanallarına çevirdi, polinomu PN9'a sabitledi ve **kapatılan
+  kanalı dosya başındaki "KANAL YAPILMAYACAKLAR" listesine gerekçesiyle
+  yazdı** — "unutulmuş" ile "yazılamamış" ayrı şeylerdir.
+  **Bir bağlantı GÖRÜNMÜYORSA yoktur** (18e): `calculatorIds` bağlantısı
+  `ProtocolPage.tsx:433`te YALNIZ `timing` sekmesinde basılıyor;
+  `rf-telemetry-custom-frame`in `timing` sekmesi olmadığı için brifin önerdiği
+  `/calculators` bağı hiç görünmezdi ve EKLENMEDİ.
+
+  ### Dalga 18'den KALAN İKİ BORÇ (kapatılmadı, KAYDEDİLDİ)
+
+  **1. `createSchemaParser`in `canParse`i BOŞ `startBytes`te HER ŞEYE `true`
+  der.** `schemaParser.ts:608` `return startBytes.every((byte, index) =>
+  data[index] === byte);` ve `[].every(...)` boş dizide **`true`** döner.
+  **ÖLÇÜLDÜ (2026-08-27): `length-based-protocol` registry'nin 937 örneğinin
+  937'sini sahipleniyor (%100).** 18e bunu DÜZELTMEDİ (18e brifi: *"ayrı bir
+  kayıt, ayrı bir borç"*) ama ondan KAÇINDI: `rf-telemetry-custom-frame`
+  `createSchemaParser`i hiç kullanmaz, `canParse`ı elle yazar ve aynı kümede
+  **0** yabancı çakışma ölçer. Mayının hâlâ orada olduğu
+  `rfTelemetryCanParseRegistry.test.ts`in ikinci ayağında her koşuda YENİDEN
+  ölçülüyor — bekçi bir gün düşerse borç kapanmış demektir ve test o gün
+  GÜNCELLENİR, sessizce silinmez. Düzeltmenin bedeli: `custom-binary-protocol`
+  (9 çakışma) ve `delimiter-based-protocol` (10) dahil tüm tüketicilerin
+  ölçümü değişir, yani düzeltme kendi turunu ve kendi ölçümünü ister.
+
+  **2. `custom-schema` `definitions` paneli YOK ve 19 kayıt onu bekliyor**
+  (`[KARAR 18-7]`, `grep -rn "custom-schema" src/`). `ProtocolPage.tsx`in
+  `DEFINITION_PANELS`inde yalnız `dbc` ve `eds` var; `custom-schema` taşıyan
+  19 kaydın hepsi "planlandı" basıyor — **`ble-gatt` `ready` olduğu hâlde
+  dahil.** `lonworks`un `xif` borcuyla AYNI sınıf: biçim belgeli, motor yok,
+  ve panel 19 kaydı BİRDEN ilgilendirdiği için domain'i kapatan dalgada
+  yazılması ikinci bir motor riski demekti (`[Karar 15h-1]` gerekçesi).
+  **Bu doğru davranıştır**, bir mayın değil.

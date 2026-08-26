@@ -769,6 +769,16 @@ yüzden aşağı sapabilir.
 
 ## Domain kapanış görevleri (18e bitince) — **KİLOMETRE TAŞI**
 
+> ✅ **UYGULANDI (2026-08-27, dalga 18e).** Aşağıdaki dört görevin dördü de
+> koştu: `CLAUDE.md` borç bölümü KODDAN doğrulanmış sayımla yeniden yazıldı
+> (**140 `ready` / 0 `planned` / 32 `partial`**), `docs/plan-fazlar.md`ye
+> dalga 18 kapanış özeti ve Faz 10'un kendi kapanışı eklendi, bu dosyanın
+> "Uygulama sırasında çürüyenler" bölümü 18a-18e için TAMAMLANDI ve sıradaki
+> domain seçimi YAPILMADI çünkü seçenek kalmadı. **Beklenti tuttu:** ham
+> **125 `ready` / 15 `planned` / 32 `partial`** (brif 125/15/32 öngörmüştü —
+> tam isabet), çözülmüş **140 / 0 / 32** (brif 140/0/32 öngörmüştü — tam
+> isabet). Dördün rozet dağılımı da tuttu: **1 `ready` + 3 `partial`**.
+
 ### 1. `CLAUDE.md` "Bilinen borçlar"
 
 - **`wireless-iot` TAMAMEN KAPANDI — SEKİZİNCİ ve SON domain.**
@@ -1019,6 +1029,180 @@ SİLİNMEZ.)*
     **~60 tahmin → 46 gerçek** (%23 aşağı) — sebep 18a'nınkiyle aynı:
     element adları, süit adları, OUI etiketleri ve kod sözlükleri VERİDİR,
     sözlüğe girmedi. Kayıt toplamı 71 → **117** anahtar.
+
+#### 18c (`esp-now`)
+
+24. **`[BEKLENTİ]` "Gerçek ESP-NOW yakalaması BULUNAMADI; rozet `partial`
+    olacak."** **ÇÜRÜDÜ.** `espressif/esp-idf#2833` (2018) **iki gerçek ESP32
+    monitor-mode yakalaması** taşıyor; radiotap soyulunca 48 bayt kalıyor ve
+    baytlar Espressif'in belgelediği şemayla **SIFIR sapmayla** çaprazlandı,
+    kalıntı yok. Kayıt **`ready`** açıldı. Kaynağın TEK ve 2018 tarihli olduğu
+    dosya başında ve katalog özetinde AÇIKÇA yazılı — "bulundu" ile "bol"
+    ayrı şeylerdir.
+
+25. **"Espressif'in şeması üçüncü adresi hep broadcast der."** **ÇÜRÜDÜ ve
+    çürüten şey KAYNAĞIN KENDİ YAKALAMASI oldu:** unicast hedefli çerçevede
+    `Addr3 = Addr1`. `resolveAddressRoles` (18a'da yazılan matris) yalnız ROL
+    adı verir, DEĞER garantisi vermez — matrise DOKUNULMADI ve iddia örnek
+    açıklamasına not olarak düştü. *Birinci taraf belgesi bile kendi
+    yakalamasıyla çelişebilir; hakem baytlardır.*
+
+26. **"v1.0'da gövde > 250 bayt ⇒ uyarı basılmalı" (brifin ZORUNLU tuttuğu
+    denetim).** **KISMEN ÇÜRÜDÜ: denetim pratikte TETİKLENEMEZ**, çünkü
+    `Length` tek bayttır ve 5 + gövde ≤ 255 zaten gövdeyi 250'ye kapatıyor.
+    Savunma amaçlı KORUNDU ve neden asla ateşlenmeyeceği koda yazıldı — sessiz
+    ölü kod bırakmak yerine ölü olduğunu SÖYLEYEN kod.
+
+27. **`wifi`nin bekçi ölçümü değişti — ve bu KARARIN SONUCU.** `esp-now`ın
+    ALTI örneğinin altısı da `wifi`nin W12 imzasını geçiyor, çünkü bir ESP-NOW
+    çerçevesi **yapısal olarak zaten geçerli bir 802.11 çerçevesidir**
+    (`[KARAR 18-4]`nin ta kendisi). `wifi.canParse`a DOKUNULMADI; bekçinin
+    yabancı çakışma kovası `esp-now`u ayrı sayıyor ve sayı SABİTLENMEYİP
+    `espNowPlugin.exampleFrames.length`ten TÜRETİLİYOR — ölçüm ezberlenmiyor.
+
+#### 18d (`thread`)
+
+28. **"`decodeOptions` SEKİZ kanal olacak; sekizincisi `iphcContext`."**
+    **ÇÜRÜDÜ — ve sebebi bir KAPSAM KISITI:** `DecodeOption.kind` yalnız
+    `'select' | 'number'` (`protocol-core/types.ts:278`) ve bir IPv6 prefix'i
+    ikisine de sığmıyor; `types.ts`e dokunmak bu dalgada YASAK. Kanal
+    AÇILMADI ve davranış zaten brifin *"seçilmezse ham + uyarı"* dalı oldu.
+    **Kapatılan kanal `thread.ts` dosya başındaki "KANAL YAPILMAYACAKLAR"
+    listesine gerekçesiyle YAZILDI** — "unutulmuş" ile "yazılamamış" ayrı
+    şeylerdir. *(18e aynı kısıtla DÖRT kanal birden kaybetti; aşağı.)*
+
+29. **🚨 "Keşfin elle çözdüğü çerçeveler ŞÜPHELİDİR" dersi ÜÇÜNCÜ kez işe
+    yaradı.** 18d brifinin BEŞİNCİ çerçevesi aritmetik sapma taşıyordu:
+    UDP Length **13** yazıyordu, başlık + yük **15**ti. Çerçeve bu yüzden
+    programatik kuruldu (uzunluk yükten TÜRETİLİYOR, FCS motorla üretiliyor).
+    Brifin DÖRT gerçek çerçevesi ise 4/4 FCS PASS verdi ve elle yeniden
+    çözüldü — sapma yok. *(Dalga 17'de brifin çözümü bir bayt atlamıştı;
+    burada bir uzunluk tutmadı. Aramaya devam.)*
+
+30. **"OpenThread birinci sınıf kaynaktır, yorumları okunabilir."**
+    **YARISI ÇÜRÜDÜ ve yanlış yarısı KRİTİK:** `mle.cpp:1593/1616/3575`
+    Security Suite **0 = ŞİFRELİ**, **255 = şifresiz** diyor;
+    `mle.hpp:1498-1502`in yorumları TERSİNİ yazıyor. Yorum izlenseydi
+    **ciphertext, MLE komutu diye basılacaktı.** Dalga 17'nin
+    `LtIpPackets.h` dersinin birebir tekrarı — *yorum ile kod ayrışırsa
+    KOD kazanır*, ve bu ilk kez BİRİNCİ SINIF bir uygulamada oldu.
+
+31. **"802.15.4 MAC çekirdeğe çıkarılırsa `zigbee` kırılabilir."**
+    **ÇÜRÜDÜ, ama ancak DOĞRU BÖLÜNMEYLE:** çekirdek YALNIZ KONTEYNER biliyor
+    (FCF, adresleme modları, PAN ID sıkıştırma, Aux Security Header VARLIĞI)
+    ve gövdeyi TÜKETİCİ araya sokuyor — çünkü `zigbee` FCS'i NWK'dan ÖNCE,
+    `thread` EN SONDA basıyor. `zigbee.ts` **299 satır inceldi**, 37 testi ve
+    106 örneği **bit düzeyinde aynı** çıktıyı verdi. Çekirdeğe eklenen tek
+    seçenek (`fcsPresent`) ölçülebilir bir gerekçe taşıyor: `payloadEnd` hem
+    yükün sonunu hem adresleme taşmasını belirliyor, tüketicide düzeltilseydi
+    FCS'siz kısa çerçevede **sahte `truncated-frame`** basılırdı.
+
+#### 18e (`rf-telemetry-custom-frame`) — **domain'i ve katalog borcunu kapatan alt dalga**
+
+32. **🚨 "Spec'in kendi örnekleri açıklayıcıdır, fixture değildir"
+    `[KARAR 18-5]`.** **KEŞİF TURU HAKLIYDI ve uygulama turu bunu bağımsızca
+    DOĞRULADI.** Bu turda `"123456789"` üzerinde beş yayımlanmış `check`
+    değeri (CCITT-FALSE `0x29B1` · MODBUS `0x4B37` · KERMIT `0x2189` ·
+    XMODEM `0x31C3` · ARC `0xBB3D`) **beşte beş** yeniden üretildi — yani
+    hesaplayıcının kendisi doğru; buna rağmen `C9 21` çıkmıyor. Yayımlanan
+    çerçevenin CRC'si motorun kendi `CRC16_CCITT_FALSE` çıktısı **`0xAC54`**
+    ve bu, örnek açıklamasında AÇIKÇA söyleniyor. **Deponun KENDİ spec'i de
+    bir kaynaktır ve çürüyebilir** — dalga 17 dersinin dördüncü vakası,
+    ilk kez şüpheli olan şey deponun kendi belgesi.
+
+33. **"`decodeOptions` ON kanal: `profile`, `preambleBytes`, `syncWord`,
+    `lengthFieldSemantics`, `endianness`, `bitOrder`, `whiteningPolynomial`,
+    `whiteningSeed`, `manchesterPolarity`, `crcAlgorithm`+`crcCoverage`."**
+    **SAYI TUTTU (10 → 10), BİLEŞİM ÇÜRÜDÜ — beş kanal başka bir şeye
+    dönüştü.**
+    - Dört `text hex` kanalı (`preambleBytes`, `syncWord`,
+      `whiteningPolynomial`, `whiteningSeed`) **AÇILAMADI**: `DecodeOption.kind`
+      yalnız `'select' | 'number'` ve `types.ts` dokunulmaz. **28 numaralı
+      çürümenin ikinci ve daha büyük vakası.** Karşılıkları: uzunluklar
+      (`preambleLength`, `syncWordLength`) ve tohum (`whiteningSeed`) `number`
+      kanalı oldu; polinom PN9'un tap kümesine SABİTLENDİ.
+    - `profile` (spec/cc1101/nrf/custom) **ÇÜRÜDÜ**: belgelenmiş TEK çerçeve
+      yerleşimi spec §3.9'unkidir; CC1101 ve nRF bir çerçeve yerleşimi değil
+      bir RADYO yapılandırmasıdır (whitening, Manchester, CRC) ve o üçü zaten
+      ayrı kanaldır. İkinci bir yerleşim UYDURMAK, deponun
+      "doğrulanamayanı yayımlama" kuralını çiğnerdi.
+    - `endianness` **DARALDI**: bu profilde tek çok baytlı sayısal alan CRC'dir,
+      kanal `crcByteOrder` adıyla ve o kapsamla yazıldı — genel bir
+      "endianness" etiketi olmayan bir yetenek vaat ederdi.
+    - `bitOrder` **DARALDI**: PN9'un LSB-first paketlemesi TI'ın yayımladığı
+      BAYT dizisinin parçasıdır, çevrilirse PN9 olmayan bir dizi çıkar ve
+      fixture geçersizleşir. Kanal yalnız Manchester'a bağlandı
+      (`manchesterBitOrder`).
+
+34. **"`crcAlgorithm` şıkları 38 katalog girdisidir."** **ÇÜRÜDÜ.** Şemanın
+    `algorithm` alanı `crcCatalogue.ts`in 38'ine değil
+    `algorithmCatalogue.ts`in **`CHECKSUM_ALGORITHMS`** listesine bağlıdır
+    (basit toplamlar dahil, CRC katalogunun bir ALT KÜMESİ + `none`). Şıklar
+    bu yüzden sabit yazılmadı, listeden TÜRETİLDİ. **Katalog eklemesi SIFIR:**
+    `crcCatalogue.ts`, `crcEngine.test.ts` ve `CrcCalculatorTool.test.tsx`
+    üçüne de DOKUNULMADI, sayı **38**te kaldı (`[KARAR 18-6]` beş alt dalgada
+    da tuttu).
+
+35. **"`canParse` `true` döner ve imza 0 çakışma verir" (6 numaralı keşif
+    çürümesinin devamı).** **DOĞRU ÇIKTI ve YENİDEN ölçüldü:** 148 kayıt /
+    937 örnek → **0** yabancı çakışma. Reddedilen iki gevşek imza (yalnız
+    `AA AA AA` önbellemesi; sync sözcüğünü ilk 12 baytta ARAMAK) de bugünkü
+    kümede **0** çalıyor — yani sync ayağı bugün imzayı DARALTMIYOR. Ayak yine
+    de KORUNDU ve gerekçesi bekçi testine yazıldı: `AA AA AA` yaygın bir
+    önbelleme desenidir ve tek başına bir KİMLİK taşımaz.
+
+36. **🚨 MAYIN — "`createSchemaParser` doğrudan kullanılabilir mi" sorusu.**
+    Brifin İKİ kabul edilebilir çözümünden **İKİNCİSİ** seçildi (`canParse`
+    elle yazılır). Gerekçe brifin öngördüğünden daha güçlü çıktı: önbelleme ve
+    sync sözcüğü bu kayıtta KULLANICI PARAMETRESİDİR; şemaya sabit
+    `startBytes` konulsaydı `verifyFraming` 4 baytlık sync kullanan bir
+    kullanıcının kendi çerçevesini REDDEDERDİ. Mayın bu turda yeniden ölçüldü:
+    boş `startBytes`li bir şema parser'ı **937/937** (%100) sahipleniyor ve
+    `length-based-protocol` bugün tam olarak o durumda. `schemaParser.ts`
+    DÜZELTİLMEDİ (brif: *"ayrı bir kayıt, ayrı bir borç"*); borç `CLAUDE.md`ye
+    kaydedildi ve `rfTelemetryCanParseRegistry.test.ts`in ikinci ayağı
+    mayının varlığını HER KOŞUDA yeniden ölçüyor.
+
+37. **"`calculatorIds` ile `/calculators`a bağlantı basılır (`lora` emsali)."**
+    **ÇÜRÜDÜ.** `ProtocolPage.tsx:433` bu bağlantıyı YALNIZ `timing`
+    sekmesinde basıyor ve bu kaydın `timing` sekmesi YOK — bağlantı hiç
+    görünmezdi. EKLENMEDİ ve gerekçesi dosya başına yazıldı.
+    ***Görünmeyen bir bağ, olmayan bir bağdır*** — 18b'nin "çıktıyı
+    değiştirmeyen şık kanal değildir" kuralının navigasyon düzeyindeki eşi.
+
+38. **"İKİ türetilmiş fixture bekçisi `skip`e düşecek."** **SAYI ÇÜRÜDÜ:
+    ÜÇ bekçi düştü.** Görev tanımı `src/pages/ProtocolPage.test.tsx` ve
+    `e2e/nmea-decode.spec.ts`i sayıyordu; **`e2e/modbus-decode.spec.ts`**
+    (dalga 15b'nin yapısal çözümü) de AYNI sınıftaydı ve o da atlandı.
+    Üçü de sessiz yeşil DEĞİL, AÇIKÇA `skipped` raporluyor (birim:
+    `1 skipped`, e2e: `2 skipped`). Dalga 16a'nın söktüğü mayın beşinci kez de
+    patlamadı — ve artık PATLAYACAK bir hedefi kalmadı.
+
+39. **Başka bir kaydın ölçümü değişti: `mode-s` 7 → 13.** Bu kaydın ALTI
+    14 baytlık örneğinin ilk baytı `0xAA`, yani DF = 21 (Comm-B identity
+    reply — ATANMIŞ bir DF ve 112 bitlik uzunlukla TUTARLI) ve `modeS.ts`in
+    AP tuzağı yüzünden CRC eleği OLMAYAN daldan geçiyorlar. **Bir regresyon
+    DEĞİL, bekçinin İŞİNİ YAPMASI** (18a'daki 6 → 7'nin aynısı, bu kez altı
+    çerçeveyle). Ters yön TEMİZ: `rf-telemetry.canParse` registry'nin 937
+    örneğinin hiçbirini almıyor. Ölçüm ve gerekçesi
+    `surveillanceCanParseRegistry.test.ts`e yazıldı.
+
+40. **Tahmin kalibrasyonu (18e).** `decodeOptions` **10 tahmin → 10 gerçek**
+    (bileşim tuttu değil, SAYI tuttu — 33'e bakın); örnek çerçeve
+    **8 tahmin → 8 gerçek** (tam isabet); çeviri anahtarı **~85 tahmin →
+    52 gerçek** (%39 aşağı) — sebep 18a/18b'nin aynısı ve bu kayıtta daha da
+    baskın: alan adları, profil adları, CRC algoritma adları ve polarite
+    gelenek adları VERİDİR, sözlüğe girmedi.
+
+41. **Dalga 18'in toplam kalibrasyonu.** Alt dalga sayısı **4 tahmin → 5
+    gerçek** (10 numaralı çürüme), katalog CRC eklemesi **0 tahmin → 0
+    gerçek** (9 numaralı doğrulama), `canParse` kararı **4 kayıt için de brif
+    aşamasında ölçüldü ve dördü de değişmeden uygulandı**. En büyük sapma
+    ÇEVİRİ ANAHTARI sayısında ve sapmanın YÖNÜ beş alt dalgada da AYNI:
+    tahminler yüksek çıkıyor, çünkü *"protokol/alan/algoritma adları veridir,
+    çevrilmez"* kuralı her turda tahminden fazlasını sözlüğün dışında
+    bırakıyor. **Bir sonraki nesle: çeviri anahtarı tahminini %25-40 aşağı
+    çek.**
 
 ---
 

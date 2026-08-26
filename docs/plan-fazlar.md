@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 17 KAPANDI — `building-automation` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation`, `automotive`, `aerospace-uav` ve `marine-navigation`dan sonra **yedinci kapanan domain**). Kalan iş **4 kanonik kayıt**: wireless-iot 4 (thread, wifi, esp-now, rf-telemetry-custom-frame) — geriye TEK domain kaldı | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** ✅ | **TAMAM (2026-08-27, dalga 18 KAPANDI).** `wireless-iot` de bitti — `interfaces-framing`, `network-ethernet`, `industrial-automation`, `automotive`, `aerospace-uav`, `marine-navigation` ve `building-automation`dan sonra **SEKİZİNCİ ve SON kapanan domain**. **Kalan kanonik iş: SIFIR.** Katalogdaki 172 kaydın tamamı ya motorlu ya alias (KODDAN doğrulandı: çözülmüş **140 `ready` / 0 `planned` / 32 `partial`**; ham 125/15/32, ham `planned`ın tamamı alias). Bir sonraki iş sınıfı katalog DIŞIDIR ve seçim kullanıcınındır | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -40,14 +40,31 @@
 
 ## Sıradaki adım
 
-Comm SPA'sında **Faz 9 bitti; Faz 10 (protokol dalgaları) SÜRÜYOR** —
-`interfaces-framing`, `network-ethernet`, `industrial-automation` VE
-`automotive` domain'leri bitti, öteki dört domain'de 20 kanonik kayıt duruyor.
+## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
+
+Comm SPA'sında **Faz 9 bitti ve Faz 10 (protokol dalgaları) da BİTTİ.**
+Sekiz domain'in sekizi de kapandı: `interfaces-framing` (dalga 10-11),
+`network-ethernet` (12), `industrial-automation` (13), `automotive` (14),
+`aerospace-uav` (15), `marine-navigation` (16), `building-automation` (17),
+`wireless-iot` (18). **Katalogda kanonik `planned` kayıt KALMADI** — deponun
+tarihinde ilk kez 172 kaydın tamamının ya bir motoru var ya da kanonik bir
+kayda alias'lanıyor. KODDAN doğrulandı (tek kullanımlık sayım script'i,
+2026-08-27): 172 kayıt · 8 domain · 54 aile · 15 alias; ham
+**125 `ready` / 15 `planned` / 32 `partial`**, alias zinciri çözülünce
+**140 `ready` / 0 `planned` / 32 `partial`**. Ham `planned` sayısının sıfır
+olmaması bir borç DEĞİLDİR: 15 alias kaydın hepsi `planned` yazar ve rozet
+`resolveStatus()` üzerinden kanonik kayıttan okunur.
+
+**Sıradaki iş sınıfı KATALOG DIŞIDIR ve seçim kullanıcınındır:**
+çerçeveler-arası (stateful) panolar, `custom-schema` `definitions` paneli
+(19 kayıt bekliyor), Log Analyzer, `protocol-core/capture/pcap.ts`in ilk
+tüketicisi, `length-based-protocol`ın `canParse` borcu.
+
 (Bu başlık 2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle
 `interfaces-framing`in bittiğini kastediyordu ama fazın tamamı gibi okunuyordu
 — 2026-08-22'de düzeltildi. Sayım 2026-08-23'te dalga 13 kapanışıyla 48'den
-32'ye, 2026-08-24'te dalga 14 kapanışıyla 32'den 20'ye indi; her iki sayım da
-KODDAN doğrulandı.)
+32'ye, 2026-08-24'te dalga 14 kapanışıyla 32'den 20'ye, dalga 15-17 ile 4'e ve
+2026-08-27'de dalga 18 ile **0**'a indi; sayımların hepsi KODDAN doğrulandı.)
 
 **Dalga 12 (network-ethernet, 19 kayıt) 2026-08-22'de TAMAMEN KAPANDI**
 (12a icmp/icmpv6 · 12b arp/lldp · 12c dns/mdns/dhcp · 12d ntp/ptp · 12e
@@ -699,9 +716,186 @@ bağlama indeksidir; KNX DPT ilkesinin ikinci vakası. (7) **`canParse` yanlış
 pozitifi üçüncü kez brif aşamasında ölçüldü** ve ilk kez `true`/`false`
 kararının ötesine geçip **KAPSAM kararını** belirledi (0 vs 401).
 
-Sıradaki domain seçimi YAPILMADI ve YAPILMAYACAK — geriye **TEK domain**
+~~Sıradaki domain seçimi YAPILMADI ve YAPILMAYACAK — geriye **TEK domain**
 kaldı (`wireless-iot`: thread, wifi, esp-now, rf-telemetry-custom-frame),
-toplam **4 kanonik kayıt** açık. Keşif turu başlatılmadı; seçim kullanıcınındır.
+toplam **4 kanonik kayıt** açık.~~ (Dalga 17'nin kapanış notu; dalga 18 o dört
+kaydın dördünü de kapattı — aşağı.)
+
+---
+
+## 🏁 Dalga 18 — `wireless-iot` KAPANDI, **SEKİZİNCİ ve SON domain** (2026-08-27)
+
+**Katalog borcu SIFIRLANDI.** Bu dalga bittiğinde katalogda kanonik `planned`
+kayıt kalmadı; deponun tarihinde ilk kez 172 kaydın tamamının ya bir motoru var
+ya da kanonik bir kayda alias'lanıyor. Keşif turu `docs/brief-faz10-dalga18.md`
+(ana brif) + `18a`…`18e` alt briflerinde; beş alt dalga koştu.
+
+| Alt dalga | Kayıt | Sonuç | Birim | e2e |
+|---|---|---|---|---|
+| **18a** | `wifi` (1/2) — 802.11 MAC katmanı | `partial` | 5880 → 5943 | 1214 → 1226 |
+| **18b** | `wifi` (2/2) — yönetim gövdeleri + IE ayrıştırıcı | `partial` | 5943 → 6004 | 1226 → 1232 |
+| **18c** | `esp-now` | **`ready`** | 6004 → 6024 | 1232 → 1244 |
+| **18d** | `thread` | `partial` | 6024 → 6147 | 1244 → 1260 |
+| **18e** | `rf-telemetry-custom-frame` | `partial` | 6147 → **6209** | 1260 → **1269** |
+
+Domain toplamı: 16 kayıt = **9 `ready` + 7 `partial` + 3 alias**, `planned`
+KALMADI. Katalog CRC sayısı **38'de KALDI** — dalga 16'dan sonra ikinci kez
+sıfır-ekleme dalgası; `crcCatalogue.ts`, `crcEngine.test.ts` ve
+`CrcCalculatorTool.test.tsx` beş alt dalganın hiçbirinde AÇILMADI
+(`[KARAR 18-6]`, iki FCS de katalogda VARDI ve gerçek yakalamayla doğrulandı:
+802.15.4 `CRC16_KERMIT` **331/331**, 802.11 `CRC32` **1080/1093**).
+
+**Paylaşılan çekirdek deseni dördüncü ve beşinci kez uygulandı.**
+`wifi/dot11Frame.ts` ÜÇ tüketiciye hizmet ediyor (18a `wifi`, 18b yönetim
+gövdeleri, 18c `esp-now`) ve `protocol-core/framing/ieee802154Frame.ts` İKİYE
+(`zigbee`, `thread`). İkincisi bir ÇIKARMA işlemiydi ve riski gerçekti: MAC
+çözücüsü `zigbee.ts`in İÇİNDEYDİ, hiçbir yardımcısı `export` edilmemişti ve
+Thread MAC katmanı GÜVENLİĞİ kullanıyor (Auxiliary Security Header), Zigbee
+kullanmıyor. Çıkarma "kes-yapıştır" olmadı: çekirdek bir ÖZET döndürüyor
+(`payloadStart`/`payloadEnd`), gövdeyi TÜKETİCİ araya sokuyor — çünkü `zigbee`
+FCS'i NWK'dan ÖNCE, `thread` EN SONDA basıyor ve `zigbee`nin
+`data-field-id` seçicileri dalga 7'den beri o sıraya bağlı. İki tüketici de
+yeşil kaldı.
+
+**`canParse` yanlış pozitifi DÖRDÜNCÜ kez brif aşamasında ölçüldü ve ilk kez
+DÖRT kayıt için AYNI ANDA karar verdi.** Dördü de `true` döner ve dördünün de
+imzası SAYIYLA seçildi: `thread` T4 (802.15.4 Data + Thread dispatch + GEÇERLİ
+FCS) **0/929**, `wifi` W12 **0**, `esp-now` E1 (Category 127 + Espressif OUI)
+**0/899**, `rf-telemetry` (önbelleme + sync sözcüğü) **0/929**. Reddedilen naif
+imzalar aynı kümede sırasıyla 138, 216, 3 ve 0 çalıyor; her bekçi testi kendi
+ölçümünü KODDA tekrarlıyor. **`canParse`ı CHECKSUM taşıyabilir:** `thread` ve
+`wifi` yalnız FCS sayesinde sıfıra iniyor — FCS'siz aynı imzalar 18 ve 216.
+
+**18a — 802.11 MAC.** Kapsam `[KARAR 18-2]`: girdi ÇIPLAK 802.11 çerçevesi +
+4 baytlık FCS (`LINKTYPE_IEEE802_11` = 105); radiotap (127), PPI, Prism, AVS ve
+pcap zarfı AYRI link-type'lardır ve kapsam DIŞIDIR. Kapsam çizgisini libpcap'in
+link-type tablosunun ÇİZEBİLMESİ bu dalganın kalıcı bir dersi oldu:
+*"bu ayrı bir konteyner"* iddiası artık KANITLANABİLİR bir iddiadır. Brifin
+ofset zinciri SÖZDE-KODU çürüdü (`if (FC.order) → n += 4` tür kapısı YOK); HT
+Control yalnız QoS Data ve Yönetim çerçevelerinde vardır ve sözde-kod
+uygulansaydı QoS-olmayan bir Data çerçevesinin gövdesi **4 bayt kayardı, hata
+VERMEDEN.** Uygulama brifin KENDİ tuzak notunu izledi (`htControlIsMeaningful`).
+
+**18b — yönetim gövdeleri + IE.** RSN sayaç zinciri TEK bir kapıdan geçiyor
+(`counterFits`, pairwise + AKM + PMKID); brif yalnız ikisini işaret ediyordu.
+WPA vendor IE'si RSN gibi çözülüyor ama **süit tablosu PAYLAŞILMADI** —
+Wireshark'ın kendisi de iki AYRI tablo taşıyor ve WPA'nınki 7'de bitiyor; tek
+tablo yazılsaydı bir gün RSN'e eklenen 18 (OWE) WPA IE'sinde de basılırdı,
+hata VERMEDEN. Element ID 47 "Reserved" DEĞİLmiş: `packet-ieee80211.h:408`
+`TAG_ERP_INFO_OLD` ve 42 ile AYNI çözücüye bağlı.
+
+**18c — `esp-now`.** Tek `ready` kayıt. Brif rozeti `partial` öngörmüştü;
+gerçek yakalama bulununca `ready` oldu. Espressif'in KENDİ şeması ilk 24 baytı
+802.11 MAC başlığı, son 4 baytı FCS diye tanımlıyor, yani yeni tel biçimi YOK.
+🚨 **`Protected = 1` olan bir ESP-NOW çerçevesi `canParse`ı GEÇEMEZ ve bu bir
+eksiklik değil, protokolün kendisidir:** Category baytı da şifreli gövdenin
+İÇİNDEDİR, yani dışarıdan bakan biri korumalı bir vendor action frame'inin
+ESP-NOW olduğunu ÇERÇEVEDEN BİLEMEZ.
+
+**18d — `thread`.** Zincir MAC → (Auxiliary Security Header) → 6LoWPAN → IPv6 →
+UDP → MLE SINIFLANDIRMASI. **MLE gövdesi ŞİFRELİDİR** ve şifresiz gönderilen
+SADECE Discovery Request (16) ile Discovery Response (17); ötekilerde komut tipi
+ÇERÇEVEDE OKUNAMAZ, "şifreli MLE" damgası basılır ve MIC PASS/FAIL BASILMAZ
+(`[KARAR 18-3]`, CLAUDE.md anahtar kuralı). İki brif tahmini çürüdü: MLE'nin UDP
+portu `0xF0BF` değil **`0x4D4C`** (= ASCII `"ML"`, 19788) ve MLE dissector'ı
+`packet-thread.c`de değil **`packet-mle.c`**te. **Bir yakalamanın LINK-TYPE'ı
+içinde ne olduğunun cevabı DEĞİLDİR:** `6LoWPAN.pcap` DLT 1'dir (Ethernet) ama
+ZEP v2 kapsüllemesi çıkarılınca içinden 331 gerçek 802.15.4 çerçevesi ve
+**331/331 doğru FCS** çıktı. Ve *"yorum ile kod ayrışırsa KOD kazanır"*
+üçüncü kez, ilk kez BİRİNCİ SINIF bir uygulamada: OpenThread'in `SecuritySuite`
+enum yorumları takas edilmiş (`mle.hpp:1498-1502`) ve yanlış okuma "şifreli"yi
+"şifresiz" sanıp ciphertext'i alan olarak basardı.
+
+**18e — `rf-telemetry-custom-frame`, kaydın SINIFI ötekilerden farklı.** Bu bir
+protokol değil, bir **profil çalıştırıcısıdır** (`[KARAR 18-5]`): yayımlanmış
+tel biçimi yoktur, motor `protocol-core`un şema yorumlayıcısı üstüne kurulur ve
+alan yerleşimi kullanıcının BİLDİRDİĞİ parametrelerden üretilir. İki YENİ
+`protocol-core` modülü yazıldı — `decoding/lfsrWhitening.ts` (PN9, 9 bit,
+x⁹+x⁵+1, tohum `0x1FF`; TI'ın yayımladığı `FF E1 1D 9A ED 85 33 24 EA` dizisi
+FIXTURE olarak ASSERT ediliyor ve 511 baytlık periyot da sınanıyor) ve
+`decoding/manchester.ts` (IEEE 802.3 ↔ G. E. Thomas, geçersiz çift konumuyla
+hata). İkisinin de bugün TEK tüketicisi var ve bu dosya başlarına DÜRÜSTÇE
+yazıldı.
+
+🚨 **DEPONUN KENDİ SPEC'İ ÇÜRÜDÜ — yeni bir ders sınıfı.**
+`docs/spec/ozet/09-kablosuz-iot.md:171`in verdiği çerçevenin CRC'si (`C9 21`)
+**65.535 polinomun tamamıyla** (init/yansıma/xorout çarpanları × 6..12 arası tüm
+bayt aralıkları) taranıp ÜRETİLEMEDİ; `:173`ün whitening örneği de 8.192 LFSR
+kombinasyonunun ve 40 BLE kanalının hiçbiriyle çıkmadı. **Spec'in sayısal
+örneği bir fixture DEĞİLDİR** — aritmetiği kontrol edilene kadar. Doğru
+davranış uygulandı: ALAN YERLEŞİMİ korundu (o bilgi geçerli), SAYILAR motordan
+üretildi ve örnek açıklamasına *"spec'in `C9 21`i DEĞİL, motorun kendi
+`CRC16_CCITT_FALSE` çıktısı `AC54`"* diye YAZILDI. Dalga 17'nin *"keşfin elle
+çözdüğü her çerçeve şüphelidir"* dersinin dördüncü vakası ve ilk kez şüpheli
+olan şey deponun KENDİ belgesi.
+
+🚨 **DEVRALINAN MAYIN: `createSchemaParser`in `canParse`i boş `startBytes`te
+HER ŞEYE `true` der** (`schemaParser.ts:608`, `[].every()`). Ölçüldü:
+`length-based-protocol` registry'nin **937 örneğinin 937'sini** sahipleniyor
+(%100). 18e brifinin iki kabul edilebilir çözümünden **ikincisi** seçildi —
+şemaya sabit `startBytes` KONULMADI, `canParse` `rfTelemetry.ts`te AÇIKÇA
+yazıldı; gerekçe: önbelleme ve sync sözcüğü bu kayıtta KULLANICI
+PARAMETRESİDİR, şemaya sabitlenseydi 4 baytlık sync kullanan biri kendi
+çerçevesini çözemezdi. `schemaParser.ts` bu dalgada DÜZELTİLMEDİ (brif:
+*"ayrı bir kayıt, ayrı bir borç"*) ve borç `CLAUDE.md`ye kaydedildi;
+`rfTelemetryCanParseRegistry.test.ts`in ikinci ayağı mayının hâlâ orada
+olduğunu HER KOŞUDA yeniden ölçüyor.
+
+**`decodeOptions` ON kanal, ama brifin öngördüğü on DEĞİL.** Brifin dört `text
+hex` kanalı (`preambleBytes`, `syncWord`, `whiteningPolynomial`,
+`whiteningSeed`) AÇILAMADI: `DecodeOption.kind` yalnız `'select' | 'number'`
+(`protocol-core/types.ts:278`) ve o dosya dokunulmaz. Karşılığı yazıldı —
+uzunluklar ve tohum `number` kanalı oldu, polinom PN9'a sabitlendi. Brifin
+BİRİNCİ kanalı (`profile`: spec/cc1101/nrf/custom) da çürüdü: belgelenmiş TEK
+çerçeve yerleşimi spec §3.9'unkidir, CC1101 ve nRF bir RADYO yapılandırmasıdır
+ve o üçü zaten ayrı kanaldır. Uygulanan on kanal: `manchesterPolarity`,
+`manchesterBitOrder`, `whitening`, `whiteningSeed`, `preambleLength`,
+`syncWordLength`, `lengthFieldSemantics`, `crcAlgorithm`, `crcCoverage`,
+`crcByteOrder` — **onu da çıktıyı BAYT DÜZEYİNDE değiştiriyor** ve dördünün
+etkisi e2e'de ekranda kanıtlanıyor (aynı tel, farklı bildirim, farklı çözüm).
+Kanal YAPILMAYANLAR gerekçeleriyle dosya başında: RF metadata (çerçevede yok),
+Unknown RF Protocol Analyzer (çok çerçeveli), girdi adaptörü seçimi (kanal
+değil, `parse`ın önünde koşan bir GİRDİ DÖNÜŞÜMÜ), `custom-schema` paneli
+(`[KARAR 18-7]`), ve **`calculatorIds` bağlantısı** — `ProtocolPage.tsx:433`
+onu YALNIZ `timing` sekmesinde basıyor, bu kaydın `timing` sekmesi yok, yani
+bağlantı hiç görünmezdi. *Görünmeyen bir bağ, olmayan bir bağdır.*
+
+**Manchester ofsetleri TELE göre ölçekleniyor.** Manchester çözüldüğünde tel iki
+kat uzundur; `ParsedField.offset/length` DAİMA kullanıcının yapıştırdığı tel
+baytlarına göre verilir (`DecodePanel` bayt görüntüleyiciye kullanıcının
+girdisini basıyor, çözülmüşü değil) ve `rawBytes` tel dilimidir, çözülmüş değer
+`rawValue`da durur. Eşleme kesin: her çözülmüş bayt tam iki tel baytıdır.
+
+**ÜÇ türetilmiş fixture bekçisi AÇIKÇA `skip`e düştü** — dalga 16a'nın yapısal
+olarak söktüğü mayının son hâli. `src/pages/ProtocolPage.test.tsx`,
+`e2e/nmea-decode.spec.ts` ve `e2e/modbus-decode.spec.ts` hepsi *"motoru
+olmayan, alias olmayan, `decode` sekmesi olan ilk `planned` kayıt"*ı
+KATALOGDAN türetiyordu; artık öyle bir kayıt YOK ve üçü de sessiz yeşil
+DEĞİL, `skipped` raporluyor (birim: `1 skipped`; e2e: `2 skipped`).
+Görev tanımı İKİ bekçi bekliyordu — üçüncüsü (`modbus-decode.spec.ts`, dalga
+15b'nin yapısal çözümü) de aynı sınıftaydı ve o da düştü.
+
+**Başka bir kaydın ölçümü GÜNCELLENDİ, gerekçesiyle.**
+`surveillanceCanParseRegistry.test.ts`teki `mode-s` yanlış pozitif sayısı
+**7 → 13** oldu: bu kaydın altı 14 baytlık örneğinin ilk baytı `0xAA`, yani
+DF = 21 (Comm-B identity reply — ATANMIŞ bir DF ve 112 bitlik uzunlukla
+TUTARLI) ve `modeS.ts`in AP tuzağı yüzünden CRC eleği olmayan daldan geçiyorlar.
+Bir regresyon DEĞİL, bekçinin İŞİNİ YAPMASI; ters yön TEMİZ
+(`rf-telemetry.canParse` registry'nin 937 örneğinin hiçbirini almıyor) ve
+"yalnız 7/14 bayt" karşılaştırması 27 → 33'e çıktı.
+
+Dokunulan dosyalar (18e, 13): `protocol-core/decoding/lfsrWhitening.ts` +
+testi, `protocol-core/decoding/manchester.ts` + testi,
+`protocols/wireless/rftelemetry/` (`rfTelemetryProfiles.ts`, `rfTelemetry.ts`,
+`rfTelemetry.test.ts`, `rfTelemetryCanParseRegistry.test.ts`),
+`app/catalog/domains/wireless-iot.ts` (`planned` → `partial` + `pluginId` +
+kapsamı AÇIKÇA yazan yorum), `protocols/index.ts`, `protocols/index.test.ts`,
+`protocols/aerospace/surveillance/surveillanceCanParseRegistry.test.ts`
+(7 → 13), `tr.ts`/`en.ts` (2×52 anahtar — brif ~85 bekliyordu; fark yine
+"alan/algoritma/profil adları VERİDİR, çevrilmez" kuralından),
+`e2e/rf-telemetry-decode.spec.ts` (9 test). Tam paket yeşil:
+**6209 birim** (6147 → +62, 1 `skipped`) · **1269 e2e** (1260 → +9,
+2 `skipped`) · `npm run typecheck` · `npm run build`.
 
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →

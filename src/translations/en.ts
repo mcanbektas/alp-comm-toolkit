@@ -8234,4 +8234,97 @@ export const en: TranslationDictionary = {
   'protocol.thread.example.fcsMismatch.description':
     'The last byte of the first example was flipped. FCS FAIL is printed and the frame counts as invalid; the fields are still decoded and the partial result is shown.',
 
+
+  // ── RF Telemetry Custom Frame (phase 10, wave 18e) ──────────────────────
+  'protocol.rfTelemetry.documentation.summary':
+    'A proprietary sub-GHz or 2.4 GHz telemetry frame with no published wire format. The page is not a protocol but a configurable frame engine that runs the profile you declare: preamble, sync word, Length semantics, dewhitening, Manchester polarity and CRC algorithm/coverage are all chosen by you.',
+
+  'protocol.rfTelemetry.option.manchesterPolarity': 'Manchester polarity',
+  'protocol.rfTelemetry.option.manchesterPolarity.description':
+    'Line coding is not written on the wire. The wrong polarity inverts every bit without raising an error, so no default can be picked and it ships disabled.',
+  'protocol.rfTelemetry.option.manchesterPolarity.none': 'None (raw bytes)',
+  'protocol.rfTelemetry.option.manchesterBitOrder': 'Manchester bit order',
+  'protocol.rfTelemetry.option.manchesterBitOrder.description':
+    'The order in which the bits of a data byte leave on the wire. The wrong choice reverses the bits inside each byte.',
+
+  'protocol.rfTelemetry.option.whitening': 'Whitening',
+  'protocol.rfTelemetry.option.whitening.description':
+    'Enable when the radio XORs the payload with a pseudo-random sequence. Preamble and sync word are never whitened — receiver synchronisation depends on them.',
+  'protocol.rfTelemetry.option.whitening.none': 'None',
+  'protocol.rfTelemetry.option.whiteningSeed': 'Whitening seed (decimal)',
+  'protocol.rfTelemetry.option.whiteningSeed.description':
+    'Initial value of the nine-bit LFSR, 1..511. Standard PN9 uses 511 (0x1FF); proprietary radios may pick another seed.',
+
+  'protocol.rfTelemetry.option.preambleLength': 'Preamble length (bytes)',
+  'protocol.rfTelemetry.option.preambleLength.description':
+    'Number of preamble bytes at the head of the frame. Zero drops the field entirely — some receivers consume the preamble and hand over only the body.',
+  'protocol.rfTelemetry.option.syncWordLength': 'Sync word length (bytes)',
+  'protocol.rfTelemetry.option.syncWordLength.description':
+    'Byte count of the synchronisation word after the preamble. It shifts the position of every field that follows.',
+
+  'protocol.rfTelemetry.option.lengthFieldSemantics': 'What the Length field counts',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.description':
+    'The most common source of error: what Length counts is not written on the wire. The same bytes are a different frame under a different reading.',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.payloadOnly': 'Payload only',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.includesCrc': 'Payload + CRC',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.includesHeader': 'Header + payload',
+
+  'protocol.rfTelemetry.option.crcAlgorithm': 'CRC / checksum algorithm',
+  'protocol.rfTelemetry.option.crcAlgorithm.description':
+    'The same bit width is not the same algorithm: the choice changes both the field width and the verification result. Picking "none" drops the CRC field entirely.',
+  'protocol.rfTelemetry.option.crcCoverage': 'Start of CRC coverage',
+  'protocol.rfTelemetry.option.crcCoverage.description':
+    'Coverage runs from this field to the end of the Data field. Shifting it changes the computed value.',
+  'protocol.rfTelemetry.option.crcByteOrder': 'CRC byte order',
+  'protocol.rfTelemetry.option.crcByteOrder.description':
+    'Which end the stored CRC is written from. The right algorithm with the wrong byte order still reports FAIL.',
+  'protocol.rfTelemetry.option.crcByteOrder.big': 'Big-endian',
+  'protocol.rfTelemetry.option.crcByteOrder.little': 'Little-endian',
+
+  'protocol.rfTelemetry.error.emptyFrame': 'An empty frame cannot be decoded.',
+  'protocol.rfTelemetry.error.manchesterInvalidPair':
+    'Invalid Manchester pair (00 or 11): the line coding is corrupt at this position, or the polarity / bit order is set wrong.',
+  'protocol.rfTelemetry.error.manchesterOddLength':
+    'The Manchester wire carries an odd number of bytes; every data byte is exactly two wire bytes, so the last byte is incomplete.',
+  'protocol.rfTelemetry.error.headerTruncated':
+    'After the declared preamble and sync lengths the frame does not reach the Length byte.',
+  'protocol.rfTelemetry.error.lengthSemantics':
+    'With the selected reading the Length value yields a negative payload length; try changing what the Length field counts.',
+
+  'protocol.rfTelemetry.warning.userDeclaredProfile':
+    'This record is not a published protocol but a declared profile: fields are laid out from the parameters you choose, not derived from the frame.',
+  'protocol.rfTelemetry.warning.preambleMismatch':
+    'The preamble bytes differ from the default profile (AA AA AA). Not an error — it may simply be your own radio\'s preamble.',
+  'protocol.rfTelemetry.warning.syncWordMismatch':
+    'The sync word differs from the default profile (2D D4). Not an error — it may simply be your own radio\'s sync word.',
+  'protocol.rfTelemetry.warning.dewhitenedView':
+    'Field values were read from dewhitened bytes; the bytes in the byte viewer are the ones seen on the wire.',
+  'protocol.rfTelemetry.warning.manchesterView':
+    'The wire is Manchester coded: field positions point at wire bytes (each data byte is two wire bytes) while values are read from the decoded bytes.',
+
+  'protocol.rfTelemetry.example.defaultProfile.name': 'Default profile — CRC PASS',
+  'protocol.rfTelemetry.example.defaultProfile.description':
+    'The field layout comes from spec §3.9 (Preamble · Sync Word · Device ID · Packet Type · Length · Data · CRC-16). The CRC value is NOT the spec\'s C9 21: that value could not be reproduced by any known CRC-16 (all 65,535 polynomials were swept). The AC54 here is the engine\'s own CRC-16/CCITT-FALSE output.',
+  'protocol.rfTelemetry.example.whitened.name': 'Whitened body (PN9, seed 0x1FF)',
+  'protocol.rfTelemetry.example.whitened.description':
+    'The same frame as the first, only its body XORed with the PN9 sequence (FF E1 1D 9A ED 85 33 24 EA). With whitening off the Length byte reads as 25 and the frame cannot be decoded; select "Whitening = PN9" and it turns into the first example\'s fields with a passing CRC.',
+  'protocol.rfTelemetry.example.manchester.name': 'Manchester coded wire (IEEE 802.3)',
+  'protocol.rfTelemetry.example.manchester.description':
+    'The whole of the first example, Manchester coded: 28 bytes instead of 14. The sync word 2D D4 becomes A6 59 59 9A on the wire. Choosing IEEE 802.3 decodes it; choosing G. E. Thomas inverts every bit without raising an error. Auto-detection does not fire on this wire — the raw wire carries no preamble.',
+  'protocol.rfTelemetry.example.crcMismatch.name': 'Corrupt: the CRC does not match',
+  'protocol.rfTelemetry.example.crcMismatch.description':
+    'The last byte of the first example was set to 0x55. CRC FAIL is printed and the frame counts as invalid; the fields are still decoded and the partial result is shown.',
+  'protocol.rfTelemetry.example.lengthOverflow.name': 'Corrupt: Length overruns the frame',
+  'protocol.rfTelemetry.example.lengthOverflow.description':
+    'The Length byte was set to 0xFF while the wire carries only a 4-byte payload. The declared length is inconsistent with the actual data and decoding stops with truncated-frame.',
+  'protocol.rfTelemetry.example.zeroLengthPayload.name': 'Edge case: zero-length payload',
+  'protocol.rfTelemetry.example.zeroLengthPayload.description':
+    'Length = 0, no Data field, the CRC follows the header immediately. Coverage still runs from Device ID to the end of Data (01 14 00) and the CRC passes.',
+  'protocol.rfTelemetry.example.modbusCrc.name': 'Same body, different CRC algorithm',
+  'protocol.rfTelemetry.example.modbusCrc.description':
+    'The first 12 bytes are byte-for-byte those of the first example; only the CRC was computed with CRC-16/MODBUS and stored little-endian (F5 1F). With the defaults it reports FAIL; select "CRC16_MODBUS" plus "little-endian" and it passes. The same bit width is not the same algorithm.',
+  'protocol.rfTelemetry.example.lengthIncludesCrc.name': 'Same bytes, two readings of Length',
+  'protocol.rfTelemetry.example.lengthIncludesCrc.description':
+    'Length is written as 6, meaning it counts the CRC as well. Under the default "payload only" reading the CRC field overruns the frame and decoding stops; select "payload + CRC" and the same bytes become a valid frame.',
+
 };

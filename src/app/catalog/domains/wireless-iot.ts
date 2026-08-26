@@ -306,7 +306,24 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'Proprietary sub-GHz or 2.4 GHz telemetry framing described by a user-defined schema, used for vendor remote sensors, alarm links and reverse-engineered radio devices.',
           layer: 'data-link',
-          status: 'planned',
+          // Faz 10 dalga 18e — deponun SON kanonik kaydı; bununla katalog borcu
+          // SIFIRLANIR. `partial`, `ready` DEĞİL ve gerekçesi ÜÇ kalemdir
+          // (`protocols/wireless/rftelemetry/rfTelemetry.ts` dosya başı):
+          //  1. `Input Adapters`ın BEŞ yolundan yalnız "demodulated bytes"
+          //     bağlandı; bit akışı / nabız süresi / SDR dışa aktarımı / UART
+          //     birer GİRDİ DÖNÜŞÜMÜdür, `parse`ın önünde koşarlar ve motorları
+          //     (`bitCursor.ts`, `pulseLog.ts`) kendi turlarını bekliyor.
+          //  2. `RF Metadata View` ve `Unknown RF Protocol Analyzer` yazılmadı:
+          //     birincisi çerçevede OLMAYAN yakalama metadata'sı, ikincisi ÇOK
+          //     ÇERÇEVELİ analiz (dalga 16 bulgu 12).
+          //  3. `definitions: ['custom-schema']` paneli YOK ve bu DOĞRU
+          //     DAVRANIŞTIR (`[KARAR 18-7]`): katalogda 19 kayıt aynı paneli
+          //     bekliyor, `ble-gatt` `ready` olduğu hâlde dahil. `lonworks`un
+          //     `xif`iyle birebir aynı sınıf borç.
+          // Çözülen kısım TAM: varsayılan profil, dewhitening, Manchester,
+          // `Length` yorumu, CRC algoritması/kapsamı/bayt sırası ve `build`.
+          status: 'partial',
+          pluginId: 'rf-telemetry-custom-frame',
           tabs: ['overview', 'decode', 'build', 'data', 'diagnostics', 'definitions', 'examples'],
           tools: [
             'Custom Frame Schema Editor (Preamble / Sync Word / Device ID / Packet Type / Sequence / Length / Payload / CRC)',

@@ -770,6 +770,19 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'thread', () =>
     import('./wireless/thread/thread').then((module) => module.threadPlugin),
   );
+  // RF Telemetry Custom Frame — Faz 10 dalga 18e: **deponun SON kanonik
+  // kaydı.** Bir protokol DEĞİL, kullanıcının BİLDİRDİĞİ bir çerçeveyi çalıştıran
+  // yapılandırılabilir motor (`[KARAR 18-5]`): `protocol-core`un şema
+  // yorumlayıcısı TÜKETİLİR, yeni bir tel biçimi yazılmaz. Girdi DEMODÜLE
+  // EDİLMİŞ BAYT dizisidir; bit akışı / nabız süresi / SDR dışa aktarımı ayrı
+  // GİRDİ DÖNÜŞÜMLERİDİR ve kapsam dışıdır.
+  // 🚨 `createSchemaParser` DOĞRUDAN KULLANILMADI: boş `startBytes`te
+  // `canParse` HER ŞEYE `true` der (`schemaParser.ts:608`, ölçüm 937/937).
+  // İmza bu dosyada AÇIKÇA yazılı ve varsayılan profilin önbelleme + sync
+  // ikilisine bağlı — ölçüm 0/937.
+  registerOnce(registry, 'rf-telemetry-custom-frame', () =>
+    import('./wireless/rftelemetry/rfTelemetry').then((module) => module.rfTelemetryPlugin),
+  );
   // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
   // çerçeveleme (komut/yanıt ayrımı, URC, final result code sözel VE sayısal
   // — ATV0 numeric mode dalga 9 madde 7'de eklendi, tüm AT lehçelerine

@@ -8225,6 +8225,99 @@ export const tr = {
   'protocol.thread.example.fcsMismatch.description':
     'İlk örneğin son baytı bozuldu. FCS FAIL basılır ve çerçeve geçersiz sayılır; alanlar yine de çözülür, kısmi sonuç gösterilir.',
 
+
+  // ── RF Telemetry Custom Frame (Faz 10 dalga 18e) ────────────────────────
+  'protocol.rfTelemetry.documentation.summary':
+    'Yayımlanmış bir tel biçimi olmayan tescilli sub-GHz / 2,4 GHz telemetri çerçevesi. Sayfa bir protokol değil, kullanıcının bildirdiği profili çalıştıran yapılandırılabilir bir çerçeve motorudur: önbelleme, sync sözcüğü, Length yorumu, dewhitening, Manchester polaritesi ve CRC algoritması/kapsamı seçilerek çözülür.',
+
+  'protocol.rfTelemetry.option.manchesterPolarity': 'Manchester polaritesi',
+  'protocol.rfTelemetry.option.manchesterPolarity.description':
+    'Hat kodlaması telde YAZMAZ. Yanlış polarite tüm bitleri hata vermeden ters çevirir; bu yüzden varsayılan seçilemez ve kapalı gelir.',
+  'protocol.rfTelemetry.option.manchesterPolarity.none': 'Yok (ham baytlar)',
+  'protocol.rfTelemetry.option.manchesterBitOrder': 'Manchester bit sırası',
+  'protocol.rfTelemetry.option.manchesterBitOrder.description':
+    'Veri baytının bitlerinin telde hangi sırayla çıktığı. Yanlış seçim bayt içi bitleri ters çevirir.',
+
+  'protocol.rfTelemetry.option.whitening': 'Beyazlatma (whitening)',
+  'protocol.rfTelemetry.option.whitening.description':
+    'Radyo yükü sözde-rastgele bir diziyle XOR\'lamışsa açın. Önbelleme ve sync sözcüğü beyazlatılmaz — alıcı senkronizasyonu onlara dayanır.',
+  'protocol.rfTelemetry.option.whitening.none': 'Yok',
+  'protocol.rfTelemetry.option.whiteningSeed': 'Beyazlatma tohumu (ondalık)',
+  'protocol.rfTelemetry.option.whiteningSeed.description':
+    'Dokuz bitlik LFSR\'ın başlangıç değeri; 1..511. Standart PN9 511 (0x1FF) kullanır, tescilli radyolar başka tohum seçebilir.',
+
+  'protocol.rfTelemetry.option.preambleLength': 'Önbelleme uzunluğu (bayt)',
+  'protocol.rfTelemetry.option.preambleLength.description':
+    'Çerçevenin başındaki önbelleme baytı sayısı. Sıfır verilirse alan hiç basılmaz — bazı alıcılar önbellemeyi tüketip yalnız gövdeyi verir.',
+  'protocol.rfTelemetry.option.syncWordLength': 'Sync sözcüğü uzunluğu (bayt)',
+  'protocol.rfTelemetry.option.syncWordLength.description':
+    'Önbellemeden sonraki senkronizasyon sözcüğünün bayt sayısı. Sonraki tüm alanların konumunu kaydırır.',
+
+  'protocol.rfTelemetry.option.lengthFieldSemantics': 'Length alanı neyi sayıyor',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.description':
+    'En sık hata kaynağı: Length\'in neyi saydığı telde yazmaz. Aynı baytlar, yorum değişince başka bir çerçevedir.',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.payloadOnly': 'Yalnız yük',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.includesCrc': 'Yük + CRC',
+  'protocol.rfTelemetry.option.lengthFieldSemantics.includesHeader': 'Başlık + yük',
+
+  'protocol.rfTelemetry.option.crcAlgorithm': 'CRC / checksum algoritması',
+  'protocol.rfTelemetry.option.crcAlgorithm.description':
+    'Aynı bit genişliği aynı algoritma değildir: seçim alanın genişliğini ve doğrulama sonucunu birlikte değiştirir. "none" seçilirse CRC alanı hiç basılmaz.',
+  'protocol.rfTelemetry.option.crcCoverage': 'CRC kapsamının başlangıcı',
+  'protocol.rfTelemetry.option.crcCoverage.description':
+    'Kapsam bu alandan Data alanının sonuna kadar uzanır. Kapsamı kaydırmak hesaplanan değeri değiştirir.',
+  'protocol.rfTelemetry.option.crcByteOrder': 'CRC bayt sırası',
+  'protocol.rfTelemetry.option.crcByteOrder.description':
+    'Saklanan CRC\'nin telde hangi uçtan yazıldığı. Doğru algoritma yanlış bayt sırasıyla hâlâ FAIL basar.',
+  'protocol.rfTelemetry.option.crcByteOrder.big': 'Büyük uçlu (big-endian)',
+  'protocol.rfTelemetry.option.crcByteOrder.little': 'Küçük uçlu (little-endian)',
+
+  'protocol.rfTelemetry.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.rfTelemetry.error.manchesterInvalidPair':
+    'Geçersiz Manchester çifti (00 ya da 11): bu konumda hat kodlaması bozuk ya da polarite/bit sırası yanlış seçilmiş.',
+  'protocol.rfTelemetry.error.manchesterOddLength':
+    'Manchester teli tek sayıda bayt taşıyor; her veri baytı tam iki tel baytıdır, son bayt yarım kalmış.',
+  'protocol.rfTelemetry.error.headerTruncated':
+    'Çerçeve, bildirilen önbelleme ve sync uzunluklarından sonra Length baytına kadar uzanmıyor.',
+  'protocol.rfTelemetry.error.lengthSemantics':
+    'Length değeri seçilen yorumla negatif bir yük uzunluğu veriyor; Length alanının neyi saydığını değiştirmeyi deneyin.',
+
+  'protocol.rfTelemetry.warning.userDeclaredProfile':
+    'Bu kayıt yayımlanmış bir protokol değil, bildirilen bir profildir: alanlar seçtiğiniz parametrelere göre yerleştirilir, çerçeveden çıkarılmaz.',
+  'protocol.rfTelemetry.warning.preambleMismatch':
+    'Önbelleme baytları varsayılan profilinkinden (AA AA AA) farklı. Hata değil — kendi radyonuzun önbellemesi olabilir.',
+  'protocol.rfTelemetry.warning.syncWordMismatch':
+    'Sync sözcüğü varsayılan profilinkinden (2D D4) farklı. Hata değil — kendi radyonuzun sync sözcüğü olabilir.',
+  'protocol.rfTelemetry.warning.dewhitenedView':
+    'Alan değerleri beyazlatması çözülmüş baytlardan okundu; bayt görüntüleyicideki baytlar teldeki hâlidir.',
+  'protocol.rfTelemetry.warning.manchesterView':
+    'Tel Manchester ile kodlanmış: alan konumları tel baytlarını gösterir (her veri baytı iki tel baytıdır), değerler ise çözülmüş baytlardan okunur.',
+
+  'protocol.rfTelemetry.example.defaultProfile.name': 'Varsayılan profil — CRC PASS',
+  'protocol.rfTelemetry.example.defaultProfile.description':
+    'Alan yerleşimi spec §3.9\'dan (Preamble · Sync Word · Device ID · Packet Type · Length · Data · CRC-16). CRC değeri spec\'in C9 21\'i DEĞİL: o değer hiçbir bilinen CRC-16 ile yeniden üretilemedi (65.535 polinom tarandı). Buradaki AC54, motorun kendi CRC-16/CCITT-FALSE çıktısıdır.',
+  'protocol.rfTelemetry.example.whitened.name': 'Beyazlatılmış gövde (PN9, tohum 0x1FF)',
+  'protocol.rfTelemetry.example.whitened.description':
+    'Birinci örneğin aynısı, yalnız gövdesi PN9 dizisiyle (FF E1 1D 9A ED 85 33 24 EA) XOR\'lanmış. Beyazlatma kapalıyken Length baytı 25 okunur ve çerçeve çözülemez; "Beyazlatma = PN9" seçilince birinci örneğin alanlarına dönüşür ve CRC PASS olur.',
+  'protocol.rfTelemetry.example.manchester.name': 'Manchester kodlanmış tel (IEEE 802.3)',
+  'protocol.rfTelemetry.example.manchester.description':
+    'Birinci örneğin tamamı Manchester ile kodlanmış: 14 bayt yerine 28. Sync sözcüğü 2D D4 telde A6 59 59 9A olur. Polarite IEEE 802.3 seçilince çözülür; G. E. Thomas seçilirse tüm bitler hata vermeden ters çıkar. Auto-detection bu telde çalışmaz — ham telde önbelleme yoktur.',
+  'protocol.rfTelemetry.example.crcMismatch.name': 'Bozuk: CRC tutmuyor',
+  'protocol.rfTelemetry.example.crcMismatch.description':
+    'Birinci örneğin son baytı 0x55 yapıldı. CRC FAIL basılır ve çerçeve geçersiz sayılır; alanlar yine de çözülür ve kısmi sonuç gösterilir.',
+  'protocol.rfTelemetry.example.lengthOverflow.name': 'Bozuk: Length çerçeveyi aşıyor',
+  'protocol.rfTelemetry.example.lengthOverflow.description':
+    'Length baytı 0xFF yapıldı ama tel yalnız 4 baytlık yük taşıyor. Bildirilen uzunluk gerçek veriyle tutarsız; çözüm truncated-frame ile durur.',
+  'protocol.rfTelemetry.example.zeroLengthPayload.name': 'Sınır durumu: sıfır uzunluklu yük',
+  'protocol.rfTelemetry.example.zeroLengthPayload.description':
+    'Length = 0, Data alanı yok, CRC hemen başlığın ardından gelir. Kapsam yine Device ID\'den Data\'nın sonuna kadar (01 14 00) ve CRC PASS olur.',
+  'protocol.rfTelemetry.example.modbusCrc.name': 'Aynı gövde, farklı CRC algoritması',
+  'protocol.rfTelemetry.example.modbusCrc.description':
+    'İlk 12 bayt birinci örneğin birebir aynısı; yalnız CRC CRC-16/MODBUS ile hesaplanıp küçük uçlu yazıldı (F5 1F). Varsayılan ayarlarla FAIL basar; "CRC-16/MODBUS" + "küçük uçlu" seçilince PASS olur. Aynı bit genişliği aynı algoritma değildir.',
+  'protocol.rfTelemetry.example.lengthIncludesCrc.name': 'Aynı baytlar, iki farklı Length yorumu',
+  'protocol.rfTelemetry.example.lengthIncludesCrc.description':
+    'Length = 6 yazılmış, yani CRC\'yi de sayıyor. Varsayılan "yalnız yük" yorumuyla CRC alanı çerçeveyi aşar ve çözüm durur; "yük + CRC" seçilince aynı baytlar geçerli bir çerçeveye dönüşür.',
+
 } as const;
 
 /**
