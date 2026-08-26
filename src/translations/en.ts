@@ -8097,4 +8097,141 @@ export const en: TranslationDictionary = {
   'protocol.espNow.example.realCaptureHello.description':
     "A real ESP32 monitor-mode capture from Espressif's own issue tracker (IDFGH-503, 2018), with radiotap stripped. The vendor element body carries the ASCII text \"Hello\" plus 4 undocumented bytes — those four bytes were not invented, they are shown raw. The capture had NO FCS; it was recomputed and appended here.",
 
+  // ── Thread (Phase 10, wave 18d) ───────────────────────────────────────
+  'protocol.thread.documentation.summary':
+    'A 6LoWPAN → IPv6 → UDP → MLE chain carried over an IEEE 802.15.4 MAC frame. The input is a COMPLETE MAC frame plus its 2-byte FCS (LINKTYPE_IEEE802_15_4_WITHFCS = 195); the TAP pseudo-header (283) and ZEP encapsulation are out of scope, which is why this page shows no channel, RSSI or LQI. The MAC container is read from the core shared with `zigbee`. The Auxiliary Security Header is decoded and its MIC length is subtracted from the end of the payload; the MIC is shown as a field but NO PASS/FAIL verdict is printed, because the key is not on the wire. MLE bodies are encrypted: only Discovery Request (16) and Discovery Response (17) are ever sent unsecured, so for every other command the command type is NOT readable on the wire and is not invented.',
+
+  'protocol.thread.error.aborted': 'Decoding was cancelled.',
+  'protocol.thread.error.emptyFrame': 'An empty frame cannot be decoded.',
+  'protocol.thread.error.frameTooShort':
+    'The frame is too short to carry an 802.15.4 MAC header plus FCS (5 bytes minimum).',
+  'protocol.thread.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.thread.error.macAddressingTruncated':
+    'The MAC addressing fields do not end before the FCS; the payload is not trustworthy.',
+  'protocol.thread.error.fcsMismatch': 'The FCS does not match the calculated CRC16/KERMIT value.',
+  'protocol.thread.error.auxSecurityTruncated':
+    'The Auxiliary Security Header does not fit inside the frame; the upper chain was not entered.',
+  'protocol.thread.error.lowpanTruncated':
+    'The 6LoWPAN header stack runs past the end of the frame; no offset was invented.',
+
+  'protocol.thread.warning.linkTypeContract':
+    'The input is read as a bare 802.15.4 MAC frame plus FCS (LINKTYPE 195). The TAP pseudo-header (283) and ZEP encapsulation are out of scope; channel, RSSI and LQI are NOT present in this frame.',
+  'protocol.thread.warning.frameVersionUnsupported':
+    'Frame Version is neither 2003 nor 2006; the 2015+ addressing rules are unsupported, so no addressing fields were printed.',
+  'protocol.thread.warning.nonDataFrame':
+    'The MAC Frame Type is not Data; the 6LoWPAN chain was not attempted and the payload was left raw.',
+  'protocol.thread.warning.macPayloadEncrypted':
+    'MAC Security Level is 4 or higher: the payload is encrypted. The 6LoWPAN dispatch byte sits inside the ciphertext, so the chain was not entered and no header was invented.',
+  'protocol.thread.warning.micNotVerifiable':
+    'The MIC is produced by AES-CCM* from the network key; the key is not on the wire, so the field is shown but no PASS/FAIL verdict is printed.',
+  'protocol.thread.warning.hc1OutOfScope':
+    'LOWPAN_HC1 (RFC 4944 §10) — superseded by RFC 6282 IPHC and not used by Thread. It is recognised and named, not decoded.',
+  'protocol.thread.warning.nalp':
+    'The dispatch byte is in the NALP range (00xxxxxx): this is not a 6LoWPAN frame. A Zigbee NWK Frame Control byte structurally lands here too.',
+  'protocol.thread.warning.escNotAllocated':
+    'ESC dispatch: no IANA-allocated value exists for the additional dispatch byte, so the chain stopped here.',
+  'protocol.thread.warning.unknownDispatch': 'Unrecognised 6LoWPAN dispatch byte; nothing was invented.',
+  'protocol.thread.warning.fragmentNotReassembled':
+    'The fragment header was decoded, but reassembly is NOT performed: that is cross-frame state and does not belong in a parser.',
+  'protocol.thread.warning.contextNotOnWire':
+    'Context-based compression (SAC/DAC = 1): the Context ID → prefix table is not on the wire, so the address was not reconstructed and the in-line bits are shown raw.',
+  'protocol.thread.warning.iidDerived':
+    'The address is fully elided; the interface identifier was DERIVED from the encapsulating 802.15.4 address (RFC 6282 §3.2.2, universal/local bit inverted). It is not a value read from the wire.',
+  'protocol.thread.warning.reservedAddressMode':
+    'This combination of address modes is RESERVED in RFC 6282; the field was left raw.',
+  'protocol.thread.warning.nhcNotUdp':
+    'A LOWPAN_NHC header is present but it is not UDP (an extension header); its body is not decoded in this version and the chain stopped.',
+  'protocol.thread.warning.udpChecksumNotVerified':
+    'The UDP checksum covers the IPv6 pseudo-header; under IPHC part of the addresses are DERIVED and under NHC the UDP Length is not on the wire at all. A result computed from derived input is not a measurement — the field is shown, not verified.',
+  'protocol.thread.warning.udpChecksumElidedOnWire':
+    "The NHC C bit says the checksum was elided: it is not on the wire at all, so no PASS/FAIL verdict is printed.",
+  'protocol.thread.warning.notMlePort':
+    'The UDP port is not the MLE port (19788); the payload was left raw and not interpreted as MLE.',
+  'protocol.thread.warning.unknownSecuritySuite':
+    'Unrecognised MLE Security Suite value (only 0 and 255 are defined); the body was left raw.',
+  'protocol.thread.warning.encryptedCommandNotReadable':
+    'Encrypted MLE (Security Suite 0): the command type is NOT readable on the wire and is not invented. There is no key, so no MIC PASS/FAIL verdict is printed either.',
+  'protocol.thread.warning.commandNotDecoded':
+    'This command is never sent unsecured: OpenThread uses Security Suite 255 only for Discovery Request (16) and Discovery Response (17). The byte is real, but unexpected.',
+  'protocol.thread.warning.tlvsNotDecoded':
+    'MLE TLVs are not decoded in this version (Thread Network Data / MeshCoP / TMF CoAP are a separate job); they are shown raw.',
+
+  'protocol.thread.option.fcsPresent': 'FCS present',
+  'protocol.thread.option.fcsPresent.description':
+    'libpcap separates 802.15.4 captures with (195) and without (230) an FCS into DIFFERENT link types, and which one it is is not written inside the frame. The choice decides whether the last two bytes are the FCS or payload.',
+  'protocol.thread.option.fcsPresent.auto': 'Automatic (assumed present per contract)',
+  'protocol.thread.option.fcsPresent.yes': 'Present',
+  'protocol.thread.option.fcsPresent.no': 'Absent',
+
+  'protocol.thread.option.securityLevelOverride': 'Override Security Level',
+  'protocol.thread.option.securityLevelOverride.description':
+    'The Security Level determines the MIC length, i.e. where the payload ENDS. Because the Frame Counter Suppression and ASN bits can make the Security Control byte ambiguous, the level can be supplied by hand.',
+  'protocol.thread.option.securityLevelOverride.auto': 'Automatic (from the Security Control byte)',
+
+  'protocol.thread.option.mlePort': 'MLE UDP port',
+  'protocol.thread.option.mlePort.description':
+    'The default MLE port is 19788 = 0x4D4C = ASCII "ML". The port is on the wire, but proprietary deployments may deviate; this value is the gate for MLE classification.',
+
+  'protocol.thread.option.dispatchProfile': 'Dispatch profile',
+  'protocol.thread.option.dispatchProfile.description':
+    'RFC 4944 and RFC 6282 CONTRADICT each other in the dispatch table: byte 0x7F is IPHC under RFC 6282 and ESC under RFC 4944, and ESC consumes an ADDITIONAL dispatch byte. The choice changes the output at byte level.',
+  'protocol.thread.option.dispatchProfile.thread': 'Thread (RFC 6282 — HC1 out of scope)',
+  'protocol.thread.option.dispatchProfile.rfc4944': 'RFC 4944 full table (HC1 and ESC recognised, not decoded)',
+
+  'protocol.thread.option.encryptedPayloadDisplay': 'Encrypted payload display',
+  'protocol.thread.option.encryptedPayloadDisplay.description':
+    'Whether an encrypted body appears with just a stamp or with a hex dump. This is not decryption; the bytes are the same bytes.',
+  'protocol.thread.option.encryptedPayloadDisplay.marked': 'Stamp only',
+  'protocol.thread.option.encryptedPayloadDisplay.hex': 'Hex dump',
+
+  'protocol.thread.option.addressDisplay': 'Address display',
+  'protocol.thread.option.addressDisplay.description':
+    'An EUI-64 sits little-endian on the wire and is conventionally written reversed and colon-separated on screen. That is a formatting decision; the raw wire order can be shown as well.',
+  'protocol.thread.option.addressDisplay.eui64': 'EUI-64 (reversed, colon-separated)',
+  'protocol.thread.option.addressDisplay.raw': 'Raw wire order',
+
+  'protocol.thread.option.udpChecksumElided': 'UDP checksum',
+  'protocol.thread.option.udpChecksumElided.description':
+    'The NHC C bit says whether the checksum was elided, but plain UDP without NHC carries no such information. The decision shifts where the payload begins by two bytes.',
+  'protocol.thread.option.udpChecksumElided.auto': 'Automatic (from the NHC C bit)',
+  'protocol.thread.option.udpChecksumElided.present': 'Present',
+  'protocol.thread.option.udpChecksumElided.elided': 'Elided',
+
+  'protocol.thread.example.uncompressedIpv6.name':
+    'Real capture — uncompressed IPv6 (dispatch 0x41)',
+  'protocol.thread.example.uncompressedIpv6.description':
+    '89 B from Wireshark SampleCaptures 6LoWPAN.pcap, with the ZEP v2 encapsulation stripped. The triple arithmetic holds: 21 (MAC) + 1 (dispatch) + 40 (IPv6) + 8 (UDP) + 17 (payload) + 2 (FCS) = 89; IPv6 Payload Length = 25 = UDP Length. The UDP port is 0xF0B1, i.e. NOT MLE — the payload is shown raw ("Hello 003 0xC59A"). FCS PASS.',
+  'protocol.thread.example.fragmentFirst.name': 'Real capture — FRAG1 (first fragment)',
+  'protocol.thread.example.fragmentFirst.description':
+    '123 B. Dispatch c1 09 00 02 → datagram_size 265, datagram_tag 2, and 96 B of payload in this frame. Reassembly is NOT performed: the fragment position inside the datagram is printed, no buffer is kept.',
+  'protocol.thread.example.fragmentSubsequent.name':
+    'Real capture — FRAGN (same datagram, second fragment)',
+  'protocol.thread.example.fragmentSubsequent.description':
+    '124 B. Dispatch e1 09 00 02 0c → the same size (265) and the same tag (2), with datagram_offset 0x0C × 8 = 96 — exactly the payload length of the first fragment. Three independent numbers confirm each other.',
+  'protocol.thread.example.lowpanHc1.name': 'Real capture — LOWPAN_HC1 (the out-of-scope branch)',
+  'protocol.thread.example.lowpanHc1.description':
+    '49 B, dispatch 0x42. This is RFC 4944 §10\'s older compression, superseded by RFC 6282 IPHC and not used by Thread. The frame is VALID (FCS PASS) but out of this engine\'s scope: it is named, not decoded, and nothing is invented. That is why `canParse` returns false for it.',
+  'protocol.thread.example.mleDiscoveryRequest.name':
+    'MLE Discovery Request — Security Suite 255 (unsecured)',
+  'protocol.thread.example.mleDiscoveryRequest.description':
+    'Derived; the FCS was recomputed by the engine. IPHC (both addresses fully elided and derived from the MAC addresses) + UDP 19788/19788 + MLE. Security Suite 255 = No Security and command 0x10 = Discovery Request — one of the only TWO commands ever sent unsecured, and therefore the only branch where the command type is genuinely readable.',
+  'protocol.thread.example.mleEncrypted.name':
+    'Encrypted MLE — Security Suite 0, command type not readable',
+  'protocol.thread.example.mleEncrypted.description':
+    'Derived. Security Suite 0 ⇒ an Auxiliary Security Header (Level 5 = ENC-MIC-32, Key Identifier Mode 2) + 4 B Frame Counter + 4 B Key Source + 1 B Key Index, then ciphertext, and a 4 B MIC at the very end. The MLE command sits inside the ciphertext: the command field is NEVER printed, and no MIC PASS/FAIL verdict is printed either.',
+  'protocol.thread.example.macSecurityMic.name':
+    'MAC Security Enabled — the MIC is subtracted from the payload',
+  'protocol.thread.example.macSecurityMic.description':
+    'Derived. MAC Security Control 0x0D = Level 5 (ENC-MIC-32) + Key Identifier Mode 1 ⇒ a 6-byte header and a 4-byte MIC. The MIC sits at the END of the frame, BEFORE the FCS; if it is not subtracted from the payload length the encrypted payload looks 4 bytes too long. Level 4 and above means encrypted, so the 6LoWPAN chain is never entered.',
+  'protocol.thread.example.meshDeepHops.name': 'Mesh header — Hops Left 0xF ⇒ Deep Hops Left',
+  'protocol.thread.example.meshDeepHops.description':
+    'Derived. Mesh dispatch 0xBF: V = 1 and F = 1 (both addresses 16-bit), Hops Left = 0xF. Per RFC 4944 §5.2, 0xF brings an 8-bit Deep Hops Left field immediately after — skip that conditional offset and both addresses shift by one byte, silently. After the mesh header the chain continues with IPHC + UDP + an MLE Discovery Response.',
+  'protocol.thread.example.nhcUdpCompressed.name':
+    'IPHC + NHC-UDP (4-bit ports) — dispatch 0x7F',
+  'protocol.thread.example.nhcUdpCompressed.description':
+    'Derived. Byte 0x7F is exactly where the two RFCs disagree: IPHC (011 11111) under the Thread profile, ESC under the full RFC 4944 table. NHC 0xF3 = checksum present on the wire + both ports compressed to 4 bits (0xF0Bx). Switching the dispatch profile changes the output at byte level — the on-screen proof that the option is a real channel.',
+  'protocol.thread.example.fcsMismatch.name': 'Corrupt: the FCS does not match',
+  'protocol.thread.example.fcsMismatch.description':
+    'The last byte of the first example was flipped. FCS FAIL is printed and the frame counts as invalid; the fields are still decoded and the partial result is shown.',
+
 };

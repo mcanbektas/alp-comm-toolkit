@@ -77,6 +77,19 @@
 
 import { readBitsAsNumber, toSignedBits } from '@/protocol-core/decoding/bitCursor';
 import { computeNamedCrc } from '@/protocol-core/checksums/crcCatalogue';
+import {
+  decodeIeee802154Header,
+  formatEui64,
+  planIeee802154Addressing,
+  pushIeee802154Fcs,
+  readIeee802154FrameControl,
+  IEEE802154_ADDR_MODE_SHORT,
+  IEEE802154_FRAME_TYPE_DATA,
+  IEEE802154_FRAME_TYPE_NAMES,
+  IEEE802154_FRAME_VERSION_2006,
+  IEEE802154_MIN_LENGTH,
+} from '@/protocol-core/framing/ieee802154Frame';
+import type { Ieee802154Messages } from '@/protocol-core/framing/ieee802154Frame';
 import { createRawFrame } from '@/protocol-core/types';
 import type {
   ExampleFrame,
@@ -96,55 +109,17 @@ const PROTOCOL_ID = 'zigbee';
 const PROTOCOL_DISPLAY_NAME = 'Zigbee';
 const TRANSLATION_KEY_PREFIX = 'protocol.zigbee';
 
-// ───────────────────────── 802.15.4 MAC sabitleri ─────────────────────────
+// ────────────── 802.15.4 MAC — PAYLAŞILAN ÇEKİRDEKTEN (`[KARAR 18-1]`) ──────
+// Dalga 18d: FCF bit alanları, adresleme planı, adres biçimleme, başlık
+// uzunluğu ve FCS artık `protocol-core/framing/ieee802154Frame.ts`te ve
+// `thread` ile PAYLAŞILIYOR. Aşağıdakiler yalnız yerel takma adlardır.
+// TAŞINMAYAN: Auxiliary Security Header — Zigbee MAC katmanında güvenlik
+// kullanmaz, Thread kullanır; türetme protokole özeldir (`pulseLog.ts` emsali).
 
-const MAC_FCF_LENGTH = 2;
-const MAC_SEQ_LENGTH = 1;
-const MAC_PAN_ID_LENGTH = 2;
-const MAC_SHORT_ADDR_LENGTH = 2;
-const MAC_EXT_ADDR_LENGTH = 8;
-const MAC_FCS_LENGTH = 2;
-const MAC_MIN_LENGTH = MAC_FCF_LENGTH + MAC_SEQ_LENGTH + MAC_FCS_LENGTH;
-
-const MAC_FRAME_TYPE_BIT_POSITION = 0;
-const MAC_FRAME_TYPE_BIT_LENGTH = 3;
-const MAC_SECURITY_BIT_POSITION = 3;
-const MAC_FRAME_PENDING_BIT_POSITION = 4;
-const MAC_ACK_REQUEST_BIT_POSITION = 5;
-const MAC_PAN_ID_COMPRESSION_BIT_POSITION = 6;
-const MAC_DEST_ADDR_MODE_BIT_POSITION = 10;
-const MAC_ADDR_MODE_BIT_LENGTH = 2;
-const MAC_FRAME_VERSION_BIT_POSITION = 12;
-const MAC_FRAME_VERSION_BIT_LENGTH = 2;
-const MAC_SRC_ADDR_MODE_BIT_POSITION = 14;
-
-const MAC_FRAME_TYPE_DATA = 0b001;
-/** IEEE 802.15.4-2006 §7.2.1.1.1 Table 79 — 0/1/2/3 resmi metinden; 4-7 spec'te topluca "Reserved" (dosya başı). */
-const MAC_FRAME_TYPE_NAMES: ReadonlyMap<number, string> = new Map([
-  [0b000, 'Beacon'],
-  [MAC_FRAME_TYPE_DATA, 'Data'],
-  [0b010, 'Acknowledgment'],
-  [0b011, 'MAC Command'],
-]);
-
-const MAC_ADDR_MODE_NONE = 0b00;
-const MAC_ADDR_MODE_SHORT = 0b10;
-const MAC_ADDR_MODE_EXT = 0b11;
-/** IEEE 802.15.4-2006 §7.2.1.1.6/.8 Table 80 — resmi metin, dest/src ortak. */
-const MAC_ADDR_MODE_NAMES: ReadonlyMap<number, string> = new Map([
-  [MAC_ADDR_MODE_NONE, 'Not present'],
-  [0b01, 'Reserved'],
-  [MAC_ADDR_MODE_SHORT, '16-bit short address'],
-  [MAC_ADDR_MODE_EXT, '64-bit extended address'],
-]);
-
-const MAC_FRAME_VERSION_2003 = 0b00;
-const MAC_FRAME_VERSION_2006 = 0b01;
-/** IEEE 802.15.4-2006 §7.2.1.1.7 — resmi metin. 2015+ (Table 7-6) bu dalgada desteklenmez (dosya başı). */
-const MAC_FRAME_VERSION_NAMES: ReadonlyMap<number, string> = new Map([
-  [MAC_FRAME_VERSION_2003, 'IEEE 802.15.4-2003'],
-  [MAC_FRAME_VERSION_2006, 'IEEE 802.15.4-2006'],
-]);
+const MAC_MIN_LENGTH = IEEE802154_MIN_LENGTH;
+const MAC_FRAME_TYPE_DATA = IEEE802154_FRAME_TYPE_DATA;
+const MAC_ADDR_MODE_SHORT = IEEE802154_ADDR_MODE_SHORT;
+const MAC_FRAME_VERSION_2006 = IEEE802154_FRAME_VERSION_2006;
 
 // ───────────────────────── Zigbee NWK sabitleri ─────────────────────────
 
@@ -582,6 +557,17 @@ function toProtocolWarning(key: string): ProtocolWarning {
   return { code: key, message: key };
 }
 
+/**
+ * Çekirdek konteynerin bastığı hata/uyarıların ÇEVİRİ ANAHTARLARI. Çekirdek
+ * kendi ön ekini uydurmaz; `thread` aynı alanlar için kendi anahtarlarını
+ * verir (`ieee802154Frame.ts` dosya başı).
+ */
+const MAC_MESSAGES: Ieee802154Messages = {
+  frameVersionUnsupported: WARN_FRAME_VERSION_UNSUPPORTED,
+  addressingTruncated: ERROR_MAC_ADDRESSING_TRUNCATED,
+  fcsMismatch: ERROR_FCS_MISMATCH,
+};
+
 /** noUncheckedIndexedAccess: bayt dizisi erişimi her yerde bu guard'dan geçer. */
 function byteAt(data: Uint8Array, offset: number): number {
   return data[offset] ?? 0;
@@ -603,46 +589,6 @@ function readUint32Le(bytes: Uint8Array, offset: number): number {
       (byteAt(bytes, offset + 3) << 24)) >>>
     0
   );
-}
-
-/** Wire LE; ekranda geleneksel EUI64 gösterimiyle TERS/ayraçlı (dosya başı gösterim ayrımı). */
-function formatEui64(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .reverse()
-    .map((byte) => byte.toString(16).padStart(2, '0').toUpperCase())
-    .join(':');
-}
-
-function macAddressLength(mode: number): number {
-  if (mode === MAC_ADDR_MODE_SHORT) return MAC_SHORT_ADDR_LENGTH;
-  if (mode === MAC_ADDR_MODE_EXT) return MAC_EXT_ADDR_LENGTH;
-  return 0;
-}
-
-function formatMacAddress(mode: number, bytes: Uint8Array): string {
-  if (mode === MAC_ADDR_MODE_EXT) return formatEui64(bytes);
-  return toHex(readUint16Le(bytes, 0), 2);
-}
-
-interface MacAddressingPlan {
-  readonly destPanPresent: boolean;
-  readonly srcPanPresent: boolean;
-  readonly supported: boolean;
-}
-
-/** IEEE 802.15.4-2006 §7.2.1.1.5/.5 (resmi metin, birebir) — yalnız 2003/2006 (dosya başı). */
-function planMacAddressing(destMode: number, srcMode: number, panIdCompression: number, frameVersion: number): MacAddressingPlan {
-  if (frameVersion !== MAC_FRAME_VERSION_2003 && frameVersion !== MAC_FRAME_VERSION_2006) {
-    return { destPanPresent: false, srcPanPresent: false, supported: false };
-  }
-  const destPresent = destMode !== MAC_ADDR_MODE_NONE;
-  const srcPresent = srcMode !== MAC_ADDR_MODE_NONE;
-  if (destPresent && srcPresent) {
-    return { destPanPresent: true, srcPanPresent: panIdCompression === 0, supported: true };
-  }
-  if (destPresent) return { destPanPresent: true, srcPanPresent: false, supported: true };
-  if (srcPresent) return { destPanPresent: false, srcPanPresent: true, supported: true };
-  return { destPanPresent: false, srcPanPresent: false, supported: true };
 }
 
 function decodeZclValue(kind: ZclDataTypeKind, fixedLength: number | undefined, data: Uint8Array, offset: number): { length: number; physicalValue: string } | undefined {
@@ -724,139 +670,16 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
   const errors: ProtocolError[] = [];
 
   // ═══════════════════════ 802.15.4 MAC ═══════════════════════
+  // `[KARAR 18-1]` (dalga 18d): konteyner PAYLAŞILAN ÇEKİRDEKTEN okunur.
+  // Alan id'leri, adları, ofsetleri ve sıraları taşımadan ÖNCEKİYLE BİREBİR
+  // AYNIDIR — `data-field-id` seçicileri ve 37 zigbee testi buna bağlı.
 
-  const macFrameType = readBitsAsNumber(data, MAC_FRAME_TYPE_BIT_POSITION, MAC_FRAME_TYPE_BIT_LENGTH, 'lsb-first');
-  const macFrameTypeField: ParsedField = {
-    id: 'mac-frame-type',
-    name: 'MAC Frame Type',
-    offset: 0,
-    length: MAC_FRAME_TYPE_BIT_LENGTH,
-    rawBytes: data.slice(0, 1),
-    rawValue: macFrameType,
-    valid: MAC_FRAME_TYPE_NAMES.has(macFrameType),
-    warnings: [],
-  };
-  const macFrameTypeName = MAC_FRAME_TYPE_NAMES.get(macFrameType);
-  if (macFrameTypeName !== undefined) macFrameTypeField.physicalValue = macFrameTypeName;
-  fields.push(macFrameTypeField);
-
-  const macSecurity = readBitsAsNumber(data, MAC_SECURITY_BIT_POSITION, 1, 'lsb-first');
-  fields.push({ id: 'mac-security', name: 'Security Enabled', offset: 0, length: 1, rawBytes: data.slice(0, 1), rawValue: macSecurity, valid: true, warnings: [] });
-
-  const macFramePending = readBitsAsNumber(data, MAC_FRAME_PENDING_BIT_POSITION, 1, 'lsb-first');
-  fields.push({ id: 'mac-frame-pending', name: 'Frame Pending', offset: 0, length: 1, rawBytes: data.slice(0, 1), rawValue: macFramePending, valid: true, warnings: [] });
-
-  const macAckRequest = readBitsAsNumber(data, MAC_ACK_REQUEST_BIT_POSITION, 1, 'lsb-first');
-  fields.push({ id: 'mac-ack-request', name: 'Ack Request', offset: 0, length: 1, rawBytes: data.slice(0, 1), rawValue: macAckRequest, valid: true, warnings: [] });
-
-  const macPanIdCompression = readBitsAsNumber(data, MAC_PAN_ID_COMPRESSION_BIT_POSITION, 1, 'lsb-first');
-  fields.push({ id: 'mac-pan-id-compression', name: 'PAN ID Compression', offset: 0, length: 1, rawBytes: data.slice(0, 1), rawValue: macPanIdCompression, valid: true, warnings: [] });
-
-  const macDestAddrMode = readBitsAsNumber(data, MAC_DEST_ADDR_MODE_BIT_POSITION, MAC_ADDR_MODE_BIT_LENGTH, 'lsb-first');
-  fields.push({
-    id: 'mac-dest-addr-mode',
-    name: 'Destination Addressing Mode',
-    offset: 1,
-    length: MAC_ADDR_MODE_BIT_LENGTH,
-    rawBytes: data.slice(1, 2),
-    rawValue: macDestAddrMode,
-    physicalValue: MAC_ADDR_MODE_NAMES.get(macDestAddrMode),
-    valid: true,
-    warnings: [],
-  });
-
-  const macFrameVersion = readBitsAsNumber(data, MAC_FRAME_VERSION_BIT_POSITION, MAC_FRAME_VERSION_BIT_LENGTH, 'lsb-first');
-  const macFrameVersionField: ParsedField = {
-    id: 'mac-frame-version',
-    name: 'Frame Version',
-    offset: 1,
-    length: MAC_FRAME_VERSION_BIT_LENGTH,
-    rawBytes: data.slice(1, 2),
-    rawValue: macFrameVersion,
-    valid: true,
-    warnings: [],
-  };
-  const macFrameVersionName = MAC_FRAME_VERSION_NAMES.get(macFrameVersion);
-  if (macFrameVersionName !== undefined) {
-    macFrameVersionField.physicalValue = macFrameVersionName;
-  } else {
-    macFrameVersionField.warnings = [WARN_FRAME_VERSION_UNSUPPORTED];
-    warnings.push(toProtocolWarning(WARN_FRAME_VERSION_UNSUPPORTED));
-  }
-  fields.push(macFrameVersionField);
-
-  const macSrcAddrMode = readBitsAsNumber(data, MAC_SRC_ADDR_MODE_BIT_POSITION, MAC_ADDR_MODE_BIT_LENGTH, 'lsb-first');
-  fields.push({
-    id: 'mac-src-addr-mode',
-    name: 'Source Addressing Mode',
-    offset: 1,
-    length: MAC_ADDR_MODE_BIT_LENGTH,
-    rawBytes: data.slice(1, 2),
-    rawValue: macSrcAddrMode,
-    physicalValue: MAC_ADDR_MODE_NAMES.get(macSrcAddrMode),
-    valid: true,
-    warnings: [],
-  });
-
-  fields.push({
-    id: 'mac-seq',
-    name: 'Sequence Number',
-    offset: MAC_FCF_LENGTH,
-    length: MAC_SEQ_LENGTH,
-    rawBytes: data.slice(MAC_FCF_LENGTH, MAC_FCF_LENGTH + MAC_SEQ_LENGTH),
-    rawValue: byteAt(data, MAC_FCF_LENGTH),
-    valid: true,
-    warnings: [],
-  });
-
-  let cursor = MAC_FCF_LENGTH + MAC_SEQ_LENGTH;
-  const fcsOffset = data.length - MAC_FCS_LENGTH;
-  let macPayloadStart = cursor;
-  let macPayloadEnd = fcsOffset;
+  const mac = decodeIeee802154Header(data, fields, warnings, errors, MAC_MESSAGES);
+  const macFrameType = mac.frameControl.frameType;
+  const addressingPlan = mac.addressing;
+  const macPayloadStart = mac.payloadStart;
+  const macPayloadEnd = mac.payloadEnd;
   let nwkPayload: Uint8Array | undefined;
-
-  const addressingPlan = planMacAddressing(macDestAddrMode, macSrcAddrMode, macPanIdCompression, macFrameVersion);
-
-  if (!addressingPlan.supported) {
-    // Frame Version 2015+/reserved — Table 7-6 karmaşık ve Zigbee'de kullanılmaz (dosya başı).
-    macPayloadStart = cursor;
-  } else {
-    let truncated = false;
-    if (addressingPlan.destPanPresent) {
-      if (cursor + MAC_PAN_ID_LENGTH > fcsOffset) truncated = true;
-      else {
-        fields.push({ id: 'mac-dest-pan', name: 'Destination PAN ID', offset: cursor, length: MAC_PAN_ID_LENGTH, rawBytes: data.slice(cursor, cursor + MAC_PAN_ID_LENGTH), rawValue: toHex(readUint16Le(data, cursor), 2), valid: true, warnings: [] });
-        cursor += MAC_PAN_ID_LENGTH;
-      }
-    }
-    if (!truncated && macDestAddrMode !== MAC_ADDR_MODE_NONE) {
-      const length = macAddressLength(macDestAddrMode);
-      if (length === 0 || cursor + length > fcsOffset) truncated = true;
-      else {
-        fields.push({ id: 'mac-dest-addr', name: 'Destination Address', offset: cursor, length, rawBytes: data.slice(cursor, cursor + length), rawValue: formatMacAddress(macDestAddrMode, data.slice(cursor, cursor + length)), valid: true, warnings: [] });
-        cursor += length;
-      }
-    }
-    if (!truncated && addressingPlan.srcPanPresent) {
-      if (cursor + MAC_PAN_ID_LENGTH > fcsOffset) truncated = true;
-      else {
-        fields.push({ id: 'mac-src-pan', name: 'Source PAN ID', offset: cursor, length: MAC_PAN_ID_LENGTH, rawBytes: data.slice(cursor, cursor + MAC_PAN_ID_LENGTH), rawValue: toHex(readUint16Le(data, cursor), 2), valid: true, warnings: [] });
-        cursor += MAC_PAN_ID_LENGTH;
-      }
-    }
-    if (!truncated && macSrcAddrMode !== MAC_ADDR_MODE_NONE) {
-      const length = macAddressLength(macSrcAddrMode);
-      if (length === 0 || cursor + length > fcsOffset) truncated = true;
-      else {
-        fields.push({ id: 'mac-src-addr', name: 'Source Address', offset: cursor, length, rawBytes: data.slice(cursor, cursor + length), rawValue: formatMacAddress(macSrcAddrMode, data.slice(cursor, cursor + length)), valid: true, warnings: [] });
-        cursor += length;
-      }
-    }
-    if (truncated) {
-      errors.push({ code: 'truncated-frame', message: ERROR_MAC_ADDRESSING_TRUNCATED, offset: cursor, length: fcsOffset - cursor });
-    }
-    macPayloadStart = cursor;
-  }
 
   if (macPayloadStart <= macPayloadEnd) {
     const payload = data.slice(macPayloadStart, macPayloadEnd);
@@ -868,32 +691,10 @@ function parseZigbeeFrame(data: Uint8Array, options: ZigbeeParseOptions): ParseR
     }
   }
 
-  // FCS — bu dalgada GERÇEKTEN doğrulanır (dosya başı, MIC/checksum-dialect kuralının istisnası).
-  const fcsBytes = data.slice(fcsOffset, fcsOffset + MAC_FCS_LENGTH);
-  const receivedFcs = BigInt(readUint16Le(data, fcsOffset));
-  const calculatedFcs = computeNamedCrc(data.slice(0, fcsOffset), 'CRC16_KERMIT');
-  const fcsValid = receivedFcs === calculatedFcs;
-  const fcsField: ParsedField = {
-    id: 'mac-fcs',
-    name: 'FCS',
-    offset: fcsOffset,
-    length: MAC_FCS_LENGTH,
-    rawBytes: fcsBytes,
-    rawValue: toHex(Number(receivedFcs), 2),
-    physicalValue: fcsValid ? 'PASS' : 'FAIL',
-    valid: fcsValid,
-    warnings: [],
-  };
-  fields.push(fcsField);
-  if (!fcsValid) {
-    errors.push({
-      code: 'crc-mismatch',
-      message: ERROR_FCS_MISMATCH,
-      offset: fcsOffset,
-      length: MAC_FCS_LENGTH,
-      details: { received: receivedFcs.toString(16), calculated: calculatedFcs.toString(16) },
-    });
-  }
+  // FCS — bu dalgada GERÇEKTEN doğrulanır (dosya başı, MIC/checksum-dialect
+  // kuralının istisnası). NWK/APS/ZCL alanlarından ÖNCE basılır: sıra dalga
+  // 7'den beri böyle ve çekirdeğe taşınırken KORUNDU.
+  pushIeee802154Fcs(data, fields, errors, MAC_MESSAGES);
 
   // ═══════════════════════ Zigbee NWK ═══════════════════════
 
@@ -1236,8 +1037,8 @@ export const zigbeeParser: ProtocolParser = {
   /** Ucuz ön eleme: yeterli uzunluk + Frame Type dar kümede. */
   canParse(data: Uint8Array): boolean {
     if (data.length < MAC_MIN_LENGTH) return false;
-    const frameType = readBitsAsNumber(data, MAC_FRAME_TYPE_BIT_POSITION, MAC_FRAME_TYPE_BIT_LENGTH, 'lsb-first');
-    return MAC_FRAME_TYPE_NAMES.has(frameType);
+    const frameType = readIeee802154FrameControl(data).frameType;
+    return IEEE802154_FRAME_TYPE_NAMES.has(frameType);
   },
 
   parse(data: Uint8Array, context?: ParseContext): ParseResult {
@@ -1269,7 +1070,7 @@ function macHeader(options: {
   const byte0 = (frameType & 0x07) | (panIdCompression === 1 ? 0x40 : 0);
   const byte1 = ((destAddrMode & 0x03) << 2) | ((frameVersion & 0x03) << 4) | ((srcAddrMode & 0x03) << 6);
   const bytes = [byte0, byte1, seq];
-  const plan = planMacAddressing(destAddrMode, srcAddrMode, panIdCompression, frameVersion);
+  const plan = planIeee802154Addressing(destAddrMode, srcAddrMode, panIdCompression, frameVersion);
   if (plan.destPanPresent) bytes.push(0x34, 0x12); // PAN 0x1234 (LE)
   if (destAddrMode === MAC_ADDR_MODE_SHORT) bytes.push(0x00, 0x00); // coordinator 0x0000
   if (plan.srcPanPresent) bytes.push(0x34, 0x12);

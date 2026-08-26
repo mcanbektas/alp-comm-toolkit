@@ -8085,6 +8085,146 @@ export const tr = {
   'protocol.espNow.example.realCaptureHello.description':
     'Espressif\'in kendi issue tracker\'ından (IDFGH-503, 2018) gerçek bir ESP32 monitor-mode yakalaması; radiotap soyuldu. Vendor element gövdesi ASCII "Hello" + belgelenmemiş 4 bayt taşıyor — o dört bayt UYDURULMADI, ham görünür. Capture\'da FCS YOKTU; burada yeniden hesaplanıp eklendi.',
 
+  // ── Thread (Faz 10, dalga 18d) ────────────────────────────────────────
+  // MLE komut adları, 6LoWPAN dispatch adları ve Security Suite adları
+  // VERİDİR ve burada YOKTUR — motorun içinde yaşarlar (CLAUDE.md).
+  'protocol.thread.documentation.summary':
+    'IEEE 802.15.4 MAC üzerinde 6LoWPAN → IPv6 → UDP → MLE zinciri. Girdi TAM MAC çerçevesi + 2 baytlık FCS (LINKTYPE_IEEE802_15_4_WITHFCS = 195); TAP (283) sözde başlığı ve ZEP kapsüllemesi kapsam dışıdır, bu yüzden sayfada kanal/RSSI/LQI yoktur. MAC konteyneri `zigbee` ile PAYLAŞILAN çekirdekten okunur. Auxiliary Security Header çözülür ve MIC uzunluğu yükün sonundan düşülür; MIC bir alan olarak basılır ama anahtar telde olmadığı için PASS/FAIL BASILMAZ. MLE gövdesi şifrelidir: şifresiz gönderilen sadece Discovery Request (16) ve Discovery Response (17); ötekilerinde komut tipi çerçevede okunamaz ve UYDURULMAZ.',
+
+  'protocol.thread.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.thread.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.thread.error.frameTooShort':
+    'Çerçeve bir 802.15.4 MAC başlığı + FCS taşıyamayacak kadar kısa (en az 5 bayt).',
+  'protocol.thread.error.frameTooLong': 'Çerçeve verilen azami uzunluğu aşıyor.',
+  'protocol.thread.error.macAddressingTruncated':
+    'MAC adresleme alanları FCS\'ten önce bitmiyor; yük güvenilir değil.',
+  'protocol.thread.error.fcsMismatch':
+    'FCS hesaplanan CRC16/KERMIT değeriyle uyuşmuyor.',
+  'protocol.thread.error.auxSecurityTruncated':
+    'Auxiliary Security Header çerçeveye sığmıyor; üst zincire girilmedi.',
+  'protocol.thread.error.lowpanTruncated':
+    '6LoWPAN başlık yığını çerçevenin sonundan taşıyor; ofset uydurulmadı.',
+
+  'protocol.thread.warning.linkTypeContract':
+    'Girdi çıplak 802.15.4 MAC çerçevesi + FCS olarak okunuyor (LINKTYPE 195). TAP (283) sözde başlığı ve ZEP kapsüllemesi kapsam dışıdır; kanal, RSSI ve LQI bu çerçevede YOKTUR.',
+  'protocol.thread.warning.frameVersionUnsupported':
+    'Frame Version 2003/2006 dışında; 2015+ adresleme kuralları desteklenmiyor, adresleme alanları basılmadı.',
+  'protocol.thread.warning.nonDataFrame':
+    'MAC Frame Type Data değil; 6LoWPAN zinciri denenmedi, yük ham bırakıldı.',
+  'protocol.thread.warning.macPayloadEncrypted':
+    'MAC Security Level 4 veya üstü: yük şifreli. 6LoWPAN dispatch baytı ciphertext\'in içindedir, zincire girilmedi ve hiçbir başlık uydurulmadı.',
+  'protocol.thread.warning.micNotVerifiable':
+    'MIC AES-CCM* ile ağ anahtarından üretilir; anahtar telde yoktur, bu yüzden alan gösterilir ama PASS/FAIL basılmaz.',
+  'protocol.thread.warning.hc1OutOfScope':
+    'LOWPAN_HC1 (RFC 4944 §10) — RFC 6282 IPHC\'siyle değiştirildi ve Thread kullanmaz. Tanınır ve adlandırılır, çözülmez.',
+  'protocol.thread.warning.nalp':
+    'Dispatch NALP aralığında (00xxxxxx): bu bir 6LoWPAN çerçevesi değil. Zigbee NWK Frame Control baytı da yapısal olarak buraya düşer.',
+  'protocol.thread.warning.escNotAllocated':
+    'ESC dispatch\'i: ek dispatch baytı için IANA\'da tahsis edilmiş bir değer yok; zincir burada durdu.',
+  'protocol.thread.warning.unknownDispatch': 'Tanınmayan 6LoWPAN dispatch baytı; uydurulmadı.',
+  'protocol.thread.warning.fragmentNotReassembled':
+    'Parça başlığı çözüldü ama yeniden birleştirme YAPILMAZ: bu, çerçeveler arası bir durumdur ve parser\'a girmez.',
+  'protocol.thread.warning.contextNotOnWire':
+    'Bağlam tabanlı sıkıştırma (SAC/DAC = 1): Context ID → prefix tablosu telde yoktur, adres kurulamadı, satır içi bitler ham basıldı.',
+  'protocol.thread.warning.iidDerived':
+    'Adres tamamen elenmiş; arayüz tanımlayıcısı kapsülleyen 802.15.4 adresinden TÜRETİLDİ (RFC 6282 §3.2.2, U/L biti çevrilir). Telde okunmuş bir değer değildir.',
+  'protocol.thread.warning.reservedAddressMode':
+    'Bu adres kipi bileşimi RFC 6282\'de REZERVE; alan ham bırakıldı.',
+  'protocol.thread.warning.nhcNotUdp':
+    'LOWPAN_NHC var ama UDP değil (genişletme başlığı); gövdesi bu sürümde çözülmüyor, zincir durdu.',
+  'protocol.thread.warning.udpChecksumNotVerified':
+    'UDP checksum kapsamı IPv6 sözde başlığıdır; IPHC\'de adreslerin bir kısmı türetilmiştir ve NHC\'de UDP Length telde hiç yoktur. Türetilmiş girdiden hesaplanan bir sonuç ölçüm olmaz — alan gösterilir, doğrulanmaz.',
+  'protocol.thread.warning.udpChecksumElidedOnWire':
+    'NHC\'nin C biti checksum\'ın elendiğini söylüyor: telde hiç yok, dolayısıyla PASS/FAIL basılmaz.',
+  'protocol.thread.warning.notMlePort':
+    'UDP portu MLE portu (19788) değil; yük ham bırakıldı, MLE olarak yorumlanmadı.',
+  'protocol.thread.warning.unknownSecuritySuite':
+    'Tanınmayan MLE Security Suite değeri (yalnız 0 ve 255 tanımlı); gövde ham bırakıldı.',
+  'protocol.thread.warning.encryptedCommandNotReadable':
+    'Şifreli MLE (Security Suite 0): komut tipi çerçevede OKUNAMAZ ve uydurulmaz. Anahtar yok, MIC PASS/FAIL de basılmaz.',
+  'protocol.thread.warning.commandNotDecoded':
+    'Bu komut şifresiz gönderilmez: OpenThread yalnız Discovery Request (16) ve Discovery Response (17) için Security Suite 255 kullanır. Bayt gerçektir ama beklenmediktir.',
+  'protocol.thread.warning.tlvsNotDecoded':
+    'MLE TLV\'leri bu sürümde çözülmüyor (Thread Network Data / MeshCoP / TMF CoAP ayrı bir iş); ham gösteriliyor.',
+
+  'protocol.thread.option.fcsPresent': 'FCS var mı',
+  'protocol.thread.option.fcsPresent.description':
+    'libpcap FCS\'li (195) ve FCS\'siz (230) 802.15.4 yakalamalarını AYRI link-type ile ayırır; hangisi olduğu çerçevenin içinde yazmaz. Seçim son iki baytın FCS mi yük mü olduğunu belirler.',
+  'protocol.thread.option.fcsPresent.auto': 'Otomatik (sözleşme gereği var sayılır)',
+  'protocol.thread.option.fcsPresent.yes': 'Var',
+  'protocol.thread.option.fcsPresent.no': 'Yok',
+
+  'protocol.thread.option.securityLevelOverride': 'Security Level\'ı elle ver',
+  'protocol.thread.option.securityLevelOverride.description':
+    'Security Level MIC uzunluğunu, yani yükün NEREDE bittiğini belirler. Frame Counter Suppression ve ASN bitleri Security Control baytının okunmasını belirsizleştirebildiği için seviye elle verilebilir.',
+  'protocol.thread.option.securityLevelOverride.auto': 'Otomatik (Security Control baytından)',
+
+  'protocol.thread.option.mlePort': 'MLE UDP portu',
+  'protocol.thread.option.mlePort.description':
+    'MLE varsayılan portu 19788 = 0x4D4C = ASCII "ML". Port telde vardır ama tescilli dağıtımlar sapabilir; bu değer sınıflandırmanın kapısıdır.',
+
+  'protocol.thread.option.dispatchProfile': 'Dispatch profili',
+  'protocol.thread.option.dispatchProfile.description':
+    'RFC 4944 ile RFC 6282 dispatch tablosunda ÇELİŞİR: 0x7F baytı RFC 6282\'de IPHC, RFC 4944\'te ESC\'tir ve ESC bir EK dispatch baytı tüketir. Seçim çıktıyı bayt düzeyinde değiştirir.',
+  'protocol.thread.option.dispatchProfile.thread': 'Thread (RFC 6282 — HC1 kapsam dışı)',
+  'protocol.thread.option.dispatchProfile.rfc4944': 'RFC 4944 tam tablo (HC1 ve ESC tanınır, çözülmez)',
+
+  'protocol.thread.option.encryptedPayloadDisplay': 'Şifreli yük gösterimi',
+  'protocol.thread.option.encryptedPayloadDisplay.description':
+    'Şifreli gövdenin ekranda yalnız damgayla mı yoksa onaltılık dökümüyle mi görüneceği. Çözme değildir; baytlar aynı baytlardır.',
+  'protocol.thread.option.encryptedPayloadDisplay.marked': 'Yalnız "şifreli" damgası',
+  'protocol.thread.option.encryptedPayloadDisplay.hex': 'Onaltılık döküm',
+
+  'protocol.thread.option.addressDisplay': 'Adres gösterimi',
+  'protocol.thread.option.addressDisplay.description':
+    'EUI-64 telde little-endian durur, ekranda geleneksel olarak ters/ayraçlı yazılır. Bu bir biçimleme kararıdır; ham tel sırası da görülebilir.',
+  'protocol.thread.option.addressDisplay.eui64': 'EUI-64 (ters, iki nokta ayraçlı)',
+  'protocol.thread.option.addressDisplay.raw': 'Ham tel sırası',
+
+  'protocol.thread.option.udpChecksumElided': 'UDP checksum',
+  'protocol.thread.option.udpChecksumElided.description':
+    'NHC\'nin C biti checksum\'ın elenip elenmediğini söyler, ama NHC\'siz UDP\'de bu bilgi yoktur. Karar yükün nerede başladığını iki bayt kaydırır.',
+  'protocol.thread.option.udpChecksumElided.auto': 'Otomatik (NHC\'nin C bitinden)',
+  'protocol.thread.option.udpChecksumElided.present': 'Var',
+  'protocol.thread.option.udpChecksumElided.elided': 'Elenmiş',
+
+  'protocol.thread.example.uncompressedIpv6.name':
+    'Gerçek yakalama — sıkıştırılmamış IPv6 (dispatch 0x41)',
+  'protocol.thread.example.uncompressedIpv6.description':
+    '89 B. Wireshark SampleCaptures 6LoWPAN.pcap; ZEP v2 kapsüllemesi soyuldu. Üçlü aritmetik tutuyor: 21 (MAC) + 1 (dispatch) + 40 (IPv6) + 8 (UDP) + 17 (yük) + 2 (FCS) = 89; IPv6 Payload Length = 25 = UDP Length. UDP portu 0xF0B1, yani MLE DEĞİL — yük ham gösterilir ("Hello 003 0xC59A"). FCS PASS.',
+  'protocol.thread.example.fragmentFirst.name': 'Gerçek yakalama — FRAG1 (ilk parça)',
+  'protocol.thread.example.fragmentFirst.description':
+    '123 B. Dispatch c1 09 00 02 → datagram_size 265, datagram_tag 2, bu çerçevenin yükü 96 B. Yeniden birleştirme YAPILMAZ: parçanın datagram içindeki yeri basılır, tampon tutulmaz.',
+  'protocol.thread.example.fragmentSubsequent.name':
+    'Gerçek yakalama — FRAGN (aynı datagram, ikinci parça)',
+  'protocol.thread.example.fragmentSubsequent.description':
+    '124 B. Dispatch e1 09 00 02 0c → aynı size (265) ve aynı tag (2), datagram_offset 0x0C × 8 = 96 — yani ilk parçanın yük uzunluğuyla BİREBİR. Üç bağımsız sayı birbirini doğruluyor.',
+  'protocol.thread.example.lowpanHc1.name': 'Gerçek yakalama — LOWPAN_HC1 (kapsam dışı dal)',
+  'protocol.thread.example.lowpanHc1.description':
+    '49 B, dispatch 0x42. RFC 4944 §10\'un eski sıkıştırması; RFC 6282 IPHC\'siyle değiştirildi ve Thread kullanmaz. Çerçeve GEÇERLİDİR (FCS PASS) ama bu motorun kapsamında değildir: adlandırılır, çözülmez, uydurulmaz. `canParse` bu yüzden false döner.',
+  'protocol.thread.example.mleDiscoveryRequest.name':
+    'MLE Discovery Request — Security Suite 255 (şifresiz)',
+  'protocol.thread.example.mleDiscoveryRequest.description':
+    'Türetildi, FCS motordan yeniden hesaplandı. IPHC (adresler tamamen elenmiş, MAC adreslerinden türetilir) + UDP 19788/19788 + MLE. Security Suite 255 = No Security ve komut 0x10 = Discovery Request — şifresiz gönderilen İKİ komuttan biri, yani komut tipinin gerçekten okunabildiği tek dal.',
+  'protocol.thread.example.mleEncrypted.name':
+    'MLE şifreli — Security Suite 0, komut tipi okunamaz',
+  'protocol.thread.example.mleEncrypted.description':
+    'Türetildi. Security Suite 0 ⇒ Auxiliary Security Header (Level 5 = ENC-MIC-32, Key Identifier Mode 2) + 4 B Frame Counter + 4 B Key Source + 1 B Key Index, sonra ciphertext, en sonda 4 B MIC. MLE komutu ciphertext\'in içindedir: komut alanı HİÇ BASILMAZ ve MIC PASS/FAIL de basılmaz.',
+  'protocol.thread.example.macSecurityMic.name':
+    'MAC Security Enabled — MIC yükün sonundan düşülür',
+  'protocol.thread.example.macSecurityMic.description':
+    'Türetildi. MAC Security Control 0x0D = Level 5 (ENC-MIC-32) + Key Identifier Mode 1 ⇒ 6 baytlık başlık ve 4 baytlık MIC. MIC çerçevenin SONUNDA, FCS\'ten ÖNCE durur; yük uzunluğundan düşülmezse şifreli yük 4 bayt uzun görünürdü. Level 4 ve üstü şifreli demektir, bu yüzden 6LoWPAN zincirine hiç girilmez.',
+  'protocol.thread.example.meshDeepHops.name': 'Mesh başlığı — Hops Left 0xF ⇒ Deep Hops Left',
+  'protocol.thread.example.meshDeepHops.description':
+    'Türetildi. Mesh dispatch 0xBF: V = 1 ve F = 1 (iki adres de 16 bit), Hops Left = 0xF. RFC 4944 §5.2\'ye göre 0xF hemen ardından 8 bitlik bir Deep Hops Left alanı getirir — koşullu ofset atlanırsa adresler bir bayt kayar, hata vermeden. Mesh\'ten sonra zincir IPHC + UDP + MLE Discovery Response ile sürüyor.',
+  'protocol.thread.example.nhcUdpCompressed.name':
+    'IPHC + NHC-UDP (4 bitlik portlar) — dispatch 0x7F',
+  'protocol.thread.example.nhcUdpCompressed.description':
+    'Türetildi. 0x7F baytı iki RFC\'nin çeliştiği yerdir: Thread profilinde IPHC (011 11111), RFC 4944 tam tablosunda ESC. NHC 0xF3 = checksum telde VAR + iki port da 4 bit (0xF0Bx). Dispatch profilini değiştirmek çıktıyı bayt düzeyinde değiştirir — kanalın ekrandaki kanıtı.',
+  'protocol.thread.example.fcsMismatch.name': 'Bozuk: FCS tutmuyor',
+  'protocol.thread.example.fcsMismatch.description':
+    'İlk örneğin son baytı bozuldu. FCS FAIL basılır ve çerçeve geçersiz sayılır; alanlar yine de çözülür, kısmi sonuç gösterilir.',
+
 } as const;
 
 /**

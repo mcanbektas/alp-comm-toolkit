@@ -124,7 +124,28 @@ export const wirelessIotDomain: CatalogDomain = {
           summary:
             'IPv6-native low-power mesh over 802.15.4 and 6LoWPAN, providing the routed transport layer beneath Matter in smart home and building networks.',
           layer: 'network',
-          status: 'planned',
+          // Faz 10 dalga 18d: 802.15.4 MAC (PAYLAŞILAN çekirdek) → Auxiliary
+          // Security Header → 6LoWPAN (Mesh/BC0/FRAG/IPHC/NHC-UDP) → IPv6 →
+          // UDP → MLE SINIFLANDIRMASI çözülüyor. `partial`ın BİRİNCİ sebebi
+          // MLE gövdesinin ŞİFRELİ olması: şifresiz gönderilen SADECE
+          // Discovery Request (16) ve Discovery Response (17) — ötekilerin
+          // komut tipi ÇERÇEVEDE OKUNAMAZ, dolayısıyla aşağıdaki "MLE Message
+          // Classifier" vaadi anahtar olmadan KARŞILANAMAZ. Öteki sebepler:
+          // fragment birleştirme ve mesh topolojisi çerçeveler ARASI durum,
+          // RSSI/LQI TAP (283) ve ZEP sözde başlıklarında (girdi sözleşmesi
+          // 195 = FCS'li çıplak MAC çerçevesi), LOWPAN_HC1 tanınır ama
+          // çözülmez, bağlam tabanlı sıkıştırma (SAC/DAC = 1) için tablo
+          // telde YOK.
+          //
+          // 🚨 OpenThread'in KENDİ YORUMLARI TERS (`mle.hpp:1498-1502`):
+          // `k154Security = 0` "not secured", `kNoSecurity = 255` "secured"
+          // yazar; ADLAR doğru, YORUMLAR takas edilmiş. Motor YORUMA DEĞİL
+          // KODA bakar (`mle.cpp:1593` / `:1616` / `:3575`).
+          //
+          // FCS `CRC16_KERMIT`tir ve katalogda ZATEN VAR — CRC katalogu bu
+          // dalgada BÜYÜMEDİ.
+          status: 'partial',
+          pluginId: 'thread',
           tabs: ['overview', 'decode', 'diagnostics', 'examples'],
           tools: [
             'Mesh Topology Graph (Leader / Router / REED / End Device / SED)',

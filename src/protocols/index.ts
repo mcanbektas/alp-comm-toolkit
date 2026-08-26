@@ -759,6 +759,17 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'esp-now', () =>
     import('./wireless/espnow/espNow').then((module) => module.espNowPlugin),
   );
+  // Thread — Faz 10 dalga 18d: 802.15.4 MAC KONTEYNERİNİN İKİNCİ tüketicisi
+  // (`[KARAR 18-1]`; birincisi `zigbee`). Girdi `zigbee` ile AYNI sözleşme:
+  // TAM 802.15.4 MAC çerçevesi + FCS (`LINKTYPE_IEEE802_15_4_WITHFCS` = 195);
+  // TAP (283) ve ZEP kapsüllemesi KAPSAM DIŞI. Zincir MAC → (Auxiliary
+  // Security Header) → 6LoWPAN → IPv6 → UDP → MLE SINIFLANDIRMASI.
+  // 🚨 MLE gövdesi ŞİFRELİDİR: şifresiz gönderilen SADECE Discovery Request
+  // (16) ve Discovery Response (17); ötekilerde komut tipi ÇERÇEVEDE
+  // OKUNAMAZ, "şifreli MLE" damgası basılır ve MIC PASS/FAIL BASILMAZ.
+  registerOnce(registry, 'thread', () =>
+    import('./wireless/thread/thread').then((module) => module.threadPlugin),
+  );
   // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
   // çerçeveleme (komut/yanıt ayrımı, URC, final result code sözel VE sayısal
   // — ATV0 numeric mode dalga 9 madde 7'de eklendi, tüm AT lehçelerine
