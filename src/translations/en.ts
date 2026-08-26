@@ -7997,4 +7997,104 @@ export const en: TranslationDictionary = {
   'protocol.wifi.example.hiddenSsid.description':
     'The Probe Response with its SSID element reduced to length 0. A zero-length SSID is the wildcard: the network name is simply not broadcast. The row says "wildcard / hidden SSID" instead of drawing an empty card. The FCS was recomputed.',
 
+  // --- ESP-NOW (Phase 10, wave 18c) ---
+  'protocol.espNow.documentation.summary':
+    "Espressif's ESP-NOW — a connectionless device-to-device protocol carried inside an 802.11 vendor-specific action frame. The first 24 bytes are the 802.11 MAC header and the last 4 are the 802.11 FCS, and both are SHARED with the `wifi` record. The body is Category (127) + Organization Identifier (Espressif, 18:FE:34) + Random Value (4 B, replay-attack prevention) + a vendor-specific element chain; each element splits into OUI/Type/Reserved/More data/Version sub-fields, and the v1.0 (4-bit Reserved) and v2.0 (3-bit Reserved + More data bit) bit layouts are interpreted SEPARATELY. A multi-element payload (v2.0, up to six elements) is reassembled WITHIN the frame. When the Protected bit is set, even the Category byte sits inside the encrypted body — the frame cannot be confirmed as ESP-NOW from the outside, and the body is not invented.",
+
+  'protocol.espNow.error.aborted': 'Decoding was cancelled.',
+  'protocol.espNow.error.emptyFrame': 'An empty frame cannot be decoded.',
+  'protocol.espNow.error.frameTooLong': 'The frame exceeds the given maximum length.',
+  'protocol.espNow.error.bodyTooShortForAction':
+    'The body is too short for Category + Organization Identifier + Random Values (8 B).',
+  'protocol.espNow.error.noEspNowElement':
+    "No valid ESP-NOW vendor element was found in the frame — the Organization Identifier or Type does not match Espressif's ESP-NOW scheme.",
+  'protocol.espNow.error.elementLengthExceedsFrame':
+    "An element's Length field is larger than the remaining bytes. The chain was not silently shifted; the remaining bytes were left raw.",
+
+  'protocol.espNow.warning.radiotapOutOfScope':
+    'The input was read as a BARE 802.11 MAC frame (FCS included). Radiotap, PPI, Prism and AVS headers and the pcap envelope are separate link types and are not decoded on this page — strip any such header from your capture first.',
+  'protocol.espNow.warning.encryptedPayload':
+    'The Protected bit is set: the body is CCMP-encrypted and even the Category byte sits INSIDE the encrypted content. The key (PMK/LMK) never leaves the browser and the body is not invented — it was left raw.',
+  'protocol.espNow.warning.notActionFrame':
+    "The subtype is not Action (13). ESP-NOW is only carried in Action frames; the body was not attempted as ESP-NOW.",
+  'protocol.espNow.warning.categoryNotVendorSpecific':
+    'The Category field is not 127 (Vendor Specific); this is not an ESP-NOW action body.',
+  'protocol.espNow.warning.actionOuiNotEspressif':
+    "The action envelope's Organization Identifier is not Espressif's OUI (18:FE:34).",
+  'protocol.espNow.warning.noEspNowElementFound':
+    "Not a single element in the chain has an OUI/Type matching Espressif's ESP-NOW scheme.",
+  'protocol.espNow.warning.elementChainTruncated':
+    "The element chain did not end cleanly: the last element's Length is larger than the remaining bytes. The remaining bytes were left raw, not invented.",
+  'protocol.espNow.warning.unrecognizedElement':
+    "ESP-NOW's vendor content consists solely of Element ID 221; a different ID was seen and left raw.",
+  'protocol.espNow.warning.foreignVendorElement':
+    "Element ID 221, but the Organization Identifier/Type is not Espressif's ESP-NOW — this may be another vendor's element sharing the same ID, and it was NOT counted as ESP-NOW payload.",
+  'protocol.espNow.warning.unrecognizedVersion':
+    'The version nibble is neither v1.0 (0) nor v2.0 (1). Since the Reserved / More data bit split depends on that nibble, it was NOT attempted for an undocumented value — the byte is shown raw.',
+  'protocol.espNow.warning.payloadOversizeV1':
+    "An element interpreted as v1.0 has a body exceeding ESP_NOW_MAX_DATA_LEN (250 B).",
+  'protocol.espNow.warning.payloadOversizeV2':
+    'The reassembled v2.0 payload exceeds ESP_NOW_MAX_DATA_LEN_V2 (1470 B).',
+  'protocol.espNow.warning.tooManyElements':
+    "The vendor element count exceeds six, v2.0's structural maximum.",
+
+  'protocol.espNow.field.notActionFrame': 'Not an Action frame; ESP-NOW body not attempted.',
+  'protocol.espNow.field.categoryInvalid': 'Category is not 127 (Vendor Specific).',
+  'protocol.espNow.field.ouiNotEspressif': "Organization Identifier is not Espressif's.",
+  'protocol.espNow.field.elementTooShort': 'Element too short for the OUI/Type/Version fields.',
+  'protocol.espNow.field.elementUnrecognized': 'Unexpected element ID in the ESP-NOW body.',
+  'protocol.espNow.field.elementForeignVendor':
+    "OUI/Type is not Espressif's ESP-NOW; not counted as ESP-NOW payload.",
+  'protocol.espNow.field.versionUnrecognized':
+    'Version nibble is undocumented; Reserved/More data bits were not decoded.',
+  'protocol.espNow.field.trailingBytes': 'Does not form a complete Element ID / Length / Data triple.',
+  'protocol.espNow.field.encryptedBody': 'Encrypted body; no key available.',
+
+  'protocol.espNow.option.espNowVersion': 'ESP-NOW version',
+  'protocol.espNow.option.espNowVersion.description':
+    "The vendor element's Reserved/More data/Version byte is split DIFFERENTLY in v1.0 (4-bit Reserved) and v2.0 (3-bit Reserved + More data bit). \"Automatic\" derives it from the version nibble (0 ⇒ v1.0, 1 ⇒ v2.0); forcing it IGNORES the nibble.",
+  'protocol.espNow.option.espNowVersion.auto': 'Automatic (derive from version nibble)',
+  'protocol.espNow.option.espNowVersion.v1': 'Force v1.0',
+  'protocol.espNow.option.espNowVersion.v2': 'Force v2.0',
+
+  'protocol.espNow.option.fcsPresent': 'FCS present',
+  'protocol.espNow.option.fcsPresent.description':
+    "Whether the FCS is present is a RADIOTAP FLAG and radiotap is out of scope — it cannot be read from the frame itself (the same rationale as `wifi`). \"Automatic\" follows the input contract and counts the last four bytes as the FCS; if they do not check out it raises a warning instead of silently ignoring it.",
+  'protocol.espNow.option.fcsPresent.auto': 'Automatic (assume present per contract)',
+  'protocol.espNow.option.fcsPresent.yes': 'Present',
+  'protocol.espNow.option.fcsPresent.no': 'Absent',
+
+  'protocol.espNow.option.payloadSchema': 'Payload schema',
+  'protocol.espNow.option.payloadSchema.description':
+    "The vendor content is known to be an application payload, but its type is NOT on the wire (the same `decodeOptions` lesson as the LonTalk selector). \"None\" shows only a byte count, \"ASCII\"/\"Hex\" decode the payload in that form, and \"Custom\" does not interpret it and says so EXPLICITLY.",
+  'protocol.espNow.option.payloadSchema.none': 'None (byte count only)',
+  'protocol.espNow.option.payloadSchema.ascii': 'ASCII text',
+  'protocol.espNow.option.payloadSchema.hex': 'Hex dump',
+  'protocol.espNow.option.payloadSchema.custom': 'Custom (not interpreted)',
+
+  'protocol.espNow.option.unknownVendorElementDisplay': 'Foreign vendor element display',
+  'protocol.espNow.option.unknownVendorElementDisplay.description':
+    "An element carrying ID 221 but an Organization Identifier other than Espressif's may appear in the frame (another vendor's vendor-specific element). \"Warn\" flags it and raises a warning; \"Raw\" shows the same bytes quietly.",
+  'protocol.espNow.option.unknownVendorElementDisplay.warn': 'Warn',
+  'protocol.espNow.option.unknownVendorElementDisplay.raw': 'Raw',
+
+  'protocol.espNow.example.broadcastSingleElement.name': 'Broadcast, single element — "ALP Comm 18c"',
+  'protocol.espNow.example.broadcastSingleElement.description':
+    'v1.0, 55 B. Addr1/Addr3 are broadcast, Addr2 is the source. A single vendor element (version nibble 0 ⇒ v1.0) with an ASCII body of "ALP Comm 18c". Arithmetic: 24 (MAC) + 8 (Category+OUI+Random) + 19 (element) + 4 (FCS) = 55. The FCS was recomputed.',
+  'protocol.espNow.example.unicastTwoElements.name': 'Unicast, two elements — the More data bit',
+  'protocol.espNow.example.unicastTwoElements.description':
+    'v2.0, 78 B. Two vendor elements back to back: the first has More data = 1 (more follows), the second has 0 (last element). Reassembly happens WITHIN the frame — this is not cross-frame state, both arrive in the same `parse` call. The FCS was recomputed.',
+  'protocol.espNow.example.protected.name': 'Protected (CCMP)',
+  'protocol.espNow.example.protected.description':
+    "60 B with the Protected bit set. `canParse` DELIBERATELY returns `false` because even the Category byte sits inside the encrypted body — the frame cannot be confirmed as ESP-NOW from the outside. The page still opens; the body stays raw with an \"encrypted\" stamp and is not invented.",
+  'protocol.espNow.example.foreignVendorOui.name': "Corrupt: element OUI is not Espressif's",
+  'protocol.espNow.example.foreignVendorOui.description':
+    "48 B. The action envelope's OUI is Espressif's, but the vendor element INSIDE it carries Organization Identifier 00:50:F2 (a different vendor). It is NOT counted as ESP-NOW payload and a warning is raised. The FCS was recomputed.",
+  'protocol.espNow.example.truncatedElementLength.name': "Corrupt: element Length exceeds the frame",
+  'protocol.espNow.example.truncatedElementLength.description':
+    "47 B. The vendor element's Length field (0xF0 = 240) is far larger than the bytes remaining. The chain is not silently shifted: the remaining bytes are left raw and a length mismatch is raised. The FCS was recomputed.",
+  'protocol.espNow.example.realCaptureHello.name': 'Real capture — "Hello" (espressif/esp-idf#2833)',
+  'protocol.espNow.example.realCaptureHello.description':
+    "A real ESP32 monitor-mode capture from Espressif's own issue tracker (IDFGH-503, 2018), with radiotap stripped. The vendor element body carries the ASCII text \"Hello\" plus 4 undocumented bytes — those four bytes were not invented, they are shown raw. The capture had NO FCS; it was recomputed and appended here.",
+
 };

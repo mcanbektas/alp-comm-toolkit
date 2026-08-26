@@ -751,6 +751,14 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'wifi', () =>
     import('./wireless/wifi/wifi').then((module) => module.wifiPlugin),
   );
+  // ESP-NOW — Faz 10 dalga 18c: `wifi`nin İKİNCİ tüketicisi (`[KARAR 18-4]`).
+  // Espressif'in vendor-specific action frame'i — ilk 24 bayt 802.11 MAC
+  // başlığı, son 4 bayt 802.11 FCS; `dot11Frame.ts`/`dot11Elements.ts`
+  // TÜKETİLİR, KOPYALANMAZ. `Protected = 1` ⇒ Category baytı bile şifreli
+  // gövdenin içinde, `canParse` bu yüzden korumalı çerçeveyi GEÇMEZ.
+  registerOnce(registry, 'esp-now', () =>
+    import('./wireless/espnow/espNow').then((module) => module.espNowPlugin),
+  );
   // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
   // çerçeveleme (komut/yanıt ayrımı, URC, final result code sözel VE sayısal
   // — ATV0 numeric mode dalga 9 madde 7'de eklendi, tüm AT lehçelerine

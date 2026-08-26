@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createProtocolRegistry } from '@/protocol-core/registry';
 
 import { registerBuiltInProtocols } from '../../index';
+import { espNowPlugin } from '../espnow/espNow';
 import { hasFcslessDot11Signature, hasStrictFcslessDot11Signature } from './dot11Frame';
 import { wifiParser, wifiPlugin } from './wifi';
 
@@ -17,6 +18,17 @@ import { wifiParser, wifiPlugin } from './wifi';
  *      kodda tekrar üretilmezse, registry büyüdükçe bir gün başka bir kaydın
  *      örneği bu imzayı geçebilir ve `wifi` otomatik algılamada onun
  *      çerçevesini SESSİZCE çalar.
+ *
+ *      🚨 **dalga 18c'den beri BİR İSTİSNA VAR ve KASITLI:** `esp-now`in
+ *      TÜM örnekleri W12'yi geçer. Bu, `mode-s`in `wifi`nin ACK örneğini
+ *      sahiplenmesi gibi RASTLANTISAL bir çakışma DEĞİL — `[KARAR 18-4]`
+ *      `esp-now`u `wifi`nin PAYLAŞILAN 802.11 MAC+FCS çekirdeğinin
+ *      TÜKETİCİSİ ilan ediyor, yani bir esp-now çerçevesi YAPISAL OLARAK
+ *      da geçerli bir 802.11 çerçevesidir (aynı FC/adres/FCS alanları).
+ *      Bu çakışma KALICIDIR ve gelecekte esp-now'a eklenecek her yeni
+ *      örnek için de TEKRARLANACAKTIR — `foreignHits`ten AYRI bir
+ *      `espNowHits` kovasında sayılır, `foreignHits` SIFIR'da kalmaya
+ *      devam eder.
  *   2. **Ters** — FCS'SİZ imza YAZILSAYDI kaç çerçeve çalardı? Ana brif
  *      ölçümü **216 / 899**; bu tur onu BİREBİR yeniden üretti. En dar
  *      FCS'siz varyant bile **110**. `[KARAR 18-2]`nin ikinci ayağı budur:
@@ -32,8 +44,10 @@ import { wifiParser, wifiPlugin } from './wifi';
 interface RegistrySweep {
   readonly registeredProtocols: number;
   readonly totalExamples: number;
-  /** `wifi` DIŞINDAKİ kayıtlardan W12'yi geçenler — boş olmalı. */
+  /** `wifi` ve `esp-now` DIŞINDAKİ kayıtlardan W12'yi geçenler — boş olmalı. */
   readonly foreignHits: string[];
+  /** `esp-now`dan W12'yi geçenler — `[KARAR 18-4]` gereği BEKLENEN, AYRI sayılır. */
+  readonly espNowHits: string[];
   /** Aynı kümede FCS'siz imzayı geçenler — kabul edilemez sayı. */
   readonly fcslessForeignHits: string[];
   /** FCS'siz imzanın EN DAR biçimi — yine kabul edilemez. */
@@ -47,6 +61,7 @@ async function sweepRegistry(): Promise<RegistrySweep> {
   registerBuiltInProtocols(registry);
 
   const foreignHits: string[] = [];
+  const espNowHits: string[] = [];
   const fcslessForeignHits: string[] = [];
   const strictFcslessForeignHits: string[] = [];
   const ownHits: string[] = [];
@@ -62,6 +77,12 @@ async function sweepRegistry(): Promise<RegistrySweep> {
       const accepted = wifiParser.canParse(example.bytes);
       if (id === 'wifi') {
         (accepted ? ownHits : ownMisses).push(label);
+      } else if (id === 'esp-now') {
+        // `[KARAR 18-4]`: esp-now `wifi`nin çekirdeğini TÜKETİR, bu yüzden
+        // W12'yi geçmesi BEKLENEN bir sonuçtur — `foreignHits`e KARIŞMAZ.
+        if (accepted) espNowHits.push(label);
+        if (hasFcslessDot11Signature(example.bytes)) fcslessForeignHits.push(label);
+        if (hasStrictFcslessDot11Signature(example.bytes)) strictFcslessForeignHits.push(label);
       } else {
         if (accepted) foreignHits.push(label);
         if (hasFcslessDot11Signature(example.bytes)) fcslessForeignHits.push(label);
@@ -74,6 +95,7 @@ async function sweepRegistry(): Promise<RegistrySweep> {
     registeredProtocols: ids.length,
     totalExamples,
     foreignHits,
+    espNowHits,
     fcslessForeignHits,
     strictFcslessForeignHits,
     ownHits,
@@ -96,11 +118,22 @@ describe('wifi canParse — üç yönlü bekçi', () => {
       ).toBeGreaterThan(900);
       expect(sweep.registeredProtocols).toBeGreaterThanOrEqual(145);
 
-      // ÖLÇÜM: ana brifin 899 örnek üzerinde bulduğu 0 çakışma, bugün de 0.
+      // ÖLÇÜM: ana brifin 899 örnek üzerinde bulduğu 0 çakışma, bugün de 0
+      // — `esp-now` HARİÇ (o AYRI bir kovada, aşağıda).
       expect(
         sweep.foreignHits.length,
         `yabancı çakışmalar (${String(sweep.foreignHits.length)}):\n${sweep.foreignHits.join('\n')}`,
       ).toBe(0);
+
+      // `[KARAR 18-4]` (dalga 18c): `esp-now`in TÜM örnekleri W12'yi geçer,
+      // çünkü bir esp-now çerçevesi YAPISAL OLARAK da geçerli bir 802.11
+      // çerçevesidir — bu bir yanlış pozitif DEĞİL, PAYLAŞILAN çekirdeğin
+      // doğal sonucu. Sayı esp-now'ın KENDİ plugin'inden TÜRETİLİR
+      // (sabitlenmez): plugin büyüdükçe bu test KIRILMAZ.
+      expect(
+        sweep.espNowHits.length,
+        `esp-now örneklerinin W12'yi geçme sayısı beklenenden farklı (${String(sweep.espNowHits.length)}):\n${sweep.espNowHits.join('\n')}`,
+      ).toBe(espNowPlugin.exampleFrames.length);
     },
     30000,
   );

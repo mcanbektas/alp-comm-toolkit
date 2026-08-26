@@ -7985,6 +7985,106 @@ export const tr = {
   'protocol.wifi.example.hiddenSsid.description':
     'Probe Response\'un SSID elemanı uzunluk 0\'a indirilmiş hâli. Sıfır uzunluklu SSID wildcard\'dır: ağ adı yayınlanmıyor demektir. Satır boş bir kart çizmek yerine "wildcard / gizli SSID" der. FCS yeniden hesaplandı.',
 
+  // --- ESP-NOW (Faz 10, dalga 18c) ---
+  'protocol.espNow.documentation.summary':
+    'Espressif\'in ESP-NOW\'ı — 802.11 vendor-specific action frame üstünde taşınan bağlantısız cihaz-cihaz protokolü. İlk 24 bayt 802.11 MAC başlığı, son 4 bayt 802.11 FCS\'idir ve `wifi` kaydıyla PAYLAŞILIR. Gövde Category (127) + Organization Identifier (Espressif, 18:FE:34) + Random Value (4 bayt, tekrar saldırısı önleme) + vendor-specific element zinciridir; her element OUI/Type/Reserved/More data/Version alt alanlarına ayrılır ve v1.0 (Reserved 4 bit) ile v2.0 (Reserved 3 bit + More data biti) bit yerleşimleri AYRI yorumlanır. Çok elementli yük (v2.0, azami altı element) ÇERÇEVE İÇİNDE birleştirilir. Protected biti açıksa Category baytı bile şifreli gövdenin içindedir — çerçeve dışarıdan ESP-NOW olarak doğrulanamaz, gövde UYDURULMAZ.',
+
+  'protocol.espNow.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.espNow.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.espNow.error.frameTooLong': 'Çerçeve verilen azami uzunluğu aşıyor.',
+  'protocol.espNow.error.bodyTooShortForAction':
+    'Gövde, Category + Organization Identifier + Random Values (8 bayt) için çok kısa.',
+  'protocol.espNow.error.noEspNowElement':
+    'Çerçevede geçerli bir ESP-NOW vendor element bulunamadı — Organization Identifier ya da Type Espressif\'in ESP-NOW şemasıyla eşleşmiyor.',
+  'protocol.espNow.error.elementLengthExceedsFrame':
+    'Bir element\'in Length alanı kalan bayttan büyük. Zincir sessizce kaydırılmadı; kalan baytlar ham bırakıldı.',
+
+  'protocol.espNow.warning.radiotapOutOfScope':
+    'Girdi ÇIPLAK 802.11 MAC çerçevesi olarak okundu (FCS dahil). Radiotap, PPI, Prism ve AVS başlıkları ile pcap zarfı ayrı link-type\'lardır ve bu sayfada çözülmez — yakalamanızda böyle bir başlık varsa önce soyun.',
+  'protocol.espNow.warning.encryptedPayload':
+    'Protected biti açık: gövde CCMP ile şifrelidir ve Category baytı bile şifreli içeriğin İÇİNDEDİR. Anahtar (PMK/LMK) tarayıcıdan çıkmaz, gövde UYDURULMAZ — ham bırakıldı.',
+  'protocol.espNow.warning.notActionFrame':
+    'Alt tip Action (13) değil. ESP-NOW yalnız Action çerçevelerinde taşınır; gövde ESP-NOW olarak denenmedi.',
+  'protocol.espNow.warning.categoryNotVendorSpecific':
+    'Category alanı 127 (Vendor Specific) değil; bu bir ESP-NOW action gövdesi değil.',
+  'protocol.espNow.warning.actionOuiNotEspressif':
+    'Action zarfının Organization Identifier\'ı Espressif\'in OUI\'si (18:FE:34) değil.',
+  'protocol.espNow.warning.noEspNowElementFound':
+    'Element zincirinde OUI/Type Espressif\'in ESP-NOW şemasıyla eşleşen tek bir element bile yok.',
+  'protocol.espNow.warning.elementChainTruncated':
+    'Element zinciri tam bitmedi: son element\'in Length\'i kalan bayttan büyük. Kalan baytlar ham bırakıldı, UYDURULMADI.',
+  'protocol.espNow.warning.unrecognizedElement':
+    'ESP-NOW\'un vendor içeriği yalnız Element ID 221\'den oluşur; başka bir ID görüldü ve ham bırakıldı.',
+  'protocol.espNow.warning.foreignVendorElement':
+    'Element ID 221 ama Organization Identifier/Type Espressif\'in ESP-NOW\'ı değil — başka bir üreticinin vendor element\'i olabilir, ESP-NOW yükü olarak SAYILMADI.',
+  'protocol.espNow.warning.unrecognizedVersion':
+    'Version nibble\'ı ne v1.0 (0) ne v2.0 (1). Reserved / More data bit ayrımı bu nibble\'a bağlı olduğu için belgelenmemiş bir değerde YAPILMADI — bayt ham gösterildi.',
+  'protocol.espNow.warning.payloadOversizeV1':
+    'v1.0 olarak yorumlanan bir element\'in gövdesi ESP_NOW_MAX_DATA_LEN (250 B) sınırını aşıyor.',
+  'protocol.espNow.warning.payloadOversizeV2':
+    'Birleştirilmiş v2.0 yükü ESP_NOW_MAX_DATA_LEN_V2 (1470 B) sınırını aşıyor.',
+  'protocol.espNow.warning.tooManyElements':
+    'Vendor element sayısı altıyı (v2.0\'ın yapısal azamisi) aşıyor.',
+
+  'protocol.espNow.field.notActionFrame': 'Action çerçevesi değil; ESP-NOW gövdesi denenmedi.',
+  'protocol.espNow.field.categoryInvalid': 'Category 127 (Vendor Specific) değil.',
+  'protocol.espNow.field.ouiNotEspressif': 'Organization Identifier Espressif değil.',
+  'protocol.espNow.field.elementTooShort': 'Element, OUI/Type/Version alanları için çok kısa.',
+  'protocol.espNow.field.elementUnrecognized': 'ESP-NOW gövdesinde beklenmeyen element ID\'si.',
+  'protocol.espNow.field.elementForeignVendor':
+    'OUI/Type Espressif\'in ESP-NOW\'ı değil; ESP-NOW yükü olarak sayılmadı.',
+  'protocol.espNow.field.versionUnrecognized':
+    'Version nibble\'ı belgelenmemiş; Reserved/More data bitleri çözülmedi.',
+  'protocol.espNow.field.trailingBytes': 'Tam bir Element ID / Length / Data üçlüsü oluşturmuyor.',
+  'protocol.espNow.field.encryptedBody': 'Şifreli gövde; anahtar yok.',
+
+  'protocol.espNow.option.espNowVersion': 'ESP-NOW sürümü',
+  'protocol.espNow.option.espNowVersion.description':
+    'Vendor element\'in Reserved/More data/Version baytı v1.0\'da (Reserved 4 bit) ve v2.0\'da (Reserved 3 bit + More data biti) FARKLI dilimlenir. "Otomatik" Version nibble\'ından türetir (0 ⇒ v1.0, 1 ⇒ v2.0); elle zorlamak nibble\'ı YOK SAYAR.',
+  'protocol.espNow.option.espNowVersion.auto': 'Otomatik (Version nibble\'ından türet)',
+  'protocol.espNow.option.espNowVersion.v1': 'v1.0 zorla',
+  'protocol.espNow.option.espNowVersion.v2': 'v2.0 zorla',
+
+  'protocol.espNow.option.fcsPresent': 'FCS var mı',
+  'protocol.espNow.option.fcsPresent.description':
+    'FCS\'in varlığı bir RADIOTAP BAYRAĞIDIR ve radiotap kapsam dışıdır — çerçevenin kendisinden okunamaz (`wifi` ile AYNI gerekçe). "Otomatik" girdi sözleşmesine uyar ve son dört baytı FCS sayar; tutmazsa uyarı basar, sessizce yok saymaz.',
+  'protocol.espNow.option.fcsPresent.auto': 'Otomatik (sözleşmeye göre var say)',
+  'protocol.espNow.option.fcsPresent.yes': 'Var',
+  'protocol.espNow.option.fcsPresent.no': 'Yok',
+
+  'protocol.espNow.option.payloadSchema': 'Yük şeması',
+  'protocol.espNow.option.payloadSchema.description':
+    'Vendor içeriğinin uygulama yükü olduğu bilinir ama tipi telde YOKTUR (`decodeOptions` kanalı, LonTalk selector dersinin aynısı). "Yok" yalnız bayt sayısını gösterir, "ASCII"/"Onaltılık" yükü o biçimde çözer, "Özel" yorumlamaz ve bunu AÇIKÇA söyler.',
+  'protocol.espNow.option.payloadSchema.none': 'Yok (yalnız bayt sayısı)',
+  'protocol.espNow.option.payloadSchema.ascii': 'ASCII metin',
+  'protocol.espNow.option.payloadSchema.hex': 'Onaltılık dökme',
+  'protocol.espNow.option.payloadSchema.custom': 'Özel (yorumlanmaz)',
+
+  'protocol.espNow.option.unknownVendorElementDisplay': 'Yabancı vendor element gösterimi',
+  'protocol.espNow.option.unknownVendorElementDisplay.description':
+    'Element ID 221 taşıyan ama Organization Identifier\'ı Espressif olmayan bir element çerçevede olabilir (başka bir üreticinin vendor-specific element\'i). "Uyar" satırı işaretler ve bir uyarı düşürür; "Ham" aynı baytları sessizce gösterir.',
+  'protocol.espNow.option.unknownVendorElementDisplay.warn': 'Uyar',
+  'protocol.espNow.option.unknownVendorElementDisplay.raw': 'Ham',
+
+  'protocol.espNow.example.broadcastSingleElement.name': 'Yayın, tek element — "ALP Comm 18c"',
+  'protocol.espNow.example.broadcastSingleElement.description':
+    'v1.0, 55 B. Addr1/Addr3 yayın, Addr2 kaynak. Tek vendor element (Version nibble 0 ⇒ v1.0), gövde ASCII "ALP Comm 18c". Aritmetik: 24 (MAC) + 8 (Category+OUI+Random) + 19 (element) + 4 (FCS) = 55. FCS yeniden hesaplandı.',
+  'protocol.espNow.example.unicastTwoElements.name': 'Tekli hedef, iki element — More data biti',
+  'protocol.espNow.example.unicastTwoElements.description':
+    'v2.0, 78 B. İki vendor element art arda: ilkinde More data = 1 (devamı var), ikincisinde 0 (son element). Çerçeve İÇİ birleştirme yapılır — çerçeveler arası durum DEĞİLDİR, ikisi de aynı `parse` çağrısında. FCS yeniden hesaplandı.',
+  'protocol.espNow.example.protected.name': 'Korumalı (CCMP)',
+  'protocol.espNow.example.protected.description':
+    '60 B, Protected biti açık. Category baytı bile şifreli gövdenin içinde olduğu için `canParse` BİLEREK `false` döner — çerçeve dışarıdan ESP-NOW olarak doğrulanamaz. Sayfa yine de açılır, gövde "şifreli" damgasıyla ham kalır, UYDURULMAZ.',
+  'protocol.espNow.example.foreignVendorOui.name': 'Bozuk: element OUI Espressif değil',
+  'protocol.espNow.example.foreignVendorOui.description':
+    '48 B. Action zarfının OUI\'si Espressif ama İÇERİDEKİ vendor element\'in Organization Identifier\'ı 00:50:F2 (başka bir üretici). ESP-NOW yükü olarak SAYILMAZ, uyarı basılır. FCS yeniden hesaplandı.',
+  'protocol.espNow.example.truncatedElementLength.name': 'Bozuk: element Length çerçeveyi aşıyor',
+  'protocol.espNow.example.truncatedElementLength.description':
+    '47 B. Vendor element\'in Length alanı (0xF0 = 240) kalan bayttan çok daha büyük. Zincir sessizce kaydırılmaz: kalan baytlar ham bırakılır, uzunluk uyuşmazlığı basılır. FCS yeniden hesaplandı.',
+  'protocol.espNow.example.realCaptureHello.name': 'Gerçek yakalama — "Hello" (espressif/esp-idf#2833)',
+  'protocol.espNow.example.realCaptureHello.description':
+    'Espressif\'in kendi issue tracker\'ından (IDFGH-503, 2018) gerçek bir ESP32 monitor-mode yakalaması; radiotap soyuldu. Vendor element gövdesi ASCII "Hello" + belgelenmemiş 4 bayt taşıyor — o dört bayt UYDURULMADI, ham görünür. Capture\'da FCS YOKTU; burada yeniden hesaplanıp eklendi.',
+
 } as const;
 
 /**

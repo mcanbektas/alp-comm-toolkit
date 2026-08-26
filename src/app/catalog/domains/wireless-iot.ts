@@ -255,9 +255,10 @@ export const wirelessIotDomain: CatalogDomain = {
           id: 'esp-now',
           name: 'ESP-NOW',
           summary:
-            'Espressif connectionless protocol carrying application payloads inside 802.11 vendor-specific action frames, used for low-latency ESP32 device-to-device links without an access point.',
+            'Espressif connectionless protocol carrying application payloads inside 802.11 vendor-specific action frames, used for low-latency ESP32 device-to-device links without an access point. DECODED: the full Action frame — 802.11 MAC header (shared with `wifi`), Category/Organization Identifier/Random Values, the vendor-specific element chain with v1.0 vs v2.0 Reserved/More data/Version bit layouts, multi-element payload reassembly, and CRC-32 FCS PASS/FAIL. NOT DECODED: CCMP-protected payloads (no key leaves the browser) — the frame is still shown with an "encrypted" stamp. OUT OF SCOPE: radiotap/PPI/Prism/AVS headers and the pcap envelope (separate libpcap link types, same contract as `wifi`), Peer & Device Graph and TX→App ACK Latency (cross-frame state).',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'esp-now',
           tabs: ['overview', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'Vendor Action Frame Decoder (Category 127, Espressif OUI 18:FE:34)',
