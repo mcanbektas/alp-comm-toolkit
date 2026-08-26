@@ -39,6 +39,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC24_Q',
   'CRC24_FLEXRAY_A',
   'CRC24_FLEXRAY_B',
+  'CRC24_MODE_S',
   'CRC8_DVB_S2',
   'CRC8_CRSF_COMMAND',
   'CRC32',
@@ -301,6 +302,63 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     width: 24,
     poly: 0x5d6dcbn,
     init: 0xabcdefn,
+    refin: false,
+    refout: false,
+    xorout: 0x000000n,
+  },
+  /**
+   * CRC-24/MODE-S (Faz 10 dalga 15h, Mode S / ADS-B 1090ES parity) — width 24,
+   * poly 0xFFF409, init 0x000000, refin/refout false, xorout 0x000000.
+   *
+   * ── KATALOGDAKİ DÖRT 24-BİT CRC'NİN HİÇBİRİ BU DEĞİL ──────────────────────
+   * "Aynı bit genişliği aynı CRC algoritması DEĞİLDİR" kuralının (dalga 13
+   * dersi 2; 14g `CRC4_ITU`, 14h PSI5, 15d `CRC8_DVB_S2`/`CRC8_CRSF_COMMAND`)
+   * YEDİNCİ vakası ve bu kez DÖRT sahte dost birden var:
+   *   `CRC24` (OpenPGP)     poly 0x864CFB · init 0xB704CE → HAYIR
+   *   `CRC24_Q`             poly 0x864CFB · init 0x000000 → HAYIR
+   *   `CRC24_FLEXRAY_A`     poly 0x5D6DCB · init 0xFEDCBA → HAYIR
+   *   `CRC24_FLEXRAY_B`     poly 0x5D6DCB · init 0xABCDEF → HAYIR
+   * Dördü de 24 bit, dördü de bu protokolde SESSİZCE yanlış sonuç verirdi.
+   *
+   * ── POLİNOM ÜÇ BAĞIMSIZ YOLDAN DOĞRULANDI ────────────────────────────────
+   *   1. **Belgeli üreteç** (ICAO Annex 10 Vol IV §3.1.2.6):
+   *      G(x) = x²⁴+x²³+x²²+x²¹+x²⁰+x¹⁹+x¹⁸+x¹⁷+x¹⁶+x¹⁵+x¹⁴+x¹³+x¹²+x¹⁰+x³+1
+   *      → üsler [23,22,21,20,19,18,17,16,15,14,13,12,10,3,0] → **0xFFF409**.
+   *      Bu türetme ana thread'çe bağımsızca yapıldı, bir tablodan kopyalanmadı.
+   *   2. **`antirez/dump1090`** — `modes_checksum_table` son sıfır olmayan
+   *      girdisi 0xFFF409. DİKKAT: dump1090 polinom DÖNGÜSÜ kullanmaz, 112
+   *      girişlik ÖNCEDEN HESAPLANMIŞ tablo kullanır; 0xFFF409 orada "polinom
+   *      sabiti" diye durmaz, son veri bitinin katkısı olarak durur. Aynı dosya
+   *      `return crc & 0x00FFFFFF;` → init 0, yansıtma yok, xorout yok.
+   *   3. **`junzis/pyModeS`** `src/pyModeS/_bits.py:70`:
+   *      `_CRC_POLY = 0xFFF409`, yorumu *"Per ICAO Annex 10 Vol IV §3.1.2.6.
+   *      Two equivalent representations: 25-bit with implicit top bit 0x1FFF409
+   *      … 24-bit with the top bit dropped 0x00FFF409"* — ve kendi tablosunu
+   *      dump1090'ınkiyle 256 girdi boyunca çaprazladığını da yazıyor.
+   *
+   * ── TOPOLOJİ: DIRECT (NON-AUGMENTED), ŞANSA BIRAKILMADI ──────────────────
+   * Mode S'te `init = 0` olduğu için augmented ve direct döngü AYNI sonucu
+   * verir — ama bu bir ŞANS, bir kanıt değil. Kaynak turunda önce augmented
+   * denendi ve kontrol amaçlı hesaplanan CRC-24/OPENPGP 0xEC4877 verdi
+   * (yayımlanmış check 0x21CF02 DEĞİL); direct döngüye geçilince OpenPGP
+   * 0x21CF02'ye oturdu. Yani buradaki `check` değeri, motorun YAYIMLANMIŞ bir
+   * fixture'la doğrulanmış topolojisinden geçmiştir (dalga 14h PSI5 dersi).
+   *
+   * ── `check` VE GERÇEK MESAJ ──────────────────────────────────────────────
+   * `check("123456789") = 0x054268` (`crcEngine.test.ts`). Ayrıca protokolün
+   * KENDİ telinden bağımsız bir fixture var: gerçek bir DF17 extended
+   * squitter'ın (`8D4840D6202CC371C32CE0576098`) ilk 11 baytı üzerinde
+   * hesaplanan CRC son 3 bayta (PI = 0x576098) BİREBİR eşit. Aynı mesajın
+   * 14 baytının TAMAMI üzerinde hesaplanınca kalan 0 çıkar — pyModeS'in
+   * *"a valid message has a remainder of 0"* notuyla örtüşür.
+   *
+   * `crcBits()` ÇAĞRILMAZ: Mode S mesajları 56 ve 112 bittir, ikisi de tam
+   * bayt (7 ve 14).
+   */
+  CRC24_MODE_S: {
+    width: 24,
+    poly: 0xfff409n,
+    init: 0x000000n,
     refin: false,
     refout: false,
     xorout: 0x000000n,

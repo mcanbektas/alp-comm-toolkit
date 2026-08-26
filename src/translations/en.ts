@@ -3282,6 +3282,153 @@ export const en: TranslationDictionary = {
   'protocol.mil1553.example.notWordAligned.description':
     'A 3-byte buffer — incomplete for a block made of 16-bit words.',
 
+  // --- Mode-S (Phase 10, wave 15h) ---
+  'protocol.modeS.documentation.summary':
+    'Mode S frame-level decoding: 56-bit (7-byte) short and 112-bit (14-byte) long messages, the DF field (DF24 is identified from the FIRST TWO BITS, not the first five), the ICAO address, the raw body and the trailing 24-bit parity. Input is a RAW HEX message; Beast binary, SBS/BaseStation logs and dump1090 JSON are container formats and stay out of scope. The MEANING of the parity field changes with DF: on DF11/17/18 the PI is a plain CRC and is verified PASS/FAIL, while on DF0/4/5/16/20/21 the AP is CRC ⊕ ICAO address and a passive listener cannot split the two — the address is recovered but CANNOT be verified. The CRC-24 catalogue entry is CRC24_MODE_S (poly 0xFFF409); none of the other four 24-bit entries match it. Single-bit CRC correction candidates are not generated in this release.',
+  'protocol.modeS.error.empty': 'Input is empty.',
+  'protocol.modeS.error.invalidLength':
+    'A Mode S message is either 7 bytes (56 bit) or 14 bytes (112 bit); there is no intermediate length.',
+  'protocol.modeS.error.aborted': 'Parsing was aborted.',
+  'protocol.modeS.error.frameTooLong': 'Frame exceeds the maximum allowed length.',
+  'protocol.modeS.error.parityMismatch':
+    'The PI field does not match the computed CRC-24 — the message is corrupt.',
+
+  'protocol.modeS.warning.parityIsAddressXorCrc':
+    'For this DF the trailing 24 bits are AP = CRC ⊕ ICAO address; a passive listener cannot split the address from the checksum, so the CRC COULD NOT BE VERIFIED.',
+  'protocol.modeS.warning.paritySemanticsUnknown':
+    'The meaning of this DF\'s parity field could not be established from public sources; the trailing 24 bits are printed RAW and nothing is verified.',
+  'protocol.modeS.warning.icaoRecoveredNotVerified':
+    'The ICAO address was RECOVERED as AP ⊕ CRC; because every message yields a “valid” address, this recovery cannot be verified.',
+  'protocol.modeS.warning.lengthDoesNotMatchDownlinkFormat':
+    'Input length contradicts the length the DF requires (DF < 16 → 7 bytes, DF ≥ 16 → 14 bytes); fields were printed with the generic layout and parity was not verified.',
+  'protocol.modeS.warning.downlinkFormatUnassigned':
+    'This DF value is unassigned in ICAO Annex 10; the frame was printed with the generic layout.',
+  'protocol.modeS.warning.downlinkFormat24TwoBitException':
+    'DF24 is an exception: the first TWO bits are “11”, so DF24 was selected and the numeric value of the first five bits was not used.',
+
+  'protocol.modeS.field.icaoRecoveredNotVerified': 'Recovered as AP ⊕ CRC, not verified.',
+  'protocol.modeS.field.parityNotVerifiable':
+    'AP = CRC ⊕ ICAO address — cannot be verified without knowing the address.',
+  'protocol.modeS.field.paritySemanticsUnknown':
+    'The meaning of the parity field for this DF could not be established — printed raw.',
+  'protocol.modeS.field.parityMismatch': 'Does not match the computed CRC-24.',
+  'protocol.modeS.field.bodySubfieldsNotDecoded':
+    'The DF-specific subfields of the body are not named by this frame-level decoder.',
+  'protocol.modeS.field.messageExtendedSquitterHandoff':
+    'The contents of the ME field are decoded on the ADS-B page — this decoder is frame level.',
+  'protocol.modeS.field.commBMessageNotDecoded':
+    'The MB field is a BDS reply; the BDS number is NOT in the frame and this decoder does not interpret the contents.',
+  'protocol.modeS.field.downlinkFormat24TwoBitException':
+    'DF24 is identified from the first TWO bits only; the remaining bits carry other information.',
+  'protocol.modeS.field.downlinkFormatUnassigned': 'This DF value is unassigned.',
+  'protocol.modeS.field.lengthDoesNotMatchDownlinkFormat':
+    'The length required by the DF contradicts the length of the input.',
+
+  'protocol.modeS.example.df17Identification.name': 'DF17 — extended squitter, aircraft identification',
+  'protocol.modeS.example.df17Identification.description':
+    'A real capture (mode-s.org): ICAO 4840D6, CA 5, the ME field carries Type Code 4. The CRC-24 computed over the first 11 bytes lands exactly on the trailing 3 bytes — CRC PASS.',
+  'protocol.modeS.example.df17AirbornePosition.name': 'DF17 — airborne position (even frame)',
+  'protocol.modeS.example.df17AirbornePosition.description':
+    'A real capture (mode-s.org): ICAO 40621D. The ME field stays raw; the CPR interpretation lives on the ADS-B page.',
+  'protocol.modeS.example.df17CrcFail.name': 'DF17 — CRC FAIL (one ME byte corrupted)',
+  'protocol.modeS.example.df17CrcFail.description':
+    'One ME byte of the first example was changed while the PI field was left alone. The CRC-24 no longer matches; no correction candidate is generated.',
+  'protocol.modeS.example.df11AllCall.name': 'DF11 — All-Call reply',
+  'protocol.modeS.example.df11AllCall.description':
+    'A 56-bit short frame. DF11 belongs to the address-explicit class: the ICAO address sits openly in bits 9:32 and the PI is verified directly.',
+  'protocol.modeS.example.df4Altitude.name': 'DF4 — surveillance, altitude reply (AP class)',
+  'protocol.modeS.example.df4Altitude.description':
+    'Built with the AP = CRC ⊕ ICAO rule onto address 0x400940. The address is recovered but CANNOT be verified — no CRC PASS/FAIL indicator is printed for this frame at all.',
+  'protocol.modeS.example.df5Identity.name': 'DF5 — surveillance, identity reply (AP class)',
+  'protocol.modeS.example.df5Identity.description':
+    'The sibling of DF4: the 13-bit field carries a squawk instead of an altitude. The body stays raw in this frame-level decoder.',
+  'protocol.modeS.example.df20CommB.name': 'DF20 — Comm-B, altitude reply',
+  'protocol.modeS.example.df20CommB.description':
+    'A real capture. The MB field LOOKS exactly like a DF17 ME field but it is a BDS reply, not a Type Code — the ADS-B decoder refuses this frame.',
+  'protocol.modeS.example.df24CommD.name': 'DF24 — Comm-D (the two-bit exception)',
+  'protocol.modeS.example.df24CommD.description':
+    'The first five bits of the first byte read 28, but the first TWO bits are “11”, so this is DF24. A naive five-bit read would mistake this frame for an undefined DF.',
+  'protocol.modeS.example.lengthMismatch.name': 'Length contradicts the DF',
+  'protocol.modeS.example.lengthMismatch.description':
+    'DF17 is a long-frame DF but the input is 7 bytes. The frame is not rejected; it is printed with the generic layout and parity is not verified.',
+  'protocol.modeS.example.invalidLength.name': 'Invalid length (10 bytes)',
+  'protocol.modeS.example.invalidLength.description':
+    'Mode S has no intermediate length: it is either 7 or 14 bytes. A 10-byte input is a truncated frame.',
+
+  // --- ADS-B 1090ES (Phase 10, wave 15h) ---
+  'protocol.adsb.documentation.summary':
+    'ADS-B 1090ES: the interpretation of the 56-bit ME field of a Mode S DF17/DF18 extended squitter. Frame parsing comes from the Mode-S engine and is NOT copied. Decoded type codes: 1–4 (aircraft identification and category), 9–18 and 20–22 (airborne position), 19 (airborne velocity). TC 5–8 (surface position), 23–27, 28, 29 and 31 are RECOGNISED but their payload stays raw. The 978 MHz UAT link is a separate wire format and is OUT OF SCOPE. CPR latitude/longitude are printed RAW: a global position needs one Even and one Odd frame and cannot be produced from a single frame. The aircraft table and message age are cross-frame work and do not belong to this decoder.',
+  'protocol.adsb.error.empty': 'Input is empty.',
+  'protocol.adsb.error.invalidLength':
+    'An ADS-B 1090ES message is a 14-byte (112-bit) long Mode S frame.',
+  'protocol.adsb.error.aborted': 'Parsing was aborted.',
+  'protocol.adsb.error.frameTooLong': 'Frame exceeds the maximum allowed length.',
+  'protocol.adsb.error.notExtendedSquitter':
+    'ADS-B 1090ES is carried only in a DF17/DF18 extended squitter; this frame has a different DF. The MB field of a DF20 Comm-B reply LOOKS like an ME field but carries no type code — decode that frame on the Mode-S page.',
+  'protocol.adsb.error.parityMismatch':
+    'The PI field does not match the computed CRC-24 — the ME field was decoded over corrupt bytes.',
+
+  'protocol.adsb.warning.typeCodeNotDecoded':
+    'This type code is recognised but its payload is not decoded in this release; the ME field was left raw.',
+  'protocol.adsb.warning.cprNotConvertedToGlobalPosition':
+    'CPR latitude/longitude are printed RAW: a global position needs one Even (F=0) and one Odd (F=1) frame and cannot be produced from a single frame.',
+  'protocol.adsb.warning.uatOutOfScope':
+    'This decoder covers 1090ES; the 978 MHz UAT link is a separate wire format (different framing, different FEC) and is out of scope.',
+  'protocol.adsb.warning.messageDecodedOnFailedCrc':
+    'The CRC-24 did not match; the ME field was still decoded, but over CORRUPT bytes. No correction candidate is generated.',
+
+  'protocol.adsb.field.typeCodeNotDecoded': 'The payload of this type code is not decoded.',
+  'protocol.adsb.field.categoryRequiresRevision':
+    'The textual meaning of the category depends on the ICAO/DO-260 revision — only the number is printed.',
+  'protocol.adsb.field.nicSupplementRequiresVersion':
+    'The meaning of this bit changes with the ADS-B version (v0 Single Antenna Flag, v1/v2 NIC Supplement-B) and the version is not in this frame.',
+  'protocol.adsb.field.altitudeGillhamNotDecoded':
+    'Q bit is 0 — the 100 ft Gillham (Gray) encoding is not decoded in this release; the 12 bits were left raw.',
+  'protocol.adsb.field.altitudeGnssNotDecoded':
+    'The scale of the GNSS height depends on the DO-260 revision — the 12 bits were left raw.',
+  'protocol.adsb.field.altitudeUnavailable': 'The altitude code is zero — no altitude information.',
+  'protocol.adsb.field.cprRawNotDegrees':
+    'A raw CPR value is NOT degrees; it is an encoded integer.',
+  'protocol.adsb.field.callsignInvalidCharacter':
+    'The callsign contains a character that is not in the ICAO 6-bit alphabet.',
+  'protocol.adsb.field.valueUnavailable': 'The encoded value means “not available”.',
+  'protocol.adsb.field.velocitySubtypeUnknown':
+    'This velocity subtype is not defined — the component fields were not decoded.',
+
+  'protocol.adsb.example.identificationKlm.name': 'Aircraft identification — KLM1023 (TC 4)',
+  'protocol.adsb.example.identificationKlm.description':
+    'A real capture (mode-s.org): ICAO 4840D6, type code 4; the callsign is decoded from 8 × 6-bit ICAO alphabet slots.',
+  'protocol.adsb.example.identificationEzy.name': 'Aircraft identification — EZY85MH (TC 4)',
+  'protocol.adsb.example.identificationEzy.description':
+    'A real capture from a second independent source (the pyModeS documentation): ICAO 406B90.',
+  'protocol.adsb.example.positionEven.name': 'Airborne position — Even frame (TC 11)',
+  'protocol.adsb.example.positionEven.description':
+    'A real capture (mode-s.org). Barometric altitude is decoded through the Q=1 branch (38,000 ft); the CPR latitude/longitude stay raw.',
+  'protocol.adsb.example.positionOdd.name': 'Airborne position — Odd frame (TC 11)',
+  'protocol.adsb.example.positionOdd.description':
+    'The Odd (F=1) counterpart of the previous frame. TOGETHER they would give a global position — but that is a cross-frame computation and does not belong to the parser.',
+  'protocol.adsb.example.velocityGroundSpeed.name': 'Airborne velocity — ground speed (TC 19, subtype 1)',
+  'protocol.adsb.example.velocityGroundSpeed.description':
+    'A real capture (mode-s.org): ground speed 159 kt, track 182.88°, vertical rate −832 ft/min. All three are derived from the SAME frame.',
+  'protocol.adsb.example.velocityAirspeed.name': 'Airborne velocity — airspeed (TC 19, subtype 3)',
+  'protocol.adsb.example.velocityAirspeed.description':
+    'A real capture (mode-s.org): heading 243.98°, TAS 375 kt, vertical rate −2304 ft/min from a barometric source.',
+  'protocol.adsb.example.df18Identification.name': 'DF18 — non-transponder broadcaster',
+  'protocol.adsb.example.df18Identification.description':
+    'The SAME ME payload as DF17, but with DF18 (CF field). The ADS-B decoder accepts both; the parity is still a plain CRC.',
+  'protocol.adsb.example.surfacePosition.name': 'Surface position (TC 7) — recognised, not decoded',
+  'protocol.adsb.example.surfacePosition.description':
+    'The type code is named but the payload is left RAW: surface position is out of scope in this release.',
+  'protocol.adsb.example.operationStatus.name': 'Aircraft operation status (TC 31) — recognised, not decoded',
+  'protocol.adsb.example.operationStatus.description':
+    'Field allocation depends on the ICAO/DO-260 revision database; the payload is not guessed.',
+  'protocol.adsb.example.crcFail.name': 'CRC FAIL — the ME field is still decoded',
+  'protocol.adsb.example.crcFail.description':
+    'One ME byte of the first example was corrupted. The partial decode is shown, but the frame is invalid and no correction candidate is generated.',
+  'protocol.adsb.example.notExtendedSquitter.name': 'Not ADS-B — a DF20 Comm-B reply',
+  'protocol.adsb.example.notExtendedSquitter.description':
+    'A real DF20 capture. Its MB field looks EXACTLY like a DF17 ME field and its first byte is 0x20 — mistaking it for a type code would decode it silently wrong. The frame is rejected.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (single parser, three plugins) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'Not enough bytes for the 2-byte EtherType/Length field after the MAC pair.',

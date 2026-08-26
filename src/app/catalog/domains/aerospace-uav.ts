@@ -503,9 +503,16 @@ export const aerospaceUavDomain: CatalogDomain = {
           id: 'ads-b',
           name: 'ADS-B',
           summary:
-            'Automatic Dependent Surveillance–Broadcast, in which aircraft broadcast their own GNSS-derived position, velocity and identity over 1090ES or 978 MHz UAT to ground stations and other traffic.',
+            'Automatic Dependent Surveillance–Broadcast, in which aircraft broadcast their own GNSS-derived position, velocity and identity over 1090ES or 978 MHz UAT to ground stations and other traffic. This decoder covers 1090ES only — the DF17/DF18 extended squitter carried on Mode S — while the 978 MHz UAT link is a separate wire format with its own framing and forward error correction and is out of scope. CPR latitude and longitude are reported raw, because a global position needs an even/odd frame pair and cannot be produced from a single frame.',
           layer: 'application',
-          status: 'planned',
+          // 1090ES-only ve bu bir tercih DEĞİL: UAT ayrı bir tel biçimidir
+          // (farklı çerçeve, farklı FEC) ve ayrı bir kaynak turu ister. Emsal:
+          // `cc-link-ie` 0x890F-only, `iec-61850` GOOSE-only,
+          // `foundation-fieldbus` HSE-only. Ayrıca uçak tablosu, mesaj yaşı ve
+          // CPR global pozisyonu ÇERÇEVELER ARASI iştir ve parser'a girmez —
+          // gerekçe adsb.ts dosya başında (Faz 10 dalga 15h).
+          status: 'partial',
+          pluginId: 'ads-b',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Aircraft Table',
@@ -528,9 +535,17 @@ export const aerospaceUavDomain: CatalogDomain = {
           id: 'mode-s',
           name: 'Mode-S',
           summary:
-            'Secondary surveillance transponder family with short and extended downlink formats, 24-bit ICAO addressing and 24-bit parity, whose DF17 extended squitter is what ADS-B 1090ES rides on.',
+            'Secondary surveillance transponder family with short and extended downlink formats, 24-bit ICAO addressing and 24-bit parity, whose DF17 extended squitter is what ADS-B 1090ES rides on. Input is a raw 7- or 14-byte hex message: Beast binary, SBS/BaseStation logs and dump1090 JSON are container formats that wrap this wire and stay out of scope. The trailing 24 bits mean different things per downlink format, so a single CRC PASS indicator would be wrong; single-bit CRC correction candidates are deliberately left for a later release.',
           layer: 'data-link',
-          status: 'planned',
+          // Çerçeve düzeyi TAM çözülüyor ve CRC gerçekten doğrulanıyor —
+          // doğrulanabildiği yerde. DF11/17/18'de PI düz CRC'dir; DF0/4/5/16/
+          // 20/21'de AP = CRC ⊕ ICAO adresidir ve pasif dinleyici ikisini
+          // AYIRAMAZ, bu yüzden adres çıkarılır ama doğrulanmaz. DF24 ilk İKİ
+          // bitten tanınır, ilk beşten değil. Yeni katalog CRC'si
+          // `CRC24_MODE_S` (poly 0xFFF409) — katalogdaki dört 24-bit girdinin
+          // hiçbiri değil (Faz 10 dalga 15h, bkz. modeS.ts dosya başı).
+          status: 'ready',
+          pluginId: 'mode-s',
           tabs: ['overview', 'live', 'decode', 'data', 'diagnostics', 'examples'],
           tools: [
             'DF Decoder',

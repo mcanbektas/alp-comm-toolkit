@@ -3286,6 +3286,154 @@ export const tr = {
   'protocol.mil1553.example.notWordAligned.description':
     '3 baytlık bir arabellek — 16 bitlik sözcüklerden oluşan bir bloğa göre eksik.',
 
+  // --- Mode-S (Faz 10, dalga 15h) ---
+  'protocol.modeS.documentation.summary':
+    'Mode S çerçeve düzeyi çözümü: 56 bit (7 bayt) kısa ve 112 bit (14 bayt) uzun mesajlar, DF alanı (DF24 İLK İKİ BİTTEN tanınır, ilk beşten değil), ICAO adresi, ham gövde ve son 24 bitlik parite. Girdi HAM HEX mesajdır; Beast binary, SBS/BaseStation log ve dump1090 JSON birer konteyner biçimidir ve kapsam dışıdır. Parite alanının ANLAMI DF\'e göre değişir: DF11/17/18\'de PI düz CRC\'dir ve PASS/FAIL doğrulanır, DF0/4/5/16/20/21\'de AP = CRC ⊕ ICAO adresidir ve pasif dinleyici ikisini ayıramaz — adres çıkarılır ama DOĞRULANAMAZ. CRC-24 katalog girdisi CRC24_MODE_S\'tir (poly 0xFFF409); katalogdaki diğer dört 24-bit CRC\'nin hiçbiri değildir. Tek-bit CRC düzeltme adayları bu sürümde üretilmez.',
+  'protocol.modeS.error.empty': 'Girdi boş.',
+  'protocol.modeS.error.invalidLength':
+    'Mode S mesajı 7 bayt (56 bit) ya da 14 bayt (112 bit) olmalıdır; ara uzunluk yoktur.',
+  'protocol.modeS.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.modeS.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.modeS.error.parityMismatch':
+    'PI alanı hesaplanan CRC-24 ile eşleşmiyor — mesaj bozuk.',
+
+  'protocol.modeS.warning.parityIsAddressXorCrc':
+    'Bu DF\'te son 24 bit AP = CRC ⊕ ICAO adresidir; pasif dinleyici adresi checksum\'dan ayıramaz, bu yüzden CRC DOĞRULANAMADI.',
+  'protocol.modeS.warning.paritySemanticsUnknown':
+    'Bu DF\'in parite alanının anlamı kamuya açık kaynaklarla belirlenemedi; son 24 bit HAM basıldı ve hiçbir şey doğrulanmadı.',
+  'protocol.modeS.warning.icaoRecoveredNotVerified':
+    'ICAO adresi AP ⊕ CRC ile ÇIKARILDI; her mesaj bir “geçerli” adres ürettiği için bu çıkarım doğrulanamaz.',
+  'protocol.modeS.warning.lengthDoesNotMatchDownlinkFormat':
+    'Girdi uzunluğu DF\'in gerektirdiği uzunlukla çelişiyor (DF < 16 → 7 bayt, DF ≥ 16 → 14 bayt); alanlar genel yerleşimle basıldı ve parite doğrulanmadı.',
+  'protocol.modeS.warning.downlinkFormatUnassigned':
+    'Bu DF değeri ICAO Annex 10\'da atanmamıştır; çerçeve genel yerleşimle basıldı.',
+  'protocol.modeS.warning.downlinkFormat24TwoBitException':
+    'DF24 bir istisnadır: ilk İKİ bit “11” olduğu için DF24 seçildi, ilk beş bitin sayısal değeri kullanılmadı.',
+
+  'protocol.modeS.field.icaoRecoveredNotVerified':
+    'AP ⊕ CRC ile çıkarıldı, doğrulanmadı.',
+  'protocol.modeS.field.parityNotVerifiable':
+    'AP = CRC ⊕ ICAO adresi — adres bilinmeden doğrulanamaz.',
+  'protocol.modeS.field.paritySemanticsUnknown':
+    'Bu DF\'te parite alanının anlamı belirlenemedi — ham basıldı.',
+  'protocol.modeS.field.parityMismatch': 'Hesaplanan CRC-24 ile eşleşmiyor.',
+  'protocol.modeS.field.bodySubfieldsNotDecoded':
+    'Gövdenin DF\'e özgü alt alanları bu çerçeve düzeyi çözücüde adlandırılmaz.',
+  'protocol.modeS.field.messageExtendedSquitterHandoff':
+    'ME alanının içeriği ADS-B sayfasında çözülür — bu çözücü çerçeve düzeyindedir.',
+  'protocol.modeS.field.commBMessageNotDecoded':
+    'MB alanı bir BDS yanıtıdır; BDS numarası çerçevede YOKTUR ve bu çözücü içeriği yorumlamaz.',
+  'protocol.modeS.field.downlinkFormat24TwoBitException':
+    'DF24 yalnız ilk İKİ bitten tanınır; kalan bitler başka bilgi taşır.',
+  'protocol.modeS.field.downlinkFormatUnassigned': 'Bu DF değeri atanmamıştır.',
+  'protocol.modeS.field.lengthDoesNotMatchDownlinkFormat':
+    'DF\'in gerektirdiği uzunluk girdinin uzunluğuyla çelişiyor.',
+
+  'protocol.modeS.example.df17Identification.name': 'DF17 — extended squitter, uçak kimliği',
+  'protocol.modeS.example.df17Identification.description':
+    'Gerçek bir yakalama (mode-s.org): ICAO 4840D6, CA 5, ME alanı Type Code 4 taşıyor. İlk 11 bayt üzerinde hesaplanan CRC-24 son 3 bayta birebir oturur — CRC PASS.',
+  'protocol.modeS.example.df17AirbornePosition.name': 'DF17 — havada konum (even çerçeve)',
+  'protocol.modeS.example.df17AirbornePosition.description':
+    'Gerçek bir yakalama (mode-s.org): ICAO 40621D. ME alanı ham kalır; CPR yorumu ADS-B sayfasındadır.',
+  'protocol.modeS.example.df17CrcFail.name': 'DF17 — CRC FAIL (bir ME baytı bozuldu)',
+  'protocol.modeS.example.df17CrcFail.description':
+    'İlk örneğin bir ME baytı değiştirildi, PI alanına dokunulmadı. CRC-24 artık tutmuyor; düzeltme adayı ÜRETİLMEZ.',
+  'protocol.modeS.example.df11AllCall.name': 'DF11 — All-Call yanıtı',
+  'protocol.modeS.example.df11AllCall.description':
+    '56 bitlik kısa çerçeve. DF11 adres-açık sınıfındadır: ICAO adresi bit 9:32\'de açık durur ve PI doğrudan doğrulanır.',
+  'protocol.modeS.example.df4Altitude.name': 'DF4 — gözetim, altitude yanıtı (AP sınıfı)',
+  'protocol.modeS.example.df4Altitude.description':
+    'AP = CRC ⊕ ICAO kuralıyla 0x400940 adresine oturtuldu. Adres çıkarılır ama DOĞRULANAMAZ — CRC PASS/FAIL göstergesi bu çerçevede HİÇ basılmaz.',
+  'protocol.modeS.example.df5Identity.name': 'DF5 — gözetim, identity yanıtı (AP sınıfı)',
+  'protocol.modeS.example.df5Identity.description':
+    'DF4\'ün kardeşi: 13 bitlik alan altitude yerine squawk taşır. Gövde bu çerçeve düzeyi çözücüde ham kalır.',
+  'protocol.modeS.example.df20CommB.name': 'DF20 — Comm-B, altitude yanıtı',
+  'protocol.modeS.example.df20CommB.description':
+    'Gerçek bir yakalama. MB alanı DF17\'nin ME alanıyla AYNI GÖRÜNÜR ama bir BDS yanıtıdır, Type Code değildir — ADS-B çözücüsü bu çerçeveyi kabul etmez.',
+  'protocol.modeS.example.df24CommD.name': 'DF24 — Comm-D (iki-bit istisnası)',
+  'protocol.modeS.example.df24CommD.description':
+    'İlk baytın ilk beş biti 28 okur, ama ilk İKİ bit “11” olduğu için DF24\'tür. Naif bir beş-bit okuması bu çerçeveyi tanımsız DF sanardı.',
+  'protocol.modeS.example.lengthMismatch.name': 'Uzunluk ile DF çelişiyor',
+  'protocol.modeS.example.lengthMismatch.description':
+    'DF17 uzun çerçeve DF\'idir ama girdi 7 bayt. Çerçeve reddedilmez; genel yerleşimle basılır ve parite doğrulanmaz.',
+  'protocol.modeS.example.invalidLength.name': 'Geçersiz uzunluk (10 bayt)',
+  'protocol.modeS.example.invalidLength.description':
+    'Mode S\'te ara uzunluk yoktur: 7 ya da 14 bayt. 10 baytlık girdi eksik çerçevedir.',
+
+  // --- ADS-B 1090ES (Faz 10, dalga 15h) ---
+  'protocol.adsb.documentation.summary':
+    'ADS-B 1090ES: Mode S DF17/DF18 extended squitter\'ının 56 bitlik ME alanının yorumu. Çerçeve ayrıştırma Mode-S motorundan gelir, KOPYALANMAZ. Çözülen Type Code\'lar: 1–4 (uçak kimliği ve kategorisi), 9–18 ve 20–22 (havada konum), 19 (havada hız). TC 5–8 (yüzey konumu), 23–27, 28, 29 ve 31 TANINIR ama payload ham kalır. 978 MHz UAT ayrı bir tel biçimidir ve KAPSAM DIŞIDIR. CPR enlem/boylamı HAM basılır: global konum bir Even + bir Odd çerçevesi ister ve tek çerçeveden üretilemez. Uçak tablosu ve mesaj yaşı çerçeveler arası iştir, bu çözücüye girmez.',
+  'protocol.adsb.error.empty': 'Girdi boş.',
+  'protocol.adsb.error.invalidLength':
+    'ADS-B 1090ES mesajı 14 bayt (112 bit) uzun Mode S çerçevesidir.',
+  'protocol.adsb.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.adsb.error.frameTooLong': 'Çerçeve izin verilen azami uzunluğu aşıyor.',
+  'protocol.adsb.error.notExtendedSquitter':
+    'ADS-B 1090ES yalnız DF17/DF18 extended squitter\'ında taşınır; bu çerçevenin DF\'i farklı. Bir DF20 Comm-B yanıtının MB alanı ME gibi GÖRÜNÜR ama Type Code taşımaz — çerçeve Mode-S sayfasında çözülür.',
+  'protocol.adsb.error.parityMismatch':
+    'PI alanı hesaplanan CRC-24 ile eşleşmiyor — ME alanı bozuk baytlar üzerinde çözüldü.',
+
+  'protocol.adsb.warning.typeCodeNotDecoded':
+    'Bu Type Code tanınıyor ama payload\'ı bu sürümde çözülmüyor; ME alanı HAM bırakıldı.',
+  'protocol.adsb.warning.cprNotConvertedToGlobalPosition':
+    'CPR enlem/boylamı HAM basıldı: global konum bir Even (F=0) ve bir Odd (F=1) çerçevesi ister, tek çerçeveden üretilemez.',
+  'protocol.adsb.warning.uatOutOfScope':
+    'Bu çözücü 1090ES kapsamındadır; 978 MHz UAT ayrı bir tel biçimidir (farklı çerçeveleme, farklı FEC) ve kapsam dışıdır.',
+  'protocol.adsb.warning.messageDecodedOnFailedCrc':
+    'CRC-24 tutmadı; ME alanı yine de çözüldü ama BOZUK baytlar üzerinde. Düzeltme adayı üretilmez.',
+
+  'protocol.adsb.field.typeCodeNotDecoded': 'Bu Type Code\'un payload\'ı çözülmüyor.',
+  'protocol.adsb.field.categoryRequiresRevision':
+    'Kategorinin metin karşılığı ICAO/DO-260 revizyonuna bağlıdır — yalnız sayı basılır.',
+  'protocol.adsb.field.nicSupplementRequiresVersion':
+    'Bitin anlamı ADS-B sürümüne göre değişir (v0 Single Antenna Flag, v1/v2 NIC Supplement-B) ve sürüm bu çerçevede yoktur.',
+  'protocol.adsb.field.altitudeGillhamNotDecoded':
+    'Q biti 0 — 100 ft\'lik Gillham (Gray) kodlaması bu sürümde çözülmüyor, 12 bit ham bırakıldı.',
+  'protocol.adsb.field.altitudeGnssNotDecoded':
+    'GNSS yüksekliğinin ölçeği DO-260 revizyonuna bağlıdır — 12 bit ham bırakıldı.',
+  'protocol.adsb.field.altitudeUnavailable': 'Altitude kodu sıfır — irtifa bilgisi yok.',
+  'protocol.adsb.field.cprRawNotDegrees':
+    'Ham CPR değeri derece DEĞİLDİR, kodlanmış bir tam sayıdır.',
+  'protocol.adsb.field.callsignInvalidCharacter':
+    'Callsign ICAO 6-bit alfabesinde olmayan bir karakter içeriyor.',
+  'protocol.adsb.field.valueUnavailable': 'Kodlanan değer “mevcut değil” anlamına geliyor.',
+  'protocol.adsb.field.velocitySubtypeUnknown':
+    'Bu hız alt tipi tanımlı değil — bileşen alanları çözülmedi.',
+
+  'protocol.adsb.example.identificationKlm.name': 'Uçak kimliği — KLM1023 (TC 4)',
+  'protocol.adsb.example.identificationKlm.description':
+    'Gerçek bir yakalama (mode-s.org): ICAO 4840D6, Type Code 4, callsign 8 × 6 bitlik ICAO alfabesinden çözülür.',
+  'protocol.adsb.example.identificationEzy.name': 'Uçak kimliği — EZY85MH (TC 4)',
+  'protocol.adsb.example.identificationEzy.description':
+    'İkinci bağımsız kaynaktan (pyModeS belgeleri) gerçek bir yakalama: ICAO 406B90.',
+  'protocol.adsb.example.positionEven.name': 'Havada konum — Even çerçeve (TC 11)',
+  'protocol.adsb.example.positionEven.description':
+    'Gerçek bir yakalama (mode-s.org). Barometrik irtifa Q=1 dalıyla çözülür (38 000 ft); CPR enlem/boylamı HAM kalır.',
+  'protocol.adsb.example.positionOdd.name': 'Havada konum — Odd çerçeve (TC 11)',
+  'protocol.adsb.example.positionOdd.description':
+    'Bir öncekinin Odd (F=1) eşi. İkisi BİRLİKTE global konum verirdi — ama bu çerçeveler arası bir hesaptır ve parser\'a girmez.',
+  'protocol.adsb.example.velocityGroundSpeed.name': 'Havada hız — yer hızı (TC 19, alt tip 1)',
+  'protocol.adsb.example.velocityGroundSpeed.description':
+    'Gerçek bir yakalama (mode-s.org): yer hızı 159 kt, iz açısı 182,88°, dikey hız −832 ft/dk. Üçü de AYNI çerçeveden türetilir.',
+  'protocol.adsb.example.velocityAirspeed.name': 'Havada hız — hava hızı (TC 19, alt tip 3)',
+  'protocol.adsb.example.velocityAirspeed.description':
+    'Gerçek bir yakalama (mode-s.org): başlık 243,98°, TAS 375 kt, dikey hız −2304 ft/dk (barometrik kaynak).',
+  'protocol.adsb.example.df18Identification.name': 'DF18 — transponder olmayan yayıncı',
+  'protocol.adsb.example.df18Identification.description':
+    'DF17 ile AYNI ME yükü, ama DF18 (CF alanı). ADS-B çözücüsü ikisini de kabul eder; parite yine düz CRC\'dir.',
+  'protocol.adsb.example.surfacePosition.name': 'Yüzey konumu (TC 7) — tanınır, çözülmez',
+  'protocol.adsb.example.surfacePosition.description':
+    'Type Code adlandırılır ama payload HAM bırakılır: yüzey konumu bu sürümün kapsamı dışındadır.',
+  'protocol.adsb.example.operationStatus.name': 'Uçak işletim durumu (TC 31) — tanınır, çözülmez',
+  'protocol.adsb.example.operationStatus.description':
+    'Alan tahsisi ICAO/DO-260 revizyon veritabanına bağlıdır; payload yakıştırılmaz.',
+  'protocol.adsb.example.crcFail.name': 'CRC FAIL — ME yine çözülür',
+  'protocol.adsb.example.crcFail.description':
+    'İlk örneğin bir ME baytı bozuldu. Kısmi çözüm gösterilir ama çerçeve geçersizdir ve düzeltme adayı ÜRETİLMEZ.',
+  'protocol.adsb.example.notExtendedSquitter.name': 'ADS-B değil — DF20 Comm-B yanıtı',
+  'protocol.adsb.example.notExtendedSquitter.description':
+    'Gerçek bir DF20 yakalaması. MB alanı DF17\'nin ME alanıyla BİREBİR aynı görünür ve ilk baytı 0x20\'dir — Type Code sanılırsa sessizce yanlış çözülürdü. Çerçeve reddedilir.',
+
   // --- Ethernet II / IEEE 802.3 / VLAN 802.1Q (tek parser, üç plugin) ---
   'protocol.ethernet.error.typeLengthTruncated':
     'MAC çiftinden sonraki 2 baytlık EtherType/Length alanı için yeterli bayt yok.',

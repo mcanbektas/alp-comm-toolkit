@@ -125,13 +125,14 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-24, dalga 14h'den sonra,
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 15h'den sonra,
   KODDAN doğrulandı — tek kullanımlık sayım script'i)
-  115 `ready` / 35 `planned` / 22 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+  123 `ready` / 23 `planned` / 26 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **130 `ready` / 20 `planned` / 22 `partial`**; gerçekten yapılacak iş **20 kanonik
-  kayıt** (aerospace-uav 12, wireless-iot 4, marine-navigation 3,
-  building-automation 1). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
+  **138 `ready` / 8 `planned` / 26 `partial`**; gerçekten yapılacak iş **8 kanonik
+  kayıt** (wireless-iot 4 — thread, wifi, esp-now, rf-telemetry-custom-frame;
+  marine-navigation 3 — iec-61162, seatalk, hdlc-based-marine;
+  building-automation 1 — lonworks). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
   KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
   13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
   cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii/cc-link-ie + 13g
@@ -145,15 +146,29 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   domain toplamı 18 `ready` + 6 `partial` + 1 alias, `planned` KALMADI); domain'in 7
   ailesi de (`can-family`, `vehicle-network-protocols`, `sensor-interfaces`,
   `legacy-diagnostics`, `diagnostics`, `automotive-ethernet`, `calibration`) kapandı.
-  Kalan dört domain'de (`aerospace-uav`, `wireless-iot`,
-  `marine-navigation`, `building-automation`) henüz hiç iş başlamadı; sıradaki domain
-  seçimi YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
+  **`aerospace-uav` (16 kayıt) dalga 15 ile TAMAMEN KAPANDI** (15a dronecan + 15b
+  cyphal/uavcan-compatibility + 15c sbus/ibus + 15d crsf + 15e ppm/pwm-servo +
+  15f arinc-429 + 15g mil-std-1553 + 15h mode-s/ads-b — 8 alt dalga, 12 kanonik
+  kayıt, 8 `ready` + 4 `partial`); domain toplamı 11 `ready` + 5 `partial` +
+  3 alias, `planned` KALMADI. Dokunulmayan tek aile `gnss-navigation`dı: üç kaydı
+  da ALIAS'tır ve yönü `marine-navigation`a bakar, `resolveStatus()` `ready` çözer.
+  Kalan üç domain'de (`wireless-iot`, `marine-navigation`, `building-automation`)
+  henüz hiç iş başlamadı; sıradaki domain seçimi YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
   `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
   sınırlayıcıları bayt bile değil), `psi5` yukarı-yön-tek-çerçeve (slot zaman çizelgesi
-  çerçevede YOK) — gerekçeler ilgili `.ts` dosyalarının başında ve
-  `docs/plan-fazlar.md`nin 13g/14h notlarında. `hart` ve `io-link` (13h) ikisi de `ready`:
+  çerçevede YOK), `ads-b` 1090ES-only (978 MHz UAT ayrı bir tel biçimi: farklı
+  çerçeveleme, farklı FEC) — gerekçeler ilgili `.ts` dosyalarının başında ve
+  `docs/plan-fazlar.md`nin 13g/14h/15h notlarında.
+  **Aynı 24 bitin ANLAMI çerçeveden çerçeveye değişebilir ve tek bir gösterge
+  ikisini de yanlış anlatır** (dalga 15h): Mode S'te DF11/17/18'in PI alanı düz
+  CRC'dir ve PASS/FAIL doğrulanır, ama DF0/4/5/16/20/21'in AP alanı
+  CRC ⊕ ICAO adresidir ve pasif dinleyici ikisini AYIRAMAZ — adres çıkarılır ama
+  çürütülemediği için doğrulanmış da değildir. O çerçevelerde `mode-s`
+  CRC PASS/FAIL alanını HİÇ BASMAZ; basıp "doğrulanamadı" demek olmayan bir
+  ölçümü varmış gibi göstermek olurdu. Dalga 13 dersi 3'ün (`gösterilir ≠
+  doğrulanır`) en sert biçimi ve `modeS.ts` dosya başında yazılı. `hart` ve `io-link` (13h) ikisi de `ready`:
   HART'ın checksum'ı `lrc.ts` DEĞİL, paylaşılan `xor8Checksum`; IO-Link'in 6-bit
   checksum'ı resmi spec formülüyle (seed+XOR+8→6 bit sıkıştırma) doğrulanır ve
   `messageSide` adlı yeni bir `decodeOptions` deseniyle (alan YERLEŞİMİNİ değiştiren
@@ -165,8 +180,16 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   nibble-özyinelemeli CRC-4'ü için reddedildi; 14h'te PSI5'in 3 bitlik CRC'si
   `crcEngine.ts`in "direct" döngüsüne aynı polinom ve aynı seed'le konulduğunda 1024
   olası yükün SIFIRINDA doğru sonuç veriyor (`psi5.test.ts` bu sayıyı bekçiliyor) —
-  doğru karşılık augmented topoloji ya da seed `010`. Yeni bir CRC'yi
-  `crcCatalogue.ts`ten almadan önce YAYIMLANMIŞ bir test vektörüyle sına.
+  doğru karşılık augmented topoloji ya da seed `010`. **15h aynı kuralın
+  yedinci vakasıdır ve tek seferde DÖRT sahte dost reddetti**: Mode S'in CRC-24'ü
+  (`CRC24_MODE_S`, poly 0xFFF409, init 0) katalogdaki dört 24-bit girdinin
+  (`CRC24`, `CRC24_Q`, `CRC24_FLEXRAY_A/B`) HİÇBİRİ değildir ve dördü de burada
+  hata VERMEDEN yanlış sonuç üretirdi. Yeni bir CRC'yi
+  `crcCatalogue.ts`ten almadan önce YAYIMLANMIŞ bir test vektörüyle sına —
+  **topolojiyi de sına**: 15h'te motorun direct (non-augmented) döngüsü, aynı
+  çağrıdan geçen CRC-24/OPENPGP'nin yayımlanmış check değerini (0x21CF02)
+  üretmesiyle kanıtlandı; Mode S'te `init = 0` olduğu için augmented ve direct
+  aynı sonucu veriyor ama bu bir ŞANS, bir kanıt değil.
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).

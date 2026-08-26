@@ -5,6 +5,7 @@ import { registerBuiltInProtocols } from './index';
 
 /** `registeredProtocolIds()` ALFABETİK döner; liste o sırayla yazılır. */
 const BUILT_IN_IDS = [
+  'ads-b',
   'ais',
   'arinc-429',
   'arp',
@@ -85,6 +86,7 @@ const BUILT_IN_IDS = [
   'modbus-ascii',
   'modbus-rtu',
   'modbus-tcp',
+  'mode-s',
   'mqtt',
   'mqtt-sn',
   'nb-iot',
@@ -146,8 +148,10 @@ const BUILT_IN_IDS = [
 ];
 
 const EXPECTED_CATEGORY: Record<string, string> = {
+  'ads-b': 'aerospace-uav',
   'arinc-429': 'aerospace-uav',
   'mil-std-1553': 'aerospace-uav',
+  'mode-s': 'aerospace-uav',
   ais: 'marine-navigation',
   arp: 'network-ethernet',
   'art-net': 'building-automation',

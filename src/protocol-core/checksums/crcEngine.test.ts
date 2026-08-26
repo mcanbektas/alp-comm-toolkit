@@ -58,6 +58,15 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   // to prevent frames crossing channels").
   CRC24_FLEXRAY_A: 0x7979bdn,
   CRC24_FLEXRAY_B: 0x1f23b8n,
+  // CRC-24/MODE-S (Mode S / ADS-B 1090ES parity, dalga 15h) — reveng
+  // kataloğunda AYRI bir girdisi yok, ad bu depoya özgü. Değer bu motorla
+  // üretildi ve İKİ bağımsız yoldan bağlandı: (1) motorun topolojisi aynı
+  // çağrıdan geçen CRC24/OpenPGP'nin YAYIMLANMIŞ check değeriyle (0x21CF02)
+  // doğrulanmış durumda, (2) gerçek bir DF17 mesajının
+  // (8D4840D6202CC371C32CE0576098) ilk 11 baytı üzerinde AYNI parametrelerle
+  // hesaplanan CRC, mesajın kendi PI alanına (0x576098) birebir oturuyor
+  // (crcCatalogue.ts'teki CRC24_MODE_S girdisinin dosya başı notuna bak).
+  CRC24_MODE_S: 0x054268n,
   // CRC-8/DVB-S2 (CRSF frame CRC, dalga 15d) — reveng kataloğunun yayımlı
   // check değeri; Betaflight `common/crc.h:33` + TBS'in resmî CRSF spec'i
   // ("CRC" bölümü) bağımsızca örtüşüyor (crcCatalogue.ts'teki CRC8_DVB_S2

@@ -714,8 +714,77 @@ aynı sınıftaki kararıyla bu dalganın DIŞINDA (ileride ayrı iş).
 
 ## Çürüyen tahminler
 
-*(Dalga kapanışında doldurulacak. Dalga 12/13/14'te kural hâline gelen bölüm:
+*(Dalga 15 kapandı, 2026-08-26. Dalga 12/13/14'te kural hâline gelen bölüm:
 brifin yanlış çıkan öngörüleri dosyada İŞARETLENİR, silinmez.)*
+
+### Uygulama sırasında çürüyenler (15a-15h)
+
+1. **"Bu dalga katalog CRC sayısını 34 → 36 yapacak, İKİ ekleme."** ÇÜRÜDÜ.
+   Ekleme İKİ değil ÜÇ oldu ve sayı **37**e çıktı: 15d CRSF için TEK değil İKİ
+   CRC-8 ekledi (`CRC8_DVB_S2` frame CRC'si + `CRC8_CRSF_COMMAND`, `0x32`
+   çerçevelerinin AYRI polinomlu ikinci CRC'si — brifin "CRSF CRC-8" satırı bu
+   ikinciyi hiç görmemişti), 15h de `CRC24_MODE_S`i ekledi. Bunun bir yan etkisi
+   var: **15h brifi `CrcCalculatorTool.test.tsx` için hâlâ "35 → 36" diyor ve o
+   sayı zaten eskimişti** (gerçek baz 36, 15h'ten sonra 37). Brifteki sabit
+   sayılar alt dalgalar arasında bayatlıyor; dosyadaki gerçek değer okunmalı.
+
+2. **"`dump1090.c:694`'ün `modes_checksum_table` son girdisi tabloyu üreten
+   generator polinomudur."** SONUÇ DOĞRU, GEREKÇE EKSİKMİŞ. dump1090 polinom
+   döngüsü DEĞİL, **112 girişlik önceden hesaplanmış bir tablo** kullanıyor;
+   `0xFFF409` orada "polinom sabiti" diye durmuyor, son veri bitinin katkısı
+   olarak duruyor. Ana thread'in kaynak turu boşluğu kapattı: polinom, ICAO
+   Annex 10 Vol IV §3.1.2.6'nın belgeli üretecinden BAĞIMSIZ olarak türetildi
+   (üsler `[23,22,21,20,19,18,17,16,15,14,13,12,10,3,0]` → `0xFFF409`) ve
+   `pyModeS` `_bits.py:70` üçüncü kaynak olarak örtüştü. Ders: bir sabiti bir
+   tablonun içinde görmek, o sabitin ne olduğunu bilmek DEĞİLDİR.
+
+3. **"`mode-s` `attemptCrcCorrection` (bool) `decodeOptions` kanalını açar"**
+   (`decodeOptions` adayları tablosu + açık soru 7'nin önerisi). ÇÜRÜDÜ.
+   Motor 15h'te YAZILMADI ve kanal AÇILMADI — 15h brifinin kendi
+   [Karar 15h-1]'i ana brifin önerisini tersine çevirdi: domain'i kapatan alt
+   dalgada opsiyonel bir motor riski artırır ve kayıt onsuz da tam çözülüyor.
+   `mode-s` **`decodeOptions` HİÇ taşımıyor**; sayfa metni düzeltme adaylarını
+   "ileride" olarak yazıyor.
+
+4. **`decodeOptions` adayları tablosu SİSTEMATİK olarak AZ tahmin etti** —
+   `mode-s` hariç her satırda gerçek seçenek sayısı öngörülenden BÜYÜK çıktı:
+   `arinc-429` 1 → **7** (`wordByteOrder`, `labelBitOrder`, `dataEncoding`,
+   `parityMode`, `resolution`, `dataLowBit`, `dataHighBit`), `pwm-servo` 3 → **5**,
+   `ppm` 6 → **7**, `cyphal` 1 → **2** (`transport` + `specVersion`),
+   `mil-std-1553` 1 → **2** (`wordType` + `wordByteOrder`). Tek ters yön
+   `mode-s`: 1 → **0**. Tablo "hangi kayıt kanal açar"ı doğru bildi, "kaç kanal"ı
+   bilemedi — çünkü kalibrasyon ihtiyacı motor yazılırken görünüyor, brif
+   yazılırken değil.
+
+5. **Açık soru 1'in cevabı DOĞRU çıktı ama GEREKÇESİ DEĞİŞTİ.** `ads-b` gerçekten
+   1090ES-only ve `partial` kapandı, ama brifin gerekçesi ("978 MHz UAT ayrı
+   kaynak turu gerektirir, kapsam daraltması bir tercih") 15h'in kaynak turunda
+   sertleşti: dump1090'ın kendi notu (*"other modes have the CRC xored with the
+   sender address … a casual listener can't split the address from the
+   checksum"*) DF17/18 dışındaki her şeyin pasif dinleyici için doğrulanamaz
+   olduğunu söylüyor. **DF17/18-only olmak bir tercih değil, pasif yakalamanın
+   matematiksel sınırı.**
+
+6. **`[BEKLENTİ]` "mode-s.org'un ilgili bölümü ve `pyModeS`in `icao()`
+   fonksiyonu DF'e göre değişen parite semantiğini gösterir."** DOĞRULANDI —
+   `pyModeS` `util.py:icao()` ayrımı kodda birebir yapıyor (DF11/17/18 →
+   `msg[2:8]`, DF0/4/5/16/20/21 → `crc_remainder()`, gerisi `None`). Aynı
+   fonksiyon brifte hiç anılmayan bir şeyi de kapattı: **DF24 için adres
+   ÇIKARILMAZ** (`None` döner), oysa dump1090'ın "other modes" ifadesi Comm-D'yi
+   de kapsıyor gibi okunuyordu. İki kaynak örtüşmedi → alan adlandırılmadı.
+
+7. **"14 baytlık çerçeve depoda yaygındır, `canParse` çakışması gerçek bir
+   risktir"** (`canParse` bölümü). KISMEN doğru, ama ÖLÇÜLDÜĞÜNDE beklenenden
+   küçük: 849 registry örneğinin **6'sı** (%0,71) `mode-s`i geçiyor. Risk
+   gerçekti — yalnız uzunluk ölçütü kalsaydı **25** (%2,9) olurdu — ama DF'in
+   ATANMIŞ bir değer olması ve uzunlukla tutarlılığı yanlış pozitifi dörtte
+   birine indirdi. `ads-b` **0** veriyor (CRC-24 her çerçevede elek).
+
+**Doğrulanan DUR-SOR önerileri** (çürümedi, kayıt için): açık soru 2 (`cyphal`
+Cyphal/CAN-only `partial`), 3 (`uavcan-compatibility` sınıflandırıcı parser,
+seçenek (a)), 4 (`mil-std-1553` `wordType` varsayılansız, rozet `ready`),
+5 (`ibus` i-BUS2'siz `partial`), 6 (`ppm`/`pwm-servo` iki ayrı modül) — beşi de
+önerildiği gibi kapandı.
 
 **Keşif turunda ZATEN çürüyen iki görev-hipotezi — kayıt için burada:**
 
@@ -736,5 +805,9 @@ sözlüğü** için devreye giriyor.
 ---
 
 Bağlam: [[alp-comm-dalga14-automotive]], [[alp-comm-dalga13-industrial]],
-[[alp-comm-otonom-dalga-yurutme]]. Bu dalga 2026-08-25'te KEŞİF turuyla açıldı;
-kod henüz yazılmadı.
+[[alp-comm-otonom-dalga-yurutme]]. Bu dalga 2026-08-25'te KEŞİF turuyla açıldı ve
+**2026-08-26'da 15h ile KAPANDI**: 8 alt dalga, 12 kanonik kayıt (8 `ready` +
+4 `partial`), `aerospace-uav` domain'inde `planned` KALMADI. Dalga kapanış özeti
+`docs/plan-fazlar.md`de; deponun kalan kanonik borcu **8 kayıt**
+(wireless-iot 4, marine-navigation 3, building-automation 1) ve sıradaki domain
+seçimi YAPILMADI.

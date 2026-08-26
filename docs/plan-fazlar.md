@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-24 itibarıyla dalga 14 KAPANDI — `automotive` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet` ve `industrial-automation`dan sonra dördüncü kapanan domain). Kalan iş **20 kanonik kayıt**: aerospace-uav 12, wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 15 KAPANDI — `aerospace-uav` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation` ve `automotive`dan sonra **beşinci kapanan domain**). Kalan iş **8 kanonik kayıt**: wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -267,9 +267,80 @@ direct döngüsünün 1024/1024 yanlış verdiğini SAYIYLA gösterdi. (4) **`ca
 imzası ölçülmeden yazılmaz** — 14f'in 413 yanlış pozitifi kalıcı bir test
 desenine dönüştü ve 14g/14h onu devraldı.
 
-Sıradaki domain seçimi HENÜZ YAPILMADI — kalan dört domain'de (`aerospace-uav` 12,
-`wireless-iot` 4, `marine-navigation` 3, `building-automation` 1) hiç iş
-başlamadı, toplam 20 kanonik kayıt açık.
+**`aerospace-uav` domain'i TAMAMEN BİTTİ — dalga 15 kapandı.**
+
+**Dalga 15 kapanış özeti (15a-15h, 8 alt dalga / 12 kanonik kayıt, 2026-08-25 →
+2026-08-26):** `aerospace-uav`in altı ailesinden dördü bu dalgada kapandı
+(`distributed-uav-networks` 15a dronecan + 15b cyphal/uavcan-compatibility,
+`rc-control-links` 15c sbus/ibus + 15d crsf + 15e ppm/pwm-servo,
+`avionics-data-buses` 15f arinc-429 + 15g mil-std-1553, `surveillance` 15h
+mode-s/ads-b); `uav-telemetry` zaten `mavlink` ile doluydu ve
+`gnss-navigation`ın üç kaydı ALIAS'tır (yönü `marine-navigation`a bakar,
+`resolveStatus()` `ready` çözer) — dalgada hiç dokunulmadı. 12 kayıttan
+**8'i `ready`** (dronecan, sbus, crsf, ppm, pwm-servo, arinc-429,
+mil-std-1553, mode-s), **4'ü `partial`** (cyphal — CAN FD kapsam kararı;
+uavcan-compatibility — sınıflandırıcı, tel çözücüsü değil; ibus; ads-b —
+1090ES-only). Domain toplamı: 16 kayıt = **11 `ready` + 5 `partial` + 3 alias**,
+`planned` KALMADI (KODDAN doğrulandı, tek kullanımlık sayım script'i).
+
+**15h (`mode-s` + `ads-b`, 2026-08-26)** aileyi VE domain'i kapattı. Dört ayrı
+sessiz-yanlış-çözüm noktası vardı ve dördü de teste bağlandı: (1) **katalogdaki
+DÖRT 24-bit CRC'nin hiçbiri Mode S'inki değil** — yeni giriş `CRC24_MODE_S`
+(poly 0xFFF409, init 0, `check("123456789") = 0x054268`), polinom ÜÇ bağımsız
+yoldan doğrulandı (ICAO Annex 10 Vol IV §3.1.2.6'nın belgeli üreteci + dump1090'ın
+`modes_checksum_table`ı + `pyModeS` `_bits.py:70`), topoloji **direct
+(non-augmented)** olarak kanıtlandı (aynı motorun CRC-24/OPENPGP için
+YAYIMLANMIŞ 0x21CF02'yi üretmesiyle — 14h'in PSI5 dersi); (2) **DF24 ilk İKİ
+bitten tanınır**, ilk beşten değil — naif okuma 24…31 arası SEKİZ farklı değer
+üretirdi ve test 256 ilk baytın hepsini tarıyor; (3) **parite alanının anlamı
+DF'e göre değişir** — DF11/17/18'de PI düz CRC'dir ve PASS/FAIL doğrulanır,
+DF0/4/5/16/20/21'de AP = CRC ⊕ ICAO'dur ve *"a casual listener can't split the
+address from the checksum"* (dump1090), yani adres ÇIKARILIR ama doğrulanamaz;
+o çerçevelerde CRC PASS/FAIL alanı HİÇ BASILMAZ, çünkü basıp "doğrulanamadı"
+demek olmayan bir ölçümü varmış gibi göstermek olurdu; (4) **CPR global pozisyona
+ÇEVRİLMEZ** — ham 17-bit LAT/LON-CPR basılır, `physicalValue` ve `unit`
+VERİLMEZ, çünkü global konum bir Even + bir Odd çerçevesi ister (`mavlink.ts`in
+SEQ-LOSS sınırının aynısı).
+
+İki AYRI MODÜL yazıldı ve bağımlılık TEK YÖNLÜ: `adsb.ts` `modeS.ts`in
+`parseModeSFrameLayout()`unu ÇAĞIRIR, çerçeve ayrıştırmayı kopyalamaz
+(`xcpPacket.ts` sınıfı paylaşım; 12d'nin `networkTimestamp` vakası bu kopyanın
+bedelini ölçmüştü) ve `modeS.ts` `adsb.ts`i BİLMEZ. `ads-b` DF17/18 dışını
+`unsupported-encoding` ile REDDEDER — gerekçe somut: gerçek bir DF20 Comm-B
+yanıtının MB alanının ilk baytı 0x20'dir ve naif bir `>>> 3` okuması "TC 4, uçak
+kimliği" verir. `attemptCrcCorrection` motoru [Karar 15h-1] ile bu dalgada
+YAZILMADI (spec `:373`ün *"corrected mesaj native-valid ile aynı confidence
+seviyesinde gösterilemez"* kısıtı brifte yazılı, sayfa metni "ileride" diyor) ve
+iki kayıtta da `decodeOptions` AÇILMADI. `canParse` yanlış pozitifi ÖLÇÜLDÜ:
+849 registry örneğinin **6'sı** (%0,71) `mode-s`i geçiyor — altısı da AP
+sınıfından, yani üçüncü kanıtın bulunmadığı daldan; yalnız uzunluk ölçütü
+kalsaydı 25 (%2,9) olurdu. `ads-b` **0** yanlış pozitif veriyor (CRC-24 her
+çerçevede elek). `ads-b ⊂ mode-s` çakışması bir hata DEĞİL, teste yazılmış bir
+değişmezdir. Dokunulan dosyalar: `crcCatalogue.ts` + `crcEngine.test.ts`
+(`CRC24_MODE_S`), `CrcCalculatorTool.test.tsx` (36 → 37), `modeS.ts`/`adsb.ts`
+(+ üç test dosyası), `aerospace-uav.ts` (iki kayıt `planned` → `ready`/`partial`
++ `pluginId`), `protocols/index.ts`, `index.test.ts`, `tr.ts`/`en.ts`
+(2×85 anahtar: 42 `modeS` + 43 `adsb`), `e2e/mode-s-decode.spec.ts` (8 test) +
+`e2e/ads-b-decode.spec.ts` (10 test). Tam paket yeşil: **5634 birim** (5578 →
++56) · **1184 e2e** (1166 → +18) · `npm run typecheck` · `npm run build`.
+
+Dalganın kalıcı dersleri: (1) **Bir alanın ANLAMI çerçeve içinde değişebilir ve
+bu bir kapsam sorunu değil, raporlama sorunudur** — 15h'in DF'e göre değişen
+parite semantiği, dalga 13 dersi 3'ün (*"gösterilir ≠ doğrulanır"*) en sert
+biçimi: aynı 24 bit bir çerçevede doğrulanabilir bir CRC, ötekinde
+doğrulanamaz bir adres karışımıdır ve tek bir gösterge ikisini de yanlış
+anlatır. (2) **Girdi sözleşmesi kapsamın kendisidir** — 15g'nin Manchester'ı,
+15f'in bayt sırası, 15h'in Beast/SBS/dump1090 JSON konteynerleri: hepsinde
+parser'ın önüne gelen bir katman kapsam dışı bırakıldı ve sayfa metnine yazıldı.
+(3) **`canParse` bekçisi artık istisnasız bir görev kalemidir** — dalga 14f'in
+413 yanlış pozitifiyle başlayan desen bu dalgada altı kez tekrarlandı ve 15h'te
+İKİ kaydın İLİŞKİSİNİ (dar imza ⊂ geniş imza) ölçen bir biçime evrildi.
+(4) **`crcBits()` bu domain'de HİÇ tüketici bulamadı** — keşif turunun öngörüsü
+çürüdü, gerekçe `brief-faz10-dalga15.md`nin "Çürüyen tahminler" bölümünde.
+
+Sıradaki domain seçimi HENÜZ YAPILMADI — kalan üç domain'de (`wireless-iot` 4,
+`marine-navigation` 3, `building-automation` 1) hiç iş başlamadı, toplam
+**8 kanonik kayıt** açık.
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular

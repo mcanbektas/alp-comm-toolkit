@@ -276,6 +276,22 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'mil-std-1553', () =>
     import('./aerospace/mil1553/mil1553').then((module) => module.mil1553Plugin),
   );
+  // Mode S — dalga 15h, `surveillance` ailesinin ilk kaydı. Son 24 bitin ANLAMI
+  // DF'e göre değişir: DF11/17/18'de düz CRC (doğrulanır), diğerlerinde
+  // AP = CRC ⊕ ICAO (pasif dinleyici ayıramaz, DOĞRULANAMAZ). DF24 ilk İKİ
+  // bitten tanınır. Yeni katalog CRC'si `CRC24_MODE_S` — katalogdaki dört
+  // 24-bit girdinin hiçbiri değil (bkz. modeS.ts dosya başı).
+  registerOnce(registry, 'mode-s', () =>
+    import('./aerospace/modeS/modeS').then((module) => module.modeSPlugin),
+  );
+  // ADS-B 1090ES — dalga 15h. `modeS.ts`in çerçeve çözücüsünü ÇAĞIRIR, kod
+  // KOPYALAMAZ; yalnız DF17/18'i kabul eder (bir DF20'nin MB alanı ME gibi
+  // GÖRÜNÜR ve kabul edilseydi sessizce yanlış çözülürdü). 978 MHz UAT ayrı
+  // bir tel biçimidir ve kapsam dışıdır; CPR global konuma ÇEVRİLMEZ —
+  // çerçeveler arası (bkz. adsb.ts dosya başı).
+  registerOnce(registry, 'ads-b', () =>
+    import('./aerospace/adsb/adsb').then((module) => module.adsbPlugin),
+  );
   // Ethernet II / IEEE 802.3 / VLAN 802.1Q AYNI modülden gelir: tel biçimleri
   // aynı, ayrım MAC çiftinden sonraki 2 baytlık alanın yorumunda (bkz. ethernet.ts,
   // canClassic.ts'in üç-plugin-tek-parser emsali).
