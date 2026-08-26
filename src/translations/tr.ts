@@ -2051,6 +2051,71 @@ export const tr = {
   'protocol.sdlc.example.uFrame.description':
     'Unnumbered format — komut bitleri bu dalgada adlanmıyor (dosya başı disiplini), yalnız format + FCS gösterilir.',
 
+  // --- HDLC-Based Marine (hdlcCore.ts'in ÜÇÜNCÜ tüketicisi — her alan "candidate") ---
+  'protocol.hdlcBasedMarine.documentation.summary':
+    'Denizcilikte eski ya da vendor\'a özel ekipmanın kullandığı HDLC ve HDLC-benzeri bit çerçevelemesi — Flag/Address/Control/Information/FCS zarfı `hdlc`/`sdlc` ile birebir aynı çekirdeği (hdlcCore.ts) paylaşır, ama vendor şeması yüklenmeden Address ve Control alanları kesin adlandırılmaz, "candidate" olarak işaretli kalır. FCS gerçekten doğrulanır (varsayılan CRC-16/X.25, isteğe bağlı CRC-32/ISO-HDLC ya da FCS\'siz profil).',
+  'protocol.hdlcBasedMarine.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.hdlcBasedMarine.error.noDelimiter':
+    'Arabellekte Flag (0x7E) baytı bulunamadı — çerçeve tamamlanmamış.',
+  'protocol.hdlcBasedMarine.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.hdlcBasedMarine.error.tooShort':
+    'İçerik, seçilen alan genişlikleriyle (Address+Control+FCS) uyumlu asgari uzunluktan kısa.',
+  'protocol.hdlcBasedMarine.error.fcsMismatch':
+    'FCS uyuşmuyor — çerçeve iletim sırasında bozulmuş olabilir.',
+  'protocol.hdlcBasedMarine.warning.trailingBytes':
+    'Çerçeveden sonra artık bayt var — ayrı bir alanda gösterildi, henüz çözülmedi.',
+  'protocol.hdlcBasedMarine.warning.controlFieldNotInterpreted':
+    'Control baytı ham (candidate) basıldı — I/S/U çözümü için "ISO 13239 modulo-8" profilini seçin.',
+  'protocol.hdlcBasedMarine.warning.extendedControlNotInterpreted':
+    'İkinci control baytı (genişletilmiş/modulo-128) ham candidate olarak taşınıyor — bit seviyesinde yorumlanmıyor.',
+  'protocol.hdlcBasedMarine.warning.asyncEscapingAssumed':
+    'Async HDLC (RFC 1662) kaçış çözümü uygulandı — bu veriyi DEĞİŞTİRİR, alan konumları tel üzerindeki değil çözülmüş (mantıksal) içeriğe göre gösterilir.',
+  'protocol.hdlcBasedMarine.option.fcsProfile': 'FCS Profili',
+  'protocol.hdlcBasedMarine.option.fcsProfile.description':
+    'Çerçeve sonu denetiminin hangi algoritmayla hesaplanacağı — spec özeti üç profili adıyla sayıyor: CRC-16, CRC-32, özel/yok.',
+  'protocol.hdlcBasedMarine.option.fcsProfile.crc16X25': 'CRC-16/X.25 (varsayılan)',
+  'protocol.hdlcBasedMarine.option.fcsProfile.crc32IsoHdlc': 'CRC-32/ISO-HDLC',
+  'protocol.hdlcBasedMarine.option.fcsProfile.none': 'Yok (FCS basılmaz)',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder': 'FCS Bayt Sırası',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.description':
+    'RFC 1662 §3.1 düşük-oktet-önce (little-endian) taşınmasını şart koşar, ama vendor çerçeveleri sapabilir.',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.littleEndian': 'Little-endian (varsayılan)',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.bigEndian': 'Big-endian',
+  'protocol.hdlcBasedMarine.option.addressFieldBytes': 'Address Alanı Genişliği',
+  'protocol.hdlcBasedMarine.option.addressFieldBytes.description':
+    'Q.921 §3.3.1 EA biti adresi 2 bayta genişletir; AIS\'in VDL katmanı adres alanını hiç kullanmaz (0 bayt).',
+  'protocol.hdlcBasedMarine.option.controlFieldBytes': 'Control Alanı Genişliği',
+  'protocol.hdlcBasedMarine.option.controlFieldBytes.description':
+    'Basık (1 bayt) ya da genişletilmiş modulo-128 (2 bayt, U-frame\'ler yine 1 bayt kalır); AIS control alanını tamamen atar (0 bayt).',
+  'protocol.hdlcBasedMarine.option.width.zeroBytes': '0 bayt (kullanılmıyor)',
+  'protocol.hdlcBasedMarine.option.width.oneByte': '1 bayt',
+  'protocol.hdlcBasedMarine.option.width.twoBytes': '2 bayt',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile': 'Control Alanı Yorumu',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.description':
+    'Control baytı ham candidate olarak mı kalsın, yoksa ISO 13239 basık (modulo-8) I/S/U kurallarıyla mı okunsun — hangisinin doğru olduğu vendor\'a bağlıdır, motor VARSAYMAZ.',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.rawCandidate': 'Ham candidate (varsayılan)',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.iso13239Modulo8': 'ISO 13239 modulo-8 (I/S/U)',
+  'protocol.hdlcBasedMarine.option.escaping': 'Kaçış (Escaping)',
+  'protocol.hdlcBasedMarine.option.escaping.description':
+    'Senkron HDLC (bit-destuff edilmiş, kaçışsız) ile async/PPP-tipi HDLC (RFC 1662 bayt kaçışlı) AYRI çerçeveleme mekanizmalarıdır; seçim yanlışsa veri bozulur.',
+  'protocol.hdlcBasedMarine.option.escaping.none': 'Yok — senkron/bit-destuff (varsayılan)',
+  'protocol.hdlcBasedMarine.option.escaping.rfc1662OctetStuffed': 'RFC 1662 bayt kaçışlı (async)',
+  'protocol.hdlcBasedMarine.option.fcsCoverage': 'FCS Kapsamı',
+  'protocol.hdlcBasedMarine.option.fcsCoverage.description':
+    'FCS hangi baytlar üzerinden hesaplanıyor — AIS\'in VDL katmanında (M.1371-6 §A2-3.2.2.6) FCS yalnız veri kısmını kapsar, bayrakları ya da (kullanılıyorsa) address/control\'ü değil.',
+  'protocol.hdlcBasedMarine.option.fcsCoverage.addressControlInformation':
+    'Address+Control+Information (varsayılan)',
+  'protocol.hdlcBasedMarine.option.fcsCoverage.informationOnly': 'Yalnız Information (AIS/VDL düzeni)',
+  'protocol.hdlcBasedMarine.example.unknownMarineFrame.name': 'Bilinmeyen denizcilik çerçevesi (spec örneği)',
+  'protocol.hdlcBasedMarine.example.unknownMarineFrame.description':
+    'Spec\'in kendi yakalaması (05-denizcilik.md) — Address 0x12, Control 0x03, altı baytlık Information, FCS PASS. Tüm alanlar candidate\'tir.',
+  'protocol.hdlcBasedMarine.example.pollNoInformation.name': 'Poll (Information alanı yok)',
+  'protocol.hdlcBasedMarine.example.pollNoInformation.description':
+    'Address=0xFF, Control=0x71 — Information alanı boş olduğu için hiç basılmaz, yalnız Address/Control/FCS candidate alanları görünür.',
+  'protocol.hdlcBasedMarine.example.fcsMismatch.name': 'FCS uyuşmazlığı',
+  'protocol.hdlcBasedMarine.example.fcsMismatch.description':
+    'Bilinmeyen denizcilik çerçevesiyle AYNI bayt dizisi, FCS\'in bir biti bozulmuş — FCS\'in gerçekten hesaplandığını, yalnız gösterilmediğini kanıtlar.',
+
   // --- XMODEM (framing motoruna uğramaz, xmodemCore.ts'in üstünde ince sarmal) ---
   'protocol.xmodem.documentation.summary':
     'Stop-and-wait seri dosya transferi — 128 ya da 1024 baytlık bloklar, blok numarası tümleyeni kontrolü, checksum (SUM-8) ya da CRC-16 (CRC16_XMODEM) modu, NAK ile yeniden gönderim. Framing motoruna hiç uğramaz — çerçeve sınırı Header baytının taşıdığı sabit veri uzunluğundan türetilir.',

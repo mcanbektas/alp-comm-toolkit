@@ -57,6 +57,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'rtcm', () =>
     import('./marine/rtcm/rtcm').then((module) => module.rtcmPlugin),
   );
+  // HDLC-Based Marine — dalga 16a: `hdlcCore.ts`nin (dalga 10c, PAYLAŞILAN
+  // çekirdek) ÜÇÜNCÜ tüketicisi, `hdlc`/`sdlc`nin ardından — kod KOPYALANMADI.
+  // Aynı zarf, aynı `CRC16_X25`, ama her alan "candidate" adlanır (vendor
+  // şeması yüklenmeden kesin ad ÜRETİLMEZ). `canParse` DAİMA `false`: doğal
+  // imzası `hdlc`/`sdlc`ninkiyle AYNIDIR ve `true` dönmek o iki çalışan
+  // kaydın çerçevesini otomatik algılamada ÇALARDI (bkz. hdlcBasedMarine.ts
+  // dosya başı, `hdlcMarineCanParseRegistry.test.ts`).
+  registerOnce(registry, 'hdlc-based-marine', () =>
+    import('./marine/hdlcMarine/hdlcBasedMarine').then((module) => module.hdlcBasedMarinePlugin),
+  );
   // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
   // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
   registerOnce(registry, 'can-2-0a', () =>

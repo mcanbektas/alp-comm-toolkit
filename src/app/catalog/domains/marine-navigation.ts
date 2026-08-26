@@ -467,7 +467,8 @@ export const marineNavigationDomain: CatalogDomain = {
           summary:
             'HDLC and HDLC-like bit framing used by older or vendor-specific shipboard equipment, read conservatively as flag/address/control/information/FCS candidates until a vendor schema names the fields.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'ready',
+          pluginId: 'hdlc-based-marine',
           tabs: ['overview', 'live', 'decode', 'data', 'diagnostics', 'definitions', 'examples'],
           tools: [
             'Flag Detection',

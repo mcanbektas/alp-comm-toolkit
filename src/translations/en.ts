@@ -2049,6 +2049,71 @@ export const en: TranslationDictionary = {
   'protocol.sdlc.example.uFrame.description':
     'Unnumbered format — command bits are not named in this wave (see file header), only format and FCS are shown.',
 
+  // --- HDLC-Based Marine (hdlcCore.ts's THIRD consumer — every field stays "candidate") ---
+  'protocol.hdlcBasedMarine.documentation.summary':
+    'HDLC and HDLC-like bit framing used by legacy or vendor-specific shipboard equipment — the Flag/Address/Control/Information/FCS envelope shares the exact same core (hdlcCore.ts) as `hdlc`/`sdlc`, but without a loaded vendor schema the Address and Control fields cannot be named with confidence and stay marked "candidate". The FCS is genuinely verified (default CRC-16/X.25, optional CRC-32/ISO-HDLC or an FCS-less profile).',
+  'protocol.hdlcBasedMarine.error.emptyFrame': 'An empty frame cannot be parsed.',
+  'protocol.hdlcBasedMarine.error.noDelimiter':
+    'No Flag (0x7E) byte found in the buffer — frame incomplete.',
+  'protocol.hdlcBasedMarine.error.aborted': 'Parsing was aborted.',
+  'protocol.hdlcBasedMarine.error.tooShort':
+    'Content is shorter than the minimum consistent with the selected field widths (Address+Control+FCS).',
+  'protocol.hdlcBasedMarine.error.fcsMismatch':
+    'FCS mismatch — the frame may have been corrupted in transit.',
+  'protocol.hdlcBasedMarine.warning.trailingBytes':
+    'Bytes remain after the frame — shown in a separate field, not yet parsed.',
+  'protocol.hdlcBasedMarine.warning.controlFieldNotInterpreted':
+    'The Control byte is shown raw (candidate) — select the "ISO 13239 modulo-8" profile for I/S/U decoding.',
+  'protocol.hdlcBasedMarine.warning.extendedControlNotInterpreted':
+    'The second Control byte (extended/modulo-128) is carried as raw candidate data — it is not interpreted at the bit level.',
+  'protocol.hdlcBasedMarine.warning.asyncEscapingAssumed':
+    'Async HDLC (RFC 1662) escape decoding was applied — this CHANGES the data, and field positions are shown against the decoded (logical) content rather than the wire.',
+  'protocol.hdlcBasedMarine.option.fcsProfile': 'FCS Profile',
+  'protocol.hdlcBasedMarine.option.fcsProfile.description':
+    'Which algorithm the frame-check trailer is computed with — the spec summary names three profiles: CRC-16, CRC-32, custom/none.',
+  'protocol.hdlcBasedMarine.option.fcsProfile.crc16X25': 'CRC-16/X.25 (default)',
+  'protocol.hdlcBasedMarine.option.fcsProfile.crc32IsoHdlc': 'CRC-32/ISO-HDLC',
+  'protocol.hdlcBasedMarine.option.fcsProfile.none': 'None (FCS not shown)',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder': 'FCS Byte Order',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.description':
+    'RFC 1662 §3.1 requires least-significant-octet-first transmission, but vendor frames may deviate.',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.littleEndian': 'Little-endian (default)',
+  'protocol.hdlcBasedMarine.option.fcsByteOrder.bigEndian': 'Big-endian',
+  'protocol.hdlcBasedMarine.option.addressFieldBytes': 'Address Field Width',
+  'protocol.hdlcBasedMarine.option.addressFieldBytes.description':
+    "Q.921 §3.3.1's EA bit extends the address to 2 bytes; AIS's VDL layer does not use an address field at all (0 bytes).",
+  'protocol.hdlcBasedMarine.option.controlFieldBytes': 'Control Field Width',
+  'protocol.hdlcBasedMarine.option.controlFieldBytes.description':
+    'Basic (1 byte) or extended modulo-128 (2 bytes, U-frames still stay 1 byte); AIS omits the control field entirely (0 bytes).',
+  'protocol.hdlcBasedMarine.option.width.zeroBytes': '0 bytes (unused)',
+  'protocol.hdlcBasedMarine.option.width.oneByte': '1 byte',
+  'protocol.hdlcBasedMarine.option.width.twoBytes': '2 bytes',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile': 'Control Field Interpretation',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.description':
+    'Whether the Control byte stays raw candidate data or is read with ISO 13239 basic (modulo-8) I/S/U rules — which one is correct depends on the vendor, the engine does not assume.',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.rawCandidate': 'Raw candidate (default)',
+  'protocol.hdlcBasedMarine.option.controlFieldProfile.iso13239Modulo8': 'ISO 13239 modulo-8 (I/S/U)',
+  'protocol.hdlcBasedMarine.option.escaping': 'Escaping',
+  'protocol.hdlcBasedMarine.option.escaping.description':
+    'Synchronous HDLC (bit-destuffed, unescaped) and async/PPP-style HDLC (RFC 1662 byte escaping) are SEPARATE framing mechanisms — the wrong choice corrupts the data.',
+  'protocol.hdlcBasedMarine.option.escaping.none': 'None — synchronous/bit-destuffed (default)',
+  'protocol.hdlcBasedMarine.option.escaping.rfc1662OctetStuffed': 'RFC 1662 byte-stuffed (async)',
+  'protocol.hdlcBasedMarine.option.fcsCoverage': 'FCS Coverage',
+  'protocol.hdlcBasedMarine.option.fcsCoverage.description':
+    "Which bytes the FCS is computed over — AIS's VDL layer (M.1371-6 §A2-3.2.2.6) covers only the data portion, not the flags or (if present) address/control.",
+  'protocol.hdlcBasedMarine.option.fcsCoverage.addressControlInformation':
+    'Address+Control+Information (default)',
+  'protocol.hdlcBasedMarine.option.fcsCoverage.informationOnly': 'Information only (AIS/VDL layout)',
+  'protocol.hdlcBasedMarine.example.unknownMarineFrame.name': 'Unknown marine frame (spec example)',
+  'protocol.hdlcBasedMarine.example.unknownMarineFrame.description':
+    "The spec's own capture (05-denizcilik.md) — Address 0x12, Control 0x03, a six-byte Information field, FCS PASS. All fields are candidates.",
+  'protocol.hdlcBasedMarine.example.pollNoInformation.name': 'Poll (no Information field)',
+  'protocol.hdlcBasedMarine.example.pollNoInformation.description':
+    'Address=0xFF, Control=0x71 — the Information field is empty and therefore not shown, only the Address/Control/FCS candidate fields appear.',
+  'protocol.hdlcBasedMarine.example.fcsMismatch.name': 'FCS mismatch',
+  'protocol.hdlcBasedMarine.example.fcsMismatch.description':
+    'The SAME byte sequence as the unknown marine frame, with one bit of the FCS corrupted — proves the FCS is genuinely computed, not just displayed.',
+
   // --- XMODEM (never touches the framing engine, thin wrapper over xmodemCore.ts) ---
   'protocol.xmodem.documentation.summary':
     'Stop-and-wait serial file transfer — 128- or 1024-byte blocks, block-number complement checking, checksum (SUM-8) or CRC-16 (CRC16_XMODEM) mode, NAK-driven retransmission. Never touches the framing engine — the frame boundary is derived from the fixed data length carried by the Header byte itself.',
