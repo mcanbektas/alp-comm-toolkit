@@ -742,6 +742,15 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'matter', () =>
     import('./wireless/matter/matter').then((module) => module.matterPlugin),
   );
+  // Wi-Fi (IEEE 802.11) — Faz 10 dalga 18a: MAC KATMANI. Girdi ÇIPLAK 802.11
+  // çerçevesi + 4 baytlık FCS (`LINKTYPE_IEEE802_11` = 105); radiotap/PPI/
+  // Prism/AVS ve pcap zarfı AYRI link-type'lardır ve KAPSAM DIŞIDIR
+  // (`[KARAR 18-2]`). Motor `wifi/dot11Frame.ts`te ve PAYLAŞILAN çekirdektir:
+  // 18b (yönetim gövdeleri + IE) ve 18c (esp-now) onu tüketecek. Gövde bu
+  // dalgada HAM kalır; `Protected = 1` ise "şifreli" damgasıyla durulur.
+  registerOnce(registry, 'wifi', () =>
+    import('./wireless/wifi/wifi').then((module) => module.wifiPlugin),
+  );
   // AT Commands — Faz 10 dalga 9b: ITU-T V.250 / 3GPP TS 27.007 jenerik
   // çerçeveleme (komut/yanıt ayrımı, URC, final result code sözel VE sayısal
   // — ATV0 numeric mode dalga 9 madde 7'de eklendi, tüm AT lehçelerine

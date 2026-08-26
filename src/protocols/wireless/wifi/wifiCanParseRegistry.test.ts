@@ -1,0 +1,187 @@
+import { describe, expect, it } from 'vitest';
+
+import { createProtocolRegistry } from '@/protocol-core/registry';
+
+import { registerBuiltInProtocols } from '../../index';
+import { hasFcslessDot11Signature, hasStrictFcslessDot11Signature } from './dot11Frame';
+import { wifiParser, wifiPlugin } from './wifi';
+
+/**
+ * Faz 10 dalga 18a — ZORUNLU bekçi (15f/15g/15h/16c/17'den beri kural), ve
+ * bu dosya **ÜÇ YÖNLÜ** koşuyor:
+ *
+ *   1. **İleri** — `wifi.canParse` (imza W12) registry'deki BAŞKA hiçbir
+ *      örneği kabul etmiyor mu? Ana brif ölçümü 899 örnek üzerinde SIFIR
+ *      çakışma buldu; bu tur 909 örnek üzerinde onu YENİDEN üretti. Sayı
+ *      kodda tekrar üretilmezse, registry büyüdükçe bir gün başka bir kaydın
+ *      örneği bu imzayı geçebilir ve `wifi` otomatik algılamada onun
+ *      çerçevesini SESSİZCE çalar.
+ *   2. **Ters** — FCS'SİZ imza YAZILSAYDI kaç çerçeve çalardı? Ana brif
+ *      ölçümü **216 / 899**; bu tur onu BİREBİR yeniden üretti. En dar
+ *      FCS'siz varyant bile **110**. `[KARAR 18-2]`nin ikinci ayağı budur:
+ *      **FCS bu kaydın auto-detection'da var olabilmesinin TEK sebebidir.**
+ *   3. **Kendi üzerinde** — `wifi`nin TÜM örneklerinde `canParse` `true`,
+ *      bozuk-FCS örneği HARİÇ. O istisna SESSİZCE ATLANMAZ, AÇIKÇA `false`
+ *      beklenir: imza FCS'e dayanıyor ve yakalamanın kendi bozuk çerçevesinin
+ *      reddedilmesi DOĞRU davranıştır.
+ *
+ * Emsal: `lonworksCanParseRegistry.test.ts` (17), `iec61162CanParseRegistry.test.ts` (16c).
+ */
+
+interface RegistrySweep {
+  readonly registeredProtocols: number;
+  readonly totalExamples: number;
+  /** `wifi` DIŞINDAKİ kayıtlardan W12'yi geçenler — boş olmalı. */
+  readonly foreignHits: string[];
+  /** Aynı kümede FCS'siz imzayı geçenler — kabul edilemez sayı. */
+  readonly fcslessForeignHits: string[];
+  /** FCS'siz imzanın EN DAR biçimi — yine kabul edilemez. */
+  readonly strictFcslessForeignHits: string[];
+  readonly ownHits: string[];
+  readonly ownMisses: string[];
+}
+
+async function sweepRegistry(): Promise<RegistrySweep> {
+  const registry = createProtocolRegistry();
+  registerBuiltInProtocols(registry);
+
+  const foreignHits: string[] = [];
+  const fcslessForeignHits: string[] = [];
+  const strictFcslessForeignHits: string[] = [];
+  const ownHits: string[] = [];
+  const ownMisses: string[] = [];
+  let totalExamples = 0;
+
+  const ids = registry.registeredProtocolIds();
+  for (const id of ids) {
+    const plugin = await registry.loadProtocolPlugin(id);
+    for (const example of plugin.exampleFrames) {
+      totalExamples += 1;
+      const label = `${id}/${example.id} (${String(example.bytes.length)}B)`;
+      const accepted = wifiParser.canParse(example.bytes);
+      if (id === 'wifi') {
+        (accepted ? ownHits : ownMisses).push(label);
+      } else {
+        if (accepted) foreignHits.push(label);
+        if (hasFcslessDot11Signature(example.bytes)) fcslessForeignHits.push(label);
+        if (hasStrictFcslessDot11Signature(example.bytes)) strictFcslessForeignHits.push(label);
+      }
+    }
+  }
+
+  return {
+    registeredProtocols: ids.length,
+    totalExamples,
+    foreignHits,
+    fcslessForeignHits,
+    strictFcslessForeignHits,
+    ownHits,
+    ownMisses,
+  };
+}
+
+describe('wifi canParse — üç yönlü bekçi', () => {
+  it(
+    'İLERİ: registry’deki BAŞKA hiçbir örnek W12 imzasını geçmez',
+    async () => {
+      const sweep = await sweepRegistry();
+
+      // Sağlık kontrolü: tarama gerçekten TAM registry üzerinde koştu mu?
+      // Ana brif ölçümü 144 kayıt / 899 örnekti; dalga 18a `wifi`yi ekledi.
+      expect(
+        sweep.totalExamples,
+        'registry örnek sayısı beklenenden düşük — tarama TAM registry üzerinde mi koştu?',
+      ).toBeGreaterThan(900);
+      expect(sweep.registeredProtocols).toBeGreaterThanOrEqual(145);
+
+      // ÖLÇÜM: ana brifin 899 örnek üzerinde bulduğu 0 çakışma, bugün de 0.
+      expect(
+        sweep.foreignHits.length,
+        `yabancı çakışmalar (${String(sweep.foreignHits.length)}):\n${sweep.foreignHits.join('\n')}`,
+      ).toBe(0);
+    },
+    30000,
+  );
+
+  it(
+    'TERS: FCS`siz imza YAZILSAYDI yüzlerce çerçeve ÇALARDI — kapsam kararının kanıtı',
+    async () => {
+      const sweep = await sweepRegistry();
+
+      // Brif ölçümü W13 = 216 / 899 (%24). Sayı registry büyüdükçe kayabilir
+      // ama BÜYÜKLÜK SINIFI kaymaz: FCS'siz 802.11 imzasının ayırt edici
+      // hiçbir çapası yok.
+      expect(
+        sweep.fcslessForeignHits.length,
+        'FCS`siz imzanın çakışma sayısı beklenmedik biçimde DÜŞTÜ — kapsam kararının dayanağı yeniden ölçülmeli',
+      ).toBeGreaterThanOrEqual(200);
+
+      // EN DAR FCS'siz varyant (sınıf başına asgari uzunluk kapısı da olan)
+      // bile 110 çakışıyor. İki sayı da aynı kararı veriyor.
+      expect(sweep.strictFcslessForeignHits.length).toBeGreaterThanOrEqual(100);
+      expect(sweep.strictFcslessForeignHits.length).toBeLessThan(
+        sweep.fcslessForeignHits.length,
+      );
+
+      // Uçurum KARARIN kendisidir: 0'a karşı 200+.
+      expect(sweep.fcslessForeignHits.length).toBeGreaterThan(sweep.foreignHits.length + 200);
+    },
+    30000,
+  );
+
+  it(
+    'KENDİ ÜZERİNDE: dokuz örnek imzayı geçer, bozuk-FCS örneği AÇIKÇA geçmez',
+    async () => {
+      const sweep = await sweepRegistry();
+      expect(sweep.ownHits.length).toBe(9);
+
+      // TEK istisna ve KASITLI: imzanın çapası FCS'tir, yakalamanın kendi
+      // bozuk çerçevesinin reddedilmesi DOĞRU davranıştır. Sessizce atlanmaz.
+      expect(sweep.ownMisses).toHaveLength(1);
+      expect(sweep.ownMisses[0]).toContain('wifi/corrupt-fcs');
+
+      // Aynı çerçeve `parse` edilebiliyor ve FAIL basıyor — `canParse`ın
+      // reddi bir GÖRMEZDEN GELME değil, auto-detection kararı.
+      const corrupt = wifiPlugin.exampleFrames.find((entry) => entry.id === 'corrupt-fcs');
+      if (corrupt === undefined) throw new Error('missing corrupt-fcs example');
+      const result = wifiParser.parse(corrupt.bytes);
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.frame.valid).toBe(false);
+    },
+    30000,
+  );
+
+  it('W12 DÖRT koşulun TAMAMIDIR — üçü yetmez', () => {
+    const base = wifiPlugin.exampleFrames.find((entry) => entry.id === 'beacon')?.bytes;
+    if (base === undefined) throw new Error('missing beacon example');
+    expect(wifiParser.canParse(base)).toBe(true);
+
+    // 1) Protokol sürümü 0 olmalı.
+    const version = Uint8Array.from(base);
+    version[0] = (version[0] ?? 0) | 0x01;
+    expect(wifiParser.canParse(version), 'protokol sürümü').toBe(false);
+
+    // 2) Type 3 (Extension) elenir.
+    const extension = Uint8Array.from(base);
+    extension[0] = ((extension[0] ?? 0) & ~0x0c) | 0x0c;
+    expect(wifiParser.canParse(extension), 'extension türü').toBe(false);
+
+    // 3) Sınıf-farkındalıklı asgari uzunluk.
+    expect(wifiParser.canParse(base.subarray(0, 27)), 'asgari uzunluk').toBe(false);
+
+    // 4) FCS geçerli olmalı — tek başına en güçlü koşul.
+    const fcs = Uint8Array.from(base);
+    fcs[base.length - 2] = ((fcs[base.length - 2] ?? 0) ^ 0x01) & 0xff;
+    expect(wifiParser.canParse(fcs), 'FCS').toBe(false);
+  });
+
+  it('`canParse` kaydın kendi örneklerinde `parse`la TUTARLIDIR', () => {
+    for (const example of wifiPlugin.exampleFrames) {
+      const accepted = wifiParser.canParse(example.bytes);
+      const result = wifiParser.parse(example.bytes);
+      // İmzayı geçen her örnek varsayılan seçeneklerle en azından ÇÖZÜLEBİLİR
+      // olmalı (geçerli olmak zorunda değil — bozuk örnek de burada).
+      if (accepted) expect(result.success, example.id).toBe(true);
+    }
+  });
+});

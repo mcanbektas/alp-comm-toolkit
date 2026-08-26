@@ -233,9 +233,10 @@ export const wirelessIotDomain: CatalogDomain = {
           id: 'wifi',
           name: 'Wi-Fi',
           summary:
-            'IEEE 802.11 wireless LAN whose management, control and data frames are analysed from PCAP or monitor-mode captures to explain association, roaming and retry behaviour.',
+            'IEEE 802.11 wireless LAN whose management, control and data frames are analysed from PCAP or monitor-mode captures to explain association, roaming and retry behaviour. DECODED: the bare MAC frame with its 4-byte FCS — 11 Frame Control subfields, all four addresses resolved through the ToDS/FromDS role matrix, sequence and fragment numbers, QoS and HT Control, CRC-32 FCS PASS/FAIL. NOT DECODED YET: management frame bodies and information elements (next sub-wave). OUT OF SCOPE: radiotap / PPI / Prism / AVS headers and the pcap envelope (separate libpcap link types), HT/VHT/HE PHY parameters, the EAPOL handshake, WEP/TKIP/CCMP decryption, A-MSDU / A-MPDU and defragmentation.',
           layer: 'data-link',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'wifi',
           tabs: ['overview', 'decode', 'timing', 'diagnostics', 'examples'],
           tools: [
             'Frame Class Filter (Management / Control / Data)',

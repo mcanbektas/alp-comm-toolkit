@@ -34,23 +34,31 @@ import { modeSBytesFromHex, modeSParser, modeSPlugin } from '../modeS/modeS';
 const REGISTRY_EXAMPLE_HEALTH_THRESHOLD = 700;
 
 /**
- * `mode-s`in registry'deki yanlış pozitif SAYISI — **2026-08-26 ölçümü**.
- * Tavan değil, ÖLÇÜLMÜŞ değer: artarsa yeni bir çerçeve imzaya sızmıştır,
- * azalırsa imza daralmıştır; iki durumda da bakılması gerekir.
+ * `mode-s`in registry'deki yanlış pozitif SAYISI — **dalga 18a'da yeniden
+ * ölçüldü (888 yabancı örnek)**. Tavan değil, ÖLÇÜLMÜŞ değer: artarsa yeni
+ * bir çerçeve imzaya sızmıştır, azalırsa imza daralmıştır; iki durumda da
+ * bakılması gerekir.
  *
- * 849 örneğin **6'sı** (%0,71) kabul ediliyor ve altısı da AP sınıfından
+ * 888 örneğin **7'si** (%0,79) kabul ediliyor ve yedisi de AP sınıfından
  * (DF0/4/5/16/20/21) geçiyor, yani üçüncü kanıtın (CRC) BULUNMADIĞI daldan:
  *   `hart/long-request-secondary-master` (14 bayt) ·
  *   `length-based-protocol/valid-frame` (7) · `mavlink/v2-large-message-id` (14) ·
  *   `profibus-dp/sd3-fixed-data` (14) · `telnet/terminal-type-subnegotiation` (14) ·
- *   `tftp/data-final-block` (7)
+ *   `tftp/data-final-block` (7) · **`wifi/ack` (14) — dalga 18a'da eklendi**
  *
- * Karşılaştırma: üç kanıttan yalnız uzunluk kalsaydı (7 ya da 14 bayt) **25**
- * örnek (%2,9) kabul edilirdi — DF'in atanmışlığı ve uzunlukla tutarlılığı
+ * > **Yedinci giriş bir REGRESYON DEĞİL, bekçinin İŞİNİ YAPMASIDIR.** Dalga
+ * > 18a `wifi`nin 14 baytlık ACK örneğini registry'ye soktu ve `mode-s`in
+ * > imzası uzunluk + DF atanmışlığına dayandığı için onu sahiplendi. `wifi`
+ * > tarafında bir düzeltme YOK: `wifi.canParse` aynı çerçeveyi FCS'le
+ * > doğruluyor ve `mode-s`in örneklerinden HİÇBİRİNİ almıyor (18a'nın kendi
+ * > bekçisi bunu 0 olarak ölçüyor). Ayrım sıralamada değil, KANITTA.
+ *
+ * Karşılaştırma: üç kanıttan yalnız uzunluk kalsaydı (7 ya da 14 bayt) **27**
+ * örnek (%3,0) kabul edilirdi — DF'in atanmışlığı ve uzunlukla tutarlılığı
  * yanlış pozitifi dörtte birine indiriyor, ama SIFIRA indiremiyor ve
  * indiremez: `modeS.ts` dosya başındaki AP tuzağı bunun matematiksel sebebi.
  */
-const MODE_S_REGISTRY_FALSE_POSITIVE_COUNT = 6;
+const MODE_S_REGISTRY_FALSE_POSITIVE_COUNT = 7;
 
 /**
  * `ads-b` için beklenen SIFIR ve bu bir tavan DEĞİL kesin bir beklentidir:

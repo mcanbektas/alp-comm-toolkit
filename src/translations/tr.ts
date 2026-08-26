@@ -7790,6 +7790,125 @@ export const tr = {
   'protocol.lonworks.example.rawPduWithCrc.name': 'Kuyruk CRC\'li ham PDU (türetilmiş)',
   'protocol.lonworks.example.rawPduWithCrc.description':
     'İlk örneğin LonTalk PDU\'su, zarfı soyulmuş ve sonuna CRC-16/GENIBUS eklenmiş hâli. Varsayılan tünel modunda ÇÖZÜLMEZ — yük türünü "ham PDU + kuyruk CRC\'si" yapın, o zaman CRC gerçekten doğrulanır.',
+  // --- Wi-Fi (IEEE 802.11) — Faz 10 dalga 18a, MAC katmanı ---
+  // Alt tip adları, adres rolleri (RA/TA/DA/SA/BSSID), OUI adları ve alan
+  // adları VERİDİR; çeviriye GİRMEZ (CLAUDE.md).
+  'protocol.wifi.documentation.summary':
+    'IEEE 802.11 MAC çerçevesi çözücüsü. Girdi ÇIPLAK 802.11 çerçevesidir ve 4 baytlık FCS DAHİLDİR (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism ve AVS başlıkları libpcap\'in AYRI link-type\'larıdır ve kapsam dışındadır. Yönetim, kontrol ve veri çerçevelerinin üçü de BAŞLIK düzeyinde çözülür: 11 Frame Control alt alanı, dört adresin ToDS/FromDS matrisiyle çözülen rolleri, sıra ve parça numarası, QoS ve HT Control, CRC-32 FCS PASS/FAIL. Gövde bu sürümde ham kalır; şifreli çerçevede anahtar olmadan ÖTEYE İNİLMEZ.',
+
+  'protocol.wifi.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.wifi.error.emptyFrame': 'Boş çerçeve çözülemez.',
+  'protocol.wifi.error.frameTooLong': 'Çerçeve verilen azami uzunluğu aşıyor.',
+  'protocol.wifi.error.tooShortForHeader':
+    'Çerçeve 802.11 MAC başlığı için çok kısa. Bu sınıfın başlığı hesaplanan uzunluğa ulaşmıyor — girdi kesik ya da bir 802.11 çerçevesi değil.',
+  'protocol.wifi.error.tooShortForFcs':
+    'FCS "var" seçildi ama başlıktan sonra dört bayt kalmıyor. Girdi FCS\'siz ise seçeneği "yok" yapın.',
+  'protocol.wifi.error.extensionTypeOutOfScope':
+    'Type 3 (Extension) çerçeveleri KAPSAM DIŞIDIR: DMG Beacon ayrı bir başlık düzeni taşır ve bu çözücü onu okumaz.',
+  'protocol.wifi.error.fcsMismatch':
+    'FCS tutmuyor: hesaplanan CRC-32 çerçevenin son dört baytıyla eşleşmiyor.',
+
+  'protocol.wifi.warning.protocolVersionNotZero':
+    'Protokol sürümü 0 değil. IEEE 802.11 başka bir sürüm tanımlamadı — çerçeve büyük olasılıkla bozuk ya da 802.11 değil.',
+  'protocol.wifi.warning.unknownSubtype':
+    'Alt tip bu sürümün tablosunda yok. Bu bir HATA DEĞİLDİR: alt tip uzayı 802.11 revizyonlarıyla büyüyor, alan ham basılır.',
+  'protocol.wifi.warning.controlGeometryUnknown':
+    'Kontrol çerçevesinin alt tipi adlandırılmış kümede değil ve başlık geometrisi alt tipe göre değişiyor. Yalnız Frame Control, Duration ve Address 1 basıldı; kalan baytlar ham bırakıldı — bir Address 2 varsaymak onu UYDURMAK olurdu.',
+  'protocol.wifi.warning.fcsMismatch':
+    'Son dört bayt geçerli bir CRC-32 üretmiyor. İki olasılık var ve çerçeveden ayırt edilemez: çerçeve gerçekten bozuk, ya da girdi FCS taşımıyor. FCS seçeneğini "yok" yaparak ikinci okumayı deneyebilirsiniz.',
+  'protocol.wifi.warning.fcsAbsent':
+    'Başlıktan sonra FCS için dört bayt kalmadığı için FCS okunmadı.',
+  'protocol.wifi.warning.qosControlForced':
+    'QoS Control alanının varlığı elle geçersiz kılındı; alt tipten türetilen değer kullanılmadı.',
+  'protocol.wifi.warning.htControlForced':
+    'HT Control alanının varlığı elle geçersiz kılındı; +HTC bitinden türetilen değer kullanılmadı.',
+  'protocol.wifi.warning.orderBitWithoutHtControl':
+    'Bit 15 açık ama bu çerçeve sınıfında anlamı "Order"dır, "+HTC" değil — HT Control alanı YOKTUR. Bu ayrımı kaçırmak gövdeyi dört bayt kaydırırdı.',
+  'protocol.wifi.warning.managementDsBitsSet':
+    'Yönetim çerçevesinde ToDS ve FromDS bitleri sıfır olmak zorundadır; burada biri açık.',
+  'protocol.wifi.warning.bodyNotDecoded':
+    'Çerçeve gövdesi bu sürümde çözülmedi ve ham bırakıldı. Yönetim gövdeleri ile bilgi elemanları bir sonraki alt dalgada açılacak; kontrol ve veri gövdeleri kapsam dışıdır.',
+  'protocol.wifi.warning.encryptedPayload':
+    'Protected biti açık: gövde şifrelidir (WEP/TKIP/CCMP/GCMP) ve anahtar olmadan çözülemez. Anahtar tarayıcıdan çıkmaz, gövde UYDURULMAZ — ham bırakıldı.',
+  'protocol.wifi.warning.radiotapOutOfScope':
+    'Girdi ÇIPLAK 802.11 MAC çerçevesi olarak okundu (FCS dahil). Radiotap, PPI, Prism ve AVS başlıkları ile pcap zarfı ayrı link-type\'lardır ve bu sayfada çözülmez — yakalamanızda böyle bir başlık varsa önce soyun.',
+
+  'protocol.wifi.field.fcsMismatch': 'FCS tutmuyor.',
+  'protocol.wifi.field.unknownSubtype': 'Alt tip tabloda yok; ham basıldı.',
+  'protocol.wifi.field.protocolVersionNotZero': 'Geçerli tek protokol sürümü 0\'dır.',
+  'protocol.wifi.field.dsBitsUnexpected': 'Yönetim çerçevesinde beklenmeyen DS biti.',
+  'protocol.wifi.field.bodyNotDecoded': 'Gövde çözülmedi.',
+  'protocol.wifi.field.encryptedPayload': 'Şifreli gövde; anahtar yok.',
+
+  'protocol.wifi.option.fcsPresent': 'FCS var mı',
+  'protocol.wifi.option.fcsPresent.description':
+    'FCS\'in varlığı bir RADIOTAP BAYRAĞIDIR ve radiotap kapsam dışıdır — çerçevenin kendisinden okunamaz. Wireshark bunu iki ayrı dissector\'la çözüyor. "Otomatik" girdi sözleşmesine uyar ve son dört baytı FCS sayar; tutmazsa uyarı basar, sessizce yok saymaz.',
+  'protocol.wifi.option.fcsPresent.auto': 'Otomatik (sözleşmeye göre var say)',
+  'protocol.wifi.option.fcsPresent.yes': 'Var',
+  'protocol.wifi.option.fcsPresent.no': 'Yok',
+
+  'protocol.wifi.option.addressRoleDisplay': 'Adres rolü gösterimi',
+  'protocol.wifi.option.addressRoleDisplay.description':
+    'Adreslerin anlamı ToDS ve FromDS bitlerine göre değişir; "Address 1 = hedef" VARSAYILMAZ. Çözülmüş rol matrisin sonucudur, ham gösterim yalnız Address 1..4 der.',
+  'protocol.wifi.option.addressRoleDisplay.resolved': 'Çözülmüş rol (DA / SA / BSSID)',
+  'protocol.wifi.option.addressRoleDisplay.raw': 'Ham (yalnız Address 1..4)',
+  'protocol.wifi.option.addressRoleDisplay.both': 'İkisi birden (RA/TA ve çözülmüş)',
+
+  'protocol.wifi.option.qosControlPresent': 'QoS Control alanı',
+  'protocol.wifi.option.qosControlPresent.description':
+    'Alan alt tipin 3. bitinden çıkar, ama tescilli ve eski cihazlar bundan sapabiliyor. "Otomatik" türetir; elle geçersiz kılma yalnız sapan bir yakalamada gerekir.',
+
+  'protocol.wifi.option.htControlPresent': 'HT Control alanı',
+  'protocol.wifi.option.htControlPresent.description':
+    'Frame Control\'ün 15. biti VERİ çerçevelerinde "Order", QoS Data ve yönetim çerçevelerinde "+HTC" anlamına gelir; alan yalnız ikincisinde vardır. "Otomatik" bu tür kapısını uygular.',
+
+  'protocol.wifi.option.presence.auto': 'Otomatik',
+  'protocol.wifi.option.presence.yes': 'Var',
+  'protocol.wifi.option.presence.no': 'Yok',
+
+  'protocol.wifi.option.protectedPayloadDisplay': 'Şifreli gövde gösterimi',
+  'protocol.wifi.option.protectedPayloadDisplay.description':
+    'Şifreli gövde HER İKİ şıkta da ÇÖZÜLMEZ; bu yalnız bir gösterim tercihidir. "Damgalı" gövdeyi uzunluğuyla anar, "Onaltılık" ham baytları döker.',
+  'protocol.wifi.option.protectedPayloadDisplay.marked': 'Damgalı (çözülmedi yazar)',
+  'protocol.wifi.option.protectedPayloadDisplay.hex': 'Onaltılık dökümü',
+
+  'protocol.wifi.option.vendorAddressLabels': 'Üretici etiketleri',
+  'protocol.wifi.option.vendorAddressLabels.description':
+    'MAC adresinin ilk üç baytı bir IEEE OUI kaydıdır ama üretici adı ÇERÇEVEDE YOKTUR. Bu sayfa tam bir OUI veritabanı taşımaz; yalnız bu kaydın örneklerinde geçen beş ön eki adlandırır. Liste dar olduğu için kapatılabilir.',
+  'protocol.wifi.option.vendorAddressLabels.show': 'Göster',
+  'protocol.wifi.option.vendorAddressLabels.hide': 'Gizle',
+
+  'protocol.wifi.example.beacon.name': 'Beacon — SSID "Coherer"',
+  'protocol.wifi.example.beacon.description':
+    'Gerçek yakalamadan 144 baytlık bir Beacon. Aritmetik: 24 (MAC başlığı) + 12 (sabit alanlar) + 104 (bilgi elemanları) + 4 (FCS). Bu sürümde MAC başlığı çözülür, 116 baytlık gövde ham kalır, FCS PASS basar.',
+  'protocol.wifi.example.ack.name': 'ACK — 14 bayt, en kısa çerçeve',
+  'protocol.wifi.example.ack.description':
+    'Yakalamanın en kısa çerçevesi. Address 2 ve Sequence Control YOKTUR — kontrol çerçevelerinin başlık geometrisi alt tipe göre değişir ve bu örnek ofset zincirinin en sert sınavıdır.',
+  'protocol.wifi.example.protectedData.name': 'Korumalı veri çerçevesi (FromDS = 1)',
+  'protocol.wifi.example.protectedData.description':
+    'Protected biti açık: gövde şifrelidir ve ÖTEYE İNİLMEZ. ToDS = 0 / FromDS = 1 dalı burada kanıtlanır — Address 1 hedef (STP çoklu yayın adresi), Address 2 BSSID, Address 3 kaynak.',
+  'protocol.wifi.example.probeRequest.name': 'Probe Request — joker BSSID',
+  'protocol.wifi.example.probeRequest.description':
+    'Address 3 yayın adresidir (joker BSSID). "Address 3 ya yayındır ya da Address 2\'ye eşittir" biçimindeki dar imza bu yüzden REDDEDİLDİ: aynı yakalamadaki Authentication çerçevesi onu yanlış negatife düşürüyordu.',
+  'protocol.wifi.example.authentication.name': 'Authentication',
+  'protocol.wifi.example.authentication.description':
+    'Address 3 ile Address 2 FARKLIDIR — reddedilen dar imzanın yanlış negatif ürettiği çerçeve tam olarak budur. Aritmetik: 24 + 6 (sabit alanlar) + 4 = 34.',
+  'protocol.wifi.example.associationResponse.name': 'Association Response',
+  'protocol.wifi.example.associationResponse.description':
+    'Aritmetik: 24 + 6 (sabit alanlar) + 24 (bilgi elemanları) + 4 = 58. Gövde bir sonraki alt dalgada açılacak.',
+  'protocol.wifi.example.disassociation.name': 'Disassociation',
+  'protocol.wifi.example.disassociation.description':
+    'En kısa yönetim çerçevesi: 24 + 2 (Reason Code) + 4 = 30.',
+  'protocol.wifi.example.fourAddressWds.name': 'Dört adresli WDS (türetilmiş)',
+  'protocol.wifi.example.fourAddressWds.description':
+    'Adres rol matrisinin DÖRDÜNCÜ dalı (ToDS = FromDS = 1) gerçek yakalamada YOK. Korumalı veri çerçevesinden türetildi: DS bitleri açıldı ve 24. ofsete altı baytlık Address 4 eklendi. FCS elle yazılmadı, motorun CRC-32\'siyle yeniden hesaplandı.',
+  'protocol.wifi.example.qosData.name': 'QoS veri çerçevesi (türetilmiş)',
+  'protocol.wifi.example.qosData.description':
+    'QoS Control alanının varlığını kanıtlar. Korumalı veri çerçevesinin alt tipi 8 (QoS Data) yapıldı ve 24. ofsete iki baytlık QoS Control eklendi (TID 6). Protected biti KORUNDU: gövde hâlâ şifrelidir ve onu düz metin ilan etmek yalan olurdu. FCS yeniden hesaplandı.',
+  'protocol.wifi.example.corruptFcs.name': 'Bozuk FCS — yakalamanın kendi çerçevesi',
+  'protocol.wifi.example.corruptFcs.description':
+    'UYDURULMADI: 1093 çerçevelik gerçek yakalamanın kendisinde bozuk olan 13 çerçeveden biri. Protokol sürümü ve uzunluk geçerli, YALNIZ FCS tutmuyor — otomatik algılama imzası bu çerçeveyi bu yüzden reddeder ve bu BEKLENEN davranıştır.',
+
 } as const;
 
 /**

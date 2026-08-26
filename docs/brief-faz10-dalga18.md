@@ -907,6 +907,69 @@ SİLİNMEZ.)*
 
 *(Uygulama turları koştukça DOLDURULUR. Yanlış öngörüler SİLİNMEZ, işaretlenir.)*
 
+#### 18a (`wifi` MAC katmanı)
+
+11. **"18a'nın ofset zinciri sözde-kodu uygulanabilir."**
+    `docs/brief-faz10-dalga18a.md:141`in Management/Data dalı
+    `if (FC.order) → n += 4 (HT Control)` diyor, **tür kapısı YOK.**
+    **ÇÜRÜDÜ — ve brifin KENDİ TUZAK NOTU (`:145-149`) doğruyu yazıyor:**
+    HT Control yalnız **QoS Data ve Yönetim** çerçevelerinde vardır;
+    QoS-olmayan bir Data çerçevesinde aynı bit "Order"dır ve alan YOKTUR.
+    Sözde-kod uygulanmış olsaydı böyle bir çerçevenin gövdesi **4 bayt
+    kayardı, HATA VERMEDEN.** Uygulama tuzak notunu izledi
+    (`dot11Frame.ts` `htControlIsMeaningful`), sözde-kodu değil.
+    *Bu, dalga 17'nin "yorum ile kod ayrışırsa KOD kazanır" dersinin bir
+    BRİF üzerindeki karşılığıdır: aynı belgenin iki cümlesi çelişince
+    kazanan, ölçülebilir sonucu olan cümledir.*
+
+12. **"W13 = sınıf-farkındalıklı, FCS'siz imza = 216 / 899."**
+    **SAYI DOĞRU, ETİKET YANLIŞ.** 216 bu turda BİREBİR yeniden üretildi,
+    ama yalnız **sınıf başına asgari uzunluk kapısı OLMADAN** (protokol
+    sürümü 0 + type ≠ 3 + n ≥ 10). Sınıf kapısı da eklenince sayı
+    **110**'a düşüyor — ki o da brifin `W1` satırıyla (110 / 899) birebir
+    aynı. **Karar iki sayıda da AYNI** (0'a karşı 110 ya da 216, ikisi de
+    kabul edilemez); bekçi `wifiCanParseRegistry.test.ts` İKİSİNİ DE ölçer
+    ki gelecek nesil etiketten değil ÖLÇÜMDEN beslensin.
+
+13. **"`fcsPresent` `auto` = son 4 bayt CRC-32 tutuyorsa var say."**
+    (`docs/brief-faz10-dalga18a.md:185`.) **ÇÜRÜDÜ — aynı brifin
+    TAMAMLANMA ÖLÇÜTÜYLE çelişiyor:** `:335` *"Bozuk-FCS örneği FAIL
+    basıyor"* diyor, ama "tutmuyorsa yok say" kuralı o örnekte FCS alanını
+    HİÇ BASMAZ ve FAIL görünmez. İkisi aynı anda doğru olamaz.
+    **Ölçüt kazandı:** `auto` girdi sözleşmesine uyar (FCS VAR sayar),
+    PASS/FAIL basar ve tutmadığında *"çerçeve bozuk olabilir ya da girdi
+    FCS'siz olabilir, `fcsPresent = no` ile deneyin"* uyarısını düşürür.
+    Bir FAIL'i gizlemek, bir belirsizliği yanlış tarafa çözmekten ağırdır.
+
+14. **"Keşif turunun elle çözdüğü çerçeveler ŞÜPHELİDİR" (dalga 17 dersi).**
+    **BU TURDA ÇÜRÜMEDİ — sekiz gerçek çerçevenin HEPSİ tuttu.** Uzunluk
+    aritmetiği (`başlık + gövde + FCS === n`), IE zincirlerinin bayt
+    toplamları (Beacon 104, AssocResp 24, ProbeReq 25), Sequence Control
+    okuması (`50 f8` → frag 0 / seq 3973) ve sekiz FCS'in hepsi bağımsızca
+    yeniden hesaplandı; **sapma YOK.** Brifin `[KANIT]` etiketleri
+    gerçekten kanıta bağlıymış.
+
+15. **"Katalog eklemesi SIFIR, sayı 38'de kalır."** **DOĞRU ÇIKTI ve
+    kanıtlandı:** gerçek ACK çerçevesinde `computeNamedCrc(…, 'CRC32')`
+    FCS'i birebir üretiyor, sahte dost `CRC32C` aynı baytlarda BAŞKA
+    sonuç veriyor (`dot11Frame.test.ts` ikisini de ASSERT ediyor).
+    `crcCatalogue.ts` / `crcEngine.test.ts` / `CrcCalculatorTool.test.tsx`
+    dosyalarına DOKUNULMADI.
+
+16. **`mode-s`in registry yanlış pozitif sayısı 6 → 7 oldu.**
+    **Bir regresyon DEĞİL, bekçinin İŞİNİ YAPMASI:** `wifi`nin 14 baytlık
+    ACK örneği registry'ye girdi ve `mode-s`in uzunluk + DF tabanlı imzası
+    onu sahiplendi (`modeS.ts`in AP tuzağının matematiksel sonucu).
+    Ters yön TEMİZ: `wifi.canParse` `mode-s`in hiçbir örneğini almıyor.
+    `surveillanceCanParseRegistry.test.ts`teki ölçüm 7'ye güncellendi ve
+    gerekçesi oraya yazıldı.
+
+17. **Tahmin kalibrasyonu.** `decodeOptions` kanal sayısı **6 tahmin →
+    6 gerçek** (tam isabet). Çeviri anahtarı **~80 tahmin → 71 gerçek**
+    (%11 aşağı) — sebep yine "protokol adları veridir, çevrilmez" kuralı:
+    alt tip adları, adres rolleri (RA/TA/DA/SA/BSSID) ve OUI adlarının
+    hiçbiri sözlüğe girmedi.
+
 ---
 
 ## Açık sorular

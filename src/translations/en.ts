@@ -7804,4 +7804,121 @@ export const en: TranslationDictionary = {
   'protocol.lonworks.example.rawPduWithCrc.name': 'Raw PDU with trailing CRC (derived)',
   'protocol.lonworks.example.rawPduWithCrc.description':
     'The LonTalk PDU of the first example with the envelope stripped and a CRC-16/GENIBUS appended. It does NOT decode in the default tunnel mode — switch the payload kind to "raw PDU + trailing CRC" and the CRC is really verified.',
+  // --- Wi-Fi (IEEE 802.11) — Phase 10 wave 18a, MAC layer ---
+  'protocol.wifi.documentation.summary':
+    'IEEE 802.11 MAC frame decoder. The input is the BARE 802.11 frame with its 4-byte FCS INCLUDED (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism and AVS headers are SEPARATE libpcap link types and are out of scope. All three classes — management, control and data — are decoded at HEADER level: 11 Frame Control subfields, all four addresses resolved through the ToDS/FromDS matrix, sequence and fragment numbers, QoS and HT Control, CRC-32 FCS PASS/FAIL. The body stays raw in this release; on a protected frame nothing below the header is decoded without keys.',
+
+  'protocol.wifi.error.aborted': 'Decoding was cancelled.',
+  'protocol.wifi.error.emptyFrame': 'An empty frame cannot be decoded.',
+  'protocol.wifi.error.frameTooLong': 'The frame exceeds the supplied maximum length.',
+  'protocol.wifi.error.tooShortForHeader':
+    'The frame is too short for an 802.11 MAC header. The header this class requires does not fit — the input is truncated or is not an 802.11 frame.',
+  'protocol.wifi.error.tooShortForFcs':
+    'FCS was forced to "present" but there are no four bytes left after the header. Set the option to "absent" if the input carries no FCS.',
+  'protocol.wifi.error.extensionTypeOutOfScope':
+    'Type 3 (Extension) frames are OUT OF SCOPE: the DMG Beacon uses a different header layout and this decoder does not read it.',
+  'protocol.wifi.error.fcsMismatch':
+    'FCS mismatch: the calculated CRC-32 does not match the last four bytes of the frame.',
+
+  'protocol.wifi.warning.protocolVersionNotZero':
+    'The protocol version is not 0. IEEE 802.11 never defined another version — the frame is most likely corrupt or not 802.11 at all.',
+  'protocol.wifi.warning.unknownSubtype':
+    'The subtype is not in this release\'s table. This is NOT an error: the subtype space grows with each 802.11 revision, so the field is printed raw.',
+  'protocol.wifi.warning.controlGeometryUnknown':
+    'This control frame subtype is not in the named set and the header geometry differs per subtype. Only Frame Control, Duration and Address 1 were printed; the remaining bytes were left raw — assuming an Address 2 would be INVENTING one.',
+  'protocol.wifi.warning.fcsMismatch':
+    'The last four bytes do not form a valid CRC-32. Two readings are possible and the frame cannot tell them apart: it really is corrupt, or the input carries no FCS. Set the FCS option to "absent" to try the second reading.',
+  'protocol.wifi.warning.fcsAbsent':
+    'No FCS was read because fewer than four bytes remain after the header.',
+  'protocol.wifi.warning.qosControlForced':
+    'The presence of the QoS Control field was overridden manually; the value derived from the subtype was not used.',
+  'protocol.wifi.warning.htControlForced':
+    'The presence of the HT Control field was overridden manually; the value derived from the +HTC bit was not used.',
+  'protocol.wifi.warning.orderBitWithoutHtControl':
+    'Bit 15 is set, but in this frame class it means "Order", not "+HTC" — there is NO HT Control field here. Missing that distinction would shift the body by four bytes.',
+  'protocol.wifi.warning.managementDsBitsSet':
+    'ToDS and FromDS must both be zero in a management frame; one of them is set here.',
+  'protocol.wifi.warning.bodyNotDecoded':
+    'The frame body was not decoded in this release and was left raw. Management bodies and information elements arrive in the next sub-wave; control and data bodies are out of scope.',
+  'protocol.wifi.warning.encryptedPayload':
+    'The Protected bit is set: the body is encrypted (WEP/TKIP/CCMP/GCMP) and cannot be decoded without keys. Keys never leave the browser and the body is NEVER invented — it was left raw.',
+  'protocol.wifi.warning.radiotapOutOfScope':
+    'The input was read as a BARE 802.11 MAC frame (FCS included). Radiotap, PPI, Prism and AVS headers and the pcap envelope are separate link types and are not decoded here — strip them first if your capture carries one.',
+
+  'protocol.wifi.field.fcsMismatch': 'FCS mismatch.',
+  'protocol.wifi.field.unknownSubtype': 'Subtype not in the table; printed raw.',
+  'protocol.wifi.field.protocolVersionNotZero': 'The only valid protocol version is 0.',
+  'protocol.wifi.field.dsBitsUnexpected': 'Unexpected DS bit in a management frame.',
+  'protocol.wifi.field.bodyNotDecoded': 'Body not decoded.',
+  'protocol.wifi.field.encryptedPayload': 'Encrypted body; no key.',
+
+  'protocol.wifi.option.fcsPresent': 'FCS present',
+  'protocol.wifi.option.fcsPresent.description':
+    'FCS presence is a RADIOTAP FLAG and radiotap is out of scope — it cannot be read from the frame itself. Wireshark solves this with two separate dissectors. "Automatic" follows the input contract and treats the last four bytes as the FCS; on a mismatch it warns instead of silently dropping the field.',
+  'protocol.wifi.option.fcsPresent.auto': 'Automatic (assume present, per contract)',
+  'protocol.wifi.option.fcsPresent.yes': 'Present',
+  'protocol.wifi.option.fcsPresent.no': 'Absent',
+
+  'protocol.wifi.option.addressRoleDisplay': 'Address role display',
+  'protocol.wifi.option.addressRoleDisplay.description':
+    'Address meanings change with the ToDS and FromDS bits; "Address 1 = destination" is NEVER assumed. The resolved role is the matrix result; the raw display just says Address 1..4.',
+  'protocol.wifi.option.addressRoleDisplay.resolved': 'Resolved role (DA / SA / BSSID)',
+  'protocol.wifi.option.addressRoleDisplay.raw': 'Raw (Address 1..4 only)',
+  'protocol.wifi.option.addressRoleDisplay.both': 'Both (RA/TA and resolved)',
+
+  'protocol.wifi.option.qosControlPresent': 'QoS Control field',
+  'protocol.wifi.option.qosControlPresent.description':
+    'The field follows from bit 3 of the subtype, but proprietary and legacy devices can deviate. "Automatic" derives it; the manual override is only needed for a deviating capture.',
+
+  'protocol.wifi.option.htControlPresent': 'HT Control field',
+  'protocol.wifi.option.htControlPresent.description':
+    'Bit 15 of Frame Control means "Order" in data frames and "+HTC" in QoS data and management frames; the field exists only in the latter. "Automatic" applies that type gate.',
+
+  'protocol.wifi.option.presence.auto': 'Automatic',
+  'protocol.wifi.option.presence.yes': 'Present',
+  'protocol.wifi.option.presence.no': 'Absent',
+
+  'protocol.wifi.option.protectedPayloadDisplay': 'Encrypted body display',
+  'protocol.wifi.option.protectedPayloadDisplay.description':
+    'An encrypted body is NOT decoded under either choice; this is a display preference only. "Marked" names the body with its length, "Hex" dumps the raw bytes.',
+  'protocol.wifi.option.protectedPayloadDisplay.marked': 'Marked (says not decoded)',
+  'protocol.wifi.option.protectedPayloadDisplay.hex': 'Hex dump',
+
+  'protocol.wifi.option.vendorAddressLabels': 'Vendor labels',
+  'protocol.wifi.option.vendorAddressLabels.description':
+    'The first three bytes of a MAC address are an IEEE OUI assignment, but the vendor name is NOT ON THE WIRE. This page ships no full OUI database; it labels only the five prefixes that appear in this record\'s examples. The list is deliberately narrow, so it can be turned off.',
+  'protocol.wifi.option.vendorAddressLabels.show': 'Show',
+  'protocol.wifi.option.vendorAddressLabels.hide': 'Hide',
+
+  'protocol.wifi.example.beacon.name': 'Beacon — SSID "Coherer"',
+  'protocol.wifi.example.beacon.description':
+    'A real 144-byte Beacon from the capture. Arithmetic: 24 (MAC header) + 12 (fixed fields) + 104 (information elements) + 4 (FCS). This release decodes the MAC header, leaves the 116-byte body raw and prints FCS PASS.',
+  'protocol.wifi.example.ack.name': 'ACK — 14 bytes, the shortest frame',
+  'protocol.wifi.example.ack.description':
+    'The shortest frame in the capture. It has NO Address 2 and NO Sequence Control — control frame header geometry varies per subtype, and this example is the hardest test of the offset chain.',
+  'protocol.wifi.example.protectedData.name': 'Protected data frame (FromDS = 1)',
+  'protocol.wifi.example.protectedData.description':
+    'The Protected bit is set: the body is encrypted and nothing below it is decoded. The ToDS = 0 / FromDS = 1 branch is proven here — Address 1 is the destination (an STP multicast address), Address 2 the BSSID, Address 3 the source.',
+  'protocol.wifi.example.probeRequest.name': 'Probe Request — wildcard BSSID',
+  'protocol.wifi.example.probeRequest.description':
+    'Address 3 is the broadcast address (wildcard BSSID). The narrow signature "Address 3 is broadcast or equals Address 2" was REJECTED for this reason: the Authentication frame in the same capture turned it into a false negative.',
+  'protocol.wifi.example.authentication.name': 'Authentication',
+  'protocol.wifi.example.authentication.description':
+    'Address 3 DIFFERS from Address 2 — this is exactly the frame on which the rejected narrow signature produced a false negative. Arithmetic: 24 + 6 (fixed fields) + 4 = 34.',
+  'protocol.wifi.example.associationResponse.name': 'Association Response',
+  'protocol.wifi.example.associationResponse.description':
+    'Arithmetic: 24 + 6 (fixed fields) + 24 (information elements) + 4 = 58. The body opens in the next sub-wave.',
+  'protocol.wifi.example.disassociation.name': 'Disassociation',
+  'protocol.wifi.example.disassociation.description':
+    'The shortest management frame: 24 + 2 (Reason Code) + 4 = 30.',
+  'protocol.wifi.example.fourAddressWds.name': 'Four-address WDS (derived)',
+  'protocol.wifi.example.fourAddressWds.description':
+    'The FOURTH branch of the address role matrix (ToDS = FromDS = 1) does not occur in the real capture. Derived from the protected data frame: both DS bits were set and a six-byte Address 4 was inserted at offset 24. The FCS was NOT written by hand — it was recomputed with the engine\'s own CRC-32.',
+  'protocol.wifi.example.qosData.name': 'QoS data frame (derived)',
+  'protocol.wifi.example.qosData.description':
+    'Proves the QoS Control field exists. The protected data frame was retyped to subtype 8 (QoS Data) and a two-byte QoS Control (TID 6) was inserted at offset 24. The Protected bit was KEPT: the body is still ciphertext and calling it plaintext would be a lie. The FCS was recomputed.',
+  'protocol.wifi.example.corruptFcs.name': 'Corrupt FCS — the capture\'s own frame',
+  'protocol.wifi.example.corruptFcs.description':
+    'NOT INVENTED: one of the 13 frames that are genuinely corrupt inside the real 1,093-frame capture. The protocol version and the length are valid, ONLY the FCS fails — which is why the auto-detection signature rejects this frame, and that is the EXPECTED behaviour.',
+
 };
