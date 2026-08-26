@@ -77,6 +77,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'seatalk', () =>
     import('./marine/seatalk/seatalk').then((module) => module.seatalkPlugin),
   );
+  // IEC 61162 — dalga 16c, `marine-navigation` domain'ini KAPATAN kayıt.
+  // Keşif hipotezi ("kendi teli yok, `uavcan-compatibility` emsali") ÇÜRÜDÜ:
+  // `-450` profilinin GERÇEK bir teli var (`UdPbC\0` + TAG block + cümle) ve
+  // `canParse` bu yüzden `true` DÖNER — altı baytlık sabit önek 870 örnek
+  // üzerinde SIFIR çakışma verdi. `-1`/`-2`/`-3`/`-460` yalnız YÖNLENDİRME
+  // görünümüdür. `nmeaChecksum.ts` + `nmeaSentences.ts` TÜKETİLİR, kod
+  // kopyalanmaz (`ais.ts` emsali).
+  registerOnce(registry, 'iec-61162', () =>
+    import('./marine/iec61162/iec61162').then((module) => module.iec61162Plugin),
+  );
   // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
   // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
   registerOnce(registry, 'can-2-0a', () =>

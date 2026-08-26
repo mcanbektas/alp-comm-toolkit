@@ -16,7 +16,14 @@ import type { CatalogDomain } from '../types';
  *
  * IEC 61162'nin beş alt varyantı (-1/-2/-3/-450/-460) ayrı protokol kaydı değil:
  * tek kayıtta `tools` içinde transport profili olarak geçiyor. Ayrı kayıt yapmak
- * 172 sayımını bozardı ve varyantlar bağımsız motor gerektirmiyor.
+ * 172 sayımını bozardı ve varyantlar bağımsız motor gerektirmiyor. Bu HÂLÂ
+ * doğrudur, ama dalga 16c'de bir şey değişti: varyantlardan BİRİNİN (-450)
+ * kendine ait, gerçek bir tel biçimi olduğu beş bağımsız uygulamada
+ * doğrulandı (`UdPbC\0` + TAG block + NMEA cümlesi). Kayıt artık gerçek bir
+ * çözücü taşıyor (`pluginId: 'iec-61162'`, rozet `partial`): `-450`nin ASCII
+ * teli ÇÖZÜLÜR, `-1`/`-2`/`-3`/`-460` ise `transportProfile` seçeneğiyle
+ * yönlendirme görünümü basar. `-450`nin ikinci (binary `R?UdP`) teli, Ed.2'nin
+ * PGN kapsüllemesi ve `a:` authentication içeriği KAPSAM DIŞIDIR.
  *
  * `definitions` alanı buradaki hiçbir protokolde standart bir dosya biçimine
  * (DBC/EDS/…) karşılık gelmez; NMEA sentence revision DB, NMEA 2000 PGN DB, AIS
@@ -128,9 +135,10 @@ export const marineNavigationDomain: CatalogDomain = {
           id: 'iec-61162',
           name: 'IEC 61162',
           summary:
-            'International standard family for digital interfaces between shipboard navigation and radiocommunication equipment, spanning low-speed serial sentences (-1), high-speed serial (-2), the CAN instrument network (-3) and Ethernet multicast interconnection (-450/-460).',
+            'International standard family for digital interfaces between shipboard navigation and radiocommunication equipment, spanning low-speed serial sentences (-1), high-speed serial (-2), the CAN instrument network (-3) and Ethernet multicast interconnection (-450/-460). DECODED: the IEC 61162-450 "UdPbC" datagram in full — the six-byte UdPbC+NUL token, every TAG block with its own checksum verified over its own byte range, the s:/n:/g:/c:/d:/r:/t:/i: parameters, one or more embedded NMEA sentences each with its own checksum verified over a DIFFERENT byte range, the CRLF terminator and the 1472-byte datagram ceiling. ROUTED, NOT DECODED: -1 and -2 are NMEA 0183 on a serial line (4800 and 38400 bit/s), -3 is NMEA 2000, and -460 defines no application protocol of its own — selecting them prints a routing table pointing at the page that really decodes them. NOT AVAILABLE AT ALL: the second, entirely separate RaUdP/RpUdP/RrUdP binary file transfer wire, the Edition 2 IEC 61162-3 PGN encapsulation (its five-character token is not public), the Edition 2 TCP-based transfer, and the contents of the a: authentication tag (its format is not public — the tag is recognised, never decoded). The multicast transmission group is NOT in the payload at all: it lives in the UDP/IP header, so it can only be supplied by the user and is always flagged as such.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'iec-61162',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
           tools: [
             'Transport Profile',

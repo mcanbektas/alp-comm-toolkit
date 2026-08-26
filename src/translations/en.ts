@@ -2194,6 +2194,124 @@ export const en: TranslationDictionary = {
   'protocol.seatalk.example.targetWaypointName.description':
     'Built by inverting Knauf\'s four-character encoding for the name "WPT1"; all three complement pairs pass.',
 
+
+  // --- IEC 61162 (wave 16c; the -450 "UdPbC" wire is DECODED, the other four profiles are ROUTED) ---
+  'protocol.iec61162.documentation.summary':
+    'IEC 61162 — the international standard family for digital interfaces between shipboard navigation and radiocommunication equipment. DECODED: the IEC 61162-450 "UdPbC" datagram end to end — the six-byte UdPbC+NUL token, every TAG block verified with its own checksum over its OWN byte range, the s:/n:/g:/c:/d:/r:/t:/i: parameters, one or more NMEA sentences sharing the same datagram (each with its own checksum over a DIFFERENT byte range), the CRLF terminator and the 1472-byte datagram ceiling. ROUTED, NOT DECODED: -1 and -2 are NMEA 0183 itself on a serial line (4800 and 38400 bit/s), -3 is NMEA 2000, and -460 defines NO application protocol of its own — selecting those profiles decodes no frame and prints a routing table pointing at the page that really decodes them. NOT AVAILABLE AT ALL: the second and entirely separate RaUdP/RpUdP/RrUdP binary file transfer wire, the Edition 2 IEC 61162-3 PGN encapsulation (its five-character token is not public), the Edition 2 TCP-based transfer, and the CONTENTS of the a: authentication tag (its format is not public — the tag is recognised, never decoded). The multicast transmission group is NOT in the payload at all: it lives in the UDP/IP header, so it can only come from the user and is always flagged as not read from the wire.',
+  'protocol.iec61162.error.aborted': 'Parsing was aborted.',
+  'protocol.iec61162.error.emptyDatagram': 'An empty datagram cannot be parsed.',
+  'protocol.iec61162.error.tooShort':
+    'The datagram is too short to carry the six-byte "UdPbC" + NUL token.',
+  'protocol.iec61162.error.invalidMagicToken':
+    'The first six bytes are not 55 64 50 62 43 00 ("UdPbC" + NUL) — this is not an IEC 61162-450 datagram.',
+  'protocol.iec61162.error.binaryTransferOutOfScope':
+    'This is the SECOND wire of IEC 61162-450: the RaUdP/RpUdP/RrUdP binary file transfer. Recognised but OUT OF SCOPE — it is a separate wire format (38-byte big-endian header, fragment reassembly, MIME file descriptor) and the difference in meaning between the three tokens is not public.',
+  'protocol.iec61162.error.noSentence':
+    'No NMEA sentence starting with "$" or "!" was found after the token.',
+  'protocol.iec61162.error.unterminatedTagBlock':
+    'A TAG block ended without its closing backslash ("\\").',
+  'protocol.iec61162.error.missingTagBlock':
+    'The datagram carries no TAG block. The standard makes the source tag (s:) mandatory; because implementations deviate, the "TAG block required" option can be turned off.',
+  'protocol.iec61162.error.missingSentenceChecksum':
+    'The sentence checksum delimiter ("*") was not found.',
+  'protocol.iec61162.error.tagChecksumMismatch':
+    'TAG block checksum mismatch — its coverage runs from the backslash to the asterisk, which is NOT the range the sentence checksum covers.',
+  'protocol.iec61162.error.sentenceChecksumMismatch':
+    'Sentence checksum mismatch — its coverage runs from "$"/"!" to the asterisk, which is NOT the range the TAG block checksum covers.',
+  'protocol.iec61162.error.missingTerminator':
+    'The last sentence of the datagram does not end with CRLF and strict terminator mode is on.',
+  'protocol.iec61162.warning.frameNotDecodedInRoutingProfile':
+    'The selected transport profile has no wire of its own — NO frame was decoded. The table below points at the page that really decodes it.',
+  'protocol.iec61162.warning.groupFromUserNotWire':
+    'The multicast group is NOT in the frame, it lives in the UDP/IP header — the group shown was not read from the wire, it is your selection.',
+  'protocol.iec61162.warning.groupTalkerMismatch':
+    'The talker IDs in this datagram are not in the documented talker set of the group you selected — the group choice may be wrong.',
+  'protocol.iec61162.warning.transmissionGroupUnknown':
+    'The multicast group was not printed because it is not in the payload. If you know it, supply it through the "Multicast group" option.',
+  'protocol.iec61162.warning.datagramExceedsStandardLimit':
+    'The datagram exceeds the standard\'s own 1472-byte limit (ISIS 2011 §5.3) — decoding continued, but IP fragmentation is a risk.',
+  'protocol.iec61162.warning.timestampScaleInferred':
+    'The scale of the c: timestamp is NOT in the frame; it was inferred from the digit count (10 digits → seconds, 13 digits → milliseconds). An inferred scale is not a measurement, so no unit is written on the field.',
+  'protocol.iec61162.warning.timestampScaleUnknown':
+    'The c: timestamp has neither 10 nor 13 digits — the scale could not be inferred and NO scale was claimed.',
+  'protocol.iec61162.warning.authTagNotDecoded':
+    'The a: authentication tag was recognised but not decoded — its format is not public and no new cryptographic surface is opened.',
+  'protocol.iec61162.warning.tagBlockMissing':
+    'At least one record has no TAG block; the standard makes the source tag (s:) mandatory.',
+  'protocol.iec61162.warning.sourceParameterMissing':
+    'At least one record is missing the mandatory source parameter (s:).',
+  'protocol.iec61162.warning.tagBlockExceedsMaxLength':
+    'A TAG block exceeds the 80-byte limit.',
+  'protocol.iec61162.warning.unknownTagParameter':
+    'A TAG parameter outside the dictionary is present — its letter is shown, its meaning was NOT invented.',
+  'protocol.iec61162.warning.encapsulationSentence':
+    'The datagram carries an encapsulation sentence starting with "!" (typically AIS) — its contents are decoded on the AIS page.',
+  'protocol.iec61162.warning.sentenceEnvelopeOnly':
+    'The sentence was printed as an ENVELOPE: the subject of this page is the -450 transport. For a field-by-field decode set "Sentence decoding" to "Full" or use the NMEA 0183 page.',
+  'protocol.iec61162.warning.sentenceExceedsNmeaLimit':
+    'A sentence falls outside the NMEA 0183 7-82 character limit. That limit belongs to the SENTENCE, not to the datagram.',
+  'protocol.iec61162.warning.missingTerminator':
+    'A sentence does not end with CRLF. The sources are split: two independent implementations require CRLF, one does not.',
+  'protocol.iec61162.field.checksumMismatch': 'Checksum mismatch.',
+  'protocol.iec61162.field.timestampScaleInferred': 'Scale inferred, not measured.',
+  'protocol.iec61162.field.timestampScaleUnknown': 'Scale could not be inferred.',
+  'protocol.iec61162.field.authNotDecoded': 'Format is not public — not decoded.',
+  'protocol.iec61162.field.unknownParameter': 'Parameter outside the dictionary — meaning not invented.',
+  'protocol.iec61162.field.groupFromUserNotWire': 'Not read from the wire — user selection.',
+  'protocol.iec61162.field.sentenceNotDecoded':
+    'Sentence contents were not decoded on this page (envelope mode).',
+  'protocol.iec61162.field.tagBlockTooLong': 'The 80-byte TAG block limit was exceeded.',
+  'protocol.iec61162.option.boolean.on': 'On',
+  'protocol.iec61162.option.boolean.off': 'Off',
+  'protocol.iec61162.option.transportProfile': 'Transport profile',
+  'protocol.iec61162.option.transportProfile.description':
+    'Of the five profiles only -450 has a wire of its own. Selecting any other decodes no frame and prints a routing table instead.',
+  'protocol.iec61162.option.transmissionGroup': 'Multicast group',
+  'protocol.iec61162.option.transmissionGroup.description':
+    'The group address and port live in the UDP/IP header, NOT in the payload. If left unset the group field is never printed; if set, an unconditional "not read from the wire" warning is raised and the datagram\'s talker IDs are checked against the group\'s documented set.',
+  'protocol.iec61162.option.transmissionGroup.unknown': 'Unknown (default — no group field)',
+  'protocol.iec61162.option.sentenceDecoding': 'Sentence decoding',
+  'protocol.iec61162.option.sentenceDecoding.description':
+    'The subject of this page is the -450 TRANSPORT; the sentence itself is fully decoded on the NMEA 0183 page. Choosing "Full" opens the embedded sentence field by field here as well.',
+  'protocol.iec61162.option.sentenceDecoding.envelopeOnly': 'Envelope only (default)',
+  'protocol.iec61162.option.sentenceDecoding.full': 'Full — decode the sentence field by field',
+  'protocol.iec61162.option.requireTagBlock': 'TAG block required',
+  'protocol.iec61162.option.requireTagBlock.description':
+    'The standard makes the source tag (s:) mandatory but implementations deviate. Turning this off also decodes datagrams without a TAG block.',
+  'protocol.iec61162.option.strictTerminator': 'CRLF terminator required',
+  'protocol.iec61162.option.strictTerminator.description':
+    'The sources are split: two independent implementations require CRLF and reject the datagram without it, one accepts its absence. The default is permissive — a datagram that decodes fully is not rejected over a missing CRLF.',
+  'protocol.iec61162.option.timestampScale': 'Timestamp scale',
+  'protocol.iec61162.option.timestampScale.description':
+    'The scale of the c: parameter is NOT in the frame. The default infers it from the digit count; if you know your vendor you can force it.',
+  'protocol.iec61162.option.timestampScale.infer': 'Infer from digit count (default)',
+  'protocol.iec61162.option.timestampScale.seconds': 'Seconds',
+  'protocol.iec61162.option.timestampScale.milliseconds': 'Milliseconds',
+  'protocol.iec61162.option.maxDatagramBytes': 'Maximum datagram size (bytes)',
+  'protocol.iec61162.option.maxDatagramBytes.description':
+    'The limit set by the standard\'s own authors is 1472 bytes (the maximum UDP payload in a single Ethernet frame). Exceeding it raises a warning, not an error.',
+  'protocol.iec61162.example.singleSentenceRot.name': 'Single sentence — HEROT (real capture, 40 bytes)',
+  'protocol.iec61162.example.singleSentenceRot.description':
+    'The iec-61162-450-nmea.pcap capture from FKIE maritime-dissector. One TAG block (s:HE0001*45) and one sentence ($HEROT,+000.05,A*35); BOTH checksums were independently recomputed in this wave and hold.',
+  'protocol.iec61162.example.multiTagRot.name': 'Two TAG blocks, one sentence (real capture, 53 bytes)',
+  'protocol.iec61162.example.multiTagRot.description':
+    'Two TAG blocks in front of the same sentence: d:HE0002*51 (destination) and s:HE0001*45 (source). Each block\'s checksum covers its OWN range.',
+  'protocol.iec61162.example.multiSentenceNavd.name': 'Eight sentences in one datagram (real capture, 568 bytes)',
+  'protocol.iec61162.example.multiSentenceNavd.description':
+    'FKIE\'s multi-sentence capture: every sentence carries its own TAG block (s:/n:/c:) and its own checksum. The 13-digit c: value is INFERRED as milliseconds. This capture targets 239.192.0.4:60104 — the correct NAVD address but not the documented port 60004; the engine never trusts the port anyway.',
+  'protocol.iec61162.example.tagChecksumCorrupt.name': 'TAG checksum corrupt (sentence intact)',
+  'protocol.iec61162.example.tagChecksumCorrupt.description':
+    'The SAME bytes as the single-sentence capture with only the last digit of the TAG checksum corrupted (45 → 46). The TAG reads FAIL while the sentence stays PASS — proof that the two checksums cover DIFFERENT byte ranges.',
+  'protocol.iec61162.example.sentenceChecksumCorrupt.name': 'Sentence checksum corrupt (TAG intact)',
+  'protocol.iec61162.example.sentenceChecksumCorrupt.description':
+    'The same bytes, this time with only the last digit of the SENTENCE checksum corrupted (35 → 36). The sentence reads FAIL while the TAG stays PASS — the mirror image of the previous example.',
+  'protocol.iec61162.example.noTagBlock.name': 'No TAG block (rejected by the strict default)',
+  'protocol.iec61162.example.noTagBlock.description':
+    'The same sentence without a TAG block. Because the standard makes the s: tag mandatory it is rejected with the default settings; turning "TAG block required" off decodes it in full.',
+  'protocol.iec61162.example.binaryTransferOutOfScope.name': 'RrUdP binary transfer (OUT OF SCOPE wire)',
+  'protocol.iec61162.example.binaryTransferOutOfScope.description':
+    'The real 38-byte header from FKIE\'s iec-61162-450-binary-type1.pcap capture. It is the SECOND wire of -450; the engine RECOGNISES it and says "out of scope" explicitly instead of silently reporting an invalid token.',
+
   // --- XMODEM (never touches the framing engine, thin wrapper over xmodemCore.ts) ---
   'protocol.xmodem.documentation.summary':
     'Stop-and-wait serial file transfer — 128- or 1024-byte blocks, block-number complement checking, checksum (SUM-8) or CRC-16 (CRC16_XMODEM) mode, NAK-driven retransmission. Never touches the framing engine — the frame boundary is derived from the fixed data length carried by the Header byte itself.',

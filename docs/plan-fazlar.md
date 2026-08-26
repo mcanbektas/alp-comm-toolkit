@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 15 KAPANDI — `aerospace-uav` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation` ve `automotive`dan sonra **beşinci kapanan domain**). Kalan iş **8 kanonik kayıt**: wireless-iot 4, marine-navigation 3, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 16 KAPANDI — `marine-navigation` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation`, `automotive` ve `aerospace-uav`dan sonra **altıncı kapanan domain**). Kalan iş **5 kanonik kayıt**: wireless-iot 4, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -338,9 +338,159 @@ parser'ın önüne gelen bir katman kapsam dışı bırakıldı ve sayfa metnine
 (4) **`crcBits()` bu domain'de HİÇ tüketici bulamadı** — keşif turunun öngörüsü
 çürüdü, gerekçe `brief-faz10-dalga15.md`nin "Çürüyen tahminler" bölümünde.
 
-Sıradaki domain seçimi HENÜZ YAPILMADI — kalan üç domain'de (`wireless-iot` 4,
+~~Sıradaki domain seçimi HENÜZ YAPILMADI — kalan üç domain'de (`wireless-iot` 4,
 `marine-navigation` 3, `building-automation` 1) hiç iş başlamadı, toplam
-**8 kanonik kayıt** açık.
+**8 kanonik kayıt** açık.~~ (Dalga 15'in kapanış notu; dalga 16
+`marine-navigation`ı kapattı — aşağı.)
+
+**`marine-navigation` domain'i TAMAMEN BİTTİ — dalga 16 kapandı.**
+
+**Dalga 16 kapanış özeti (16a-16c, 3 alt dalga / 3 kanonik kayıt, 2026-08-26):**
+`marine-navigation`ın beş ailesinden ikisi bu dalgada kapandı
+(`legacy-proprietary-marine` 16a hdlc-based-marine + 16b seatalk,
+`nmea-family` 16c iec-61162); `ais`, `gnss-corrections` ve `marine-machinery`
+zaten doluydu. Üç kayıttan **1'i `ready`** (hdlc-based-marine), **2'si
+`partial`** (seatalk — kaynak güvenilirliği + komut biti çerçevede yok;
+iec-61162 — `UdPbC`-only kapsam kararı). Domain toplamı: 11 kayıt =
+**6 `ready` + 2 `partial` + 3 alias**, `planned` KALMADI (KODDAN doğrulandı,
+tek kullanımlık sayım script'i: 172 kayıt ham 124 `ready` / 20 `planned` /
+28 `partial`, alias çözülünce 139 / 5 / 28). Deponun kanonik borcu **8 → 5**
+indi (wireless-iot 4, building-automation 1).
+
+Üç kayıt AYRI briflerle yürütüldü çünkü **hiçbir kod, kaynak ya da tel biçimi
+paylaşmıyorlar** — 15c'nin (`sbus`+`ibus`) birleştirme gerekçesi olan "ortak
+yardımcı burada doğuyor" durumu bu dalgada hiç doğmadı. Dalganın **Görev 0**'ı
+kod yazılmadan ÖNCE koştu: `ProtocolPage.test.tsx` (seatalk'a sabit) ve
+`e2e/nmea-decode.spec.ts` (iec-61162'ye sabit) fixture'ları katalogdan
+türetilir hâle getirildi — 15b'nin "mayını patlamadan sök" dersi. İkisi de bu
+dalgada kendiliğinden `building-automation/lonworks/lonworks`a kaydı; hiçbiri
+kırılmadı.
+
+**16a (`hdlc-based-marine`, `ready`)** — `hdlcCore.ts`in (dalga 10c'de
+"paylaşılan çekirdek" ilan edilmişti) **ÜÇÜNCÜ tüketicisi**; `hdlc.ts`/`sdlc.ts`
+şablon alındı, kod KOPYALANMADI, çekirdeğe DOKUNULMADI. Katalog checksum
+eklemesi YOK: `CRC16_X25` zaten katalogda ve `check = 0x906E` fixture'ı
+doğrulanmış. **Aynı poly aynı algoritma DEĞİLDİR**: katalogda poly `0x1021`
+taşıyan dört giriş var, `CRC16_KERMIT` (`init=0 xorout=0`, check `0x2189`) ve
+`CRC16_CCITT_FALSE` sahte dost olarak dosya başında AÇIKÇA reddedildi. Yedi
+`decodeOptions` kanalı açıldı ve üçünün gerekçesi belgelenmiş bir denizcilik
+vakası: AIS'in VDL katmanı (ITU-R M.1371-6 Annex 2 §A2-3.2.2) control alanını
+TAMAMEN atıyor ve FCS'i yalnız 168 veri bitini kapsıyor — `controlFieldBytes: 0`
+ve `fcsCoverage: 'information-only'` uydurma esneklik değil. `canParse` DAİMA
+`false`: `0x7E…0x7E` zarfı 141 kayıt / 873 örnekte `hdlc`/`sdlc` ile çakışıyor.
+Brifte olmayan iki karar: `rfc1662-octet-stuffed` modunda alan offset'leri
+MANTIKSAL ve `asyncEscapingAssumed` uyarısıyla söyleniyor; `iso-13239-modulo8`
++ 2 baytlık control'de ikinci bayt ayrı bir `control-extended` candidate alanı,
+uydurma modulo-128 yorumu YOK.
+
+**16b (`seatalk`, `partial`)** `legacy-proprietary-marine` ailesini kapattı ve
+dalganın kaynak-disiplini açısından en zorlu işi oldu. **HİÇBİR paylaşılan
+çekirdek tüketilmedi ve bu bilinçli**: SeaTalk ASCII değil, `$`/`*`
+sınırlayıcısı yok, CAN değil, **checksum'ı HİÇ YOK** (Knauf Part 1/2/3'ün tam
+metninde `checksum`/`CRC` araması sıfır sonuç). **59 komut TANINIR, 22'si
+ÇÖZÜLÜR** — yalnız ikinci bir bağımsız uygulamada da teyitli olanlar (SignalK
+`nmea0183-signalk`in 21 hook'u + canboat'ın PGN 126720 tüneli); kalan 37'de
+payload HAM kalır ve `commandPayloadNeedsVendorMap` basılır (`ads-b`nin Type
+Code kararının birebir biçimi). Brifin "60 komut" sayısı ÇÜRÜDÜ: `C7` fantom —
+Knauf Part 2'nin metninde yalnız `C1…C8` waypoint adı yer tutucusunun
+sarmalanmış devamında geçiyor, komut baytı değil. **İki kaynak ÜÇ yerde
+çelişti** ve üçünde de kaynağın KENDİ worked example'ıyla aritmetik olarak
+doğrulanan okuma alındı (0x85 XTE nibble sırası `(XX<<4)|X`; 0x20 hız
+little-endian; 0x84/0x9C başlık düzeltme terimi popcount) — üçüncüsünde iki
+okuma ayrıştığı için alan `headingCorrectionAmbiguous` uyarısı TAŞIYOR.
+**Komut biti çerçevede YOKTUR**: datagram sınırını belirleyen dokuzuncu bit
+UART'ın parity bitindedir ve `Uint8Array`de yer almaz — komut alanı
+`Command (assumed)` adını taşır, HER çözümde koşulsuz `commandBitNotInBytes` ve
+`noIntegrityCheckOnWire` uyarıları basılır (`mil-std-1553`ün 15g'deki "sözcük
+tipi çerçevede yok" bulgusunun aynı sınıfı). `canParse` DAİMA `false` ve bu
+ÖLÇÜLMÜŞ: naif uzunluk imzası 27/870, Knauf'un 59 komutuyla daraltılmış imza
+bile 7/870 yanlış pozitif veriyor; bekçi testi iki sayıyı ALT SINIR olarak
+sabitliyor.
+
+**16c (`iec-61162`, `partial`)** aileyi VE domain'i kapattı ve **keşif
+hipotezinin çürüdüğü kayıt** oldu: "kendi teli yok, `uavcan-compatibility`
+emsali, `canParse` daima `false`" öngörüsü yanlış çıktı. `-450` profilinin
+gerçek bir teli var (`55 64 50 62 43 00` = `"UdPbC"`+NUL + TAG block + cümle +
+CRLF) ve tel BEŞ bağımsız uygulamada birebir aynı (FKIE `maritime-dissector`,
+`ipal_transcriber`, `PyLWE`, `gosk`, `EsDemo`). Üç gerçek `.pcap` yakalaması bu
+alt dalgada doğrudan indirildi, UDP payload'ları çıkarıldı ve **her iki
+checksum'ı da bağımsız yeniden hesaplandı**; üçü de `exampleFrames` oldu.
+`canParse` bu yüzden **`true` döner** ve bekçi testi ilk kez TERS yönde koşuyor:
+kanıtlanan şey yanlış pozitifin **SIFIR** olduğu (143 kayıt / 886 örnek, 0
+çakışma).
+
+Alt dalganın en incelikli noktası **aynı datagramda İKİ checksum'ın FARKLI bayt
+aralıkları kapsamasıydı**: TAG bloğunun `*hh`si `\` ile `*` arasını
+(`XOR("s:HE0001") = 0x45`), gömülü cümlenin `*hh`si `$`/`!` ile `*` arasını
+(`XOR("HEROT,+000.05,A") = 0x35`) kapsar — algoritma AYNI, kapsam FARKLI ve tek
+bir fonksiyonla çözmek HATA VERMEDEN yanlış PASS/FAIL basardı. İki aralık İKİ
+AYRI modülde yaşıyor (`lweTagBlock.ts` TAG'i, `iec61162.ts` cümleyi bilir) ve
+iki türetilmiş örnek çerçeve (biri TAG checksum'ı, öteki cümleninki tek hane
+bozuk) ayrımı ekranda kanıtlıyor: biri FAIL basarken öteki PASS kalıyor.
+`nmeaXorChecksum`/`formatNmeaChecksum` `nmeaChecksum.ts`ten DOĞRUDAN import
+edildi, `parseNmeaSentence` KULLANILMADI (`$` başlangıcını sabit varsayıyor —
+`ais.ts:10-20`in birebir emsali) ve `nmeaChecksum.ts`e DOKUNULMADI.
+
+Üç bilgi çerçevede YOK ve üçü de farklı biçimde raporlanıyor: (1)
+**çok-noktaya-yayın grubu UDP/IP başlığındadır**, payload'da hiç yok —
+seçilmezse alan HİÇ BASILMAZ (`mode-s`in DF-bağımlı CRC alanını hiç basmaması
+emsali), seçilirse koşulsuz `groupFromUserNotWire` uyarısı düşer; (2) **`c:`
+zaman damgasının ÖLÇEĞİ** çerçeveden anlaşılmaz (gerçek yakalamada 13 hane =
+ms, gpsd'nin örneğinde 10 hane = s) — hane sayısından ÇIKARILIR,
+`timestampScaleInferred` basılır ve **`unit` ATANMAZ**, çünkü çıkarılmış bir
+ölçek ölçüm değildir; (3) **`a:` authentication tag'inin biçimi kamuya açık
+değil** — TANINIR, ÇÖZÜLMEZ, yeni kripto yüzeyi AÇILMAZ. Ayrıca `-1`/`-2`/`-3`/
+`-460` profilleri `transportProfile` ile seçilince motor **çerçeve ÇÖZMEZ**,
+`uavcanCompatibility.ts` biçiminde bir yönlendirme tablosu basar ve kullanıcıyı
+`nmea-0183`/`nmea-2000` sayfalarına yollar.
+
+Brifte yazmayan üç karar: (1) `decodeOptions` **5 → 7**'ye çıktı — brifin kendi
+"görünen adaylar" listesindeki `timestampScale` (ölçek çerçevede yok, kullanıcı
+vendor'unu biliyor olabilir) ve `strictTerminator` (`ipal_transcriber` ve FKIE
+CRLF'i ŞART koşuyor, PyLWE koşmuyor; varsayılan PERMİSİF çünkü CRLF'siz datagram
+tam çözülebiliyor) eklendi; (2) transmission group'un **düz metin anlamsal
+açıklaması BASILMADI** — o açıklama standardın paywall'lı Tablo 4'ünde ve
+ikinci elden aktarmak "uydurma kaynak" hatası olurdu; onun yerine iki bağımsız
+kaynakta birebir örtüşen **talker kümesi** basılıyor ve motor datagramdaki
+gerçek talker ID'lerini o kümeyle KARŞILAŞTIRIP çelişkide `groupTalkerMismatch`
+uyarıyor — kullanıcının iddiası telle SINANIYOR; (3) `R?UdP` binary teli
+**TANINIR ve AÇIKÇA "kapsam dışı" der**, sessizce "geçersiz önek" demez —
+FKIE'nin gerçek binary yakalamasının 38 baytlık başlığı bunun örnek çerçevesi.
+`ParsedField.id` çakışması (sekiz cümle aynı düz tabloda) hem sıra numarasıyla
+hem de bir `Set` üzerinden yapısal olarak garantiye alındı ve iki testle
+bekçilendi.
+
+Dokunulan dosyalar (16c): `iec61162.ts` + `lweTagBlock.ts` (+ üç test dosyası),
+`marine-navigation.ts` (`iec-61162` `planned` → `partial` + `pluginId` + domain
+yorumu), `protocols/index.ts`, `index.test.ts`, `tr.ts`/`en.ts` (2×73 anahtar —
+brif ~35-45 bekliyordu), `e2e/iec-61162-decode.spec.ts` (8 test). Tam paket
+yeşil: **5782 birim** (5719 → +63) · **1203 e2e** (1195 → +8) ·
+`npm run typecheck` · `npm run build`. **Katalog checksum eklemesi dalga
+BOYUNCA SIFIR** — `CrcCalculatorTool.test.tsx` 37'de kaldı, `crcCatalogue.ts` ve
+`nmeaChecksum.ts` hiç değişmedi. Dalga 13'ten beri `crcCatalogue.ts`e
+dokunmayan ilk dalga.
+
+Dalganın kalıcı dersleri: (1) **Paylaşılan çekirdek deseni üçüncü kez
+kanıtlandı ve negatifi de gösterildi** — `hdlcCore.ts` üçüncü tüketicisini
+aldı (16a), `nmeaChecksum.ts`+`nmeaSentences.ts` dördüncü/ikinci tüketicisini
+aldı (16c), ama `seatalk` HİÇBİRİNİ tüketmedi ve bu bir eksiklik değil
+protokolün kendisi; paylaşım aramak `ccp.ts`in reddettiği şeydir. (2) **Aynı
+POLİNOM aynı algoritma değildir** (16a) — "aynı bit genişliği aynı algoritma
+değildir" kuralının polinom düzeyindeki eşi; katalogda poly `0x1021` taşıyan
+dört girişten yalnız biri HDLC'dir. (3) **İki kaynak çelişirse kazanan kendi
+içinde ARİTMETİK olarak doğrulanabilendir** (16b) ve gerçekten ayrıştıklarında
+alan bir uyarı TAŞIR; ayrıca kaynağın metninde geçen her bayt bir komut değildir
+(`C7` fantomu). (4) **`canParse` yanlış pozitifi BRİF AŞAMASINDA ölçülebilir** —
+bu dalgada üç imza brif yazılırken 870 örnek üzerinde ölçüldü (27/7/6/0) ve üç
+kararın üçü de tahminle değil SAYIYLA verildi; bekçi testi artık iki yönlü
+(`false` dönende "yazılsaydı ne çalardı", `true` dönende "hâlâ sıfır mı").
+(5) **Bir kaydın "kendi teli var mı" sorusu KEŞİFTE cevaplanmalıdır** (16c) —
+yanlış sınıflandırma yalnız motoru değil, rozeti, `decodeOptions` yüzeyini ve
+bekçi testinin YÖNÜNÜ de değiştirirdi.
+
+Sıradaki domain seçimi HENÜZ YAPILMADI — kalan İKİ domain'de (`wireless-iot` 4,
+`building-automation` 1) hiç iş başlamadı, toplam **5 kanonik kayıt** açık.
+
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →
 lte-modem-at → {nb-iot, gnss-modem}` zinciri + Karar 6 + Cellular

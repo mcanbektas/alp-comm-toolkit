@@ -799,6 +799,108 @@ Otonomi anlaşması gereği **`[DUR-SOR]` olanlar kalın** işaretli ve
 
 *(Alt dalgalar bittikçe BURAYA yazılır. Yanlış öngörüler silinmez, işaretlenir.)*
 
+**16a — `hdlc-based-marine`**
+
+5. **"Çeviri anahtarı ~20-25 beklenir."** **ÇÜRÜDÜ — 44 çıktı.** Sebep
+   `decodeOptions`: yedi kanalın her biri etiket + açıklama + şık etiketleri
+   getiriyor. Dalga 15'in *"brifler `decodeOptions` yüzeyini SİSTEMATİK olarak
+   AZ tahmin ediyor"* dersinin doğrudan devamı ve bu dalgada ÜÇ kez tekrarlandı
+   (bkz. 16c/8).
+
+6. **"Yedi `decodeOptions` kanalı"** — **DOĞRU ÇIKTI**, dalga 15'ten beri ilk
+   kez bir tahmin tutmuş oldu. Sebebi tahminin CÖMERT yapılmış olması: üç kanalın
+   gerekçesi (AIS VDL'inin control alanını atması ve FCS'i yalnız veriyi
+   kapsaması) keşif turunda ZATEN bulunmuştu.
+
+7. **Brifte HİÇ öngörülmeyen iki karar** uygulamada doğdu: (a)
+   `rfc1662-octet-stuffed` modunda alan offset'lerinin MANTIKSAL olması ve bunun
+   `asyncEscapingAssumed` ile söylenmesi; (b) `iso-13239-modulo8` + 2 baytlık
+   control kombinasyonunda ikinci baytın ayrı bir `control-extended` candidate
+   alanı olması (uydurma modulo-128 yorumu YAZILMADI).
+
+**16b — `seatalk`**
+
+8. **"Knauf'un 60 komutu."** **ÇÜRÜDÜ — 59.** `C7` bir FANTOM: Part 2'nin tam
+   metninde yalnız `C1…C8` waypoint adı yer tutucusunun sarmalanmış devamında
+   geçiyor, komut baytı olarak değil. Ders: **kaynağın metninde geçen her bayt
+   bir komut değildir**; fantom komut yayımlamak dalga 13 dersi 5'in (uydurma
+   kaynak) sessiz biçimidir.
+
+9. **"~23 komutun payload'ı çözülür"** (`[DUR-SOR]` kararı 4'ün sayısı).
+   **NEREDEYSE — 22.** Fark tek komut ve sebebi 8'in aynısı.
+
+10. **"Derinlik komutlarında metrik/imperial bayrağı çözülür."** **ÇÜRÜDÜ.**
+    Tel DAİMA feet/10 taşır; `Y&4` bayrağı ENSTRÜMANIN GÖSTERİM tercihidir,
+    telin birimi değil. Birim sabit `ft` basıldı, bayrak AYRI bir alan oldu.
+    Bir bayrağı "birim seçici" sanmak `unit`i yanlış yazmanın klasik yolu.
+
+11. **Brifin ÖNGÖRMEDİĞİ en pahalı iş: iki kaynağın ÜÇ yerde çelişmesi.** Brif
+    *"iki bağımsız kaynak örtüşmezse alan ADLANDIRILMAZ"* kuralını yazıyordu ama
+    çelişkinin **ADLANDIRMA değil YORUM** düzeyinde çıkacağını öngörmemişti:
+    Knauf ile SignalK aynı alanı aynı adla ama FARKLI okuyordu (0x85 XTE nibble
+    sırası, 0x20 hızın bayt sırası, 0x84/0x9C başlık düzeltme terimi). Çözüm
+    kurala eklendi: **kazanan, kaynağın KENDİ worked example'ıyla aritmetik
+    olarak doğrulanabilen okumadır**; iki okuma gerçekten ayrışıyorsa alan bir
+    uyarı TAŞIR (`headingCorrectionAmbiguous`).
+
+**16c — `iec-61162`**
+
+12. **Keşif hipotezinin çürümesi UYGULAMADA DOĞRULANDI.** Bulgu 7 zaten
+    *"`-450`nin gerçek teli var"* diyordu; uygulama turu üç `.pcap` yakalamasını
+    doğrudan indirip UDP payload'larını çıkardı ve **her iki checksum'ı da
+    bağımsız yeniden hesapladı** — üçü de tutuyor. Brifin bayt düzeni tarifinde
+    tek bir sapma çıkmadı. `canParse` yanlış pozitifi de brifin ölçtüğü gibi
+    **0** kaldı (bugün 143 kayıt / 886 örnek).
+
+13. **"`decodeOptions` BEŞ kanal."** **ÇÜRÜDÜ — 7.** Brifin kendi "görünen
+    adaylar" listesindeki İKİSİ gerçekten gerekti: `timestampScale` (`c:`in
+    ölçeği çerçevede YOK ve 10/13 hane dışında çıkarım da yapılamıyor;
+    kullanıcı vendor'unu biliyor olabilir) ve `strictTerminator` (brifteki adı
+    `trailingCrlfRequired`; üç kaynak ikiye bölünüyor — `ipal_transcriber` ve
+    FKIE CRLF'i ŞART koşuyor, PyLWE koşmuyor). Üçüncü aday `sentenceStartChars`
+    kanal OLMADI: `!` KOŞULSUZ kabul edilir (`ais.ts`in gerekçesi burada da
+    geçerli) ve kapsülleme cümlesi bir uyarıyla işaretlenir — seçenek yapmak
+    kullanıcıya olmayan bir karar sordurmak olurdu.
+
+14. **"Çeviri anahtarı ~35-45 beklenir."** **ÇÜRÜDÜ — 73.** Dalganın üçüncü
+    aynı hatası (16a'da 20-25 → 44). Kalıcı düzeltme: **anahtar tahmini
+    `decodeOptions` kanal sayısıyla ÖLÇEKLENİR** — kanal başına ~4 anahtar
+    (etiket + açıklama + şıklar) ve örnek başına 2. Bu kayıtta 7 kanal + 7
+    örnek + 12 hata + 16 uyarı + 8 alan uyarısı gerçekten 73 ediyor.
+
+15. **Brifin "grup adı ve ANLAMSAL KATEGORİ basılır" tarifi DEĞİŞTİRİLDİ.**
+    Kategorinin düz metin açıklaması (ör. VDRD = *"Data required for the VDR
+    according to IEC 61996"*) standardın **paywall'lı Tablo 4**'ündedir ve brife
+    ikinci elden (Cobham kılavuzu) girmişti. İkinci elden aktarılmış bir cümleyi
+    "standardın tanımı" diye basmak dalga 13 dersi 5'in tam hedefi olurdu.
+    Yerine **iki bağımsız kaynakta birebir örtüşen TALKER KÜMESİ** basılıyor
+    (`transmissiongroups.json` ve `gosk`in `talkerMulticastMap`i). Bu düz
+    metinden DAHA iyi çıktı çünkü **ölçülebilir**: motor datagramdaki gerçek
+    talker ID'lerini seçilen grubun kümesiyle karşılaştırıyor ve çelişkide
+    `groupTalkerMismatch` basıyor — kullanıcının iddiası telle SINANIYOR.
+    Brifin öngörmediği bir doğrulama kanalı doğdu.
+
+16. **`ProtocolErrorCode` kümesi brifte hiç anılmamıştı ve bir tuzak çıktı.**
+    "Geçersiz sihirli sayı" ve "kapsam dışı tel" için doğal görünen
+    `invalid-header`/`unsupported-version` kodları **kilitli birlik tipte
+    YOKTUR** (`types.ts`). Kullanılan karşılıklar: sihirli önek →
+    `start-delimiter-not-found` (token çerçevenin başlangıç sınırlayıcısıdır),
+    `R?UdP` ve TAG bloğu zorunluluğu → `unsupported-encoding` (*"biçim bu
+    çözücünün kabul ettiği kümede değil"*). Yeni bir kod EKLENMEDİ.
+
+17. **Fixture öngörüsü DOĞRU ÇIKTI.** 16a'nın Görev 0'ı iki mayını patlamadan
+    söktü; 16c'de `iec-61162` motor alınca iki türetilmiş fixture da
+    kendiliğinden `building-automation/lonworks/lonworks`a KAYDI ve hiçbiri
+    kırılmadı. `CrcCalculatorTool.test.tsx`in gerçek satırının `:81` ve sayının
+    37 olduğu da doğrulandı; dalga boyunca `crcCatalogue.ts` ve
+    `nmeaChecksum.ts` HİÇ değişmedi.
+
+18. **Rozet ve kapsam öngörüleri (`[DUR-SOR]` 1/2/3/5) DOĞRU ÇIKTI.**
+    `iec-61162` `partial` (`UdPbC`-only), `R?UdP` yazılmadı, `seatalk`
+    `partial`, `hdlc-based-marine` `ready`. Tek EK karar: `R?UdP` sessizce
+    "geçersiz önek" ile değil, **TANINIP AÇIKÇA "kapsam dışı" denerek**
+    reddediliyor ve FKIE'nin gerçek binary yakalamasının 38 baytlık başlığı
+    bunun örnek çerçevesi — kapsam kararı böylece EKRANDA görünür oldu.
 ---
 
 ## Dalga kapanışı — 16c bitince yapılacaklar

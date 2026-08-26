@@ -2196,6 +2196,124 @@ export const tr = {
   'protocol.seatalk.example.targetWaypointName.description':
     'Knauf\'un dört karakterlik kodlaması tersine çevrilerek "WPT1" adı için kuruldu; üç tümleyen çiftinin üçü de PASS.',
 
+
+  // --- IEC 61162 (dalga 16c; -450 "UdPbC" teli ÇÖZÜLÜR, diğer dört profil YÖNLENDİRİLİR) ---
+  'protocol.iec61162.documentation.summary':
+    'IEC 61162 — gemi seyir ve telsiz cihazları arasındaki sayısal arayüz ailesi. ÇÖZÜLEN: IEC 61162-450\'nin "UdPbC" datagramı baştan sona — altı baytlık UdPbC+NUL öneki, her TAG bloğu kendi checksum\'ıyla ve KENDİ bayt aralığıyla doğrulanmış, s:/n:/g:/c:/d:/r:/t:/i: parametreleri, aynı datagramı paylaşan bir ya da daha çok NMEA cümlesi (her biri BAŞKA bir bayt aralığını kapsayan kendi checksum\'ıyla), CRLF sonlandırıcı ve 1472 baytlık datagram tavanı. YÖNLENDİRİLEN, ÇÖZÜLMEYEN: -1 ve -2 seri hat üzerindeki NMEA 0183\'ün kendisidir (4800 ve 38400 bit/s), -3 NMEA 2000\'dir, -460 ise kendi uygulama protokolünü TANIMLAMAZ — bu profiller seçilince motor çerçeve çözmez, kaydı gerçekten çözen sayfayı gösteren bir yönlendirme tablosu basar. HİÇ YOK: -450\'nin ikinci ve tamamen ayrı teli olan RaUdP/RpUdP/RrUdP binary dosya transferi, Ed.2\'nin IEC 61162-3 PGN kapsüllemesi (beş karakterlik token\'ı kamuya açık değil), Ed.2\'nin TCP tabanlı transferi ve a: authentication tag\'inin İÇERİĞİ (biçimi kamuya açık değil — tag TANINIR, asla çözülmez). Çok-noktaya-yayın grubu payload\'da HİÇ YOKTUR: UDP/IP başlığındadır, bu yüzden yalnız kullanıcıdan gelebilir ve her zaman "telden okunmadı" diye işaretlenir.',
+  'protocol.iec61162.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.iec61162.error.emptyDatagram': 'Boş datagram çözülemez.',
+  'protocol.iec61162.error.tooShort':
+    'Datagram altı baytlık "UdPbC" + NUL önekini taşıyamayacak kadar kısa.',
+  'protocol.iec61162.error.invalidMagicToken':
+    'İlk altı bayt 55 64 50 62 43 00 ("UdPbC" + NUL) değil — bu bir IEC 61162-450 datagramı değil.',
+  'protocol.iec61162.error.binaryTransferOutOfScope':
+    'Bu, IEC 61162-450\'nin İKİNCİ teli: RaUdP/RpUdP/RrUdP binary dosya transferi. Tanındı ama KAPSAM DIŞI — ayrı bir tel biçimidir (38 baytlık big-endian başlık, parça birleştirme, MIME\'lı dosya tanımlayıcı) ve üç token arasındaki anlam farkı kamuya açık değildir.',
+  'protocol.iec61162.error.noSentence':
+    'Önekten sonra "$" ya da "!" ile başlayan bir NMEA cümlesi bulunamadı.',
+  'protocol.iec61162.error.unterminatedTagBlock':
+    'TAG bloğu kapanış ters bölüsü ("\\") olmadan bitti.',
+  'protocol.iec61162.error.missingTagBlock':
+    'Datagramda TAG bloğu yok. Standart kaynak etiketini (s:) zorunlu kılıyor; uygulamalar bundan sapabildiği için "TAG bloğu zorunlu" seçeneği kapatılabilir.',
+  'protocol.iec61162.error.missingSentenceChecksum':
+    'Cümlenin checksum sınırlayıcısı ("*") bulunamadı.',
+  'protocol.iec61162.error.tagChecksumMismatch':
+    'TAG bloğu checksum\'ı uyuşmuyor — kapsamı ters bölü ile yıldız ARASIDIR, cümleninkiyle aynı değildir.',
+  'protocol.iec61162.error.sentenceChecksumMismatch':
+    'Cümle checksum\'ı uyuşmuyor — kapsamı "$"/"!" ile yıldız ARASIDIR, TAG bloğununkiyle aynı değildir.',
+  'protocol.iec61162.error.missingTerminator':
+    'Datagramın son cümlesi CRLF ile bitmiyor ve katı sonlandırıcı modu açık.',
+  'protocol.iec61162.warning.frameNotDecodedInRoutingProfile':
+    'Seçilen taşıma profilinin kendi teli yok — çerçeve ÇÖZÜLMEDİ. Aşağıdaki tablo kaydı gerçekten çözen sayfayı gösterir.',
+  'protocol.iec61162.warning.groupFromUserNotWire':
+    'Çok-noktaya-yayın grubu çerçevede YOKTUR, UDP/IP başlığındadır — basılan grup bilgisi telden okunmadı, sizin seçiminizdir.',
+  'protocol.iec61162.warning.groupTalkerMismatch':
+    'Datagramdaki talker ID\'leri seçtiğiniz grubun belgelenmiş talker kümesinde değil — grup seçimi yanlış olabilir.',
+  'protocol.iec61162.warning.transmissionGroupUnknown':
+    'Çok-noktaya-yayın grubu payload\'da olmadığı için basılmadı. Biliyorsanız "Çok-noktaya-yayın grubu" seçeneğinden verin.',
+  'protocol.iec61162.warning.datagramExceedsStandardLimit':
+    'Datagram standardın kendi 1472 baytlık sınırını aşıyor (ISIS 2011 §5.3) — çözüm sürdü, ama IP parçalanması riski var.',
+  'protocol.iec61162.warning.timestampScaleInferred':
+    'c: zaman damgasının ölçeği ÇERÇEVEDE YOK; hane sayısından çıkarıldı (10 hane → saniye, 13 hane → milisaniye). Çıkarılmış ölçek bir ölçüm değildir, bu yüzden alana birim yazılmaz.',
+  'protocol.iec61162.warning.timestampScaleUnknown':
+    'c: zaman damgasının hane sayısı ne 10 ne 13 — ölçek çıkarılamadı ve HİÇBİR ölçek iddia edilmedi.',
+  'protocol.iec61162.warning.authTagNotDecoded':
+    'a: authentication tag\'i tanındı ama çözülmedi — biçimi kamuya açık değil, yeni bir kripto yüzeyi açılmıyor.',
+  'protocol.iec61162.warning.tagBlockMissing':
+    'En az bir kayıtta TAG bloğu yok; standart kaynak etiketini (s:) zorunlu kılıyor.',
+  'protocol.iec61162.warning.sourceParameterMissing':
+    'En az bir kayıtta zorunlu kaynak parametresi (s:) yok.',
+  'protocol.iec61162.warning.tagBlockExceedsMaxLength':
+    'Bir TAG bloğu 80 baytlık sınırı aşıyor.',
+  'protocol.iec61162.warning.unknownTagParameter':
+    'Sözlükte olmayan bir TAG parametresi var — harfi basıldı, anlamı UYDURULMADI.',
+  'protocol.iec61162.warning.encapsulationSentence':
+    'Datagram "!" ile başlayan bir kapsülleme cümlesi taşıyor (tipik olarak AIS) — içeriği AIS sayfasında çözülür.',
+  'protocol.iec61162.warning.sentenceEnvelopeOnly':
+    'Cümle ZARF olarak basıldı: bu sayfanın konusu -450 taşımasıdır. Alan alan çözüm için "Cümle çözümü" seçeneğini "Tam" yapın ya da NMEA 0183 sayfasını kullanın.',
+  'protocol.iec61162.warning.sentenceExceedsNmeaLimit':
+    'Bir cümle NMEA 0183\'ün 7-82 karakter sınırının dışında. Bu sınır CÜMLEYE aittir, datagrama değil.',
+  'protocol.iec61162.warning.missingTerminator':
+    'Bir cümle CRLF ile bitmiyor. Kaynaklar bölünüyor: iki bağımsız uygulama CRLF\'i şart koşuyor, biri koşmuyor.',
+  'protocol.iec61162.field.checksumMismatch': 'Checksum uyuşmuyor.',
+  'protocol.iec61162.field.timestampScaleInferred': 'Ölçek çıkarıldı, ölçülmedi.',
+  'protocol.iec61162.field.timestampScaleUnknown': 'Ölçek çıkarılamadı.',
+  'protocol.iec61162.field.authNotDecoded': 'Biçimi kamuya açık değil — çözülmedi.',
+  'protocol.iec61162.field.unknownParameter': 'Sözlükte olmayan parametre — anlamı uydurulmadı.',
+  'protocol.iec61162.field.groupFromUserNotWire': 'Telden okunmadı — kullanıcı seçimi.',
+  'protocol.iec61162.field.sentenceNotDecoded':
+    'Cümle içeriği bu sayfada çözülmedi (zarf modu).',
+  'protocol.iec61162.field.tagBlockTooLong': '80 baytlık TAG bloğu sınırı aşıldı.',
+  'protocol.iec61162.option.boolean.on': 'Açık',
+  'protocol.iec61162.option.boolean.off': 'Kapalı',
+  'protocol.iec61162.option.transportProfile': 'Taşıma profili',
+  'protocol.iec61162.option.transportProfile.description':
+    'Beş profilden yalnız -450\'nin kendi teli var. Diğerleri seçilirse çerçeve çözülmez, yönlendirme tablosu basılır.',
+  'protocol.iec61162.option.transmissionGroup': 'Çok-noktaya-yayın grubu',
+  'protocol.iec61162.option.transmissionGroup.description':
+    'Grup adresi ve portu UDP/IP başlığındadır, payload\'da YOKTUR. Seçilmezse grup alanı hiç basılmaz; seçilirse koşulsuz bir "telden okunmadı" uyarısı düşer ve datagramdaki talker ID\'leri grubun belgelenmiş kümesiyle karşılaştırılır.',
+  'protocol.iec61162.option.transmissionGroup.unknown': 'Bilinmiyor (varsayılan — grup basılmaz)',
+  'protocol.iec61162.option.sentenceDecoding': 'Cümle çözümü',
+  'protocol.iec61162.option.sentenceDecoding.description':
+    'Bu sayfanın konusu -450 TAŞIMASIDIR; cümlenin kendisi NMEA 0183 sayfasında tam çözülüyor. "Tam" seçilirse gömülü cümle burada da alan alan açılır.',
+  'protocol.iec61162.option.sentenceDecoding.envelopeOnly': 'Yalnız zarf (varsayılan)',
+  'protocol.iec61162.option.sentenceDecoding.full': 'Tam — cümleyi alan alan çöz',
+  'protocol.iec61162.option.requireTagBlock': 'TAG bloğu zorunlu',
+  'protocol.iec61162.option.requireTagBlock.description':
+    'Standart kaynak etiketini (s:) zorunlu kılıyor ama uygulamalar sapabiliyor. Kapatılırsa TAG bloğu olmayan datagram da çözülür.',
+  'protocol.iec61162.option.strictTerminator': 'CRLF sonlandırıcı zorunlu',
+  'protocol.iec61162.option.strictTerminator.description':
+    'Kaynaklar bölünüyor: iki bağımsız uygulama CRLF\'i şart koşup datagramı reddediyor, biri yokluğuna razı. Varsayılan izin verici — CRLF\'siz datagram tam çözülebiliyorken reddedilmez.',
+  'protocol.iec61162.option.timestampScale': 'Zaman damgası ölçeği',
+  'protocol.iec61162.option.timestampScale.description':
+    'c: parametresinin ölçeği çerçevede YOKTUR. Varsayılan hane sayısından çıkarır; vendor\'unuzu biliyorsanız elle zorlayabilirsiniz.',
+  'protocol.iec61162.option.timestampScale.infer': 'Hane sayısından çıkar (varsayılan)',
+  'protocol.iec61162.option.timestampScale.seconds': 'Saniye',
+  'protocol.iec61162.option.timestampScale.milliseconds': 'Milisaniye',
+  'protocol.iec61162.option.maxDatagramBytes': 'Azami datagram boyutu (bayt)',
+  'protocol.iec61162.option.maxDatagramBytes.description':
+    'Standardın kendi yazarlarının sınırı 1472 bayttır (tek Ethernet çerçevesindeki azami UDP payload\'ı). Aşılırsa uyarı basılır, hata değil.',
+  'protocol.iec61162.example.singleSentenceRot.name': 'Tek cümle — HEROT (gerçek yakalama, 40 bayt)',
+  'protocol.iec61162.example.singleSentenceRot.description':
+    'FKIE maritime-dissector\'ın iec-61162-450-nmea.pcap yakalaması. Bir TAG bloğu (s:HE0001*45) ve bir cümle ($HEROT,+000.05,A*35); İKİ checksum da bu dalgada bağımsız yeniden hesaplandı ve tutuyor.',
+  'protocol.iec61162.example.multiTagRot.name': 'İki TAG bloğu, tek cümle (gerçek yakalama, 53 bayt)',
+  'protocol.iec61162.example.multiTagRot.description':
+    'Aynı cümlenin önünde iki TAG bloğu: d:HE0002*51 (hedef) ve s:HE0001*45 (kaynak). Her bloğun checksum\'ı KENDİ aralığını kapsar.',
+  'protocol.iec61162.example.multiSentenceNavd.name': 'Sekiz cümle tek datagramda (gerçek yakalama, 568 bayt)',
+  'protocol.iec61162.example.multiSentenceNavd.description':
+    'FKIE\'nin çoklu-cümle yakalaması: her cümlenin kendi TAG bloğu (s:/n:/c:) ve kendi checksum\'ı var. 13 haneli c: değeri milisaniye olarak ÇIKARILIR. Bu yakalama 239.192.0.4:60104 hedefliyor — doğru NAVD adresi ama belgelenen 60004 portu değil; motor porta zaten güvenmez.',
+  'protocol.iec61162.example.tagChecksumCorrupt.name': 'TAG checksum\'ı bozuk (cümleninki sağlam)',
+  'protocol.iec61162.example.tagChecksumCorrupt.description':
+    'Tek cümle yakalamasıyla AYNI baytlar, yalnız TAG checksum\'ının son hanesi bozuk (45 → 46). TAG FAIL basar, cümle PASS kalır — iki checksum\'ın FARKLI bayt aralıklarını kapsadığının kanıtı.',
+  'protocol.iec61162.example.sentenceChecksumCorrupt.name': 'Cümle checksum\'ı bozuk (TAG sağlam)',
+  'protocol.iec61162.example.sentenceChecksumCorrupt.description':
+    'Aynı baytlar, bu kez yalnız CÜMLE checksum\'ının son hanesi bozuk (35 → 36). Cümle FAIL basar, TAG PASS kalır — bir öncekinin tersi.',
+  'protocol.iec61162.example.noTagBlock.name': 'TAG bloğu yok (varsayılan katı mod reddeder)',
+  'protocol.iec61162.example.noTagBlock.description':
+    'Aynı cümle, TAG bloğu olmadan. Standart s: etiketini zorunlu kıldığı için varsayılan ayarda reddedilir; "TAG bloğu zorunlu" kapatılınca tam çözülür.',
+  'protocol.iec61162.example.binaryTransferOutOfScope.name': 'RrUdP binary transferi (KAPSAM DIŞI tel)',
+  'protocol.iec61162.example.binaryTransferOutOfScope.description':
+    'FKIE\'nin iec-61162-450-binary-type1.pcap yakalamasının gerçek 38 baytlık başlığı. -450\'nin İKİNCİ telidir; motor TANIR ve açıkça "kapsam dışı" der — sessizce "geçersiz önek" demez.',
+
   // --- XMODEM (framing motoruna uğramaz, xmodemCore.ts'in üstünde ince sarmal) ---
   'protocol.xmodem.documentation.summary':
     'Stop-and-wait seri dosya transferi — 128 ya da 1024 baytlık bloklar, blok numarası tümleyeni kontrolü, checksum (SUM-8) ya da CRC-16 (CRC16_XMODEM) modu, NAK ile yeniden gönderim. Framing motoruna hiç uğramaz — çerçeve sınırı Header baytının taşıdığı sabit veri uzunluğundan türetilir.',

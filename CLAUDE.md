@@ -125,13 +125,12 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 15h'den sonra,
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 16c'den sonra,
   KODDAN doğrulandı — tek kullanımlık sayım script'i)
-  123 `ready` / 23 `planned` / 26 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+  124 `ready` / 20 `planned` / 28 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **138 `ready` / 8 `planned` / 26 `partial`**; gerçekten yapılacak iş **8 kanonik
+  **139 `ready` / 5 `planned` / 28 `partial`**; gerçekten yapılacak iş **5 kanonik
   kayıt** (wireless-iot 4 — thread, wifi, esp-now, rf-telemetry-custom-frame;
-  marine-navigation 3 — iec-61162, seatalk, hdlc-based-marine;
   building-automation 1 — lonworks). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
   KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
   13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
@@ -152,15 +151,24 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   kayıt, 8 `ready` + 4 `partial`); domain toplamı 11 `ready` + 5 `partial` +
   3 alias, `planned` KALMADI. Dokunulmayan tek aile `gnss-navigation`dı: üç kaydı
   da ALIAS'tır ve yönü `marine-navigation`a bakar, `resolveStatus()` `ready` çözer.
-  Kalan üç domain'de (`wireless-iot`, `marine-navigation`, `building-automation`)
-  henüz hiç iş başlamadı; sıradaki domain seçimi YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
+  **`marine-navigation` (11 kayıt) dalga 16 ile TAMAMEN KAPANDI** (16a
+  hdlc-based-marine + 16b seatalk + 16c iec-61162 — 3 alt dalga, 3 kanonik
+  kayıt, 1 `ready` + 2 `partial`); domain toplamı **6 `ready` + 2 `partial` +
+  3 alias**, `planned` KALMADI. Kalan İKİ domain'de (`wireless-iot`,
+  `building-automation`) henüz hiç iş başlamadı; sıradaki domain seçimi
+  YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
   `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
   sınırlayıcıları bayt bile değil), `psi5` yukarı-yön-tek-çerçeve (slot zaman çizelgesi
   çerçevede YOK), `ads-b` 1090ES-only (978 MHz UAT ayrı bir tel biçimi: farklı
-  çerçeveleme, farklı FEC) — gerekçeler ilgili `.ts` dosyalarının başında ve
-  `docs/plan-fazlar.md`nin 13g/14h/15h notlarında.
+  çerçeveleme, farklı FEC), `iec-61162` `UdPbC`-only (`-450`nin İKİNCİ teli olan
+  `RaUdP`/`RpUdP`/`RrUdP` binary dosya transferi ayrı bir tel biçimidir; Ed.2'nin
+  PGN kapsüllemesinin token'ı ve `a:` authentication tag'inin biçimi kamuya açık
+  DEĞİL) — gerekçeler ilgili `.ts` dosyalarının başında ve
+  `docs/plan-fazlar.md`nin 13g/14h/15h/16c notlarında. `seatalk` bu sınıftan
+  DEĞİLDİR: rozeti kaynak güvenilirliğinden ve komut bitinin çerçevede
+  taşınmamasından geliyor (aşağıda).
   **Aynı 24 bitin ANLAMI çerçeveden çerçeveye değişebilir ve tek bir gösterge
   ikisini de yanlış anlatır** (dalga 15h): Mode S'te DF11/17/18'in PI alanı düz
   CRC'dir ve PASS/FAIL doğrulanır, ama DF0/4/5/16/20/21'in AP alanı
@@ -190,6 +198,43 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   çağrıdan geçen CRC-24/OPENPGP'nin yayımlanmış check değerini (0x21CF02)
   üretmesiyle kanıtlandı; Mode S'te `init = 0` olduğu için augmented ve direct
   aynı sonucu veriyor ama bu bir ŞANS, bir kanıt değil.
+  **Paylaşılan çekirdek deseni ÜÇÜNCÜ kez kanıtlandı** (dalga 16a):
+  `hdlcCore.ts` dalga 10c'de "paylaşılan çekirdek" ilan edilmişti ve
+  `hdlc-based-marine` onun üçüncü tüketicisi oldu — kod KOPYALANMADI, çekirdeğe
+  DOKUNULMADI, iki mevcut tüketici yeşil kaldı. Aynı dalga bunun negatifini de
+  gösterdi: `seatalk` HİÇBİR çekirdeği tüketmez ve bu bir eksiklik değil,
+  protokolün kendisidir (`ccp.ts`in reddettiği türden bir birleştirme aranmadı).
+  **Aynı POLİNOM aynı algoritma değildir** (16a): katalogda poly `0x1021` olan
+  DÖRT giriş var ve yalnız `CRC16_X25` HDLC'dir — `CRC16_KERMIT`
+  (`init=0 xorout=0`, check `0x2189`) ve `CRC16_CCITT_FALSE` sahte dosttur.
+  "Aynı bit genişliği aynı algoritma değildir" kuralının polinom düzeyindeki eşi.
+  **İki kaynak çelişirse KAZANAN kendi içinde ARİTMETİK olarak doğrulanabilendir**
+  (dalga 16b): SeaTalk'ta Knauf ile SignalK ÜÇ yerde çelişti (0x85 XTE nibble
+  sırası, 0x20 hızın bayt sırası, 0x84/0x9C başlık düzeltme terimi) ve üçünde de
+  kaynağın KENDİ worked example'ıyla tutarlı okuma alındı; iki okuma gerçekten
+  ayrıştığında alan `headingCorrectionAmbiguous` gibi bir uyarı TAŞIR. Aynı
+  dalgada `C7` fantom komutu reddedildi — kaynağın metninde geçen her bayt bir
+  komut DEĞİLDİR.
+  **`canParse` yanlış pozitifi BRİF AŞAMASINDA ölçülebilir** ve dalga 16'da
+  ölçüldü: 870 örnek üzerinde `seatalk` naif imza 27 / dar imza 7,
+  `hdlc-based-marine` 6, `iec-61162` **0**. Üç kayıttan ikisi bu yüzden DAİMA
+  `false` döner, üçüncüsü `true` döner — karar tahminle değil SAYIYLA verildi ve
+  üçünün de bekçi testi ölçümü kodda TEKRARLAR. **Bekçi testi artık iki yönlü
+  çalışıyor**: `false` dönenlerde "yazılsaydı kaç çerçeve çalardı", `true`
+  dönende "bugün hâlâ sıfır mı" (16c, 143 kayıt / 886 örnek → 0).
+  **Bir kaydın "kendi teli var mı" sorusu KEŞİFTE cevaplanmalıdır** (16c):
+  `iec-61162` sınıflandırıcı sanılıyordu (`uavcan-compatibility` emsali,
+  `canParse` daima `false`), keşif turu `-450`nin gerçek telini beş bağımsız
+  uygulamada bulunca kayıt gerçek bir parser'a döndü ve `canParse` `true` oldu.
+  Yanlış sınıflandırma yalnız bir motoru değil, rozeti, `decodeOptions` yüzeyini
+  ve bekçi testinin YÖNÜNÜ de değiştirirdi.
+  **Aynı çerçevede İKİ checksum farklı bayt aralığı kapsayabilir** (16c):
+  IEC 61162-450'de TAG bloğunun `*hh`si `\`…`*` arasını, gömülü cümleninki
+  `$`/`!`…`*` arasını kapsar; algoritma AYNI (NMEA XOR), kapsam FARKLI. Tek bir
+  "cümleyi bul, checksum'ını doğrula" fonksiyonuyla çözmek HATA VERMEDEN yanlış
+  PASS/FAIL basar. İki aralık iki AYRI modülde yaşar (`lweTagBlock.ts` ve
+  `iec61162.ts`) ve iki örnek çerçeve (biri TAG'i, öteki cümleyi bozuk) ayrımı
+  ekranda kanıtlar.
   **Durum rozeti her zaman `resolveStatus()`ten okunur, ham `protocol.status`tan değil** —
   aksi hâlde çalışan bir motorun üstünde "Planlandı" yazar (`FamilyPage` bunu yapıyordu,
   dalga 11 sonunda düzeltildi; `FamilyPage.test.tsx` bekçilik ediyor).
