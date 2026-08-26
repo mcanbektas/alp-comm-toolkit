@@ -29,6 +29,7 @@ export const CRC_ALGORITHM_IDS = [
   'CRC16_ARC',
   'CRC16_MODBUS',
   'CRC16_CCITT_FALSE',
+  'CRC16_GENIBUS',
   'CRC16_XMODEM',
   'CRC16_X25',
   'CRC16_DNP',
@@ -147,6 +148,35 @@ export const CRC_CATALOGUE: Record<CrcAlgorithmId, CrcParams> = {
     refin: false,
     refout: false,
     xorout: 0x0000n,
+  },
+  /**
+   * CRC-16/GENIBUS — LonTalk / ISO/IEC 14908-1'in NPDU CRC'si (dalga 17).
+   *
+   * **DEPONUN EN KESKİN SAHTE DOSTU BURADA.** `CRC16_CCITT_FALSE`tan YALNIZ
+   * `xorout`ta ayrılır: aynı polinom (0x1021), aynı init (0xFFFF), aynı
+   * yansıma (yok). Check değerleri buna rağmen bambaşkadır — 0xD64E vs
+   * 0x29B1. 16a'nın dersi *"aynı POLİNOM aynı algoritma değildir"* idi; bu
+   * vaka onu *"aynı polinom + aynı init + aynı yansıma bile aynı algoritma
+   * değildir"*e indiriyor. `CRC16_X25` de aday gibi görünür (o da tümleyen
+   * alır) ama YANSITIR — LonTalk yansıtmaz.
+   *
+   * Parametrelerin kaynağı: normatif LonTalk Protocol Specification v3.0
+   * yalnız polinomu veriyor (*"X16 + X12 + X5 + 1, the CCITT CRC-16
+   * standard"*); init/yansıma/xorout'u veren tek kaynak Echelon'un kendi
+   * yığınıdır (`izot/lon-stack-ex`, `LtCUtil.c`in `LtCRC16`i, MIT):
+   * `crc = USHRT_MAX` (init 0xFFFF), tablo üretimi `if (r & 0x8000U) r =
+   * (r << 1) ^ 0x1021U` (MSB-first, yansıma YOK), `crc = ~crc` (xorout
+   * 0xFFFF), sonuç BÜYÜK ENDIAN yazılıyor. O uygulama bu depoda bağımsızca
+   * yeniden kuruldu ve "123456789" için reveng'in yayımlı 0xD64E değerini
+   * üretti — `crcEngine.test.ts`teki fixture o değerdir.
+   */
+  CRC16_GENIBUS: {
+    width: 16,
+    poly: 0x1021n,
+    init: 0xffffn,
+    refin: false,
+    refout: false,
+    xorout: 0xffffn,
   },
   CRC16_XMODEM: {
     width: 16,

@@ -1393,7 +1393,103 @@ SİLİNMEZ.)*
 
 ### Uygulama sırasında çürüyenler (17)
 
-*(Alt dalga bitince BURAYA yazılır. Yanlış öngörüler silinmez, işaretlenir.)*
+*(Uygulama turu 2026-08-26'da koştu. Yanlış öngörüler SİLİNMEDİ, işaretlendi.)*
+
+12. **🚨 "6) numaralı gerçek çerçeve APDU + Foreign Frame'dir (`APDU=4D →
+    Foreign Frame, kod=0x0D`)."** **ÇÜRÜDÜ — BRİFİN ELLE ÇÖZÜMÜ BİR BAYT
+    ATLIYOR.** Brifin kendi hex'i (`… 00 39 01 BD 01 8C 01 83 4D 0C …`)
+    şöyle çözülür: NPDU `0x39` → fmt 3 (APDU), addr 2, dom 1; kaynak düğüm
+    baytı `0xBD`nin MSB'si 1 olduğu için adres biçimi **2a** ve adres 4 bayt
+    (`01 BD 01 8C`); domain 1 bayt (`01`); APDU **`83`ten başlar**, `4D`ten
+    değil. `0x83 ≥ 0x80` → **Network Variable**, `d=0` (incoming), selector
+    `((0x83 & 0x3F) << 8) | 0x4D = 0x034D = 845`, yük 14 bayt. Brifin
+    açıklaması `0x83`ü atlayıp `0x4D`i APDU kodu sanmış. **Hex'in kendisi
+    DOĞRU** — `len` alanı 0x002B = 43 = gerçek bayt sayısı ve öteki altı
+    çerçevenin çözümü brifle birebir tuttu, yani kaydırma yok, yalnız
+    açıklama yanlış. Motor kaydı NV olarak çözer; Foreign Frame dalını
+    ekranda kanıtlamak için 6)'dan **TEK BAYT** değiştirilerek
+    (`0x83` → `0x4D`) türetilmiş bir 12. örnek eklendi ve açıklaması bunu
+    böyle yazıyor. **Ders, dalganın kendi dersinin brife uygulanmış hâli:
+    yoruma değil KODA/ARİTMETİĞE bak — brif de bir "yorum"dur.**
+
+13. **"Çeviri anahtarı ~110 (bilerek YÜKSEK; son üç alt dalgada tahmin üst
+    üste AZ çıktı)."** **DOĞRU ÇIKTI ve seri kırıldı:** gerçek **100**
+    anahtar. Fark, `nvPayloadType`ın uzun şık listesinin (~15 anahtar
+    öngörülmüştü) çeviriye HİÇ girmemesinden geliyor — SNVT adları protokol
+    VERİSİDİR (`SNVT_temp (39)`), CLAUDE.md kuralı gereği çevrilmez. Kalan
+    kalemler tahmine yakın: 8 kanal × ~4 = 34, 13 örnek × 2 = 26, hata 15,
+    uyarı 15, alan uyarısı 9, dokümantasyon 1.
+
+14. **"`decodeOptions` sekiz kanal AZ çıkabilir; dalga 15/16 bunu üç kez
+    yaşadı."** **ÇÜRÜMEDİ — 8'de KALDI.** Dalga 16c'nin 5 → 7 büyümesinden
+    sonra ilk kez cömert tahmin tuttu. Sebep izlenebilir: brif kanalları
+    "çerçeveden çıkarılamayan parametre" ölçütüyle SİSTEMATİK olarak taradı ve
+    KANAL YAPILMAYACAKLAR listesini de yazdı; büyümeyi doğuran şey her
+    seferinde bu ikinci listenin eksikliğiydi.
+
+15. **"Modül bölünmesi 3'ten sapabilir."** **SAPMADI** — `cnip.ts`,
+    `lonTalk.ts`, `snvtTypes.ts`, artı plugin `lonworks.ts`. İki çözücü modül
+    birbirini hiç import etmiyor; ortak `FieldSink` şekli İKİ YERDE AYRI
+    bildirildi (TypeScript yapısal tiplemesi ikisini uyumlu sayıyor) —
+    böylece "birbirini çağırmaz" kuralı bir paylaşılan tip dosyasıyla
+    delinmedi.
+
+16. **"Örnek çerçeve sayısı 11 (7 gerçek + 4 türetilmiş)."** **13 OLDU.**
+    Eklenen ikisi: (a) 6)'dan türetilmiş **Foreign Frame** örneği — çünkü
+    brifin 6) için verdiği sınıf çürüdü (yukarıda 12) ve o dal ekranda
+    kanıtsız kalırdı; (b) **ham PDU + kuyruk GENIBUS CRC'si** örneği — çünkü
+    `crcCatalogue.ts`e eklenen girdinin GERÇEK bir tüketicisi olmalı
+    (`crcCatalogue.ts` dosya başının kendi kuralı). İkincisi varsayılan tünel
+    modunda bilinçli olarak `truncated-frame` verir; `expectedValid: false` ve
+    açıklaması "yük türünü değiştirin" der.
+
+17. **"Katalog CRC sayısı 37 → 38 (CRC'li şık yazılırsa)."** **YAZILDI, 38
+    oldu.** Karar brifin `[KARAR 17-6]` gerekçesine bağlı kaldı: `check =
+    0xD64E` yayımlanmış bir değerdir, deponun kendi motorundan geçirildi ve
+    **gerçek bir tüketicisi var** (13. örnek + `payloadKind`ın üçüncü şıkkı).
+    Tüketicisiz katalog girdisi yazma kuralı ihlal edilmedi.
+
+18. **"`CrcCalculatorTool.test.tsx:81` sayısını brif'ten değil DOSYADAN
+    doğrula (dalga 15 çürüyen tahmin 1)."** **Uyarı gereksiz çıktı ama
+    doğrulama YİNE DE yapıldı:** satır numarası da (`:81`) değer de (37)
+    birebir tutuyordu. Dalga 15'te kayan şey burada kaymamış; kural yine de
+    ucuz — doğrulama tek `grep`.
+
+19. **"Bekçi ölçümü: 143 kayıt / 886 örnek, ham LonTalk naif imzası 401."**
+    **DOĞRU ÇIKTI, birebir.** Uygulama turunda yeniden ölçüldü: **144 kayıt /
+    899 örnek** (dalga 17'nin kendi 13 örneği eklendi), CN/IP imzası
+    **0** yabancı çakışma, naif ham imza **401** yabancı çakışma. Brifin
+    401'i `lonworks` eklenmeden önce ölçülmüştü ve kendi örneklerimiz naif
+    imzayı da tetiklediği için sayının kayması beklenirdi — kaymadı, çünkü
+    bekçi kendi kaydını taramanın DIŞINDA tutuyor.
+
+20. **"Ham sayım dalga 17'den sonra 124 / 19 / 29, çözülmüş 139 / 4 / 29
+    olmalı `[BEKLENTİ — koddan doğrulanacak]`."** **DOĞRU ÇIKTI, koddan
+    doğrulandı** — tek kullanımlık sayım script'i tam bu üçlüleri verdi.
+    `building-automation` dağılımı **7 `ready` + 1 `partial` + 3 alias**,
+    `planned` SIFIR.
+
+21. **"Fixture zinciri `wireless-iot/mesh-smart-home/thread`e kayar."**
+    **DOĞRU ÇIKTI.** `ProtocolPage.test.tsx` ve `e2e/nmea-decode.spec.ts`
+    kendiliğinden oraya kaydı, ikisi de yeşil kaldı, ELLE DOKUNULMADI.
+
+22. **[BRİFTE YAZMAYAN KARARLAR]** (a) `timestampEpoch` varsayılanında
+    `unit: 'ms'` ATANIR (birim `LtIpPackets.h:272`den kaynaklı ve ölçülmüş bir
+    olgudur) ama kullanıcı epoch bildirince birim DÜŞER — bir ISO tarih
+    metninin birimi yoktur. (b) `foreignFrameCodeLabels` `hide` seçilse bile
+    **sınıf adı ("Foreign Frame") BASILIR**; gizlenen yalnız anlamı bilinmeyen
+    dört bitlik sayıdır — boş kart yasağı. (c) Kaynak-düğüm baytının seçici
+    biti `rawValue`da HAM hâliyle (`0xAA`) basılır, `physicalValue` maskelenmiş
+    düğüm numarasını verir; böylece maskelenen bit ekranda kaybolmaz. Gerçek
+    yakalamanın 7) numaralı broadcast çerçevesinde bu bit `0` — Figure 3.2 o
+    konuma formats 0/1/2a/3 için `1` çiziyor, ama spec'in kendi cümlesi
+    *"Address format #2 is the only address format using this capability"*
+    dediği için bir uyarı BASILMADI, gözlem yalnız dosya başında not edildi.
+    (d) Doğrulanmamış yollar için TEK bir çerçeve uyarısı
+    (`decodePathNotVerified`) + ilgili ALANLARDA `pathNotVerifiedInCapture`
+    alan uyarısı deseni seçildi; yol başına ayrı çeviri anahtarı açmak 13
+    anahtar daha getirirdi ve `ProtocolWarning`in `details` alanı olmadığı için
+    parametreli tek mesaj yazılamıyordu.
 
 ---
 

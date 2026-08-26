@@ -507,6 +507,17 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'bacnet-ip', () =>
     import('./building/bacnetip/bacnetip').then((module) => module.bacnetIpPlugin),
   );
+  // LonWorks — dalga 17: `building-automation` domain'ini KAPATAN kayıt.
+  // Girdi CN/IP (ISO/IEC 14908-4) UDP datagramıdır; zarf `cnip.ts`te, içindeki
+  // LonTalk (14908-1) PDU'su `lonTalk.ts`te çözülür ve iki modül birbirini
+  // ÇAĞIRMAZ (kaynaklar da iki ayrı dissector kullanıyor). 14908-2/-3'ün ham L2
+  // ÇERÇEVELEMESİ kapsam dışıdır — belgesiz olduğu için değil, kamuya açık bir
+  // YAKALAMA YOLU olmadığı için (libpcap'te LonTalk `DLT_`i yok). SNVT tipi
+  // telde YOKTUR: `nvPayloadType` kanalı + koşulsuz `nvTypeNotOnWire` uyarısı.
+  // Bkz. lonworks.ts dosya başı.
+  registerOnce(registry, 'lonworks', () =>
+    import('./building/lonworks/lonworks').then((module) => module.lonworksPlugin),
+  );
   // DNP3 — dalga 5a: link katmanı (bloklu CRC16_DNP) + transport FIR/FIN +
   // application header (object header'a kadar, bkz. dnp3.ts dosya başı).
   registerOnce(registry, 'dnp3', () =>

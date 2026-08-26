@@ -125,13 +125,13 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
 - `@mcanbektas/design` GitHub Packages'a yayınlanmadı; `file:` bağı ve CI'daki iki-checkout
   düzeni bunun sonucudur. Faz 4'te yayınlanınca ikisi de sadeleşir.
-- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 16c'den sonra,
+- Katalogdaki 172 kaydın **ham `status` dağılımı (2026-08-26, dalga 17'den sonra,
   KODDAN doğrulandı — tek kullanımlık sayım script'i)
-  124 `ready` / 20 `planned` / 28 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
+  124 `ready` / 19 `planned` / 29 `partial`**, ama ham sayı yanıltıcı: 15 alias kaydın
   hepsinde `status` `planned` yazarken kanonik kayıt `ready`. Alias zinciri çözülünce
-  **139 `ready` / 5 `planned` / 28 `partial`**; gerçekten yapılacak iş **5 kanonik
-  kayıt** (wireless-iot 4 — thread, wifi, esp-now, rf-telemetry-custom-frame;
-  building-automation 1 — lonworks). **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
+  **139 `ready` / 4 `planned` / 29 `partial`**; gerçekten yapılacak iş **4 kanonik
+  kayıt** ve dördü de AYNI domain'de (wireless-iot — thread, wifi, esp-now,
+  rf-telemetry-custom-frame). **Geriye TEK domain kaldı.** **`network-ethernet` (19 kayıt) dalga 12 ile TAMAMEN
   KAPANDI** (12a-12h, `docs/plan-fazlar.md`); **`industrial-automation` (25 kayıt) dalga
   13 ile TAMAMEN KAPANDI** (13a wireless-m-bus + 13b iec-60870-5-101 + 13c opc-ua + 13d
   cip/ethernet-ip/devicenet + 13e profinet + 13f powerlink/sercos-iii/cc-link-ie + 13g
@@ -154,9 +154,12 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **`marine-navigation` (11 kayıt) dalga 16 ile TAMAMEN KAPANDI** (16a
   hdlc-based-marine + 16b seatalk + 16c iec-61162 — 3 alt dalga, 3 kanonik
   kayıt, 1 `ready` + 2 `partial`); domain toplamı **6 `ready` + 2 `partial` +
-  3 alias**, `planned` KALMADI. Kalan İKİ domain'de (`wireless-iot`,
-  `building-automation`) henüz hiç iş başlamadı; sıradaki domain seçimi
-  YAPILMADI. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
+  3 alias**, `planned` KALMADI.
+  **`building-automation` (11 kayıt) dalga 17 ile TAMAMEN KAPANDI** — YEDİNCİ
+  kapanan domain (tek commit, alt dalga YOK, 1 kanonik kayıt: `lonworks`,
+  `partial`); domain toplamı **7 `ready` + 1 `partial` + 3 alias**, `planned`
+  KALMADI. Kalan TEK domain `wireless-iot` (4 kanonik kayıt); sıradaki domain
+  seçimi YAPILMADI ve zaten seçenek kalmadı. **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
   `as-interface` klasik-only (ASi-5 ayrı katman), `foundation-fieldbus` HSE-only (H1'in
@@ -165,8 +168,32 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   çerçeveleme, farklı FEC), `iec-61162` `UdPbC`-only (`-450`nin İKİNCİ teli olan
   `RaUdP`/`RpUdP`/`RrUdP` binary dosya transferi ayrı bir tel biçimidir; Ed.2'nin
   PGN kapsüllemesinin token'ı ve `a:` authentication tag'inin biçimi kamuya açık
-  DEĞİL) — gerekçeler ilgili `.ts` dosyalarının başında ve
-  `docs/plan-fazlar.md`nin 13g/14h/15h/16c notlarında. `seatalk` bu sınıftan
+  DEĞİL), `lonworks` ISO/IEC 14908-4 (CN/IP) tek-tel — gerekçeler ilgili `.ts`
+  dosyalarının başında ve `docs/plan-fazlar.md`nin 13g/14h/15h/16c/17
+  notlarında.
+  **`lonworks`un kapsam gerekçesi bu listedeki ötekilerden FARKLI bir cinstir
+  ve ayrımı korumak şart** (dalga 17): 14908-2/-3'ün ham L2 çerçevelemesi
+  **belgesiz DEĞİL** — biçimi normatif Echelon spec'inin Figure 3.2'sinde ve
+  CRC bölümünde TAM olarak var. Eksik olan **YAKALAMA YOLU**: libpcap'te
+  LonTalk için `DLT_` yok, Wireshark'ın link katmanı girişi yok, kamuya açık
+  ham L2 yakalaması yok — bir `Uint8Array`e ham LonTalk L2 çerçevesinin
+  girmesinin kamuya açık bir yolu yoktur. Birinci sınıf kaynağın kendi
+  mimarisi bunu doğruluyor: `packet-lon.c`in TEK giriş noktası
+  `dissector_add_uint("cnip.protocol", 0, lon_handle)`. **"Belgesiz" ile
+  "erişilemez" ayrı gerekçelerdir**; ikincisi bir sonraki nesle "ara, bulunur"
+  demez. `lonworks`un rozetine katkı veren öteki üç kalem: SNVT tipi telde YOK,
+  XIF paneli yazılmadı (aşağıdaki borç), Gateway Mapping analyzer işi.
+  **XIF parser'ı + `xif` `definitions` paneli YAZILMADI ve bu bir BORÇTUR**
+  (dalga 17). Biçim BELGELİ; kaynakları burada listeli ki bir sonraki nesil
+  aramak zorunda kalmasın: LONMARK Device Interface File Reference Guide rev
+  4.501 (`lonmark.org/wp-content/uploads/2020/12/LmXif4501.pdf`, girişsiz,
+  429 KB), `izot/shortstack`ta ~20 gerçek `.xif` örneği, `g3gg0/LonScan`ın
+  açık C# parser'ı (~250 satır, sabit satır atlamalarıyla kırılgan).
+  Yazılmama gerekçesi `[Karar 15h-1]`in aynısı: domain'i KAPATAN dalgada
+  ikinci bir motor riski artırır. `definitions` sekmesi bu yüzden "planlandı"
+  basıyor ve BU DOĞRU DAVRANIŞTIR (`ProtocolPage.tsx`in `DEFINITION_PANELS`inde
+  `xif` yok; emsal `lin` ve `arinc-429`, ikisi de `ready`);
+  `e2e/lonworks-decode.spec.ts` bunu sınıyor. `seatalk` bu sınıftan
   DEĞİLDİR: rozeti kaynak güvenilirliğinden ve komut bitinin çerçevede
   taşınmamasından geliyor (aşağıda).
   **Aynı 24 bitin ANLAMI çerçeveden çerçeveye değişebilir ve tek bir gösterge
@@ -222,6 +249,40 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   üçünün de bekçi testi ölçümü kodda TEKRARLAR. **Bekçi testi artık iki yönlü
   çalışıyor**: `false` dönenlerde "yazılsaydı kaç çerçeve çalardı", `true`
   dönende "bugün hâlâ sıfır mı" (16c, 143 kayıt / 886 örnek → 0).
+  **"Paywall" bir arama-durdurma gerekçesi DEĞİLDİR** (dalga 17): `lonworks`
+  "spec'i üyelik arkasında, `seatalk` sınıfı kaynaksız kayıt" hipoteziyle
+  girildi ve hipotez TAMAMEN çürüdü — normatif Echelon LonTalk Protocol
+  Specification v3.0 ücretsiz (112 sayfa), tam yığın MIT
+  (`izot/lon-stack-ex` = orijinal Echelon LonTalk Stack), SNVT master listesi
+  açık (221 tip), XIF referans kılavuzu açık, 12.028 çerçevelik gerçek
+  yakalama açık. Keşif turu "spec ücretli" diye kaynak aramayı BIRAKMAZ.
+  **Kaynak hiyerarşisi kağıt üzerinde değil ALAN ALAN işler ve Wireshark
+  ÜÇÜNCÜ sınıf olabilir** (dalga 17): `packet-lon.c`/`packet-cnip.c` birinci
+  sınıf sanılıyordu; normatif spec gelince ÜÇ yerde ondan sapıldı, AuthPDU
+  maskeleri kaynağın KENDİ `TODO`suyla bozuk çıktı, CRC'si `#if 0` içindeydi
+  ve NM/ND yanıtlarını yanlış etiketliyordu. Üstelik bir yerde (adres biçimi
+  2b'nin +4 alanı) **bozuk sanılan `go-lon` HAKLI** çıktı — hakem Figure 3.2.
+  Bir çelişkide hakem daima normatif metindir; "hangi kaynak birinci sınıf"
+  sorusu KAYIT BAŞINA değil ALAN BAŞINA cevaplanır.
+  **Aynı dosyadaki YORUM ile KOD ayrışabilir; KOD kazanır** (dalga 17, İKİ
+  KEZ): `LtIpPackets.h:264`ün yorumu `extndHdrSize` için *"size of header -
+  20"* derken aynı sınıfın `.cpp`si *"a count of 4-byte values"* deyip `*4`
+  yapıyor; `packet-lon.c:395`in `TODO`su maskeyi yanlış öneriyor ama çıkarım
+  kodu doğru. **Alan tarifini yorumdan değil çalışan koddan al** — birincisi
+  LonTalk PDU'sunu üç bayt kaydırırdı, hata VERMEDEN.
+  **Aynı polinom + aynı init + aynı yansıma bile aynı algoritma değildir**
+  (dalga 17, 16a dersinin en keskin hâli): LonTalk'ın CRC'si `CRC16_GENIBUS`
+  (check `0xD64E`) ve `CRC16_CCITT_FALSE`tan **YALNIZ `xorout`ta** ayrılıyor
+  (check `0x29B1`). Katalogda ikisi de var; birini ötekinin yerine almak hata
+  VERMEDEN yanlış PASS/FAIL basar. `CRC16_X25` de aday gibi görünür ama
+  YANSITIR.
+  **Semantik tip telde olmayabilir** (dalga 17, KNX DPT ilkesinin İKİNCİ
+  vakası): LonTalk NV mesajı yalnız 14 bitlik bir SELECTOR taşır ve selector
+  cihazın bağlama tablosundaki bir İNDEKSTİR, tip DEĞİLDİR. Aynı iki bayt
+  (`00 CA`) beş ayrı mühendislik değeri veriyor (−253.8 °C / 2.02 °C / %1.01 /
+  20.2 A / 202). Tip `decodeOptions` kanalıdır, seçilmediğinde değer HAM kalır
+  ve seçildikten SONRA DA `nvTypeNotOnWire` uyarısı düşer — seçim bir ölçüm
+  değil, bir bildirimdir.
   **Bir kaydın "kendi teli var mı" sorusu KEŞİFTE cevaplanmalıdır** (16c):
   `iec-61162` sınıflandırıcı sanılıyordu (`uavcan-compatibility` emsali,
   `canParse` daima `false`), keşif turu `-450`nin gerçek telini beş bağımsız

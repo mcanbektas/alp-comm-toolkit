@@ -29,7 +29,7 @@
 | **7** ✅ | **TAMAM.** İkiye bölündü: **7a motor** (33 alan tipi — §9.1 başlığı 32 der, listesi 33 ad taşır, liste esas alındı; dynamic length, koşullu alan, CRC coverage, yorumlayıcı parser + üç geçişli encoder) ve **7b UI** (§9.7'nin 4 paneli + Packet Builder + **6** kod üretici). Üretici sayısı 4 değil 6: §9.7'nin alt paneli JSON şema · C struct · C parser · Python parser · TypeScript parser · Markdown doküman sayıyor; "4 üretici" özeti C struct+parser'ı tek sayıyordu. **Kapsam dışı:** §10'un "WebSocket üzerinden gönderme" maddesi — `src/connection/websocket` yok, ekranda "planlandı" rozetiyle görünüyor | **Opus · ultracode** | Spec'in "en önemli modülü" — küçük bir protokol derleyicisi; uzun ve bütünsel |
 | **8** ✅ | **TAMAM.** **Live Serial Monitor** (spec Phase 5): Web Serial bağlantı katmanı + canlı parse (Worker'da) + ring buffer + virtualized tablo + Recharts grafikler + istatistik | **Opus · high** | Perf değişmezleri (UI thread bloklamaz, 100k satır), worker sınırları; sebep-sonuç izleme gerek |
 | **9** ✅ | **TAMAM.** **İlk protokoller** (spec Phase 6): Modbus RTU/ASCII/TCP + NMEA 0183 + CAN + DBC import + J1939 — plugin desenini kanıtlar | **Sonnet · high** | Tarifler net (ozet 03/04/05'te frame yapıları+fixture'lar); desen Faz 6-7'de kurulmuş olacak |
-| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 16 KAPANDI — `marine-navigation` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation`, `automotive` ve `aerospace-uav`dan sonra **altıncı kapanan domain**). Kalan iş **5 kanonik kayıt**: wireless-iot 4, building-automation 1 | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
+| **10+** 🔄 | **SÜRÜYOR** (2026-08-26 itibarıyla dalga 17 KAPANDI — `building-automation` domain'i de tamamen bitti; `interfaces-framing`, `network-ethernet`, `industrial-automation`, `automotive`, `aerospace-uav` ve `marine-navigation`dan sonra **yedinci kapanan domain**). Kalan iş **4 kanonik kayıt**: wireless-iot 4 (thread, wifi, esp-now, rf-telemetry-custom-frame) — geriye TEK domain kaldı | **Sonnet · medium-high** (dalga başına) | Kurulu desene protokol ekleme; zor decoder'larda (EtherCAT, GOOSE, Matter TLV) gerekirse Opus'a çık |
 | **P** | **PCB redesign retrofit** — paralel iz, ekran ekran token'lara geçiş | **Sonnet · medium** | Mekanik dönüşüm, tema→token eşlemesi Faz 1'de tanımlanmış olacak |
 
 ## Model geçiş kuralları
@@ -488,8 +488,220 @@ kararın üçü de tahminle değil SAYIYLA verildi; bekçi testi artık iki yön
 yanlış sınıflandırma yalnız motoru değil, rozeti, `decodeOptions` yüzeyini ve
 bekçi testinin YÖNÜNÜ de değiştirirdi.
 
-Sıradaki domain seçimi HENÜZ YAPILMADI — kalan İKİ domain'de (`wireless-iot` 4,
-`building-automation` 1) hiç iş başlamadı, toplam **5 kanonik kayıt** açık.
+~~Sıradaki domain seçimi HENÜZ YAPILMADI — kalan İKİ domain'de
+(`wireless-iot` 4, `building-automation` 1) hiç iş başlamadı, toplam
+**5 kanonik kayıt** açık.~~ (Dalga 16'nın kapanış notu; dalga 17
+`building-automation`ı kapattı — aşağı.)
+
+**`building-automation` domain'i TAMAMEN BİTTİ — dalga 17 kapandı.**
+
+**Dalga 17 kapanış özeti (tek commit, alt dalga YOK, 1 kanonik kayıt,
+2026-08-26):** `building-automation`ın dört ailesinden `lonworks` bu dalgada
+kapandı; `lighting-control`, `lighting-networks` ve `hvac-metering` zaten
+doluydu. Tek kayıt **`partial`** rozetiyle açıldı. Domain toplamı: 11 kayıt =
+**7 `ready` + 1 `partial` + 3 alias**, `planned` KALMADI (KODDAN doğrulandı,
+tek kullanımlık sayım script'i: 172 kayıt ham **124 `ready` / 19 `planned` /
+29 `partial`**, alias çözülünce **139 / 4 / 29**). Deponun kanonik borcu
+**5 → 4** indi ve dördü de `wireless-iot`ta.
+
+**Keşif hipotezi TAMAMEN ÇÜRÜDÜ.** Görev tanımı `lonworks`u
+"`seatalk`/`cc-link-ie` sınıfı bir kaynaksız-kayıt vakası, spec'i paywall
+arkasında" diye çerçevelemişti. Gerçekte normatif **Echelon LonTalk Protocol
+Specification v3.0** ücretsiz indirilebiliyor (598 KB, 112 sayfa), tam yığın
+**MIT** (`izot/lon-stack-ex` — orijinal Echelon LonTalk Stack'in tamamı) ve
+Wireshark wiki'sinde **12.028 çerçevelik gerçek bir yakalama** duruyor. Bu,
+dalga 16'nın herhangi bir kaydından daha iyi bir kaynak durumu. **Rozeti
+belirleyen şey kaynak değil, KAPSAM oldu.**
+
+**Kapsam çizgisi ve gerekçesinin İNCELİĞİ.** Çözülen tel: CN/IP
+(ISO/IEC 14908-4 · ANSI/CEA-852) UDP datagramı + içindeki LonTalk
+(ISO/IEC 14908-1) PDU'su. Kapsam dışı: 14908-2 (TP/FT-10) ve 14908-3 (PL-20)
+ham L2 çerçevelemesi, XIF dosya çözümü, Gateway Mapping. Ham L2'nin gerekçesi
+**"belgesiz" DEĞİL** — biçimi normatif spec'in Figure 3.2'sinde ve CRC
+bölümünde TAM olarak var; eksik olan **YAKALAMA YOLU**: libpcap'te LonTalk
+için `DLT_` yok, Wireshark'ın link katmanı girişi yok, kamuya açık ham L2
+yakalaması yok. Birinci sınıf kaynağın kendi mimarisi bunu doğruluyor:
+`packet-lon.c`in TEK giriş noktası `dissector_add_uint("cnip.protocol", 0,
+lon_handle)`. *"Belgesiz"* ile *"erişilemez"*i ayırmak bu dalganın en ince
+ayrımıydı ve dosya başına aynen yazıldı. Emsal: `iec-61162` `UdPbC`-only (16c),
+`ads-b` 1090ES-only (15h), `iec-61850` GOOSE-only, `foundation-fieldbus`
+HSE-only, `cc-link-ie` 0x890F-only — **kuralın yedinci uygulaması.**
+
+`canParse` **`true` döner** ve karar tahminle değil SAYIYLA verildi: CN/IP tam
+imzası (uzunluk alanı KENDİNİ doğrular + sürüm 1 + paket tipi 14'lük kümede +
+`20 + 4×exth ≤ n`) 143 kayıt / 886 örnekte **0** çakışma ölçtü; aynı imza
+gerçek yakalamanın 12.028 datagramında 12.028 doğru pozitif verdi. Ham LonTalk
+PDU imzası aynı kümede **401 (%45)** çakışıyor — `seatalk`in (16b) 27/870'inden
+on beş kat kötü. Bu iki sayı arasındaki uçurum **kapsam kararının ikinci
+ayağıdır** ve bekçi testi (`lonworksCanParseRegistry.test.ts`) ÜÇ YÖNÜ de kodda
+tekrarlıyor: ileri (yabancı çakışma bugün de 0), ters (naif ham imza hâlâ
+> 300 çalardı), kendi üzerinde (CN/IP teli taşıyan tüm örnekler geçiyor).
+
+**Kaynak hiyerarşisi alan alan işledi ve Wireshark ÜÇÜNCÜ sınıf çıktı.** Dört
+kaynak alan alan karşılaştırıldı ve **dört yerde ayrıştılar**; üçünde normatif
+spec hakem oldu. (1) CN/IP bayt 2'nin bölünmesi: Wireshark tüm baytı sürüm
+sayıyor, Echelon `LtIpPktHeader::parse` içinde `version & 0x1F` / `& 0xE0` diye
+AÇIKÇA bölüyor — hakem Echelon, çünkü okuma bir maske değeriyle değil KODLA
+kanıtlı. (2) Adres biçimi 2b'nin +4 baytı: Wireshark `dstgrp` diyor, `go-lon`
+`DstSubnet` diyor; Figure 3.2 (`2b: SrcSubnet 0 SrcNode DstSubnet 1 DstNode
+Group GrpMemb`) **go-lon'u haklı çıkardı** — bozuk sanılan kaynak burada
+doğruydu. Bu dalganın en değerli tek bulgusu: normatif kaynak olmasaydı o alan
+"belirsiz" damgasıyla ve gereksiz bir uyarıyla yayınlanacaktı. (3) Adres biçimi
+3 (UID): `go-lon` 6 baytlık dilimden `uint64` okumaya çalışıyor ve
+`domain_offset`u 5'te bırakıyor, yani domain'i UID'nin ORTASINDAN okuyor —
+hakem spec + aritmetik (`1+1+1+6 = 9`), Wireshark alındı. (4) IP-852 yükünde
+kuyruk CRC'si — ÇÖZÜLMEDİ, aşağıda.
+
+**Aynı polinom + aynı init + aynı yansıma bile aynı algoritma değildir.**
+LonTalk'ın CRC'si **CRC-16/GENIBUS**tur ve katalogda YOKTU. Normatif spec
+yalnız polinomu veriyor (*"X16 + X12 + X5 + 1, the CCITT CRC-16 standard"*);
+init/yansıma/xorout'u veren tek kaynak Echelon'un `LtCUtil.c`sindeki `LtCRC16`
+(init `0xFFFF`, MSB-first tablo, `crc = ~crc`, büyük endian yazım). O uygulama
+bu dalgada bağımsızca yeniden kuruldu ve reveng'in yayımlı `check = 0xD64E`
+değerini üretti. **`CRC16_CCITT_FALSE` bundan YALNIZ `xorout`ta ayrılıyor**
+(check `0x29B1`) — aynı poly, aynı init, aynı yansıma. 16a'nın *"aynı POLİNOM
+aynı algoritma değildir"* dersinin en keskin hâli ve deponun tarihindeki en
+keskin sahte dost; `CRC16_X25` de aday gibi görünür ama YANSITIR.
+`CRC_ALGORITHM_IDS` **29 → 30**, `crcEngine.test.ts`e `0xD64E` fixture'ı,
+`CrcCalculatorTool.test.tsx` **37 → 38**.
+
+**Kuyruk CRC'si VARSAYILMAZ ama VARSA doğrulanır.** 12.028 datagramın
+HİÇBİRİNDE kuyruk CRC'si yok (4 polinom × 3 init × yansıma × xorout × iki bayt
+sırası tarandı; bağımsız ikinci sürüm 36.000 denemede 2 tutma verdi — şans
+düzeyi) ve gövde uzunlukları da doğruluyor: 8 baytlık gövdeler tam olarak
+`PPDU + NPDU + src(2) + dst(2) + domain(1) + TPDU(1)`. Ama `lon-stack-ex`in
+`LtLreIpClient.cpp`si alınan IP-852 yüklerinde bir kuyruk CRC'si doğruluyor.
+Karar: `cnip-tunnel` modunda CRC **HİÇ hesaplanmaz** (otomatik sezme yalnız
+1/65536 yanlış pozitif eklerdi) ve motor bunu `tunnelCarriesNoCrc` uyarısıyla
+SÖYLER; `payloadKind` `raw-lontalk-pdu-with-crc`ye çevrilince GENIBUS
+GERÇEKTEN doğrulanır. *"gösterilir ≠ doğrulanır"* korundu.
+
+**Semantik tip telde olmayabilir — KNX DPT ilkesinin ikinci vakası.** LonTalk
+NV mesajı yalnız 14 bitlik bir **selector** taşır ve selector cihazın bağlama
+tablosundaki bir İNDEKSTİR, tip değildir; tip cihazın XIF'inde ya da ağ
+yönetim aracındadır. Aynı iki bayt (`00 CA`) beş ayrı mühendislik değeri
+veriyor: `SNVT_temp` −253.8 °C · `SNVT_temp_p` 2.02 °C · `SNVT_lev_percent`
+1.01 % · `SNVT_amp` 20.2 A · `SNVT_count` 202. Tip `nvPayloadType` kanalıdır,
+seçilmediğinde değer HAM kalır ve **HER NV çözümünde `nvTypeNotOnWire` uyarısı
+KOŞULSUZ basılır** (`seatalk`in `commandBitNotInBytes`i ile aynı sınıf:
+kapatılamayan uyarı, seçim yapıldıktan sonra da durur). Ölçek tablosu
+`lonmark.org/nvs/`nin **221 tip sayfasının hepsi indirilerek** çıkarıldı ve
+skaler + ölçek üçlüsü dolu + `obsolete: no` süzgeciyle **75 tipe** indirildi.
+🚨 **Ölçek formülü `A × 10^B × (ham + C)`** — parantez KRİTİK:
+`(A × 10^B) × ham + C` yazmak `SNVT_temp`te sonucu ~2466 °C kaydırır ve HATA
+VERMEZ. `snvtTypes.test.ts` iki formülü de hesaplayıp ayrıştıklarını assert
+ediyor; e2e ise aynı iki baytın ekranda `SNVT_temp_p`de **2.02 °C**,
+`SNVT_temp`te **−253.8 °C** okunduğunu kanıtlıyor. Tuzağın gizlendiği yer de
+teste bağlandı: 75 tipin **yalnız birinde** `C ≠ 0`, yani yanlış formül 74
+tipte doğru sonuç verir.
+
+**NM/ND yanıt kodu ÜÇ KATLI ÇAKIŞIR ve bu NORMATİFTİR.** Spec NM yanıtını
+`00pxxxxx`, ND yanıtını `00p1xxxx` diye tanımlıyor. Sonuç: yanıtlar
+`0x00`–`0x3F` aralığında, yani "generic application message" aralığının
+İÇİNDE; ND biçimi NM biçiminin ALT KÜMESİ; ve ayrım YALNIZ eşleşen isteğe
+bakılarak yapılabilir — o istek çerçevede YOK. Gerçek yakalama bunu doğruluyor:
+15 `NM_NV_FETCH` (`0x73`) isteğinin 15 yanıtı da `0x33` ve `0x33` aynı zamanda
+`ND_CLEAR_STATUS` (`0x53`) yanıtı olarak da geçerli. Motor alanı
+**`Application Code`** olarak basıyor, SPDU RESPONSE içindeyken
+`responseCodeAmbiguous` uyarısı basıyor ve **İKİ ADAYI DA alanın kendi
+metninde listeliyor**; transaction numarası basılıyor ki kullanıcı komşu
+çerçeveyle kendisi eşleştirebilsin. Çerçeveler arası eşleştirme YAPILMIYOR
+(dalga 16 bulgu 12) ve **uydurma bir "NM yanıtı" adı BASILMIYOR** —
+Wireshark bunu yapmıyor, her NM/ND yanıtını sessizce "Application message"
+etiketliyor; **motor birinci sınıf kaynaktan daha doğru davranıyor.**
+`mode-s`in AP alanı kararının (15h) birebir aynı sınıfı.
+
+**AYNI DOSYADAKİ YORUM İLE KOD AYRIŞABİLİR; KOD KAZANIR** — ve bu dalgada İKİ
+KEZ yaşandı. (1) `LtIpPackets.h:264`ün yorumu `extndHdrSize` için *"size of
+header - 20"* diyor (bayt gibi okunuyor), ama `LtIpPackets.cpp`nin KODU
+*"extndHdrSize is a count of 4-byte values"* deyip `p += (extndHdrSize*4)`
+yapıyor; Wireshark da `offset += 4 * exth_len`. Motor `4 × exth` atlıyor ve
+türetilmiş bir örnek çerçeve bunu ekranda kanıtlıyor — bayt sayılsaydı LonTalk
+PDU'su üç bayt kayardı, hata vermeden. (2) `packet-lon.c:395`in kendi `TODO`su
+AuthPDU maskelerinin bozuk olduğunu SÖYLÜYOR ve önerdiği düzeltme de yanlış;
+doğru maskeler `0xC0`/`0x30` ve onları `lcs_tsa.c:89`in `BITS3(fmt, 2,
+pduMsgType, 2, transNum, 4)` satırı veriyor. Wireshark'ın ÇIKARIM kodu doğru,
+GÖSTERİM maskesi yanlış. **Alan tarifini yorumdan değil çalışan koddan al.**
+Aynı disiplin `BITS<n>()` makrolarının yönünde de gerekti: yön `bitfield.h` ile
+`lcs_platform.h`in BİRLİKTE okunmasıyla belirleniyor
+(`BITF_DECLARED_BIG_ENDIAN` → argümanlar MSB→LSB) ve tek dosyaya bakmak tüm bit
+alanlarını ters çevirirdi, hata VERMEDEN.
+
+**Doğrulanmamış yollar tek tek işaretlendi.** Gerçek yakalama şunları
+doğruladı: 20 baytlık başlık, `len` kendini doğrulaması, PPDU/NPDU bit düzeni,
+adres biçimi 0 ve 2a, domain 0 ve 1 bayt, TPDU ACKD/ACK, SPDU
+REQUEST/RESPONSE, APDU NV/NM/Application, transaction eşleşmesi, NM yanıt kodu
+aritmetiği. Doğrulanmayanlar (`exth > 0`, bayt 2'nin 5/3 bölünmesi,
+`pcode != 0`, security bit, Data Packet dışındaki 13 tip, adres biçimi 1/2b/3,
+domain 3 ve 6 bayt, REMINDER/REM-MSG, AuthPDU'nun tamamı, Network Diagnostic,
+Foreign Frame kod anlamı, `NM_MANUAL_SERVICE_REQUEST` kuyruğu, kuyruk CRC'li
+ham PDU) ilgili ALANLARINDA `pathNotVerifiedInCapture` uyarısı taşıyor ve
+çerçeve düzeyinde tek bir `decodePathNotVerified` uyarısı düşüyor.
+
+**Öncelik bilgisi ULAŞIM KATMANINDA.** `packet-cnip.c` CN/IP önceliğini
+`destport == 1629` diye yazıyor (IANA kaydı: `lontalk-norm` 1628/udp,
+`lontalk-urgnt` 1629/udp — Wireshark'ın *"Not IANA registered"* yorumu YANLIŞ),
+ama **port bu motorun girdisinde YOK** (`bacnetip.ts` ile aynı: IP/UDP başlığı
+parser'a girmez). CN/IP düzeyinde öncelik alanı HİÇ BASILMIYOR; LonTalk
+PPDU'sunun kendi `0x80` priority biti ayrıdır ve o basılıyor.
+
+**Modül bölünmesi ve XIF kararı.** `cnip.ts` (zarf) ile `lonTalk.ts` (PDU)
+birbirini HİÇ çağırmıyor — kaynaklar da iki ayrı dissector kullanıyor ve CN/IP
+`pcode != 0` ile başka yükler taşıyabilir; domain içi emsal
+`bacnet/npdu.ts` ↔ `bacnetip.ts`. `snvtTypes.ts` saf veri, üçüncü modül.
+**XIF parser'ı YAZILMADI** ve bu bilinçli: `[Karar 15h-1]`in ve 16c'nin
+"domain'i kapatan dalgada ikinci motor riski artırır" gerekçesinin aynısı.
+`definitions` sekmesi bu yüzden "planlandı" basıyor ve BU DOĞRU DAVRANIŞTIR
+(`ProtocolPage.tsx`in `DEFINITION_PANELS`inde `xif` yok; emsal `lin` ve
+`arinc-429`, ikisi de `ready`). e2e bunu sınıyor. **Yeni bilinen borç:** XIF
+parser'ı + `xif` `definitions` paneli — kaynakları burada listeli, bir sonraki
+nesil aramak zorunda kalmasın: LONMARK Device Interface File Reference Guide
+rev 4.501 (`lonmark.org/wp-content/uploads/2020/12/LmXif4501.pdf`, girişsiz,
+429 KB), `izot/shortstack`ta ~20 gerçek `.xif` örneği, `g3gg0/LonScan`ın açık
+C# parser'ı (~250 satır, kırılgan).
+
+Brifte yazmayan kararlar: (1) `decodeOptions` **8'de kaldı** — dalga 15/16'da üç
+kez üst üste büyüyen kanal sayısı bu dalgada brifin cömert tahminini
+DOĞRULADI; (2) `nvPayloadType`ın şık listesi **75 SNVT** oldu ve şık etiketleri
+VERİ (`SNVT_temp (39)`), çeviriye girmedi; (3) Foreign Frame kodu için
+`numeric`/`hide` seçeneği açıldı ama sınıf adı HER İKİ ŞIKTA da basılıyor —
+boş kart yasağı; (4) `timestampEpoch` varsayılanında `unit: 'ms'` ATANIYOR
+(birim `LtIpPackets.h:272`den KAYNAKLI) ama epoch bildirilince birim DÜŞÜYOR,
+çünkü ISO tarih metninin birimi yoktur; (5) ham PDU + kuyruk CRC'li 13. bir
+örnek çerçeve eklendi ki katalog eklemesinin GERÇEK bir tüketicisi olsun.
+
+Dokunulan dosyalar (17): `building/lonworks/` (`cnip.ts`, `lonTalk.ts`,
+`snvtTypes.ts`, `lonworks.ts` + dört test dosyası),
+`app/catalog/domains/building-automation.ts` (`planned` → `partial` +
+`pluginId` + kapsamı AÇIKÇA yazan `summary`), `protocols/index.ts`,
+`protocols/index.test.ts`, `protocol-core/checksums/crcCatalogue.ts` +
+`crcEngine.test.ts`, `features/calculators/tools/CrcCalculatorTool.test.tsx`
+(37 → 38), `tr.ts`/`en.ts` (2×100 anahtar — brif ~110 bekliyordu),
+`e2e/lonworks-decode.spec.ts` (11 test). Tam paket yeşil: **5880 birim**
+(5782 → +98) · **1212 e2e** (1203 → +9) · `npm run typecheck` ·
+`npm run build`. İki türetilmiş fixture (`ProtocolPage.test.tsx` ve
+`e2e/nmea-decode.spec.ts`) kendiliğinden
+**`wireless-iot/mesh-smart-home/thread`**e kaydı ve ikisi de yeşil kaldı —
+dalga 16a'da yapısal olarak sökülen mayın dördüncü kez de patlamadı.
+
+Dalganın kalıcı dersleri: (1) **"Paywall" bir arama-durdurma gerekçesi
+DEĞİLDİR** — normatif spec ücretsiz, tam yığın MIT, SNVT master listesi açık,
+XIF referans kılavuzu açık, 12 bin çerçevelik yakalama açık. (2) **Kaynak
+hiyerarşisi kağıt üzerinde değil ALAN ALAN işler** — Wireshark birinci sınıf
+sanılıyordu, normatif spec gelince üç yerde ondan sapıldı ve bir yerde bozuk
+sanılan `go-lon` haklı çıktı. (3) **Birinci sınıf kaynak kendi hatasını
+yazabilir** (`packet-lon.c:395`in `TODO`su) ve **çıkarım kodu ile gösterim
+metadata'sı ayrışabilir**. (4) **Aynı dosyadaki YORUM ile KOD ayrışabilir; KOD
+kazanır** — bu dalgada iki kez. (5) **Aynı polinom + aynı init + aynı yansıma
+bile aynı algoritma değildir** (`CRC16_GENIBUS` vs `CRC16_CCITT_FALSE`,
+yalnız `xorout`). (6) **Semantik tip telde olmayabilir** — NV selector bir
+bağlama indeksidir; KNX DPT ilkesinin ikinci vakası. (7) **`canParse` yanlış
+pozitifi üçüncü kez brif aşamasında ölçüldü** ve ilk kez `true`/`false`
+kararının ötesine geçip **KAPSAM kararını** belirledi (0 vs 401).
+
+Sıradaki domain seçimi YAPILMADI ve YAPILMAYACAK — geriye **TEK domain**
+kaldı (`wireless-iot`: thread, wifi, esp-now, rf-telemetry-custom-frame),
+toplam **4 kanonik kayıt** açık. Keşif turu başlatılmadı; seçim kullanıcınındır.
 
 
 Dalga 9 TAMAMEN KAPANDI (`hayes-command-set → at-commands →

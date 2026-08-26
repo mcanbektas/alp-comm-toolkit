@@ -32,6 +32,11 @@ const CHECK_VALUES: Record<CrcAlgorithmId, bigint> = {
   CRC16_ARC: 0xbb3dn,
   CRC16_MODBUS: 0x4b37n,
   CRC16_CCITT_FALSE: 0x29b1n,
+  // CRC-16/GENIBUS (LonTalk NPDU CRC, dalga 17) — reveng kataloğunun yayımlı
+  // check değeri. `CRC16_CCITT_FALSE`tan YALNIZ `xorout`ta ayrıldığı hâlde
+  // check tamamen farklı; ayrıca Echelon'un `LtCRC16` tablo döngüsü bağımsızca
+  // yeniden kurulup aynı 0xD64E üretildi (crcCatalogue.ts'teki girdinin notu).
+  CRC16_GENIBUS: 0xd64en,
   CRC16_XMODEM: 0x31c3n,
   CRC16_X25: 0x906en,
   CRC16_DNP: 0xea82n,

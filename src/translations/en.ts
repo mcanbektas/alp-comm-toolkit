@@ -7643,4 +7643,165 @@ export const en: TranslationDictionary = {
   'protocol.spc.example.truncatedResponse.name': 'Truncated response',
   'protocol.spc.example.truncatedResponse.description':
     'A response starts after the trigger but is cut off before a complete SENT frame.',
+  // ── LonWorks (ISO/IEC 14908) — Faz 10, dalga 17 ─────────────────────────
+  'protocol.lonworks.documentation.summary':
+    'ISO/IEC 14908 (LonWorks) control networking. This page decodes the CN/IP (14908-4, ANSI/CEA-852) UDP datagram and the LonTalk (14908-1, ANSI/EIA-709.1) PDU inside it: L2 header, NPDU, all five addressing formats, domain, TPDU/SPDU/AuthPDU/APDU and the whole application code space. The raw 14908-2 (TP/FT-10) and 14908-3 (PL-20) link framing is OUT OF SCOPE — not because the format is undocumented, but because there is no public way to capture those bytes (libpcap defines no DLT_ for LonTalk). The SNVT type of a network variable is NEVER carried on the wire; the frame holds only a 14-bit binding selector.',
+  'protocol.lonworks.error.aborted': 'Parsing was cancelled.',
+  'protocol.lonworks.error.emptyDatagram': 'An empty datagram cannot be decoded.',
+  'protocol.lonworks.error.tooShortForCnip':
+    'The datagram is too short to carry the 20-byte CN/IP header.',
+  'protocol.lonworks.error.tooShortForPdu':
+    'A raw LonTalk PDU needs at least the L2 and NPDU octets; the input is shorter than that.',
+  'protocol.lonworks.error.cnipTruncated':
+    'The CN/IP header ends before its 20 bytes are complete.',
+  'protocol.lonworks.error.lengthMismatch':
+    'The CN/IP packet size field does not match the actual datagram length. This field COUNTS ITSELF (like BVLC, unlike MBAP). Relax the length check if you expect padding.',
+  'protocol.lonworks.error.extendedHeaderTruncated':
+    'The extended header does not fit in the datagram: the field counts 32-BIT WORDS, so the number of bytes to skip is four times its value.',
+  'protocol.lonworks.error.protocolCodeOutOfScope':
+    'The CN/IP protocol code is not 0 (EIA-709/LonTalk). The datagram was RECOGNISED, but its payload is outside this decoder\'s scope — CN/IP can tunnel other protocols too.',
+  'protocol.lonworks.error.packetTypeRejected':
+    'The CN/IP packet type is not Data Packet (0x01) and the reject-unknown-types option is on.',
+  'protocol.lonworks.error.pduTruncated':
+    'The LonTalk PDU ends before it can carry the L2 and NPDU octets.',
+  'protocol.lonworks.error.addressTruncated':
+    'The address block does not fit in the frame: its length depends on the address format (and, in format 2, on the most significant bit of the source node byte).',
+  'protocol.lonworks.error.domainTruncated':
+    'The domain field does not fit in the frame. Length codes 0/1/2/3 mean 0/1/3/6 BYTES respectively — code 2 is three bytes.',
+  'protocol.lonworks.error.transportOctetMissing':
+    'The frame ends with no room for the transport/session/authentication octet. Only the APDU format (3) omits that octet.',
+  'protocol.lonworks.error.crcMismatch':
+    'The trailing CRC-16/GENIBUS check FAILED. Note: CRC-16/CCITT-FALSE differs from this algorithm ONLY in its xorout value; confusing the two prints a wrong PASS/FAIL without raising any error.',
+  'protocol.lonworks.warning.lengthMismatchLenient':
+    'The CN/IP packet size field does not match the actual length; in lenient mode this is a warning, not an error.',
+  'protocol.lonworks.warning.vendorPrivatePacketFollows':
+    'Bit 7 of the version byte is set: by the Echelon stack\'s own comment a vendor private packet follows. This path was never seen in the real capture.',
+  'protocol.lonworks.warning.reservedBitsNotZero':
+    'Bits 6:5 of the version byte are not zero; the Echelon stack marks them "must be zero".',
+  'protocol.lonworks.warning.unexpectedCnipVersion':
+    'The CN/IP version is not 1. All 12,028 datagrams of the real capture carried version 1, so this path is unmeasured.',
+  'protocol.lonworks.warning.unknownPacketType':
+    'The CN/IP packet type is outside the 14 documented values.',
+  'protocol.lonworks.warning.nonDataPacketNotDecoded':
+    'The packet type is not Data Packet (0x01): its name is shown and the body is left RAW. The body layout of the other 13 types is not public.',
+  'protocol.lonworks.warning.securityBitSet':
+    'The CN/IP security bit is set. The authentication layer is not decoded — this page opens no new crypto surface.',
+  'protocol.lonworks.warning.extendedHeaderUnverified':
+    'An extended header is present and 4 × the field value bytes were skipped. In the real capture this field was always 0, so the skip path is unmeasured.',
+  'protocol.lonworks.warning.timestampEpochUnknown':
+    'The timestamp\'s UNIT is known (milliseconds, from the Echelon stack\'s own comment) but its EPOCH is not on the wire. The same source uses both a 1900 and a 1970 base; the raw value is shown and NOT converted to a date. Declare the base in the options if you know it.',
+  'protocol.lonworks.warning.unexpectedLonTalkVersion':
+    'The LonTalk protocol version is not 0; it was 0 in all 12,028 frames of the capture.',
+  'protocol.lonworks.warning.nvTypeNotOnWire':
+    'The SNVT TYPE of a network variable is NOT IN THE FRAME. The message carries only a 14-bit selector, and that selector is an index into the device\'s binding table; the type lives in the device\'s XIF file or in the network management tool. The same two bytes read as -253.8 °C, 2.02 °C, 1.01 % or 20.2 A depending on the type you pick. Until a type is declared the value stays RAW.',
+  'protocol.lonworks.warning.nvPayloadLengthMismatch':
+    'The declared SNVT type\'s size does not match the NV payload length; the scale was NOT applied. The raw payload is shown instead of inventing an engineering value.',
+  'protocol.lonworks.warning.responseCodeAmbiguous':
+    'This is an application code inside an SPDU RESPONSE and it is NORMATIVELY AMBIGUOUS: it can be the success/failure response of a network management (NM) command or the response of a network diagnostic (ND) command. The ND response format is a subset of the NM response format, and telling them apart requires the matching request — which is NOT in this frame. Both candidates are listed on the field itself; use the transaction number to match the neighbouring frame yourself.',
+  'protocol.lonworks.warning.foreignFrameCodeUnknown':
+    'No public source publishes a meaning table for Foreign Frame codes; only the number is shown.',
+  'protocol.lonworks.warning.decodePathNotVerified':
+    'This frame took a decode path with NO EXAMPLE in the real capture (address format 1/2b/3, a three- or six-byte domain, AuthPDU, REMINDER/REM-MSG, network diagnostic codes or an extended header). Those fields come from the source texts only; they are not verified.',
+  'protocol.lonworks.warning.rawPduModeNoEnvelope':
+    'Raw PDU mode: no CN/IP envelope was looked for. This mode does NOT decode the 14908-2/-3 link framing either (preamble, sync, encoding) — the input is assumed to be an already-stripped PDU.',
+  'protocol.lonworks.warning.tunnelCarriesNoCrc':
+    'No trailing CRC is computed inside the CN/IP tunnel: none of the 12,028 real datagrams carried one, and the body lengths leave no room for it either. If you hold a raw PDU with a trailing CRC, switch the payload kind; CRC-16/GENIBUS is then REALLY verified.',
+  'protocol.lonworks.field.pathNotVerifiedInCapture':
+    'This field comes from the source texts only: the real capture has no example of it.',
+  'protocol.lonworks.field.nvTypeNotOnWire':
+    'The SNVT type is not carried in the frame — the selector is a binding index, not a type.',
+  'protocol.lonworks.field.responseCodeAmbiguous':
+    'Both readings are valid; telling them apart needs the matching request, which is not in this frame.',
+  'protocol.lonworks.field.nvPayloadLengthMismatch':
+    'The declared type\'s size does not match the payload; the scale was not applied.',
+  'protocol.lonworks.field.foreignFrameCodeUnknown':
+    'No public source defines what this code means.',
+  'protocol.lonworks.field.securityNotDecoded':
+    'The security bit is set; the authentication layer is not decoded.',
+  'protocol.lonworks.field.timestampEpochUnknown':
+    'The unit is milliseconds (sourced) but the epoch is not on the wire; no date conversion was made.',
+  'protocol.lonworks.field.bodyNotDecoded': 'The body layout is not public; it is left raw.',
+  'protocol.lonworks.field.crcMismatch': 'The CRC-16/GENIBUS check failed.',
+  'protocol.lonworks.option.payloadKind': 'Payload kind',
+  'protocol.lonworks.option.payloadKind.description':
+    'Declares whether the input is a CN/IP tunnel or a raw LonTalk PDU with the envelope stripped. It changes the whole field LAYOUT; the third choice additionally verifies a trailing CRC-16/GENIBUS.',
+  'protocol.lonworks.option.payloadKind.tunnel': 'CN/IP tunnel (ISO/IEC 14908-4)',
+  'protocol.lonworks.option.payloadKind.rawPdu': 'Raw LonTalk PDU',
+  'protocol.lonworks.option.payloadKind.rawPduWithCrc': 'Raw LonTalk PDU + trailing CRC',
+  'protocol.lonworks.option.nvPayloadType': 'Network variable type (SNVT)',
+  'protocol.lonworks.option.nvPayloadType.description':
+    'The SNVT type of a network variable is NOT IN THE FRAME; it comes from the device\'s binding table. Declare a type and the raw value is converted with LonMark\'s published A × 10^B × (raw + C) scale. The list holds only scalar, fully-scaled, non-obsolete types.',
+  'protocol.lonworks.option.nvPayloadType.raw': 'Not declared — raw value',
+  'protocol.lonworks.option.timestampEpoch': 'Timestamp epoch',
+  'protocol.lonworks.option.timestampEpoch.description':
+    'The CN/IP timestamp is in milliseconds (sourced) but its base is not on the wire, and the Echelon stack carries both a 1900 and a 1970 base. By default the raw millisecond value is shown and no date is derived.',
+  'protocol.lonworks.option.timestampEpoch.raw': 'Raw milliseconds (no date)',
+  'protocol.lonworks.option.timestampEpoch.epoch1900': '1900 epoch',
+  'protocol.lonworks.option.timestampEpoch.epoch1970': '1970 epoch (Unix)',
+  'protocol.lonworks.option.strictLength': 'Length check',
+  'protocol.lonworks.option.strictLength.description':
+    'When the CN/IP packet size field disagrees with the actual length: treat it as an error, or accept it as padding and warn?',
+  'protocol.lonworks.option.strictLength.strict': 'Strict — raise an error',
+  'protocol.lonworks.option.strictLength.lenient': 'Lenient — warn only',
+  'protocol.lonworks.option.neuronIdByteOrder': 'Neuron ID byte order',
+  'protocol.lonworks.option.neuronIdByteOrder.description':
+    'The six-byte Neuron ID of address format 3. The real capture has NO example of this format, and one open-source implementation reads the path incorrectly; you may want to compare the byte order against your device label.',
+  'protocol.lonworks.option.neuronIdByteOrder.asTransmitted': 'As transmitted',
+  'protocol.lonworks.option.neuronIdByteOrder.reversed': 'Reversed',
+  'protocol.lonworks.option.unknownPacketTypeHandling': 'Non-Data-Packet types',
+  'protocol.lonworks.option.unknownPacketTypeHandling.description':
+    'Of CN/IP\'s 14 packet types only Data Packet (0x01) branches into a LonTalk payload. The body layout of the other 13 is not public: either show the name and leave the body raw, or reject the frame outright.',
+  'protocol.lonworks.option.unknownPacketTypeHandling.nameAndRaw':
+    'Show the name, leave the body raw',
+  'protocol.lonworks.option.unknownPacketTypeHandling.reject': 'Reject',
+  'protocol.lonworks.option.versionByteSplit': 'Version byte split',
+  'protocol.lonworks.option.versionByteSplit.description':
+    'Two sources disagree: Echelon\'s own stack splits the byte into a 5-bit version plus 3 flag bits, while Wireshark reads the whole byte as the version. In the real capture the byte was always 0x01, so both readings agree; switch to see the difference.',
+  'protocol.lonworks.option.versionByteSplit.echelon': 'Echelon: 5-bit version + 3 flag bits',
+  'protocol.lonworks.option.versionByteSplit.wholeByte': 'Wireshark: whole byte is the version',
+  'protocol.lonworks.option.foreignFrameCodeLabels': 'Foreign Frame code',
+  'protocol.lonworks.option.foreignFrameCodeLabels.description':
+    'No public source publishes a meaning table for the four-bit Foreign Frame code. Choose between showing the number and hiding it entirely.',
+  'protocol.lonworks.option.foreignFrameCodeLabels.numeric': 'Show the number',
+  'protocol.lonworks.option.foreignFrameCodeLabels.hide': 'Hide it',
+  'protocol.lonworks.example.tpduAckdNvUpdate.name': 'TPDU ACKD + network variable update (real)',
+  'protocol.lonworks.example.tpduAckdNvUpdate.description':
+    'From the Wireshark wiki\'s eia709.1-over-eia852.pcap capture, 32 bytes. Acknowledged transport, transaction 3, address format 2a (1/42 → 1/41), one-byte domain, NV selector 269 and the two-byte payload 00 CA. The engineering meaning of that payload depends on the TYPE YOU DECLARE.',
+  'protocol.lonworks.example.tpduAck.name': 'Matching TPDU ACK (real)',
+  'protocol.lonworks.example.tpduAck.description':
+    'The next datagram of the same capture: reverse direction (1/41 → 1/42), the SAME transaction number (3), no APDU. Together with the first example it proves the request/response pairing on screen.',
+  'protocol.lonworks.example.spduRequestNvFetch.name': 'SPDU REQUEST + NM_NV_FETCH (real)',
+  'protocol.lonworks.example.spduRequestNvFetch.description':
+    'A session-layer request, transaction 0x0B, network management command NM_NV_FETCH (0x73) followed by NV index 07.',
+  'protocol.lonworks.example.spduResponseAmbiguous.name':
+    'SPDU RESPONSE — response code COLLISION (real)',
+  'protocol.lonworks.example.spduResponseAmbiguous.description':
+    'The real response to the previous request (same transaction 0x0B). Application code 0x33 is valid both as the success response of NM_NV_FETCH and as the response of ND_CLEAR_STATUS; the collision is NORMATIVE, and the engine lists both candidates instead of silently picking one.',
+  'protocol.lonworks.example.apduDirectNv.name': 'Direct APDU — no transport octet (real)',
+  'protocol.lonworks.example.apduDirectNv.description':
+    'PDU format 3: after the address and the domain there is NO transport/session octet at all, the APDU starts immediately. NV selector 0x3FFF, three-byte payload.',
+  'protocol.lonworks.example.apduLongestNv.name': 'Longest datagram of the capture (real, 43 B)',
+  'protocol.lonworks.example.apduLongestNv.description':
+    'A direct APDU with NV selector 845 and a 14-byte payload. Even a long payload is decoded into a single FLAT field table; hierarchy is expressed through field NAMES.',
+  'protocol.lonworks.example.broadcastTruncated.name': 'Broadcast, no domain, no PDU octet (real)',
+  'protocol.lonworks.example.broadcastTruncated.description':
+    'The ONLY frame of its kind in the 12,028-frame capture: priority slot, broadcast addressing, a zero-length domain, and a PDU that ends with no room for the transport octet. It proves the truncated-frame error with REAL capture data rather than derived bytes.',
+  'protocol.lonworks.example.lengthMismatch.name': 'Corrupted packet size (derived)',
+  'protocol.lonworks.example.lengthMismatch.description':
+    'Derived from the first example by incrementing ONLY the packet size field. Because that field counts itself, the inconsistency is detectable on its own.',
+  'protocol.lonworks.example.nonDataPacket.name': 'Device Configuration Request (derived)',
+  'protocol.lonworks.example.nonDataPacket.description':
+    'Derived from the first example by setting ONLY the packet type to 0x63. Since it is not a Data Packet, no LonTalk decoding happens; the type name is shown and the body stays raw. This is not an error but a deliberate scope limit.',
+  'protocol.lonworks.example.foreignProtocolCode.name': 'Out-of-scope protocol code (derived)',
+  'protocol.lonworks.example.foreignProtocolCode.description':
+    'Derived from the first example by setting ONLY the protocol code to 1. CN/IP can tunnel other protocols; the engine RECOGNISES the datagram and says EXPLICITLY that it is out of scope — it does not silently call it invalid.',
+  'protocol.lonworks.example.extendedHeader.name': 'Extended header (derived)',
+  'protocol.lonworks.example.extendedHeader.description':
+    'A four-byte extended header was added to the first example and the field set to 1 (the packet size was corrected too). The field counts 32-BIT WORDS, so four bytes are skipped; counting bytes instead would shift the LonTalk PDU by three.',
+  'protocol.lonworks.example.foreignFrame.name': 'Foreign Frame (derived)',
+  'protocol.lonworks.example.foreignFrame.description':
+    'Derived from the longest real datagram by setting ONLY the APDU code byte to 0x4D. The 0x40-0x4F range of the code space is the Foreign Frame class, and no source publishes a meaning table for its four-bit code.',
+  'protocol.lonworks.example.rawPduWithCrc.name': 'Raw PDU with trailing CRC (derived)',
+  'protocol.lonworks.example.rawPduWithCrc.description':
+    'The LonTalk PDU of the first example with the envelope stripped and a CRC-16/GENIBUS appended. It does NOT decode in the default tunnel mode — switch the payload kind to "raw PDU + trailing CRC" and the CRC is really verified.',
 };

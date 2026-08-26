@@ -7630,6 +7630,166 @@ export const tr = {
   'protocol.spc.example.truncatedResponse.name': 'Yarıda kesilmiş yanıt',
   'protocol.spc.example.truncatedResponse.description':
     'Tetikten sonra yanıt BAŞLIYOR ama tam bir SENT çerçevesi için yetersiz nabızda kesiliyor.',
+  // ── LonWorks (ISO/IEC 14908) — Faz 10, dalga 17 ─────────────────────────
+  'protocol.lonworks.documentation.summary':
+    'ISO/IEC 14908 (LonWorks) kontrol ağı. Bu sayfa CN/IP (14908-4, ANSI/CEA-852) UDP datagramını ve içindeki LonTalk (14908-1, ANSI/EIA-709.1) PDU\'sunu çözer: L2 başlığı, NPDU, beş adres biçimi, domain, TPDU/SPDU/AuthPDU/APDU ve uygulama kod uzayının tamamı. 14908-2 (TP/FT-10) ve 14908-3 (PL-20) ham hat çerçevelemesi KAPSAM DIŞIDIR — biçimi belgesiz olduğu için değil, o baytları yakalamanın kamuya açık bir yolu olmadığı için (libpcap\'te LonTalk için bir DLT_ tanımı yok). Bir ağ değişkeninin SNVT tipi telde HİÇ TAŞINMAZ; çerçevede yalnız 14 bitlik bir bağlama seçicisi vardır.',
+  'protocol.lonworks.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.lonworks.error.emptyDatagram': 'Boş datagram çözülemez.',
+  'protocol.lonworks.error.tooShortForCnip':
+    'Datagram 20 baytlık CN/IP başlığını taşıyamayacak kadar kısa.',
+  'protocol.lonworks.error.tooShortForPdu':
+    'Ham LonTalk PDU\'su için en az L2 ve NPDU oktetleri gerekir; girdi bundan kısa.',
+  'protocol.lonworks.error.cnipTruncated': 'CN/IP başlığı 20 bayt dolmadan bitti.',
+  'protocol.lonworks.error.lengthMismatch':
+    'CN/IP uzunluk alanı gerçek datagram uzunluğuyla uyuşmuyor. Bu alan KENDİSİNİ DE sayar (BVLC gibi, MBAP\'ın tersine). Dolgu bekliyorsanız uzunluk denetimini gevşetin.',
+  'protocol.lonworks.error.extendedHeaderTruncated':
+    'Genişletilmiş başlık datagrama sığmıyor: alan 32-BİT SÖZCÜK sayar, yani atlanacak bayt sayısı dört katıdır.',
+  'protocol.lonworks.error.protocolCodeOutOfScope':
+    'CN/IP protokol kodu 0 (EIA-709/LonTalk) DEĞİL. Datagram TANINDI ama yükü bu çözücünün kapsamı dışında — CN/IP başka protokolleri de tünelleyebilir.',
+  'protocol.lonworks.error.packetTypeRejected':
+    'CN/IP paket tipi Data Packet (0x01) değil ve bilinmeyen tipleri reddet seçeneği açık.',
+  'protocol.lonworks.error.pduTruncated':
+    'LonTalk PDU\'su L2 ve NPDU oktetlerini taşıyamadan bitti.',
+  'protocol.lonworks.error.addressTruncated':
+    'Adres bölümü çerçeveye sığmıyor: uzunluk adres biçimine (ve biçim 2\'de kaynak düğüm baytının en anlamlı bitine) bağlıdır.',
+  'protocol.lonworks.error.domainTruncated':
+    'Domain alanı çerçeveye sığmıyor. Uzunluk kodu 0/1/2/3 sırasıyla 0/1/3/6 BAYT demektir — 2 üç bayttır.',
+  'protocol.lonworks.error.transportOctetMissing':
+    'Çerçeve, taşıma/oturum/kimlik oktetine yer kalmadan bitti. Bu okteti yalnız APDU biçimi (3) taşımaz.',
+  'protocol.lonworks.error.crcMismatch':
+    'Kuyruk CRC-16/GENIBUS doğrulaması BAŞARISIZ. Dikkat: CRC-16/CCITT-FALSE bu algoritmadan YALNIZ xorout değerinde ayrılır; ikisi karıştırılırsa hata verilmeden yanlış PASS/FAIL basılır.',
+  'protocol.lonworks.warning.lengthMismatchLenient':
+    'CN/IP uzunluk alanı gerçek uzunlukla uyuşmuyor; gevşek modda hata değil uyarı basıldı.',
+  'protocol.lonworks.warning.vendorPrivatePacketFollows':
+    'Sürüm baytının 7. biti kurulu: Echelon yığınının kendi yorumuna göre bunun ardından satıcıya özel bir paket gelir. Bu yol gerçek yakalamada HİÇ görülmedi.',
+  'protocol.lonworks.warning.reservedBitsNotZero':
+    'Sürüm baytının 6:5 bitleri sıfır değil; Echelon yığını bu bitleri "sıfır olmalı" diye işaretliyor.',
+  'protocol.lonworks.warning.unexpectedCnipVersion':
+    'CN/IP sürümü 1 değil. Gerçek yakalamanın 12.028 datagramının hepsinde sürüm 1\'di, dolayısıyla bu yol ölçülmedi.',
+  'protocol.lonworks.warning.unknownPacketType': 'CN/IP paket tipi belgelenmiş 14 değerin dışında.',
+  'protocol.lonworks.warning.nonDataPacketNotDecoded':
+    'Paket tipi Data Packet (0x01) değil: adı basıldı, gövdesi HAM bırakıldı. Kalan 13 tipin gövde biçimi kamuya açık değil.',
+  'protocol.lonworks.warning.securityBitSet':
+    'CN/IP güvenlik biti kurulu. Kimlik doğrulama katmanı çözülmez — bu sayfa yeni bir kripto yüzeyi açmaz.',
+  'protocol.lonworks.warning.extendedHeaderUnverified':
+    'Genişletilmiş başlık var ve 4 × alan değeri kadar bayt atlandı. Gerçek yakalamada bu alan hep 0\'dı, yani atlama yolu ölçülmedi.',
+  'protocol.lonworks.warning.timestampEpochUnknown':
+    'Zaman damgasının BİRİMİ biliniyor (milisaniye, Echelon yığınının kendi yorumu) ama EPOCH\'u çerçevede yok. Aynı kaynak hem 1900 hem 1970 tabanını kullanıyor; ham değer basıldı, tarihe ÇEVRİLMEDİ. Tabanı biliyorsanız seçenekten bildirin.',
+  'protocol.lonworks.warning.unexpectedLonTalkVersion':
+    'LonTalk protokol sürümü 0 değil; yakalamanın 12.028 çerçevesinin hepsinde 0\'dı.',
+  'protocol.lonworks.warning.nvTypeNotOnWire':
+    'Ağa değişkeninin SNVT TİPİ ÇERÇEVEDE YOKTUR. Mesaj yalnız 14 bitlik bir seçici taşır ve seçici cihazın bağlama tablosundaki bir indekstir; tip cihazın XIF dosyasında ya da ağ yönetim aracındadır. Aynı iki bayt seçtiğiniz tipe göre -253,8 °C, 2,02 °C, %1,01 ya da 20,2 A okunabilir. Tip seçilmedikçe değer HAM kalır.',
+  'protocol.lonworks.warning.nvPayloadLengthMismatch':
+    'Bildirilen SNVT tipinin boyu NV yükünün boyuyla uyuşmuyor; ölçek UYGULANMADI. Uydurma bir mühendislik değeri basmaktansa ham yük gösterildi.',
+  'protocol.lonworks.warning.responseCodeAmbiguous':
+    'Bu, bir SPDU RESPONSE içindeki uygulama kodudur ve NORMATİF olarak İKİ ANLAMA gelebilir: bir ağ yönetimi (NM) komutunun başarı/başarısızlık yanıtı ya da bir ağ tanı (ND) komutunun yanıtı. ND yanıt biçimi NM yanıt biçiminin alt kümesidir ve ayrım YALNIZ eşleşen isteğe bakılarak yapılabilir — o istek bu çerçevede YOK. İki aday da alanın kendisinde listelendi; transaction numarasıyla komşu çerçeveyi kendiniz eşleştirebilirsiniz.',
+  'protocol.lonworks.warning.foreignFrameCodeUnknown':
+    'Foreign Frame kodunun ANLAM tablosu hiçbir kamuya açık kaynakta yok; yalnız sayı basıldı.',
+  'protocol.lonworks.warning.decodePathNotVerified':
+    'Bu çerçeve, gerçek yakalamada ÖRNEĞİ BULUNMAYAN bir çözüm yoluna girdi (adres biçimi 1/2b/3, üç ya da altı baytlık domain, AuthPDU, REMINDER/REM-MSG, ağ tanı kodları ya da genişletilmiş başlık gibi). İlgili alanlar yalnız kaynak metninden geliyor; doğrulanmış değiller.',
+  'protocol.lonworks.warning.rawPduModeNoEnvelope':
+    'Ham PDU modu: CN/IP zarfı hiç aranmadı. Bu modda 14908-2/-3\'ün hat çerçevelemesi (preamble, senkronizasyon, kodlama) de ÇÖZÜLMEZ — girdinin zaten soyulmuş bir PDU olduğu varsayılır.',
+  'protocol.lonworks.warning.tunnelCarriesNoCrc':
+    'CN/IP tünelinde kuyruk CRC\'si HESAPLANMAZ: 12.028 gerçek datagramın hiçbirinde yoktu ve gövde uzunlukları da CRC\'ye yer bırakmıyor. Elinizde kuyruk CRC\'li ham bir PDU varsa yük türünü değiştirin; o zaman CRC-16/GENIBUS GERÇEKTEN doğrulanır.',
+  'protocol.lonworks.field.pathNotVerifiedInCapture':
+    'Bu alan yalnız kaynak metninden geliyor: gerçek yakalamada örneği yok.',
+  'protocol.lonworks.field.nvTypeNotOnWire':
+    'SNVT tipi çerçevede taşınmaz — seçici bir bağlama indeksidir, tip değil.',
+  'protocol.lonworks.field.responseCodeAmbiguous':
+    'İki okuma da geçerli; ayrım eşleşen isteğe bakmayı gerektirir ve o istek bu çerçevede yok.',
+  'protocol.lonworks.field.nvPayloadLengthMismatch':
+    'Bildirilen tipin boyu yükle uyuşmuyor; ölçek uygulanmadı.',
+  'protocol.lonworks.field.foreignFrameCodeUnknown':
+    'Kodun anlamı hiçbir kamuya açık kaynakta yok.',
+  'protocol.lonworks.field.securityNotDecoded':
+    'Güvenlik biti kurulu; kimlik doğrulama katmanı çözülmez.',
+  'protocol.lonworks.field.timestampEpochUnknown':
+    'Birim milisaniye (kaynaklı) ama epoch çerçevede yok; tarihe çevrilmedi.',
+  'protocol.lonworks.field.bodyNotDecoded': 'Gövde biçimi kamuya açık değil; ham bırakıldı.',
+  'protocol.lonworks.field.crcMismatch': 'CRC-16/GENIBUS doğrulaması başarısız.',
+  'protocol.lonworks.option.payloadKind': 'Yük türü',
+  'protocol.lonworks.option.payloadKind.description':
+    'Girdinin CN/IP tüneli mi yoksa zarfı soyulmuş ham bir LonTalk PDU\'su mu olduğunu bildirir. Alanların YERLEŞİMİNİ tümden değiştirir; üçüncü şık ayrıca kuyruk CRC-16/GENIBUS\'unu doğrular.',
+  'protocol.lonworks.option.payloadKind.tunnel': 'CN/IP tüneli (ISO/IEC 14908-4)',
+  'protocol.lonworks.option.payloadKind.rawPdu': 'Ham LonTalk PDU\'su',
+  'protocol.lonworks.option.payloadKind.rawPduWithCrc': 'Ham LonTalk PDU\'su + kuyruk CRC\'si',
+  'protocol.lonworks.option.nvPayloadType': 'Ağ değişkeni tipi (SNVT)',
+  'protocol.lonworks.option.nvPayloadType.description':
+    'Ağ değişkeninin SNVT tipi ÇERÇEVEDE YOKTUR; cihazın bağlama tablosundan gelir. Bir tip bildirirseniz ham değer LonMark\'ın yayımladığı A × 10^B × (ham + C) ölçeğiyle mühendislik değerine çevrilir. Liste yalnız skaler, ölçek üçlüsü dolu ve güncel tipleri içerir.',
+  'protocol.lonworks.option.nvPayloadType.raw': 'Bildirilmedi — ham değer',
+  'protocol.lonworks.option.timestampEpoch': 'Zaman damgası tabanı',
+  'protocol.lonworks.option.timestampEpoch.description':
+    'CN/IP zaman damgasının birimi milisaniyedir (kaynaklı) ama tabanı çerçevede yoktur ve Echelon yığını hem 1900 hem 1970 tabanını dolaştırır. Varsayılanda ham milisaniye basılır, tarihe çevrilmez.',
+  'protocol.lonworks.option.timestampEpoch.raw': 'Ham milisaniye (tarihe çevirme)',
+  'protocol.lonworks.option.timestampEpoch.epoch1900': '1900 tabanı',
+  'protocol.lonworks.option.timestampEpoch.epoch1970': '1970 tabanı (Unix)',
+  'protocol.lonworks.option.strictLength': 'Uzunluk denetimi',
+  'protocol.lonworks.option.strictLength.description':
+    'CN/IP uzunluk alanı gerçek uzunlukla ayrışırsa: hata mı sayılsın, yoksa dolgu kabul edilip uyarıyla geçilsin mi?',
+  'protocol.lonworks.option.strictLength.strict': 'Katı — hata bas',
+  'protocol.lonworks.option.strictLength.lenient': 'Gevşek — yalnız uyar',
+  'protocol.lonworks.option.neuronIdByteOrder': 'Neuron ID bayt sırası',
+  'protocol.lonworks.option.neuronIdByteOrder.description':
+    'Adres biçimi 3\'ün altı baytlık Neuron ID\'si. Gerçek yakalamada bu biçimin ÖRNEĞİ YOK, üstelik açık kaynak uygulamalardan biri bu yolu bozuk okuyor; bayt sırasını cihazınızın etiketiyle karşılaştırmak isteyebilirsiniz.',
+  'protocol.lonworks.option.neuronIdByteOrder.asTransmitted': 'İletildiği gibi',
+  'protocol.lonworks.option.neuronIdByteOrder.reversed': 'Ters çevrilmiş',
+  'protocol.lonworks.option.unknownPacketTypeHandling': 'Data Packet olmayan tipler',
+  'protocol.lonworks.option.unknownPacketTypeHandling.description':
+    'CN/IP\'nin 14 paket tipinden yalnız Data Packet (0x01) LonTalk yüküne dallanır. Kalan 13 tipin gövde biçimi kamuya açık değildir: adı basılıp gövde ham bırakılabilir ya da çerçeve tümden reddedilebilir.',
+  'protocol.lonworks.option.unknownPacketTypeHandling.nameAndRaw': 'Adını bas, gövdeyi ham bırak',
+  'protocol.lonworks.option.unknownPacketTypeHandling.reject': 'Reddet',
+  'protocol.lonworks.option.versionByteSplit': 'Sürüm baytının bölünmesi',
+  'protocol.lonworks.option.versionByteSplit.description':
+    'İki kaynak ayrışıyor: Echelon\'un kendi yığını baytı 5 bit sürüm + 3 bit bayrak diye bölüyor, Wireshark tüm baytı sürüm sayıyor. Gerçek yakalamada bayt hep 0x01 olduğu için iki okuma aynı sonucu veriyor; ayrımı görmek için değiştirin.',
+  'protocol.lonworks.option.versionByteSplit.echelon': 'Echelon: 5 bit sürüm + 3 bit bayrak',
+  'protocol.lonworks.option.versionByteSplit.wholeByte': 'Wireshark: tüm bayt sürüm',
+  'protocol.lonworks.option.foreignFrameCodeLabels': 'Foreign Frame kodu',
+  'protocol.lonworks.option.foreignFrameCodeLabels.description':
+    'Foreign Frame sınıfının dört bitlik kodunun anlam tablosu hiçbir kamuya açık kaynakta yok. Sayıyı basmak ile hiç göstermemek arasında seçim yapın.',
+  'protocol.lonworks.option.foreignFrameCodeLabels.numeric': 'Sayıyı bas',
+  'protocol.lonworks.option.foreignFrameCodeLabels.hide': 'Gösterme',
+  'protocol.lonworks.example.tpduAckdNvUpdate.name':
+    'TPDU ACKD + ağ değişkeni güncellemesi (gerçek)',
+  'protocol.lonworks.example.tpduAckdNvUpdate.description':
+    'Wireshark wiki\'sinin eia709.1-over-eia852.pcap yakalamasından, 32 bayt. Onaylı taşıma, transaction 3, adres biçimi 2a (1/42 → 1/41), tek baytlık domain, NV seçicisi 269 ve iki baytlık yük 00 CA. Bu yükün mühendislik değeri SEÇTİĞİNİZ TİPE bağlıdır.',
+  'protocol.lonworks.example.tpduAck.name': 'Eşleşen TPDU ACK (gerçek)',
+  'protocol.lonworks.example.tpduAck.description':
+    'Aynı yakalamanın bir sonraki datagramı: ters yön (1/41 → 1/42), AYNI transaction numarası (3), APDU yok. İlk örnekle birlikte istek/yanıt eşleşmesini ekranda kanıtlar.',
+  'protocol.lonworks.example.spduRequestNvFetch.name': 'SPDU REQUEST + NM_NV_FETCH (gerçek)',
+  'protocol.lonworks.example.spduRequestNvFetch.description':
+    'Oturum katmanı isteği, transaction 0x0B, ağ yönetimi komutu NM_NV_FETCH (0x73) ve ardından NV indeksi 07.',
+  'protocol.lonworks.example.spduResponseAmbiguous.name':
+    'SPDU RESPONSE — yanıt kodu ÇAKIŞMASI (gerçek)',
+  'protocol.lonworks.example.spduResponseAmbiguous.description':
+    'Bir önceki isteğin gerçek yanıtı (aynı transaction 0x0B). Uygulama kodu 0x33 hem NM_NV_FETCH\'in başarı yanıtı hem ND_CLEAR_STATUS\'un yanıtı olarak geçerlidir; çakışma NORMATİFTİR ve motor iki adayı da yazar, birini sessizce seçmez.',
+  'protocol.lonworks.example.apduDirectNv.name': 'Doğrudan APDU — taşıma okteti YOK (gerçek)',
+  'protocol.lonworks.example.apduDirectNv.description':
+    'PDU biçimi 3: adres ve domain\'in ardından taşıma/oturum okteti HİÇ YOKTUR, doğrudan APDU başlar. NV seçicisi 0x3FFF, yük üç bayt.',
+  'protocol.lonworks.example.apduLongestNv.name': 'Yakalamanın en uzun datagramı (gerçek, 43 B)',
+  'protocol.lonworks.example.apduLongestNv.description':
+    'Doğrudan APDU, NV seçicisi 845 ve 14 baytlık yük. Uzun bir yük bile tek bir DÜZ alan tablosunda çözülür; hiyerarşi alan ADLARIYLA kurulur.',
+  'protocol.lonworks.example.broadcastTruncated.name':
+    'Broadcast, domain\'siz, PDU okteti YOK (gerçek)',
+  'protocol.lonworks.example.broadcastTruncated.description':
+    '12.028 çerçevelik yakalamanın TEK böyle çerçevesi: öncelikli, broadcast adresleme, sıfır uzunluklu domain ve taşıma oktetine yer kalmadan biten PDU. Kesik çerçeve hatasını TÜRETİLMİŞ veriyle değil GERÇEK yakalamayla kanıtlar.',
+  'protocol.lonworks.example.lengthMismatch.name': 'Uzunluk alanı bozuk (türetilmiş)',
+  'protocol.lonworks.example.lengthMismatch.description':
+    'İlk örnekten YALNIZ uzunluk alanı bir artırılarak türetildi. Alan KENDİSİNİ DE saydığı için tutarsızlık tek başına yakalanabilir.',
+  'protocol.lonworks.example.nonDataPacket.name': 'Device Configuration Request (türetilmiş)',
+  'protocol.lonworks.example.nonDataPacket.description':
+    'İlk örnekten YALNIZ paket tipi 0x63 yapılarak türetildi. Data Packet olmadığı için LonTalk çözümü YAPILMAZ; tipin adı basılır, gövde ham kalır. Bu bir hata değil, bilinçli bir kapsam sınırıdır.',
+  'protocol.lonworks.example.foreignProtocolCode.name': 'Kapsam dışı protokol kodu (türetilmiş)',
+  'protocol.lonworks.example.foreignProtocolCode.description':
+    'İlk örnekten YALNIZ protokol kodu 1 yapılarak türetildi. CN/IP başka protokolleri de tünelleyebilir; motor datagramı TANIR ve kapsam dışı olduğunu AÇIKÇA söyler — sessizce "geçersiz" demez.',
+  'protocol.lonworks.example.extendedHeader.name': 'Genişletilmiş başlık (türetilmiş)',
+  'protocol.lonworks.example.extendedHeader.description':
+    'İlk örneğe dört baytlık bir genişletilmiş başlık eklenip alan 1 yapıldı (uzunluk alanı da düzeltildi). Alan 32-BİT SÖZCÜK saydığı için atlanan bayt dörttür; bayt sayılsaydı LonTalk PDU\'su üç bayt kayardı.',
+  'protocol.lonworks.example.foreignFrame.name': 'Foreign Frame (türetilmiş)',
+  'protocol.lonworks.example.foreignFrame.description':
+    'En uzun gerçek datagramdan YALNIZ APDU kod baytı 0x4D yapılarak türetildi. Kod uzayının 0x40-0x4F aralığı Foreign Frame sınıfıdır ve dört bitlik kodun anlam tablosu hiçbir kaynakta yoktur.',
+  'protocol.lonworks.example.rawPduWithCrc.name': 'Kuyruk CRC\'li ham PDU (türetilmiş)',
+  'protocol.lonworks.example.rawPduWithCrc.description':
+    'İlk örneğin LonTalk PDU\'su, zarfı soyulmuş ve sonuna CRC-16/GENIBUS eklenmiş hâli. Varsayılan tünel modunda ÇÖZÜLMEZ — yük türünü "ham PDU + kuyruk CRC\'si" yapın, o zaman CRC gerçekten doğrulanır.',
 } as const;
 
 /**

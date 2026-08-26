@@ -306,9 +306,10 @@ export const buildingAutomationDomain: CatalogDomain = {
           id: 'lonworks',
           name: 'LonWorks',
           summary:
-            'ISO/IEC 14908 distributed control networking used across legacy building systems, where each device exposes network variable inputs, outputs and configuration properties typed by SNVT.',
+            'ISO/IEC 14908 distributed control networking used across legacy building systems, where each device exposes network variable inputs, outputs and configuration properties typed by SNVT. DECODED: the ISO/IEC 14908-4 (CN/IP, ANSI/CEA-852) UDP datagram and the ISO/IEC 14908-1 (LonTalk, ANSI/EIA-709.1) PDU inside it — L2 header, NPDU, all five addressing formats, domain, TPDU/SPDU/AuthPDU/APDU and the full application code space. NOT DECODED, BUT RECOGNISED: LonTalk PDUs carrying a trailing CRC-16/GENIBUS (select the raw-PDU payload kind). OUT OF SCOPE: the raw ISO/IEC 14908-2 (TP/FT-10) and 14908-3 (PL-20) link framing — the format is fully documented, but there is NO public capture path for it (libpcap has no LonTalk DLT_), so those bytes cannot reach this page; XIF device-interface files (format documented, parser not written yet — the Definitions tab says so); Gateway Mapping to BACnet objects (analyser work, not decoder work). NOT ON THE WIRE AT ALL: the SNVT type of a network variable — the frame carries only a 14-bit binding selector, so the same two bytes read as -253.8 C, 2.02 C, 1.01 % or 20.2 A depending on a type you must declare yourself.',
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'lonworks',
           tabs: ['overview', 'decode', 'data', 'diagnostics', 'definitions', 'examples'],
           tools: [
             'Device',

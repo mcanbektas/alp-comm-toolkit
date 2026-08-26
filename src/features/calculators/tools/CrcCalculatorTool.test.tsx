@@ -69,16 +69,18 @@ describe('CrcCalculatorTool', () => {
     renderTool();
 
     const options = within(screen.getByTestId('crc-algorithm')).getAllByRole('option');
-    // 29 katalog CRC'si (dalga 10/7c'de IEEE 802.15.4 FCS için CRC16_KERMIT,
+    // 30 katalog CRC'si (dalga 10/7c'de IEEE 802.15.4 FCS için CRC16_KERMIT,
     // dalga 11j'de USB veri paketi için CRC16_USB, dalga 13a'da Wireless
     // M-Bus link-layer block CRC'si için CRC16_EN13757, dalga 14e'de FlexRay
     // için CRC11_FLEXRAY + CRC24_FLEXRAY_A + CRC24_FLEXRAY_B, dalga 15d'de
     // CRSF için CRC8_DVB_S2 (frame CRC) + CRC8_CRSF_COMMAND (komut CRC'si,
     // 0x32 çerçeveleri — frame CRC'den AYRI, kendi polinomu), dalga 15h'te
     // Mode S / ADS-B 1090ES paritesi için CRC24_MODE_S (katalogdaki DÖRT
-    // 24-bit CRC'nin hiçbiri değil — poly 0xFFF409) eklendi) + 7 basit
-    // toplam + 1 özel.
-    expect(options).toHaveLength(37);
+    // 24-bit CRC'nin hiçbiri değil — poly 0xFFF409), dalga 17'de LonTalk /
+    // ISO/IEC 14908-1 NPDU CRC'si için CRC16_GENIBUS (CRC16_CCITT_FALSE'tan
+    // YALNIZ xorout'ta ayrılır — deponun en keskin sahte dostu) eklendi) +
+    // 7 basit toplam + 1 özel.
+    expect(options).toHaveLength(38);
   });
 
   it('shows no computed value before any data is entered', () => {
