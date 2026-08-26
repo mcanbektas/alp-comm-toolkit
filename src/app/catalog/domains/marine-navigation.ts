@@ -430,9 +430,10 @@ export const marineNavigationDomain: CatalogDomain = {
           id: 'seatalk',
           name: 'SeaTalk',
           summary:
-            "Raymarine's legacy three-wire SeaTalk 1 bus, carrying bidirectional instrument data plus 12 V power in daisy-chain or star topology, decoded at command/payload level and correlated across SeaTalkNG gateway conversions.",
+            "Raymarine's legacy three-wire SeaTalk 1 bus, carrying bidirectional instrument data plus 12 V power in daisy-chain or star topology. DECODED: the envelope (command byte, attribute nibbles, the 3 + n length rule) and the payload of the 22 commands that a second independent implementation confirms. RECOGNISED BUT NOT DECODED: the remaining 37 documented commands print their name only — their field layouts rest on a single reverse-engineered source whose author calls it \"incomplete inaccurate and may even be wrong\". NOT AVAILABLE AT ALL: the datagram-start command bit lives in the UART parity bit and is absent from the bytes, so it is assumed rather than verified; SeaTalk 1 carries no checksum, so no frame can be certified intact; the $STALK container form and SeaTalkNG/NMEA 2000 gateway correlation are out of scope.",
           layer: 'multi-layer',
-          status: 'planned',
+          status: 'partial',
+          pluginId: 'seatalk',
           tabs: [
             'overview',
             'live',

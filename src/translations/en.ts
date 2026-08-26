@@ -2113,6 +2113,86 @@ export const en: TranslationDictionary = {
   'protocol.hdlcBasedMarine.example.fcsMismatch.name': 'FCS mismatch',
   'protocol.hdlcBasedMarine.example.fcsMismatch.description':
     'The SAME byte sequence as the unknown marine frame, with one bit of the FCS corrupted — proves the FCS is genuinely computed, not just displayed.',
+  // --- SeaTalk 1 (Raymarine, reverse-engineered source; 59 commands RECOGNISED, 22 DECODED) ---
+  'protocol.seatalk.documentation.summary':
+    'Raymarine SeaTalk 1 — the legacy three-wire instrument bus, 4800 baud, 11 bits per character. DECODED: the whole envelope (command byte, the attribute byte\'s data nibble and additional-byte count, the "total length = 3 + n" rule), the complement-pair redundancy where it is defined, and the field-by-field payload of the 22 commands a second independent implementation confirms. RECOGNISED BUT NOT DECODED: the remaining 37 documented commands print their NAME only, payload stays raw — their field layouts rest on a single reverse-engineered source whose author says it is "incomplete inaccurate and may even be wrong". NOT AVAILABLE AT ALL: the command bit that marks the start of a datagram lives in the UART parity bit and is absent from the bytes — it is assumed, never verified; SeaTalk 1 carries no checksum, so no frame can be certified intact. OUT OF SCOPE: the $STALK container form (its *CS is NMEA 0183\'s checksum, not SeaTalk\'s), SeaTalkNG/NMEA 2000 gateway correlation, and cross-frame duplicate-source analysis.',
+  'protocol.seatalk.error.emptyFrame': 'An empty datagram cannot be decoded.',
+  'protocol.seatalk.error.aborted': 'Decoding was cancelled.',
+  'protocol.seatalk.error.tooShort':
+    'The datagram is shorter than expected. Knauf Part 1 §Collision Management: messages shorter than expected are invalid and have to be cancelled totally (minimum length 3 bytes).',
+  'protocol.seatalk.error.lengthMismatch':
+    'The input length does not match the length declared by the attribute byte (3 + n). For multi-datagram input switch "Command Byte Source" to length chaining, or turn strict length checking off.',
+  'protocol.seatalk.error.chainNotTiled':
+    'The length chain does not tile the input exactly — datagram boundaries could not be verified. The input may be misaligned or may not be SeaTalk at all; the bytes cannot tell the two apart.',
+  'protocol.seatalk.error.complementMismatch':
+    'The complement-pair redundancy does not hold (the two bytes must sum to 0xFF). This is NOT a checksum — SeaTalk 1 has none; it is the only in-frame error detection Knauf documents.',
+  'protocol.seatalk.warning.commandBitNotInBytes':
+    'The command bit is NOT IN THE FRAME: the ninth bit that marks the start of a datagram is carried in the UART parity bit and does not appear in the byte stream. The first byte was ASSUMED to be the command byte, not verified.',
+  'protocol.seatalk.warning.noIntegrityCheckOnWire':
+    'SeaTalk 1 carries no checksum or CRC (searched in the source text, zero hits). No "intact" guarantee can be given for this frame; the only integrity signals are the length rule and — in some commands only — the complement pair.',
+  'protocol.seatalk.warning.commandPayloadNeedsVendorMap':
+    'This command is RECOGNISED but its payload is NOT DECODED: the field layout exists in a single reverse-engineered source only and is not confirmed by a second independent implementation. A guessed field table is never published — the bytes are left raw.',
+  'protocol.seatalk.warning.commandNotDocumented':
+    'The command byte matches none of the 59 commands documented in Knauf Part 2 — no name could be printed.',
+  'protocol.seatalk.warning.lengthMismatch':
+    'The input length disagrees with the length declared by the attribute byte; strict length checking is off, so the first datagram was decoded anyway.',
+  'protocol.seatalk.warning.datagramBoundaryUnverified':
+    'The length chain did not tile the input — datagram boundaries could NOT be verified; the first datagram was decoded using its own declared length.',
+  'protocol.seatalk.warning.additionalDatagramsNotDecoded':
+    'The input contains more than one datagram. The boundaries were verified by the chain, but this view decodes ONLY THE FIRST datagram.',
+  'protocol.seatalk.warning.envelopeOnly':
+    'Envelope-only view selected — the command name was printed, the payload was not decoded.',
+  'protocol.seatalk.warning.rawModeNoNaming':
+    'Raw view selected — no command or field was named, every data byte is shown individually (reverse-engineering mode).',
+  'protocol.seatalk.field.commandAssumed':
+    'ASSUMED to be the command byte — the datagram start bit is not carried in the frame.',
+  'protocol.seatalk.field.payloadNotDecoded':
+    'Payload left raw: this command\'s field table is not confirmed by a second independent source.',
+  'protocol.seatalk.field.complementMismatch':
+    'The complement byte does not match — the sum should have been 0xFF.',
+  'protocol.seatalk.field.headingCorrectionAmbiguous':
+    'The sources DISAGREE on the heading correction term: Knauf\'s English text says "number of bits set in the two higher bits of U" (used here), while SignalK preserves a precedence bug in the pseudo-C expression and produces a different value. The difference is at most 1°.',
+  'protocol.seatalk.field.keyCodeSingleSource':
+    'The key name was not printed: canboat\'s SEATALK_KEYSTROKE table and Knauf\'s table disagree on this code, or the code appears in one source only.',
+  'protocol.seatalk.field.valueNotPresent':
+    'The value is present on the wire but its "data available" flag is clear — the sender may not have filled this field.',
+  'protocol.seatalk.option.commandByteSource': 'Command Byte Source',
+  'protocol.seatalk.option.commandByteSource.description':
+    'The command bit marking the start of a datagram is NOT in the frame (it rides in the UART parity bit). The boundary is fixed either by assuming the first byte is the command byte, or by walking the length chain.',
+  'protocol.seatalk.option.commandByteSource.assumeFirstByte': 'First byte is the command byte (default)',
+  'protocol.seatalk.option.commandByteSource.lengthChained': 'Verify boundaries with the length chain',
+  'protocol.seatalk.option.semanticDepth': 'Semantic Depth',
+  'protocol.seatalk.option.semanticDepth.description':
+    'How much naming is done beyond the envelope: envelope only, decode the commands confirmed by two sources (default), or a raw view with no naming at all.',
+  'protocol.seatalk.option.semanticDepth.envelope': 'Envelope only',
+  'protocol.seatalk.option.semanticDepth.knownCommands': 'Decode confirmed commands (default)',
+  'protocol.seatalk.option.semanticDepth.raw': 'Raw — no naming',
+  'protocol.seatalk.option.strictLength': 'Strict Length Check',
+  'protocol.seatalk.option.strictLength.description':
+    'Knauf Part 1: messages shorter than expected are invalid and have to be cancelled totally. On, a length mismatch is an error; off, it is a warning.',
+  'protocol.seatalk.option.complementCheck': 'Complement Pair Check',
+  'protocol.seatalk.option.complementCheck.description':
+    'The complement pair is defined for SOME commands only (Knauf writes it in lower case: ZZ zz). Where it is undefined the field is not shown at all — no invented verification.',
+  'protocol.seatalk.option.boolean.on': 'On (default)',
+  'protocol.seatalk.option.boolean.off': 'Off',
+  'protocol.seatalk.example.keystrokeMinusOne.name': 'Keystroke "−1" (Z101 remote)',
+  'protocol.seatalk.example.keystrokeMinusOne.description':
+    'A real capture from Knauf Part 2: 86 11 05 FA. Key code 0x05 is "−1" in both Knauf and canboat\'s SEATALK_KEYSTROKE table; the complement pair 0x05 + 0xFA = 0xFF passes.',
+  'protocol.seatalk.example.keystrokeComplementMismatch.name': 'Keystroke — complement mismatch',
+  'protocol.seatalk.example.keystrokeComplementMismatch.description':
+    'The same frame with the complement byte corrupted (0xFA → 0xFB). Proves the redundancy is genuinely checked, not merely displayed.',
+  'protocol.seatalk.example.equipmentId400g.name': 'Equipment ID (Course Computer 400G)',
+  'protocol.seatalk.example.equipmentId400g.description':
+    'A real capture from Knauf Part 2: 01 05 00 00 00 60 01 00. The command is RECOGNISED and named, but the payload is NOT decoded — the identity table has a single source.',
+  'protocol.seatalk.example.compassHeadingRudder.name': 'Compass heading + rudder position (9C)',
+  'protocol.seatalk.example.compassHeadingRudder.description':
+    'Derived from Knauf\'s three-term formula: U=1, VW=0x2D → 90 + 90 + 0 = 180°; RR=0xFE → 2° to port (Part 2\'s own example). Simplifying the formula produces a wrong angle without raising an error.',
+  'protocol.seatalk.example.unknownMeaningA7.name': 'Command of unknown meaning (A7, Raystar 120)',
+  'protocol.seatalk.example.unknownMeaningA7.description':
+    'A real capture from Knauf Part 2; the source itself says "unknown meaning". The command name is printed, the payload stays raw and a vendor-map warning is raised.',
+  'protocol.seatalk.example.targetWaypointName.name': 'Target waypoint name (82, three complement pairs)',
+  'protocol.seatalk.example.targetWaypointName.description':
+    'Built by inverting Knauf\'s four-character encoding for the name "WPT1"; all three complement pairs pass.',
 
   // --- XMODEM (never touches the framing engine, thin wrapper over xmodemCore.ts) ---
   'protocol.xmodem.documentation.summary':

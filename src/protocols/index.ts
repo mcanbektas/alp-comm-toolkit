@@ -67,6 +67,16 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   registerOnce(registry, 'hdlc-based-marine', () =>
     import('./marine/hdlcMarine/hdlcBasedMarine').then((module) => module.hdlcBasedMarinePlugin),
   );
+  // SeaTalk 1 — dalga 16b: HİÇBİR paylaşılan çekirdek tüketmez (ASCII değil,
+  // `$`/`*` yok, CAN değil, checksum YOK). 59 komut TANINIR, yalnız ikinci
+  // bağımsız kaynakta da teyitli 22'sinin payload'ı ÇÖZÜLÜR. `canParse` DAİMA
+  // `false`: datagram sınırını belirleyen komut biti UART parity'sindedir,
+  // baytlarda AYIRT EDİCİ SİNYAL YOKTUR ve tek imza olan uzunluk formülü
+  // ölçüldüğünde en dar hâlinde bile 7/870 yanlış pozitif veriyor (bkz.
+  // seatalk.ts dosya başı, `seatalkCanParseRegistry.test.ts`).
+  registerOnce(registry, 'seatalk', () =>
+    import('./marine/seatalk/seatalk').then((module) => module.seatalkPlugin),
+  );
   // CAN 2.0A ve 2.0B AYNI modülden gelir: tel biçimleri aynı, ayrım yalnız
   // identifier genişliğinde (bkz. canClassic.ts). İki kayıt tek chunk paylaşır.
   registerOnce(registry, 'can-2-0a', () =>

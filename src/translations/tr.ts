@@ -2115,6 +2115,86 @@ export const tr = {
   'protocol.hdlcBasedMarine.example.fcsMismatch.name': 'FCS uyuşmazlığı',
   'protocol.hdlcBasedMarine.example.fcsMismatch.description':
     'Bilinmeyen denizcilik çerçevesiyle AYNI bayt dizisi, FCS\'in bir biti bozulmuş — FCS\'in gerçekten hesaplandığını, yalnız gösterilmediğini kanıtlar.',
+  // --- SeaTalk 1 (Raymarine, ters mühendislik kaynağı; 59 komut TANINIR, 22'si ÇÖZÜLÜR) ---
+  'protocol.seatalk.documentation.summary':
+    'Raymarine SeaTalk 1 — üç telli eski enstrüman veri yolu, 4800 baud, karakter başına 11 bit. ÇÖZÜLEN: zarfın tamamı (komut baytı, attribute\'ın veri nibble\'ı ve ek-bayt sayacı, "toplam uzunluk = 3 + n" kuralı), tanımlı olduğu komutlarda tümleyen-çift artıklığı, ve ikinci bağımsız bir uygulamada da teyitli 22 komutun alan alan payload\'ı. TANINAN AMA ÇÖZÜLMEYEN: Knauf\'un belgelediği kalan 37 komut — yalnız ADI basılır, payload HAM kalır; alan tabloları tek bir ters mühendislik kaynağına dayanıyor ve kaynağın yazarı kendisi için "incomplete inaccurate and may even be wrong" diyor. HİÇ YOK: datagram başlangıcını işaretleyen komut biti UART\'ın parity bitindedir, baytlarda YER ALMAZ — varsayılır, doğrulanamaz; SeaTalk 1\'de checksum YOKTUR, bu yüzden hiçbir çerçeve için "bozulmamış" güvencesi verilemez. KAPSAM DIŞI: $STALK konteyner biçimi (o satırın *CS\'i NMEA 0183\'ün checksum\'ıdır, SeaTalk\'un değil), SeaTalkNG/NMEA 2000 gateway korelasyonu ve çerçeveler arası tekrar-kaynak analizi.',
+  'protocol.seatalk.error.emptyFrame': 'Boş datagram çözülemez.',
+  'protocol.seatalk.error.aborted': 'Çözümleme iptal edildi.',
+  'protocol.seatalk.error.tooShort':
+    'Datagram beklenenden kısa. Knauf Part 1 §Collision Management: beklenenden kısa mesajlar geçersizdir ve tamamen atılır (asgari uzunluk 3 bayt).',
+  'protocol.seatalk.error.lengthMismatch':
+    'Girdi uzunluğu attribute baytının bildirdiği uzunluğa (3 + n) eşit değil. Çok datagramlı girdi için "Komut Baytı Kaynağı" seçeneğini "uzunluk zinciri"ne çevirin ya da katı uzunluk kontrolünü kapatın.',
+  'protocol.seatalk.error.chainNotTiled':
+    'Uzunluk zinciri girdiyi tam olarak döşemiyor — datagram sınırları doğrulanamadı. Girdi yanlış hizalanmış ya da SeaTalk olmayabilir; ikisi baytlardan ayırt edilemez.',
+  'protocol.seatalk.error.complementMismatch':
+    'Tümleyen-çift artıklığı uyuşmuyor (iki baytın toplamı 0xFF olmalı). Bu bir checksum DEĞİLDİR — SeaTalk 1\'de checksum yoktur; Knauf\'un belgelediği tek alan-içi hata sezme mekanizmasıdır.',
+  'protocol.seatalk.warning.commandBitNotInBytes':
+    'Komut biti ÇERÇEVEDE YOK: datagram başlangıcını işaretleyen dokuzuncu bit UART\'ın parity bitinde taşınır ve bayt dizisinde yer almaz. İlk baytın komut baytı olduğu VARSAYILDI, doğrulanmadı.',
+  'protocol.seatalk.warning.noIntegrityCheckOnWire':
+    'SeaTalk 1\'de checksum ya da CRC YOKTUR (kaynak metinde arandı, sıfır sonuç). Bu çerçeve için "bozulmamış" güvencesi verilemez; tek bütünlük sinyalleri uzunluk uyumu ve — yalnız bazı komutlarda — tümleyen çiftidir.',
+  'protocol.seatalk.warning.commandPayloadNeedsVendorMap':
+    'Bu komut TANINIYOR ama payload\'ı ÇÖZÜLMÜYOR: alan tablosu yalnız tek bir ters mühendislik kaynağında var, ikinci bağımsız bir uygulamada teyitli değil. Tahmin edilmiş alan tablosu yayınlanmaz — baytlar ham bırakıldı.',
+  'protocol.seatalk.warning.commandNotDocumented':
+    'Komut baytı Knauf Part 2\'nin belgelediği 59 komutun hiçbirine uymuyor — ad basılamadı.',
+  'protocol.seatalk.warning.lengthMismatch':
+    'Girdi uzunluğu attribute baytının bildirdiği uzunlukla uyuşmuyor; katı uzunluk kontrolü kapalı olduğu için ilk datagram yine de çözüldü.',
+  'protocol.seatalk.warning.datagramBoundaryUnverified':
+    'Uzunluk zinciri girdiyi tam döşemedi — datagram sınırları DOĞRULANAMADI; ilk datagram kendi bildirdiği uzunlukla çözüldü.',
+  'protocol.seatalk.warning.additionalDatagramsNotDecoded':
+    'Girdi birden çok datagram içeriyor. Sınırlar zincirle doğrulandı ama bu görünümde YALNIZ İLK datagram çözülür.',
+  'protocol.seatalk.warning.envelopeOnly':
+    'Yalnız zarf görünümü seçili — komut adı basıldı, payload çözülmedi.',
+  'protocol.seatalk.warning.rawModeNoNaming':
+    'Ham görünüm seçili — hiçbir komut ya da alan adlandırılmadı, her veri baytı tek tek gösteriliyor (tersine mühendislik modu).',
+  'protocol.seatalk.field.commandAssumed':
+    'Komut baytı olduğu VARSAYILDI — datagram başlangıç biti çerçevede taşınmıyor.',
+  'protocol.seatalk.field.payloadNotDecoded':
+    'Payload ham: bu komutun alan tablosu ikinci bir bağımsız kaynakta teyitli değil.',
+  'protocol.seatalk.field.complementMismatch':
+    'Tümleyen baytı uyuşmuyor — toplam 0xFF olmalıydı.',
+  'protocol.seatalk.field.headingCorrectionAmbiguous':
+    'Başlık düzeltme terimi için kaynaklar AYRIŞIYOR: Knauf\'un İngilizce metni "U\'nun iki üst bitinde set olan bit sayısı" diyor (burada bu kullanıldı), sözde-C ifadesindeki öncelik hatasını koruyan SignalK ise farklı bir değer üretiyor. Fark en fazla 1°\'dir.',
+  'protocol.seatalk.field.keyCodeSingleSource':
+    'Tuş kodunun adı basılmadı: canboat\'ın SEATALK_KEYSTROKE tablosuyla Knauf\'un tablosu bu kodda örtüşmüyor ya da kod yalnız tek kaynakta var.',
+  'protocol.seatalk.field.valueNotPresent':
+    'Değer tel üzerinde var ama "veri mevcut" bayrağı düşük — gönderen bu alanı doldurmamış olabilir.',
+  'protocol.seatalk.option.commandByteSource': 'Komut Baytı Kaynağı',
+  'protocol.seatalk.option.commandByteSource.description':
+    'Datagram başlangıcını işaretleyen komut biti çerçevede YOKTUR (UART parity\'sinde taşınır). Sınır ya ilk baytın komut baytı olduğu varsayılarak ya da uzunluk zinciri yürütülerek belirlenir.',
+  'protocol.seatalk.option.commandByteSource.assumeFirstByte': 'İlk bayt komut baytıdır (varsayılan)',
+  'protocol.seatalk.option.commandByteSource.lengthChained': 'Uzunluk zinciriyle sınırları doğrula',
+  'protocol.seatalk.option.semanticDepth': 'Anlamsal Derinlik',
+  'protocol.seatalk.option.semanticDepth.description':
+    'Zarfın ötesinde ne kadar ad basılacağı: yalnız zarf, çift kaynakta teyitli komutların çözümü (varsayılan), ya da hiç adlandırma yapmayan ham görünüm.',
+  'protocol.seatalk.option.semanticDepth.envelope': 'Yalnız zarf',
+  'protocol.seatalk.option.semanticDepth.knownCommands': 'Teyitli komutları çöz (varsayılan)',
+  'protocol.seatalk.option.semanticDepth.raw': 'Ham — adlandırma yok',
+  'protocol.seatalk.option.strictLength': 'Katı Uzunluk Kontrolü',
+  'protocol.seatalk.option.strictLength.description':
+    'Knauf Part 1: beklenenden kısa mesajlar geçersizdir ve tamamen atılır. Açıkken uzunluk uyuşmazlığı hata, kapalıyken uyarı üretir.',
+  'protocol.seatalk.option.complementCheck': 'Tümleyen Çifti Kontrolü',
+  'protocol.seatalk.option.complementCheck.description':
+    'Tümleyen çifti YALNIZ bazı komutlarda tanımlıdır (Knauf küçük harfle gösteriyor: ZZ zz). Tanımlı olmayan komutta alan hiç basılmaz — uydurma doğrulama üretilmez.',
+  'protocol.seatalk.option.boolean.on': 'Açık (varsayılan)',
+  'protocol.seatalk.option.boolean.off': 'Kapalı',
+  'protocol.seatalk.example.keystrokeMinusOne.name': 'Tuş vuruşu "−1" (Z101 kumanda)',
+  'protocol.seatalk.example.keystrokeMinusOne.description':
+    'Knauf Part 2\'nin gerçek yakalaması: 86 11 05 FA. Tuş kodu 0x05 hem Knauf\'ta hem canboat\'ın SEATALK_KEYSTROKE tablosunda "−1"; tümleyen çift 0x05 + 0xFA = 0xFF ile PASS.',
+  'protocol.seatalk.example.keystrokeComplementMismatch.name': 'Tuş vuruşu — tümleyen uyuşmazlığı',
+  'protocol.seatalk.example.keystrokeComplementMismatch.description':
+    'Aynı çerçeve, tümleyen baytı bozulmuş (0xFA → 0xFB). Artıklığın gerçekten sınandığını, yalnız gösterilmediğini kanıtlar.',
+  'protocol.seatalk.example.equipmentId400g.name': 'Ekipman kimliği (Course Computer 400G)',
+  'protocol.seatalk.example.equipmentId400g.description':
+    'Knauf Part 2\'nin gerçek yakalaması: 01 05 00 00 00 60 01 00. Komut TANINIR ve adı basılır, ama payload ÇÖZÜLMEZ — kimlik tablosu tek kaynaklı.',
+  'protocol.seatalk.example.compassHeadingRudder.name': 'Pusula başlığı + dümen açısı (9C)',
+  'protocol.seatalk.example.compassHeadingRudder.description':
+    'Knauf\'un üç terimli formülünden türetildi: U=1, VW=0x2D → 90 + 90 + 0 = 180°; RR=0xFE → 2° sola (Part 2\'nin kendi örneği). Formülün sadeleştirilmesi hata vermeden yanlış açı üretir.',
+  'protocol.seatalk.example.unknownMeaningA7.name': 'Anlamı bilinmeyen komut (A7, Raystar 120)',
+  'protocol.seatalk.example.unknownMeaningA7.description':
+    'Knauf Part 2\'nin gerçek yakalaması, kaynağın kendisi "unknown meaning" diyor. Komut adı basılır, payload ham kalır ve vendor eşlemesi gerektiği uyarılır.',
+  'protocol.seatalk.example.targetWaypointName.name': 'Hedef waypoint adı (82, üç tümleyen çifti)',
+  'protocol.seatalk.example.targetWaypointName.description':
+    'Knauf\'un dört karakterlik kodlaması tersine çevrilerek "WPT1" adı için kuruldu; üç tümleyen çiftinin üçü de PASS.',
 
   // --- XMODEM (framing motoruna uğramaz, xmodemCore.ts'in üstünde ince sarmal) ---
   'protocol.xmodem.documentation.summary':
