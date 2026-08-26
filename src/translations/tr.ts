@@ -7794,7 +7794,7 @@ export const tr = {
   // Alt tip adları, adres rolleri (RA/TA/DA/SA/BSSID), OUI adları ve alan
   // adları VERİDİR; çeviriye GİRMEZ (CLAUDE.md).
   'protocol.wifi.documentation.summary':
-    'IEEE 802.11 MAC çerçevesi çözücüsü. Girdi ÇIPLAK 802.11 çerçevesidir ve 4 baytlık FCS DAHİLDİR (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism ve AVS başlıkları libpcap\'in AYRI link-type\'larıdır ve kapsam dışındadır. Yönetim, kontrol ve veri çerçevelerinin üçü de BAŞLIK düzeyinde çözülür: 11 Frame Control alt alanı, dört adresin ToDS/FromDS matrisiyle çözülen rolleri, sıra ve parça numarası, QoS ve HT Control, CRC-32 FCS PASS/FAIL. Gövde bu sürümde ham kalır; şifreli çerçevede anahtar olmadan ÖTEYE İNİLMEZ.',
+    'IEEE 802.11 MAC çerçevesi çözücüsü. Girdi ÇIPLAK 802.11 çerçevesidir ve 4 baytlık FCS DAHİLDİR (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism ve AVS başlıkları libpcap\'in AYRI link-type\'larıdır ve kapsam dışındadır. Yönetim, kontrol ve veri çerçevelerinin üçü de BAŞLIK düzeyinde çözülür: 11 Frame Control alt alanı, dört adresin ToDS/FromDS matrisiyle çözülen rolleri, sıra ve parça numarası, QoS ve HT Control, CRC-32 FCS PASS/FAIL. GÖVDE yalnız YÖNETİM çerçevelerinde çözülür: 11 alt tipin sabit alanları, bilgi elemanı zinciri ve RSN / WPA\'nın iç içe şifre ve AKM süiti zinciri. Kontrol ve veri gövdeleri ham kalır; şifreli çerçevede anahtar olmadan ÖTEYE İNİLMEZ.',
 
   'protocol.wifi.error.aborted': 'Çözümleme iptal edildi.',
   'protocol.wifi.error.emptyFrame': 'Boş çerçeve çözülemez.',
@@ -7827,7 +7827,7 @@ export const tr = {
   'protocol.wifi.warning.managementDsBitsSet':
     'Yönetim çerçevesinde ToDS ve FromDS bitleri sıfır olmak zorundadır; burada biri açık.',
   'protocol.wifi.warning.bodyNotDecoded':
-    'Çerçeve gövdesi bu sürümde çözülmedi ve ham bırakıldı. Yönetim gövdeleri ile bilgi elemanları bir sonraki alt dalgada açılacak; kontrol ve veri gövdeleri kapsam dışıdır.',
+    'Çerçeve gövdesi ham bırakıldı. Yönetim gövdeleri ve bilgi elemanları BURADA çözülüyor; kontrol ve veri gövdeleri kapsam dışıdır — Block Ack bitmap\'i, veri yükü ve QoS TID semantiği bu kaydın parçası değildir.',
   'protocol.wifi.warning.encryptedPayload':
     'Protected biti açık: gövde şifrelidir (WEP/TKIP/CCMP/GCMP) ve anahtar olmadan çözülemez. Anahtar tarayıcıdan çıkmaz, gövde UYDURULMAZ — ham bırakıldı.',
   'protocol.wifi.warning.radiotapOutOfScope':
@@ -7908,6 +7908,82 @@ export const tr = {
   'protocol.wifi.example.corruptFcs.name': 'Bozuk FCS — yakalamanın kendi çerçevesi',
   'protocol.wifi.example.corruptFcs.description':
     'UYDURULMADI: 1093 çerçevelik gerçek yakalamanın kendisinde bozuk olan 13 çerçeveden biri. Protokol sürümü ve uzunluk geçerli, YALNIZ FCS tutmuyor — otomatik algılama imzası bu çerçeveyi bu yüzden reddeder ve bu BEKLENEN davranıştır.',
+
+  // ── Dalga 18b — yönetim gövdeleri + bilgi elemanları ───────────────────
+  'protocol.wifi.warning.elementChainTruncated':
+    'Bilgi elemanı zinciri temiz bitmiyor: kalan baytlar tam bir Element ID / Uzunluk / Veri üçlüsü oluşturmuyor. Ham bırakıldılar — oraya daha kısa bir eleman okumak uydurmak olurdu.',
+  'protocol.wifi.warning.unknownElement':
+    'En az bir bilgi elemanı kimliği bu sürümün tablosunda değil. Bu HATA DEĞİLDİR: eleman kimliği uzayı her 802.11 revizyonuyla büyüyor (255 numaralı "Element ID Extension" tam olarak bu yüzden var). Bilinmeyen eleman ham basılır ve ASLA uydurma bir ad almaz.',
+  'protocol.wifi.warning.elementLengthUnexpected':
+    'Bir eleman, standardın sabitlediğinden farklı bir uzunluk taşıyor. Eleman yine de ham basıldı — "N bayt olmalıydı" ile "bu eleman yok sayıldı" farklı şeylerdir.',
+  'protocol.wifi.warning.hiddenElements':
+    'Adı olmayan elemanlar gösterim seçeneğiyle gizlendi. Yine sayıldılar ve baytlarını yine tüketiyorlar; görmek için seçeneği "onaltılık" konumuna alın.',
+  'protocol.wifi.warning.rsnVersionUnsupported':
+    'RSN sürümü 1 değil. Alan yerleşimi sürüme bağlıdır, bu yüzden zincir DAHA İLERİ İZLENMEDİ — bilinmeyen bir sürümün yerleşimini varsaymak burada "uydurmak"ın tam karşılığıdır.',
+  'protocol.wifi.warning.rsnCounterOverrun':
+    'Bir RSN sayacı, elemanda kalan bayttan fazla süit ilan ediyor. Bütün zincirin etrafında kurulduğu hata biçimi budur: her sayaç bir sonraki bloğun uzunluğunu belirler, yani tek bir bozuk sayaç kendinden sonraki her şeyi sessizce kaydırır. Zincir DURDURULDU, kalan baytlar ham bırakıldı ve hiçbir süit uydurulmadı.',
+  'protocol.wifi.warning.rsnTrailingBytes':
+    'RSN zinciri, eleman uzunluğunun bildirdiğinden az bayt tüketti. Artan baytlar son alanın içine katılmak yerine ham bırakıldı.',
+  'protocol.wifi.warning.rsnTruncated':
+    'RSN elemanı kendi zorunlu alanları için bile kısa; kalan baytlar ham bırakıldı.',
+  'protocol.wifi.warning.vendorElementRaw':
+    'Üreticiye özel eleman çözümü kapalı; 221 numaralı eleman OUI etiketi olmadan ham baytlarla gösteriliyor.',
+  'protocol.wifi.warning.managementBodyTruncated':
+    'Yönetim gövdesi, bu alt tipin gerektirdiği sabit alanlardan kısa. Yarısını basıp gerisini kaydırmak sessizce yanlış olurdu, bu yüzden gövdenin tamamı ham bırakıldı.',
+  'protocol.wifi.warning.managementSubtypeNotDecoded':
+    'Bu yönetim alt tipinin bu sürümde sabit alan yerleşimi yok, bu yüzden gövdesi ham bırakıldı. Yerleşim varsaymak, bilinmeyen bir kontrol çerçevesi geometrisini uydurmanın yönetim düzeyindeki eşi olurdu.',
+  'protocol.wifi.warning.actionBodyNotDecoded':
+    'Action çerçevesinde yalnız Category alanı çözülür. Her kategorinin kendi gövde yerleşimi vardır; onlar ESP-NOW alt dalgasıyla gelecek.',
+
+  'protocol.wifi.error.rsnCounterOverrun':
+    'RSN sayaç taşması: ilan edilen süit sayısı elemanda kalan baytlara sığmıyor.',
+
+  'protocol.wifi.field.unknownElement': 'Eleman kimliği tabloda yok; ham basıldı.',
+  'protocol.wifi.field.elementLengthUnexpected': 'Beklenmedik eleman uzunluğu.',
+  'protocol.wifi.field.elementNotDecoded': 'Eleman gövdesi çözülmedi.',
+  'protocol.wifi.field.rsnCounterOverrun': 'RSN sayacı sığmıyor; kalanı ham bırakıldı.',
+  'protocol.wifi.field.hiddenSsid': 'Wildcard / gizli SSID (uzunluk 0).',
+  'protocol.wifi.field.managementBodyTruncated': 'Gövde sabit alanlar için kısa.',
+  'protocol.wifi.field.managementBodyNotDecoded': 'Gövde bu sürümde çözülmedi.',
+  'protocol.wifi.field.codeNotInTable': 'Kod tabloda yok; sayı ham basıldı.',
+
+  'protocol.wifi.option.ieNameSet': 'Bilgi elemanı adları',
+  'protocol.wifi.option.ieNameSet.description':
+    'Bilinen dar eleman kimliği kümesi adlandırılıp çözülsün mü, yoksa zincir düz Element ID / Uzunluk / Veri olarak mı gösterilsin. Adlandırmayı kapatmak ham TLV görünümüdür, bir eksiklik bildirimi değil.',
+  'protocol.wifi.option.ieNameSet.named': 'Adlandır (bilinen kümeyi çöz)',
+  'protocol.wifi.option.ieNameSet.none': 'Adlandırma (düz TLV görünümü)',
+
+  'protocol.wifi.option.vendorIeProfile': 'Üreticiye özel eleman (221)',
+  'protocol.wifi.option.vendorIeProfile.description':
+    '221 numaralı elemanın içeriği OUI\'sine bağlıdır ve burada yalnız 00-50-F2 tip 1 (WPA) için çözücü vardır. "Çöz" onu açar, "yalnız OUI etiketi" üreticiyi adlandırır ama yükü açmaz, "ham" ise hiçbir etiket koymadan baytları basar.',
+  'protocol.wifi.option.vendorIeProfile.decode': 'Çöz (WPA)',
+  'protocol.wifi.option.vendorIeProfile.labelOnly': 'Yalnız OUI etiketi',
+  'protocol.wifi.option.vendorIeProfile.raw': 'Ham',
+
+  'protocol.wifi.option.rsnSuiteLabels': 'Şifre ve AKM süiti adları',
+  'protocol.wifi.option.rsnSuiteLabels.description':
+    'Süit seçicisi bir OUI ile bir tip numarasıdır; AD telde yoktur. Farklı bir OUI altındaki aynı numara AYNI SÜİT DEĞİLDİR, bu yüzden tescilli bir seçiciye asla ad verilmez. Etiketleri kapatmak, çerçevenin gerçekten taşıdığı ham OUI:tip seçicisini bırakır.',
+  'protocol.wifi.option.rsnSuiteLabels.show': 'Adları göster',
+  'protocol.wifi.option.rsnSuiteLabels.hide': 'Yalnız ham OUI:tip',
+
+  'protocol.wifi.option.unknownIeDisplay': 'Adlandırılmamış elemanlar',
+  'protocol.wifi.option.unknownIeDisplay.description':
+    'Adı olmayan elemanın nasıl basılacağı. "Onaltılık" satırı ham baytlarıyla korur, "gizli" satırı tablodan düşürür. İki şıkta da çözüm değişmez.',
+  'protocol.wifi.option.unknownIeDisplay.hex': 'Onaltılık döküm',
+  'protocol.wifi.option.unknownIeDisplay.hidden': 'Gizli',
+
+  'protocol.wifi.example.probeResponse.name': 'Probe Response — aynı sabit alanlar, başka roller',
+  'protocol.wifi.example.probeResponse.description':
+    'Gerçek 138 baytlık bir Probe Response. Beacon ile aynı sabit alanları taşır (Timestamp, Beacon Interval, Capability) ama Address 1 yayın adresi değil, istasyonun kendisidir. Burada TIM elemanı yoktur — Beacon\'ın on elemanından dokuzu. Aritmetik: 24 + 12 + 98 + 4 = 138.',
+  'protocol.wifi.example.associationRequest.name': 'Association Request — tek pairwise süitli RSN',
+  'protocol.wifi.example.associationRequest.description':
+    'RSN elemanı 20 bayt olan gerçek 79 baytlık çerçeve: 2 + 4 + 2 + 4 + 2 + 4 + 2 = 20. İstasyon, Beacon\'ın sunduğu iki şifreden BİRİNİ (CCMP-128) seçiyor. Aritmetik: 24 + 4 + 47 + 4 = 79.',
+  'protocol.wifi.example.brokenRsnCounter.name': 'Bozuk RSN sayacı (türetilmiş)',
+  'protocol.wifi.example.brokenRsnCounter.description':
+    'Association Request\'in Pairwise Cipher Count\'u 1\'den 2\'ye çıkarılmış, liste ise aynı boyutta bırakılmıştır. İkinci "süit" AKM sayacını yutar, AKM sayısı 684 okunur ve 2 baytı kalmış bir elemandan 2736 bayt istenir. RSN zincirinin etrafında kurulduğu hata biçimi tam olarak budur: çözücü sessizce kaymak yerine durur, uzunluk uyuşmazlığı basar ve kalanı ham bırakır. FCS yeniden hesaplandı — çerçeve telde kusursuz, içeride tutarsız; asıl mesele de bu.',
+  'protocol.wifi.example.hiddenSsid.name': 'Gizli SSID (türetilmiş)',
+  'protocol.wifi.example.hiddenSsid.description':
+    'Probe Response\'un SSID elemanı uzunluk 0\'a indirilmiş hâli. Sıfır uzunluklu SSID wildcard\'dır: ağ adı yayınlanmıyor demektir. Satır boş bir kart çizmek yerine "wildcard / gizli SSID" der. FCS yeniden hesaplandı.',
 
 } as const;
 

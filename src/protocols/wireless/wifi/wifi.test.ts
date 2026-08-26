@@ -45,7 +45,7 @@ describe('wifi eklentisi — kimlik ve yüzey', () => {
     expect(wifiPlugin.encoder).toBeUndefined();
   });
 
-  it('ALTI `decodeOptions` kanalı, hepsi geçerli varsayılanla', () => {
+  it('ON `decodeOptions` kanalı (18a`nın altısı + 18b`nin dördü)', () => {
     const options = wifiPlugin.decodeOptions ?? [];
     expect(options.map((option) => option.id)).toEqual([
       'fcsPresent',
@@ -54,6 +54,10 @@ describe('wifi eklentisi — kimlik ve yüzey', () => {
       'htControlPresent',
       'protectedPayloadDisplay',
       'vendorAddressLabels',
+      'ieNameSet',
+      'vendorIeProfile',
+      'rsnSuiteLabels',
+      'unknownIeDisplay',
     ]);
     for (const option of options) {
       expect(option.kind, option.id).toBe('select');
@@ -65,13 +69,18 @@ describe('wifi eklentisi — kimlik ve yüzey', () => {
     }
   });
 
-  it('ON örnek çerçeve; sekizi GERÇEK yakalamadan, ikisi türetilmiş', () => {
-    expect(wifiPlugin.exampleFrames).toHaveLength(10);
+  it('ON DÖRT örnek çerçeve; onu GERÇEK yakalamadan, dördü türetilmiş', () => {
+    expect(wifiPlugin.exampleFrames).toHaveLength(14);
     const ids = wifiPlugin.exampleFrames.map((entry) => entry.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toContain('corrupt-fcs');
     expect(ids).toContain('four-address-wds');
     expect(ids).toContain('qos-data');
+    // 18b'nin dördü: ikisi gerçek, ikisi türetilmiş.
+    expect(ids).toContain('probe-response');
+    expect(ids).toContain('association-request');
+    expect(ids).toContain('broken-rsn-counter');
+    expect(ids).toContain('hidden-ssid');
   });
 
   it('her örneğin `expectedValid` bildirimi motorun sonucuyla TUTUYOR', () => {
@@ -105,16 +114,36 @@ describe('wifi eklentisi — kimlik ve yüzey', () => {
   });
 });
 
-describe('gövde — 18a`da HAM kalır', () => {
-  it('Beacon gövdesi 116 bayt HAM ve `bodyNotDecoded` uyarısı taşır', () => {
+describe('gövde kapıları — SIRA önemli', () => {
+  it('🚨 Beacon gövdesi ARTIK ÇÖZÜLÜR — tek parça ham `body` alanı KALMADI', () => {
     const frame = decoded(example('beacon'));
-    const body = fieldById(frame, 'body');
-    expect(body?.offset).toBe(24);
-    expect(body?.length).toBe(116);
-    expect(body?.warnings).toContain('protocol.wifi.field.bodyNotDecoded');
-    expect(frame.warnings.map((warning) => warning.code)).toContain('bodyNotDecoded');
-    // 18b'nin işi: gövde bu dalgada ÇÖZÜLMEZ, uydurulmaz.
-    expect(body?.rawValue).toBeUndefined();
+    // 18a'da burada 116 baytlık tek bir ham alan vardı; 18b onu sabit alanlara
+    // ve element zincirine böldü. Ham alan KALIRSA gövde çözülmemiş demektir.
+    expect(fieldById(frame, 'body')).toBeUndefined();
+    expect(frame.warnings.map((warning) => warning.code)).not.toContain('bodyNotDecoded');
+    expect(fieldById(frame, 'mgmt-timestamp')?.offset).toBe(24);
+    expect(fieldById(frame, 'ie-0')?.offset).toBe(36);
+    // Gövdenin SON element'i FCS'ten hemen önce biter: 24 + 12 + 104 = 140.
+    const last = fieldById(frame, 'wpa-capabilities');
+    expect((last?.offset ?? 0) + (last?.length ?? 0)).toBe(140);
+  });
+
+  it('Control gövdesi ÇÖZÜLMEZ — kapsam dışı, "sonraki dalga" değil', () => {
+    // Control çerçevelerinde gövde zaten yok; sınırı Data çerçevesi kanıtlar.
+    const frame = decoded(example('protected-data'));
+    expect(fieldById(frame, 'ie-0')).toBeUndefined();
+    expect(fieldById(frame, 'mgmt-capability')).toBeUndefined();
+  });
+
+  it('🚨 KORUMALI YÖNETİM çerçevesinde IE zinciri ARANMAZ', () => {
+    // 802.11w korumalı yönetim çerçevesi: şifreli baytları TLV sanmak uydurma
+    // element basardı. `Protected` kapısı SINIF kapısından ÖNCE gelir.
+    const beacon = Uint8Array.from(example('beacon'));
+    beacon[1] = (beacon[1] ?? 0) | 0x40; // Protected = 1
+    const frame = decoded(beacon);
+    expect(fieldById(frame, 'body')?.name).toContain('encrypted');
+    expect(fieldById(frame, 'ie-0')).toBeUndefined();
+    expect(frame.warnings.map((warning) => warning.code)).toContain('encryptedPayload');
   });
 
   it('ACK`in gövdesi YOKTUR — boş bir alan basılmaz', () => {
@@ -151,6 +180,74 @@ describe('gövde — 18a`da HAM kalır', () => {
         'radiotapOutOfScope',
       );
     }
+  });
+});
+
+describe('dalga 18b — tamamlanma ölçütleri EKRANDA', () => {
+  it('gerçek Beacon: SSID, kanal, aralık, Privacy ve RSN`in CCMP+TKIP/PSK üçlüsü', () => {
+    const frame = decoded(example('beacon'));
+    expect(String(fieldById(frame, 'ie-0')?.physicalValue)).toBe('"Coherer"');
+    expect(String(fieldById(frame, 'ie-3')?.physicalValue)).toBe('channel 1');
+    expect(fieldById(frame, 'mgmt-beacon-interval')?.rawValue).toBe(100);
+    expect(fieldById(frame, 'mgmt-beacon-interval')?.unit).toBe('TU');
+    expect(fieldById(frame, 'mgmt-capability-privacy')?.rawValue).toBe(1);
+    expect(String(fieldById(frame, 'rsn-pairwise-suite')?.physicalValue)).toContain('CCMP-128');
+    expect(String(fieldById(frame, 'rsn-pairwise-suite-2')?.physicalValue)).toContain('TKIP');
+    expect(String(fieldById(frame, 'rsn-akm-suite')?.physicalValue)).toContain('PSK');
+  });
+
+  it('aynı Beacon`ın WPA vendor IE`si AYRI ve OUI`siyle basılıyor', () => {
+    const frame = decoded(example('beacon'));
+    expect(String(fieldById(frame, 'ie-221-2')?.physicalValue)).toContain('00-50-F2');
+    expect(String(fieldById(frame, 'wpa-akm-suite')?.physicalValue)).toContain('00-50-F2');
+    // 🚨 AYNI süit numarası, FARKLI OUI: iki alan aynı metni BASMAMALI.
+    expect(String(fieldById(frame, 'wpa-akm-suite')?.physicalValue)).not.toBe(
+      String(fieldById(frame, 'rsn-akm-suite')?.physicalValue),
+    );
+  });
+
+  it('🚨 bozuk RSN sayacı örneği UYARI + HATA basar, ÇÖKMEZ', () => {
+    const entry = wifiPlugin.exampleFrames.find((item) => item.id === 'broken-rsn-counter');
+    if (entry === undefined) throw new Error('missing broken-rsn-counter');
+    const frame = decoded(entry.bytes);
+    expect(frame.valid).toBe(false);
+    expect(frame.errors.map((error) => error.code)).toContain('length-mismatch');
+    expect(frame.warnings.map((warning) => warning.code)).toContain('rsnCounterOverrun');
+    // Çerçevenin GERİ KALANI çözülmeye devam eder: kısmi sonuç gösterilir.
+    expect(fieldById(frame, 'ie-50')).toBeDefined();
+    expect(fieldById(frame, 'fcs')?.valid).toBe(true);
+  });
+
+  it('gizli SSID örneği "wildcard" der, BOŞ KART BASMAZ', () => {
+    const entry = wifiPlugin.exampleFrames.find((item) => item.id === 'hidden-ssid');
+    if (entry === undefined) throw new Error('missing hidden-ssid');
+    const frame = decoded(entry.bytes);
+    const ssid = fieldById(frame, 'ie-0');
+    expect(ssid?.length).toBe(2);
+    expect(String(ssid?.physicalValue)).toContain('wildcard');
+    expect(ssid?.warnings).toContain('protocol.wifi.field.hiddenSsid');
+    // Türetilmiş çerçevenin FCS'i motorun kendi CRC'siyle üretildi.
+    expect(fieldById(frame, 'fcs')?.valid).toBe(true);
+  });
+
+  it('Auth örneğinin "Open System / seq 1 / Successful" üçlüsü', () => {
+    const frame = decoded(example('authentication'));
+    expect(String(fieldById(frame, 'mgmt-auth-algorithm')?.physicalValue)).toContain('Open System');
+    expect(fieldById(frame, 'mgmt-auth-sequence')?.rawValue).toBe(1);
+    expect(String(fieldById(frame, 'mgmt-status-code')?.physicalValue)).toContain('Successful');
+  });
+
+  it('18b`nin dört kanalı da ÇIKTIYI GERÇEKTEN değiştirir', () => {
+    const base = decoded(example('beacon'));
+    const noNames = decoded(example('beacon'), { ieNameSet: 'none' });
+    const hidden = decoded(example('beacon'), { ieNameSet: 'none', unknownIeDisplay: 'hidden' });
+    const noLabels = decoded(example('beacon'), { rsnSuiteLabels: 'hide' });
+    const rawVendor = decoded(example('beacon'), { vendorIeProfile: 'raw' });
+
+    expect(noNames.fields.length).toBeLessThan(base.fields.length);
+    expect(hidden.fields.length).toBeLessThan(noNames.fields.length);
+    expect(String(fieldById(noLabels, 'rsn-group-cipher')?.physicalValue)).not.toContain('TKIP');
+    expect(rawVendor.warnings.map((warning) => warning.code)).toContain('vendorElementRaw');
   });
 });
 
@@ -222,8 +319,14 @@ describe('`ParsedFrame` sözleşmesi', () => {
         if (field.unit !== undefined) units.add(`${field.id}:${field.unit}`);
       }
     }
-    // Tek birim taşıyan alan Duration'dır ve o gerçekten mikrosaniyedir.
-    expect([...units]).toEqual(['duration-id:µs']);
+    // Üç alan birim taşır ve ÜÇÜ DE gerçek fiziksel büyüklüktür: Duration ve
+    // TSF zaman damgası mikrosaniye, Beacon Interval ise 1024 µs'lik TU.
+    // Listen Interval bilerek YOKTUR — o bir SAYIMDIR, süre değil.
+    expect([...units].sort()).toEqual([
+      'duration-id:µs',
+      'mgmt-beacon-interval:TU',
+      'mgmt-timestamp:µs',
+    ]);
   });
 
   it('`parse` SAF: aynı girdi arka arkaya aynı sonucu verir', () => {

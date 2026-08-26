@@ -7806,7 +7806,7 @@ export const en: TranslationDictionary = {
     'The LonTalk PDU of the first example with the envelope stripped and a CRC-16/GENIBUS appended. It does NOT decode in the default tunnel mode — switch the payload kind to "raw PDU + trailing CRC" and the CRC is really verified.',
   // --- Wi-Fi (IEEE 802.11) — Phase 10 wave 18a, MAC layer ---
   'protocol.wifi.documentation.summary':
-    'IEEE 802.11 MAC frame decoder. The input is the BARE 802.11 frame with its 4-byte FCS INCLUDED (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism and AVS headers are SEPARATE libpcap link types and are out of scope. All three classes — management, control and data — are decoded at HEADER level: 11 Frame Control subfields, all four addresses resolved through the ToDS/FromDS matrix, sequence and fragment numbers, QoS and HT Control, CRC-32 FCS PASS/FAIL. The body stays raw in this release; on a protected frame nothing below the header is decoded without keys.',
+    'IEEE 802.11 MAC frame decoder. The input is the BARE 802.11 frame with its 4-byte FCS INCLUDED (LINKTYPE_IEEE802_11 = 105); radiotap, PPI, Prism and AVS headers are SEPARATE libpcap link types and are out of scope. All three classes — management, control and data — are decoded at HEADER level: 11 Frame Control subfields, all four addresses resolved through the ToDS/FromDS matrix, sequence and fragment numbers, QoS and HT Control, CRC-32 FCS PASS/FAIL. BODIES are decoded for MANAGEMENT frames only: the fixed fields of 11 subtypes, the information element chain, and the nested RSN / WPA cipher and AKM suite chain. Control and data bodies stay raw, and on a protected frame nothing below the header is decoded without keys.',
 
   'protocol.wifi.error.aborted': 'Decoding was cancelled.',
   'protocol.wifi.error.emptyFrame': 'An empty frame cannot be decoded.',
@@ -7839,7 +7839,7 @@ export const en: TranslationDictionary = {
   'protocol.wifi.warning.managementDsBitsSet':
     'ToDS and FromDS must both be zero in a management frame; one of them is set here.',
   'protocol.wifi.warning.bodyNotDecoded':
-    'The frame body was not decoded in this release and was left raw. Management bodies and information elements arrive in the next sub-wave; control and data bodies are out of scope.',
+    'The frame body was left raw. Management bodies and information elements ARE decoded here; control and data bodies are out of scope — the Block Ack bitmap, the data payload and QoS TID semantics are not part of this record.',
   'protocol.wifi.warning.encryptedPayload':
     'The Protected bit is set: the body is encrypted (WEP/TKIP/CCMP/GCMP) and cannot be decoded without keys. Keys never leave the browser and the body is NEVER invented — it was left raw.',
   'protocol.wifi.warning.radiotapOutOfScope':
@@ -7920,5 +7920,81 @@ export const en: TranslationDictionary = {
   'protocol.wifi.example.corruptFcs.name': 'Corrupt FCS — the capture\'s own frame',
   'protocol.wifi.example.corruptFcs.description':
     'NOT INVENTED: one of the 13 frames that are genuinely corrupt inside the real 1,093-frame capture. The protocol version and the length are valid, ONLY the FCS fails — which is why the auto-detection signature rejects this frame, and that is the EXPECTED behaviour.',
+
+  // ── Dalga 18b — yönetim gövdeleri + Information Element'ler ────────────
+  'protocol.wifi.warning.elementChainTruncated':
+    'The information element chain does not end cleanly: the remaining bytes do not form a complete Element ID / Length / Data triple. They were left raw — reading a shorter element there would have been an invention.',
+  'protocol.wifi.warning.unknownElement':
+    'At least one information element ID is not in this release\'s table. This is NOT an error: the element ID space grows with every 802.11 revision (element 255, "Element ID Extension", exists for exactly that reason). Unknown elements are printed raw and are NEVER given an invented name.',
+  'protocol.wifi.warning.elementLengthUnexpected':
+    'An element carries a length the standard fixes to another value. The element is still printed raw — "it should have been N bytes" and "this element was ignored" are different statements.',
+  'protocol.wifi.warning.hiddenElements':
+    'Elements without a name were hidden by the display option. They were still counted and still consume their bytes; switch the option back to "hex" to see them.',
+  'protocol.wifi.warning.rsnVersionUnsupported':
+    'The RSN version is not 1. The field layout is version dependent, so the chain was NOT followed further — guessing the layout of an unknown version is exactly what "inventing" means here.',
+  'protocol.wifi.warning.rsnCounterOverrun':
+    'An RSN counter announces more suites than the element has bytes left. This is the failure mode the whole chain is built around: every counter sets the length of the next block, so one bad counter silently shifts everything after it. The chain was STOPPED, the remaining bytes were left raw and no suite was invented.',
+  'protocol.wifi.warning.rsnTrailingBytes':
+    'The RSN chain consumed fewer bytes than the element length declares. The leftover bytes were left raw rather than folded into the last field.',
+  'protocol.wifi.warning.rsnTruncated':
+    'The RSN element is too short for its own mandatory fields; the remaining bytes were left raw.',
+  'protocol.wifi.warning.vendorElementRaw':
+    'Vendor-specific element decoding is turned off, so element 221 is shown as raw bytes with no OUI label.',
+  'protocol.wifi.warning.managementBodyTruncated':
+    'The management body is shorter than the fixed fields this subtype requires. Printing half of them and shifting the rest would be silently wrong, so the whole body was left raw.',
+  'protocol.wifi.warning.managementSubtypeNotDecoded':
+    'This management subtype has no fixed-field layout in this release, so its body was left raw. Assuming a layout would be the management-level version of inventing a control frame geometry.',
+  'protocol.wifi.warning.actionBodyNotDecoded':
+    'Only the Category field of an action frame is decoded here. Each category has its own body layout; those arrive with the ESP-NOW sub-wave.',
+
+  'protocol.wifi.error.rsnCounterOverrun':
+    'RSN counter overrun: the announced suite count does not fit in the bytes the element has left.',
+
+  'protocol.wifi.field.unknownElement': 'Element ID not in the table; printed raw.',
+  'protocol.wifi.field.elementLengthUnexpected': 'Unexpected element length.',
+  'protocol.wifi.field.elementNotDecoded': 'Element body not decoded.',
+  'protocol.wifi.field.rsnCounterOverrun': 'RSN counter does not fit; the rest was left raw.',
+  'protocol.wifi.field.hiddenSsid': 'Wildcard / hidden SSID (length 0).',
+  'protocol.wifi.field.managementBodyTruncated': 'Body too short for the fixed fields.',
+  'protocol.wifi.field.managementBodyNotDecoded': 'Body not decoded in this release.',
+  'protocol.wifi.field.codeNotInTable': 'Code not in the table; the number is printed raw.',
+
+  'protocol.wifi.option.ieNameSet': 'Information element names',
+  'protocol.wifi.option.ieNameSet.description':
+    'Whether the narrow set of known element IDs is named and decoded, or the chain is shown as plain Element ID / Length / Data. Turning naming off is a raw-TLV view, not a report that something is missing.',
+  'protocol.wifi.option.ieNameSet.named': 'Named (decode the known set)',
+  'protocol.wifi.option.ieNameSet.none': 'None (plain TLV view)',
+
+  'protocol.wifi.option.vendorIeProfile': 'Vendor-specific element (221)',
+  'protocol.wifi.option.vendorIeProfile.description':
+    'The content of element 221 depends on its OUI, and only 00-50-F2 type 1 (WPA) has a decoder here. "Decode" opens that one, "OUI label only" names the vendor but leaves the payload alone, "Raw" prints the bytes with no label at all.',
+  'protocol.wifi.option.vendorIeProfile.decode': 'Decode (WPA)',
+  'protocol.wifi.option.vendorIeProfile.labelOnly': 'OUI label only',
+  'protocol.wifi.option.vendorIeProfile.raw': 'Raw',
+
+  'protocol.wifi.option.rsnSuiteLabels': 'Cipher and AKM suite names',
+  'protocol.wifi.option.rsnSuiteLabels.description':
+    'A suite selector is an OUI plus a type number; the NAME is not on the wire. The same number under a different OUI is NOT the same suite, so a proprietary selector is never given a name. Turning labels off leaves the raw OUI:type selector, which is what the frame actually carries.',
+  'protocol.wifi.option.rsnSuiteLabels.show': 'Show names',
+  'protocol.wifi.option.rsnSuiteLabels.hide': 'Raw OUI:type only',
+
+  'protocol.wifi.option.unknownIeDisplay': 'Unnamed elements',
+  'protocol.wifi.option.unknownIeDisplay.description':
+    'How an element without a name is printed. "Hex" keeps the row with its raw bytes; "Hidden" drops the row from the table. Nothing is decoded differently either way.',
+  'protocol.wifi.option.unknownIeDisplay.hex': 'Hex dump',
+  'protocol.wifi.option.unknownIeDisplay.hidden': 'Hidden',
+
+  'protocol.wifi.example.probeResponse.name': 'Probe Response — the same fixed fields, other roles',
+  'protocol.wifi.example.probeResponse.description':
+    'A real 138-byte Probe Response. It carries the same fixed fields as the Beacon (Timestamp, Beacon Interval, Capability) but Address 1 is the STA, not the broadcast address. There is no TIM element here — nine of the Beacon\'s ten. Arithmetic: 24 + 12 + 98 + 4 = 138.',
+  'protocol.wifi.example.associationRequest.name': 'Association Request — RSN with a single pairwise suite',
+  'protocol.wifi.example.associationRequest.description':
+    'A real 79-byte frame whose RSN element is 20 bytes long: 2 + 4 + 2 + 4 + 2 + 4 + 2 = 20. The station picks ONE pairwise cipher (CCMP-128) out of the two the Beacon offers. Arithmetic: 24 + 4 + 47 + 4 = 79.',
+  'protocol.wifi.example.brokenRsnCounter.name': 'Broken RSN counter (derived)',
+  'protocol.wifi.example.brokenRsnCounter.description':
+    'The Association Request with its Pairwise Cipher Count raised from 1 to 2 while the list stays the same size. The second "suite" swallows the AKM counter, the AKM count is then read as 684 and 2,736 bytes are demanded from an element with 2 left. This is the exact failure mode the RSN chain is built around: the decoder stops, raises a length mismatch and leaves the rest raw instead of shifting silently. The FCS was recomputed, so the frame is perfect on the wire and inconsistent inside — which is the point.',
+  'protocol.wifi.example.hiddenSsid.name': 'Hidden SSID (derived)',
+  'protocol.wifi.example.hiddenSsid.description':
+    'The Probe Response with its SSID element reduced to length 0. A zero-length SSID is the wildcard: the network name is simply not broadcast. The row says "wildcard / hidden SSID" instead of drawing an empty card. The FCS was recomputed.',
 
 };

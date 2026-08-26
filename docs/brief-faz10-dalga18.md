@@ -970,6 +970,56 @@ SİLİNMEZ.)*
     alt tip adları, adres rolleri (RA/TA/DA/SA/BSSID) ve OUI adlarının
     hiçbiri sözlüğe girmedi.
 
+#### 18b (`wifi` yönetim gövdeleri + IE)
+
+18. **"18b'nin aritmetik çaprazlama tablosu (Auth 34 · Disassoc 30 ·
+    AssocResp 58 · AssocReq 79 · ProbeReq 53 · Beacon 144) uygulamada
+    tutar."** **TUTTU — ve bu turda bir SAPMA BULUNMADI.** Yedi çerçevenin
+    (tablodaki altı + Probe Response 138) `24 + sabit + IE + 4 === n`
+    aritmetiği element element yeniden hesaplandı; brifin verdiği üç element
+    toplamı (Beacon **104**, AssocResp **24**, ProbeReq **25**) birebir
+    doğrulandı ve brifte sayı verilmeyen üçü de ölçüldü (AssocReq **47**,
+    ProbeResp **98**, Auth/Disassoc **0**). Ölçüm `dot11Management.test.ts`te
+    her koşuda YENİDEN üretiliyor; sabit sayı ezberlenmiyor.
+
+19. **`[BEKLENTİ]` "Element ID 47 ERP Information (deprecated) olabilir,
+    `packet-ieee80211.c`ten doğrulanacak."** **DOĞRULANDI.**
+    `packet-ieee80211.h:408` → `#define TAG_ERP_INFO_OLD 47 /* IEEE Std
+    802.11g/D4.0 */` ve `packet-ieee80211.c:63843` bu ID'yi **42 ile AYNI**
+    `ieee80211_tag_erp_info` çözücüsüne bağlıyor. 47 "Reserved" DEĞİLDİR;
+    bilinmeyen ID dalına düşmedi, adlandırıldı ve 42 ile aynı biçimde
+    çözülüyor (gerçek Beacon'da ikisi de `02` = Use Protection).
+
+20. **"`decodeOptions` DÖRT kanal: `ieNameSet` (narrow/all-known/none),
+    `vendorIeProfile` (auto/wpa-only/raw), `rsnSuiteLabels`,
+    `unknownIeDisplay`."** **KANAL SAYISI TUTTU (4 → 4), İKİSİNİN DEĞER
+    KÜMESİ ÇÜRÜDÜ.** `narrow` ile `all-known` bu sürümde **BAYT BAYT AYNI**
+    çıktı verirdi (tek ad tablosu var); `auto` ile `wpa-only` de aynı
+    (tek vendor çözücüsü var: `00-50-F2` type 1). Bir şey değiştirmeyen
+    şık, brifin KENDİ "kanal yapılmayacaklar" mantığıyla kanal DEĞİLDİR.
+    Uygulanan: `ieNameSet` = `named`/`none`, `vendorIeProfile` =
+    `decode`/`label-only`/`raw`. Gerekçe `wifi.ts` dosya başında.
+
+21. **"RSN sayaç zinciri bozulduğunda uyarı basılmalı."** Uygulandı
+    **ve bir adım öteye gitti**: uyarının yanına `length-mismatch` HATASI
+    da düşüyor, çünkü örnek çerçevenin `expectedValid: false` olması bir
+    hata gerektiriyor ve zincirin tutarsızlığı gerçekten bir uzunluk
+    uyuşmazlığıdır. Sayaç kapısı TEK bir yardımcıda toplandı
+    (`counterFits`) ve pairwise / AKM / PMKID üçünde de aynı kapıdan
+    geçiliyor — brif yalnız pairwise ve AKM'yi işaret ediyordu.
+
+22. **"WPA vendor IE'si RSN gibi çözülür."** Doğru, **ama süit tablosu
+    PAYLAŞILMADI.** Wireshark'ın kendisi de iki AYRI tablo taşıyor
+    (`ieee80211_rsn_cipher_vals` `:19487` ↔ `ieee80211_wfa_ie_wpa_cipher_vals`
+    `:19722`) ve ikincisi 7'de bitiyor. Tek tablo yazılsaydı bir gün RSN'e
+    eklenen 18 (OWE) WPA IE'sinde de basılırdı — hata VERMEDEN.
+
+23. **Tahmin kalibrasyonu.** `decodeOptions` **4 tahmin → 4 gerçek**;
+    örnek çerçeve **4 tahmin → 4 gerçek** (10 → 14); çeviri anahtarı
+    **~60 tahmin → 46 gerçek** (%23 aşağı) — sebep 18a'nınkiyle aynı:
+    element adları, süit adları, OUI etiketleri ve kod sözlükleri VERİDİR,
+    sözlüğe girmedi. Kayıt toplamı 71 → **117** anahtar.
+
 ---
 
 ## Açık sorular

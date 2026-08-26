@@ -12,7 +12,8 @@ import { wifiParser, wifiPlugin } from './wifi';
  *
  *   1. **İleri** — `wifi.canParse` (imza W12) registry'deki BAŞKA hiçbir
  *      örneği kabul etmiyor mu? Ana brif ölçümü 899 örnek üzerinde SIFIR
- *      çakışma buldu; bu tur 909 örnek üzerinde onu YENİDEN üretti. Sayı
+ *      çakışma buldu; 18a onu 909 örnek üzerinde, 18b ise **913** örnek
+ *      üzerinde YENİDEN üretti (dört yeni `wifi` örneği eklendi). Sayı
  *      kodda tekrar üretilmezse, registry büyüdükçe bir gün başka bir kaydın
  *      örneği bu imzayı geçebilir ve `wifi` otomatik algılamada onun
  *      çerçevesini SESSİZCE çalar.
@@ -87,7 +88,8 @@ describe('wifi canParse — üç yönlü bekçi', () => {
       const sweep = await sweepRegistry();
 
       // Sağlık kontrolü: tarama gerçekten TAM registry üzerinde koştu mu?
-      // Ana brif ölçümü 144 kayıt / 899 örnekti; dalga 18a `wifi`yi ekledi.
+      // Ana brif ölçümü 144 kayıt / 899 örnekti; 18a `wifi`yi ekledi (145 /
+      // 909), 18b dört örnek daha ekledi (145 / 913).
       expect(
         sweep.totalExamples,
         'registry örnek sayısı beklenenden düşük — tarama TAM registry üzerinde mi koştu?',
@@ -130,10 +132,12 @@ describe('wifi canParse — üç yönlü bekçi', () => {
   );
 
   it(
-    'KENDİ ÜZERİNDE: dokuz örnek imzayı geçer, bozuk-FCS örneği AÇIKÇA geçmez',
+    'KENDİ ÜZERİNDE: on üç örnek imzayı geçer, bozuk-FCS örneği AÇIKÇA geçmez',
     async () => {
       const sweep = await sweepRegistry();
-      expect(sweep.ownHits.length).toBe(9);
+      // 18b'nin dört örneği de imzayı geçer; türetilmiş ikisinin FCS'i
+      // motorun kendi CRC'siyle YENİDEN hesaplandığı için geçmesi ZORUNLU.
+      expect(sweep.ownHits.length).toBe(13);
 
       // TEK istisna ve KASITLI: imzanın çapası FCS'tir, yakalamanın kendi
       // bozuk çerçevesinin reddedilmesi DOĞRU davranıştır. Sessizce atlanmaz.

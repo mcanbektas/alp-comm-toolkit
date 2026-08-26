@@ -1,11 +1,14 @@
 /**
- * Wi-Fi (IEEE 802.11) — MAC katmanı (Faz 10, dalga 18a; `wifi` kaydının 1/2'si).
+ * Wi-Fi (IEEE 802.11) — MAC katmanı + yönetim gövdeleri
+ * (Faz 10, dalga 18a + **18b**; `wifi` kaydının 2/2'si).
  *
- * `wireless-iot`in — **deponun SON domain'inin** — ilk alt dalgası.
- * Motorun kendisi `dot11Frame.ts`tedir ve **paylaşılan çekirdektir**: 18b
- * (yönetim gövdeleri + IE) ve 18c (`esp-now`) onu TÜKETECEK. Bu dosya yalnız
- * eklentiyi kurar: `canParse`, altı `decodeOptions` kanalı, on örnek çerçeve
- * ve gövdenin HAM bırakılması.
+ * `wireless-iot`in — **deponun SON domain'inin** — ilk kaydı. Motor ÜÇ
+ * paylaşılan modüldedir ve 18c (`esp-now`) hepsini TÜKETECEK:
+ *   · `dot11Frame.ts`      — MAC başlığı (18a),
+ *   · `dot11Elements.ts`   — Information Element (TLV) yürüyücüsü + RSN/WPA (18b),
+ *   · `dot11Management.ts` — alt tip başına sabit gövde alanları (18b).
+ * Bu dosya yalnız eklentiyi kurar: `canParse`, ON `decodeOptions` kanalı,
+ * on dört örnek çerçeve ve gövde kapılarının sırası.
  *
  * ── GİRDİ SÖZLEŞMESİ `[KARAR 18-2]` — dosya başına BİREBİR ────────────────
  * Girdi = **ÇIPLAK IEEE 802.11 MAC çerçevesi, 4 baytlık FCS DAHİL**
@@ -16,14 +19,23 @@
  * Wireshark da ikiye bölüyor (`packet-ieee80211.c` ↔ ayrı dosya
  * `packet-ieee80211-radiotap.c`).
  *
- * ── ROZET `partial` — NEDEN ───────────────────────────────────────────────
+ * ── GÖVDE KAPILARI — SIRA ÖNEMLİ `[KARAR 18-2]` ──────────────────────────
+ * 1. `Protected = 1` ⇒ gövdeye **HİÇ İNİLMEZ**, "şifreli" damgası basılır ve
+ *    IE zinciri DENENMEZ. Anahtar yoksa uydurulmaz (CLAUDE.md anahtar kuralı).
+ * 2. Sınıf `management` ⇒ sabit alanlar + IE zinciri ÇÖZÜLÜR (18b).
+ * 3. Sınıf `control` / `data` ⇒ gövde HAM kalır. Block Ack bitmap'i, data
+ *    yükü ve QoS TID semantiği **KAPSAM DIŞI**, "sonraki dalga" değil.
+ *
+ * ── ROZET `partial` — NEDEN (18b'den sonra da) ────────────────────────────
  * Şifreli gövde çözülmez · radiotap/PHY metadata ayrı link-type ·
- * A-MSDU/A-MPDU ve defragmentation çerçeveler arası durum · EAPOL/WPA el
- * sıkışması yok · Connection Timeline / Airtime / Coexistence stateful ·
- * **yönetim gövdeleri 18b'de açılacak.**
+ * A-MSDU/A-MPDU ve defragmentation çerçeveler arası durum · EAPOL/WPA-WPA2-
+ * WPA3 el sıkışması, PMKID doğrulaması ve SAE yok · HT/VHT/HE PHY
+ * parametreleri ham · Action gövdesi 18c'de · Connection Timeline / Airtime /
+ * Coexistence stateful.
  *
  * "Yarım motor" DEĞİL: 11 FC alt alanı, dört adresin BAĞLAMA GÖRE rol
- * çözümü, sıra/parça numarası, QoS/HT Control ve FCS PASS/FAIL gerçek
+ * çözümü, sıra/parça numarası, QoS/HT Control, FCS PASS/FAIL, 11 yönetim alt
+ * tipinin sabit alanları ve RSN/WPA'nın iç içe süit zinciri gerçek
  * çıktılardır. Emsal `zigbee`: dalga 7'de MAC/NWK/APS, dalga 8'de ZCL —
  * aynı kayıt iki dalgada büyüdü.
  *
@@ -60,6 +72,25 @@
  *     ikisi de kapsam dışı.
  *   · **A-MSDU / A-MPDU ayrıştırma bayrağı** — çerçeveler arası durum
  *     PARSER'A GİRMEZ (dalga 16 bulgu 12).
+ *   · **802.11 revizyon seçimi (`n` / `ac` / `ax`)** — IE'nin VARLIĞI zaten
+ *     revizyonu ima ediyor (45 ⇒ HT, 191 ⇒ VHT, 255/35 ⇒ HE). Kanal açmak
+ *     kullanıcıya çerçeveden OKUNABİLEN bir şeyi sordurmak olurdu.
+ *   · **Ülke / regülasyon alanı** — Country IE (7) TELDE VAR; dışarıdan
+ *     vermek ölçüleni tahminle ezerdi.
+ *   · **Status / Reason kod sözlüğünü açma-kapama** — kapalı, dar enum'lar;
+ *     kod tabloda yoksa zaten sayı basılıyor, kanal hiçbir belirsizliği
+ *     çözmüyor.
+ *   · **PMKID / PMKSA önbellek durumu** — PMKID KİMLİĞİ basılıyor ama "bu
+ *     oturum önceden kimliklenmiş" YORUMU çerçeveler arası durumdur.
+ *   · **`ieNameSet` = "dar / tüm-bilinen"** — brif üç değer öngörmüştü
+ *     (`narrow` / `all-known` / `none`) ama bu sürümde TEK ad tablosu var:
+ *     iki şık BAYT BAYT AYNI çıktıyı verirdi. Bir şey değiştirmeyen şık,
+ *     kanal olmayanlar listesinin kendi mantığıyla, kanal DEĞİLDİR. İki
+ *     değere indirildi (`named` / `none`).
+ *   · **`vendorIeProfile` = "auto / wpa-only"** — aynı gerekçe: bu sürümde
+ *     TEK vendor çözücüsü var (`00-50-F2` type 1 = WPA), yani "auto" ile
+ *     "wpa-only" ayırt edilemezdi. Yerine GERÇEKTEN farklı üç davranış
+ *     kondu: `decode` / `label-only` / `raw`.
  *
  * ── `build` SEKMESİ YOK → `encoder` YAZILMAZ ─────────────────────────────
  * Katalog `tabs`ı `['overview','decode','timing','diagnostics','examples']`;
@@ -82,6 +113,22 @@ import type {
 } from '@/protocol-core/types';
 import { computeNamedCrc } from '@/protocol-core/checksums';
 
+import {
+  ELEMENT_RSN,
+  ELEMENT_SSID,
+  IE_NAME_SET_NAMED,
+  IE_NAME_SET_NONE,
+  RSN_SUITE_LABELS_HIDE,
+  RSN_SUITE_LABELS_SHOW,
+  UNKNOWN_IE_HEX,
+  UNKNOWN_IE_HIDDEN,
+  VENDOR_IE_DECODE,
+  VENDOR_IE_LABEL_ONLY,
+  VENDOR_IE_RAW,
+  walkDot11Elements,
+} from './dot11Elements';
+import type { Dot11ElementOptions } from './dot11Elements';
+import { decodeDot11ManagementBody } from './dot11Management';
 import {
   ADDRESS_ROLE_BOTH,
   ADDRESS_ROLE_RAW,
@@ -122,7 +169,7 @@ const WARN_RADIOTAP_OUT_OF_SCOPE = `${TRANSLATION_KEY_PREFIX}.warning.radiotapOu
 const FIELD_WARN_BODY_NOT_DECODED = `${TRANSLATION_KEY_PREFIX}.field.bodyNotDecoded`;
 const FIELD_WARN_ENCRYPTED_PAYLOAD = `${TRANSLATION_KEY_PREFIX}.field.encryptedPayload`;
 
-// ── decodeOptions — ALTI kanal ────────────────────────────────────────────
+// ── decodeOptions — ON kanal (18a'nın altısı + 18b'nin dördü) ─────────────
 // Hepsi ÇERÇEVEDEN ÇIKARILAMAYAN parametrelerdir. Yapılmayanların listesi ve
 // gerekçeleri dosya başındadır ve o liste bu dalganın ZORUNLU çıktısıdır.
 
@@ -132,6 +179,10 @@ const OPTION_QOS_CONTROL_PRESENT = 'qosControlPresent';
 const OPTION_HT_CONTROL_PRESENT = 'htControlPresent';
 const OPTION_PROTECTED_PAYLOAD_DISPLAY = 'protectedPayloadDisplay';
 const OPTION_VENDOR_ADDRESS_LABELS = 'vendorAddressLabels';
+const OPTION_IE_NAME_SET = 'ieNameSet';
+const OPTION_VENDOR_IE_PROFILE = 'vendorIeProfile';
+const OPTION_RSN_SUITE_LABELS = 'rsnSuiteLabels';
+const OPTION_UNKNOWN_IE_DISPLAY = 'unknownIeDisplay';
 
 const PROTECTED_DISPLAY_MARKED = 'marked';
 const PROTECTED_DISPLAY_HEX = 'hex';
@@ -216,6 +267,63 @@ const DECODE_OPTIONS: readonly DecodeOption[] = [
       { value: VENDOR_LABELS_HIDE, label: `${TRANSLATION_KEY_PREFIX}.option.vendorAddressLabels.hide` },
     ],
   },
+  {
+    id: OPTION_IE_NAME_SET,
+    label: `${TRANSLATION_KEY_PREFIX}.option.ieNameSet`,
+    kind: 'select',
+    defaultValue: IE_NAME_SET_NAMED,
+    description: `${TRANSLATION_KEY_PREFIX}.option.ieNameSet.description`,
+    choices: [
+      { value: IE_NAME_SET_NAMED, label: `${TRANSLATION_KEY_PREFIX}.option.ieNameSet.named` },
+      { value: IE_NAME_SET_NONE, label: `${TRANSLATION_KEY_PREFIX}.option.ieNameSet.none` },
+    ],
+  },
+  {
+    id: OPTION_VENDOR_IE_PROFILE,
+    label: `${TRANSLATION_KEY_PREFIX}.option.vendorIeProfile`,
+    kind: 'select',
+    defaultValue: VENDOR_IE_DECODE,
+    description: `${TRANSLATION_KEY_PREFIX}.option.vendorIeProfile.description`,
+    choices: [
+      { value: VENDOR_IE_DECODE, label: `${TRANSLATION_KEY_PREFIX}.option.vendorIeProfile.decode` },
+      {
+        value: VENDOR_IE_LABEL_ONLY,
+        label: `${TRANSLATION_KEY_PREFIX}.option.vendorIeProfile.labelOnly`,
+      },
+      { value: VENDOR_IE_RAW, label: `${TRANSLATION_KEY_PREFIX}.option.vendorIeProfile.raw` },
+    ],
+  },
+  {
+    id: OPTION_RSN_SUITE_LABELS,
+    label: `${TRANSLATION_KEY_PREFIX}.option.rsnSuiteLabels`,
+    kind: 'select',
+    defaultValue: RSN_SUITE_LABELS_SHOW,
+    description: `${TRANSLATION_KEY_PREFIX}.option.rsnSuiteLabels.description`,
+    choices: [
+      {
+        value: RSN_SUITE_LABELS_SHOW,
+        label: `${TRANSLATION_KEY_PREFIX}.option.rsnSuiteLabels.show`,
+      },
+      {
+        value: RSN_SUITE_LABELS_HIDE,
+        label: `${TRANSLATION_KEY_PREFIX}.option.rsnSuiteLabels.hide`,
+      },
+    ],
+  },
+  {
+    id: OPTION_UNKNOWN_IE_DISPLAY,
+    label: `${TRANSLATION_KEY_PREFIX}.option.unknownIeDisplay`,
+    kind: 'select',
+    defaultValue: UNKNOWN_IE_HEX,
+    description: `${TRANSLATION_KEY_PREFIX}.option.unknownIeDisplay.description`,
+    choices: [
+      { value: UNKNOWN_IE_HEX, label: `${TRANSLATION_KEY_PREFIX}.option.unknownIeDisplay.hex` },
+      {
+        value: UNKNOWN_IE_HIDDEN,
+        label: `${TRANSLATION_KEY_PREFIX}.option.unknownIeDisplay.hidden`,
+      },
+    ],
+  },
 ];
 
 function readSelect(
@@ -283,6 +391,12 @@ function parseWifi(data: Uint8Array, context?: ParseContext): ParseResult {
     OPTION_PROTECTED_PAYLOAD_DISPLAY,
     PROTECTED_DISPLAY_MARKED,
   );
+  const elementOptions: Dot11ElementOptions = {
+    ieNameSet: readSelect(options, OPTION_IE_NAME_SET, IE_NAME_SET_NAMED),
+    vendorIeProfile: readSelect(options, OPTION_VENDOR_IE_PROFILE, VENDOR_IE_DECODE),
+    rsnSuiteLabels: readSelect(options, OPTION_RSN_SUITE_LABELS, RSN_SUITE_LABELS_SHOW),
+    unknownIeDisplay: readSelect(options, OPTION_UNKNOWN_IE_DISPLAY, UNKNOWN_IE_HEX),
+  };
 
   const sink = createFieldSink();
   const errors: ProtocolError[] = [];
@@ -295,42 +409,54 @@ function parseWifi(data: Uint8Array, context?: ParseContext): ParseResult {
   warnings.push(toProtocolWarning('radiotapOutOfScope', WARN_RADIOTAP_OUT_OF_SCOPE));
 
   if (header.readable && header.bodyLength > 0) {
-    const bodyBytes = data.slice(header.bodyOffset, header.bodyOffset + header.bodyLength);
+    // KAPI 1 — `Protected = 1` ⇒ ÖTEYE İNİLMEZ. Bu kapı yönetim çerçevesinde
+    // de geçerlidir: korumalı yönetim çerçevesinin (802.11w) gövdesinde IE
+    // zinciri ARAMAK, şifreli baytları TLV sanıp uydurma element basardı.
     const encrypted = header.protectedFrame;
-    const showHex = protectedDisplay === PROTECTED_DISPLAY_HEX || !encrypted;
-    pushField(sink, {
-      id: 'body',
-      name: encrypted ? '802.11 · Frame Body (encrypted)' : '802.11 · Frame Body',
-      offset: header.bodyOffset,
-      length: header.bodyLength,
-      rawBytes: bodyBytes,
-      physicalValue: showHex
-        ? hexBytes(bodyBytes)
-        : `encrypted payload, ${String(header.bodyLength)} B — not decoded`,
-      valid: true,
-      warnings: [encrypted ? FIELD_WARN_ENCRYPTED_PAYLOAD : FIELD_WARN_BODY_NOT_DECODED],
-    });
+    const decodedBody =
+      !encrypted &&
+      header.frameClass === 'management' &&
+      decodeDot11ManagementBody(data, sink, warnings, errors, header, elementOptions);
 
-    if (encrypted) {
-      // CLAUDE.md anahtar kuralı: anahtar yoksa ÖTEYE İNİLMEZ, UYDURULMAZ.
-      warnings.push(
-        toProtocolWarning(
-          'encryptedPayload',
-          WARN_ENCRYPTED_PAYLOAD,
-          header.bodyOffset,
-          header.bodyLength,
-        ),
-      );
-    } else {
-      // Yönetim gövdeleri 18b'nin işi; Control/Data gövdeleri KAPSAM DIŞI.
-      warnings.push(
-        toProtocolWarning(
-          'bodyNotDecoded',
-          WARN_BODY_NOT_DECODED,
-          header.bodyOffset,
-          header.bodyLength,
-        ),
-      );
+    if (!decodedBody) {
+      const bodyBytes = data.slice(header.bodyOffset, header.bodyOffset + header.bodyLength);
+      const showHex = protectedDisplay === PROTECTED_DISPLAY_HEX || !encrypted;
+      pushField(sink, {
+        id: 'body',
+        name: encrypted ? '802.11 · Frame Body (encrypted)' : '802.11 · Frame Body',
+        offset: header.bodyOffset,
+        length: header.bodyLength,
+        rawBytes: bodyBytes,
+        physicalValue: showHex
+          ? hexBytes(bodyBytes)
+          : `encrypted payload, ${String(header.bodyLength)} B — not decoded`,
+        valid: true,
+        warnings: [encrypted ? FIELD_WARN_ENCRYPTED_PAYLOAD : FIELD_WARN_BODY_NOT_DECODED],
+      });
+
+      if (encrypted) {
+        // CLAUDE.md anahtar kuralı: anahtar yoksa ÖTEYE İNİLMEZ, UYDURULMAZ.
+        warnings.push(
+          toProtocolWarning(
+            'encryptedPayload',
+            WARN_ENCRYPTED_PAYLOAD,
+            header.bodyOffset,
+            header.bodyLength,
+          ),
+        );
+      } else {
+        // KAPI 3 — Control/Data gövdeleri KAPSAM DIŞI, "sonraki dalga" değil.
+        // Adlandırılmamış bir yönetim alt tipi de buraya düşer: yerleşimini
+        // varsaymak `dot11Frame.ts`in control-geometri kuralının ihlali olurdu.
+        warnings.push(
+          toProtocolWarning(
+            'bodyNotDecoded',
+            WARN_BODY_NOT_DECODED,
+            header.bodyOffset,
+            header.bodyLength,
+          ),
+        );
+      }
     }
   }
 
@@ -376,16 +502,21 @@ export const wifiParser: ProtocolParser = {
 };
 
 // ── Örnekler ──────────────────────────────────────────────────────────────
-// İlk SEKİZİ Wireshark SampleCaptures'ın `wpa-Induction.pcap` yakalamasının
+// ON'U Wireshark SampleCaptures'ın `wpa-Induction.pcap` yakalamasının
 // (DLT 127, 1093 çerçeve, "Coherer" ağı) GERÇEK çerçeveleridir; radiotap'in
-// 24 baytı SOYULMUŞTUR. Sekizincisi yakalamanın KENDİ bozuk çerçevesidir —
-// uydurulmadı. Son İKİSİ 3)'ten TÜRETİLDİ ve FCS'leri `computeNamedCrc` ile
-// YENİDEN HESAPLANDI (elle yazılmadı).
+// 24 baytı SOYULMUŞTUR. Biri (`corrupt-fcs`) yakalamanın KENDİ bozuk
+// çerçevesidir — uydurulmadı. DÖRDÜ türetildi ve FCS'leri `computeNamedCrc`
+// ile YENİDEN HESAPLANDI (elle yazılmadı).
 //
-// Keşif turunun elle çözümü UYGULAMADA YENİDEN ÇÖZÜLDÜ: sekiz çerçevenin
-// hepsinde uzunluk aritmetiği (`başlık + gövde + FCS === n`) ve FCS ayrı ayrı
-// doğrulandı; SAPMA BULUNMADI (dalga 17'nin "brifin kendi çözümü bir bayt
-// atlıyordu" dersi bu turda tekrarlamadı).
+// Keşif turunun elle çözümü UYGULAMADA YENİDEN ÇÖZÜLDÜ. 18a sekiz çerçevede
+// `başlık + gövde + FCS === n` aritmetiğini doğrulamıştı; 18b bunu YEDİ
+// yönetim çerçevesinde `24 + sabit + IE + 4 === n` düzeyine indirdi ve
+// element zincirlerinin bayt toplamlarını BAĞIMSIZ olarak hesapladı:
+// Beacon **104**, Probe Resp **98**, Assoc Req **47**, Assoc Resp **24**,
+// Probe Req **25**, Auth **0**, Disassoc **0**. Brifin verdiği üç sayı
+// (104 / 24 / 25) TUTTU; SAPMA BULUNMADI. Testi `dot11Management.test.ts`
+// her koşuda yeniden üretir — dalga 17'nin "brifin kendi çözümü bir bayt
+// atlıyordu" dersi bu turda da tekrarlamadı.
 
 function hexToBytes(hex: string): Uint8Array {
   const parts = hex.trim().split(/\s+/);
@@ -500,12 +631,90 @@ function deriveQosDataFrame(): Uint8Array {
 }
 const FRAME_QOS_DATA = deriveQosDataFrame();
 
+/**
+ * Probe Response — 138 B. Beacon'la AYNI sabit alanlar (Timestamp · Beacon
+ * Interval · Capability) ama farklı adres rolleri: Addr1 = STA, Duration
+ * `3a 01`. TIM (5) YOKTUR — Beacon'ın on element'inden dokuzu burada.
+ * Aritmetik: 24 + 12 + **98** + 4 = 138 (UYGULAMADA yeniden çözüldü).
+ */
+const FRAME_PROBE_RESPONSE =
+  '50 00 3a 01 00 0d 93 82 36 3a 00 0c 41 82 b2 55 00 0c 41 82 b2 55 f0 fb ' +
+  '61 ff 23 1c 01 00 00 00 64 00 11 04 00 07 43 6f 68 65 72 65 72 01 08 82 ' +
+  '84 8b 96 24 30 48 6c 03 01 01 2a 01 02 2f 01 02 30 18 01 00 00 0f ac 02 ' +
+  '02 00 00 0f ac 04 00 0f ac 02 01 00 00 0f ac 02 00 00 32 04 0c 12 18 60 ' +
+  'dd 06 00 10 18 02 00 04 dd 1c 00 50 f2 01 01 00 00 50 f2 02 02 00 00 50 ' +
+  'f2 04 00 50 f2 02 01 00 00 50 f2 02 00 00 0b bc 2c 14';
+
+/**
+ * Association Request — 79 B. RSN IE'nin **len 20** hâli (TEK pairwise süit):
+ * 2 + 4 + 2 + 4 + 2 + 4 + 2 = 20 ✓. Aritmetik: 24 + 4 + **47** + 4 = 79.
+ */
+const FRAME_ASSOCIATION_REQUEST =
+  '00 00 3a 01 00 0c 41 82 b2 55 00 0d 93 82 36 3a 00 0c 41 82 b2 55 80 01 ' +
+  '31 04 0a 00 00 07 43 6f 68 65 72 65 72 01 08 82 84 8b 96 24 30 48 6c 30 ' +
+  '14 01 00 00 0f ac 02 01 00 00 0f ac 04 01 00 00 0f ac 02 00 00 32 04 0c ' +
+  '12 18 60 21 19 2e ed';
+
+/**
+ * 🚨 TÜRETİLMİŞ — **BOZUK RSN SAYACI**. Association Request'in Pairwise
+ * Cipher Count'u `01 00` → `02 00` yapılır ama liste BÜYÜTÜLMEZ. Sonuç,
+ * bu dalganın bütün mesele ettiği hata biçimidir:
+ *
+ *   pairwise[2] AKM sayacının baytlarını YUTAR (`01 00 00 0f`), ardından
+ *   AKM Count `ac 02` = **684** okunur ve 684 × 4 = 2736 bayt istenir —
+ *   element'te kalan 2 bayt.
+ *
+ * Çözücü bunu SESSİZCE KAYDIRMAZ: `length-mismatch` hatası + uyarı basar,
+ * kalanı ham bırakır. Ofset ELLE YAZILMAZ, element zinciri motorun KENDİ
+ * yürüyücüsüyle bulunur. **FCS yeniden hesaplanır** — telde kusursuz ama
+ * İÇERİDE tutarsız bir çerçeve, tam olarak sınanmak istenen şey.
+ */
+function deriveBrokenRsnFrame(): Uint8Array {
+  const source = hexToBytes(FRAME_ASSOCIATION_REQUEST);
+  const built = Uint8Array.from(source.subarray(0, source.length - DOT11_FCS_LENGTH));
+  const rsn = walkDot11Elements(built, 24 + 4, built.length).elements.find(
+    (element) => element.id === ELEMENT_RSN,
+  );
+  // Pairwise Cipher Count = Version(2) + Group Data Cipher Suite(4) SONRASI.
+  if (rsn !== undefined) built[rsn.dataOffset + 6] = 0x02;
+  return withRecomputedFcs(built);
+}
+const FRAME_BROKEN_RSN = deriveBrokenRsnFrame();
+
+/**
+ * TÜRETİLMİŞ — **GİZLİ SSID**. Probe Response'un SSID element'i `00 00`a
+ * indirilir (uzunluk 0, yedi bayt ÇIKAR). Gizli SSID "wildcard" der, BOŞ
+ * KART BASMAZ. **FCS yeniden hesaplanır.**
+ */
+function deriveHiddenSsidFrame(): Uint8Array {
+  const source = hexToBytes(FRAME_PROBE_RESPONSE);
+  const withoutFcs = source.subarray(0, source.length - DOT11_FCS_LENGTH);
+  const ssid = walkDot11Elements(withoutFcs, 24 + 12, withoutFcs.length).elements.find(
+    (element) => element.id === ELEMENT_SSID,
+  );
+  if (ssid === undefined) return withRecomputedFcs(Uint8Array.from(withoutFcs));
+  const built = new Uint8Array(withoutFcs.length - ssid.length);
+  built.set(withoutFcs.subarray(0, ssid.offset), 0);
+  built[ssid.offset] = ELEMENT_SSID;
+  built[ssid.offset + 1] = 0;
+  built.set(withoutFcs.subarray(ssid.dataOffset + ssid.length), ssid.dataOffset);
+  return withRecomputedFcs(built);
+}
+const FRAME_HIDDEN_SSID = deriveHiddenSsidFrame();
+
 const EXAMPLE_FRAMES: ExampleFrame[] = [
   {
     id: 'beacon',
     name: `${TRANSLATION_KEY_PREFIX}.example.beacon.name`,
     bytes: hexToBytes(FRAME_BEACON),
     description: `${TRANSLATION_KEY_PREFIX}.example.beacon.description`,
+    expectedValid: true,
+  },
+  {
+    id: 'probe-response',
+    name: `${TRANSLATION_KEY_PREFIX}.example.probeResponse.name`,
+    bytes: hexToBytes(FRAME_PROBE_RESPONSE),
+    description: `${TRANSLATION_KEY_PREFIX}.example.probeResponse.description`,
     expectedValid: true,
   },
   {
@@ -537,6 +746,13 @@ const EXAMPLE_FRAMES: ExampleFrame[] = [
     expectedValid: true,
   },
   {
+    id: 'association-request',
+    name: `${TRANSLATION_KEY_PREFIX}.example.associationRequest.name`,
+    bytes: hexToBytes(FRAME_ASSOCIATION_REQUEST),
+    description: `${TRANSLATION_KEY_PREFIX}.example.associationRequest.description`,
+    expectedValid: true,
+  },
+  {
     id: 'association-response',
     name: `${TRANSLATION_KEY_PREFIX}.example.associationResponse.name`,
     bytes: hexToBytes(FRAME_ASSOCIATION_RESPONSE),
@@ -562,6 +778,20 @@ const EXAMPLE_FRAMES: ExampleFrame[] = [
     name: `${TRANSLATION_KEY_PREFIX}.example.qosData.name`,
     bytes: FRAME_QOS_DATA,
     description: `${TRANSLATION_KEY_PREFIX}.example.qosData.description`,
+    expectedValid: true,
+  },
+  {
+    id: 'broken-rsn-counter',
+    name: `${TRANSLATION_KEY_PREFIX}.example.brokenRsnCounter.name`,
+    bytes: FRAME_BROKEN_RSN,
+    description: `${TRANSLATION_KEY_PREFIX}.example.brokenRsnCounter.description`,
+    expectedValid: false,
+  },
+  {
+    id: 'hidden-ssid',
+    name: `${TRANSLATION_KEY_PREFIX}.example.hiddenSsid.name`,
+    bytes: FRAME_HIDDEN_SSID,
+    description: `${TRANSLATION_KEY_PREFIX}.example.hiddenSsid.description`,
     expectedValid: true,
   },
   {
@@ -610,8 +840,18 @@ export const wifiPlugin: ProtocolPlugin = {
       },
       {
         title:
-          'IEEE Registration Authority MA-L (OUI) public listing — the source of the five vendor labels this page carries; the repository intentionally does NOT ship the full registry',
+          'IEEE Registration Authority MA-L (OUI) public listing — the source of the vendor labels this page carries; the repository intentionally does NOT ship the full registry',
         url: 'https://standards-oui.ieee.org/oui/oui.csv',
+      },
+      {
+        title:
+          'Wireshark epan/dissectors/packet-ieee80211.h — the TAG_* element ID table; it is the source-level proof that element ID 47 is TAG_ERP_INFO_OLD ("IEEE Std 802.11g/D4.0"), not a reserved ID, and that 42 and 47 share one dissector',
+        url: 'https://gitlab.com/wireshark/wireshark/-/raw/master/epan/dissectors/packet-ieee80211.h',
+      },
+      {
+        title:
+          'Wireshark packet-ieee80211.c ieee80211_rsn_cipher_vals / ieee80211_wfa_ie_wpa_cipher_vals — TWO separate suite tables for OUI 00-0F-AC and 00-50-F2; this page mirrors that split, because the same suite number under a different OUI is NOT the same suite',
+        url: 'https://gitlab.com/wireshark/wireshark/-/raw/master/epan/dissectors/packet-ieee80211.c#L19487',
       },
     ],
   },

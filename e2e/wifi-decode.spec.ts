@@ -144,10 +144,9 @@ test('gerçek Beacon: FC alt alanları, ROLLERİYLE adresler, SeqCtl ve FCS PASS
   await expect(fieldRow(page, 'fcs')).toHaveAttribute('data-valid', 'true');
   await expect(page.getByTestId('decode-frame-error')).toHaveCount(0);
 
-  // Gövde HAM: 18b'nin işi olduğu AÇIKÇA söylenir, boş kart basılmaz.
-  await expect(fieldRow(page, 'body')).toHaveCount(1);
-  await expect(fieldWarning(page, 'body')).toHaveText(tr['protocol.wifi.field.bodyNotDecoded']);
-  await expect(frameWarning(page, tr['protocol.wifi.warning.bodyNotDecoded'])).toHaveCount(1);
+  // 🚨 Gövde ARTIK ÇÖZÜLÜYOR (18b): tek parça ham `body` satırı KALMADI.
+  await expect(fieldRow(page, 'body')).toHaveCount(0);
+  await expect(frameWarning(page, tr['protocol.wifi.warning.bodyNotDecoded'])).toHaveCount(0);
 });
 
 test('ACK 14 baytta çözülür: Address 2 ve Sequence Control satırları HİÇ BASILMAZ', async ({
@@ -245,20 +244,160 @@ test('adres rolü gösterimi ve dört adresli WDS dalı kanallarla EKRANDA deği
   );
 });
 
-test('`fcsPresent` = yok seçilince FCS satırı KAYBOLUR ve gövde dört bayt uzar', async ({
+test('`fcsPresent` = yok seçilince FCS satırı KAYBOLUR ve element zinciri ARTIK BAYT bırakır', async ({
   page,
 }) => {
   await openDecodePanel(page);
   await expect(fieldRow(page, 'fcs')).toHaveCount(1);
+  await expect(fieldRow(page, 'ie-trailing')).toHaveCount(0);
 
   await page.locator('#decode-option-fcsPresent').selectOption('no');
   // Olmayan bir doğrulama VARMIŞ gibi gösterilmez: satır hiç basılmaz.
   await expect(fieldRow(page, 'fcs')).toHaveCount(0);
   await expect(page.getByTestId('decode-frame-error')).toHaveCount(0);
-  // Gövde artık FCS'in dört baytını da içeriyor: dökümün SONU `9F 61 C9 5C`.
-  const body = fieldRow(page, 'body').getByTestId('decode-field-physical');
-  await expect(body).toContainText('89 F1 D4 1B');
-  await expect(body).toContainText('9F 61 C9 5C');
+  // 🚨 FCS'in dört baytı gövdeye katılınca element zinciri TEMİZ BİTMİYOR ve
+  // bu, dört baytın gerçekten FCS olduğunun ekrandaki KANITI: zincirin
+  // kendisi "burada bir TLV yok" diyor. Uydurma bir eleman BASILMIYOR.
+  await expect(fieldRow(page, 'ie-trailing')).toHaveCount(1);
+  await expect(fieldRow(page, 'ie-trailing').getByTestId('decode-field-raw')).toContainText(
+    '9F 61 C9 5C',
+  );
+  await expect(
+    frameWarning(page, tr['protocol.wifi.warning.elementChainTruncated']),
+  ).toHaveCount(1);
+});
+
+test('🚨 gerçek Beacon`ın gövdesi: SSID, kanal, aralık, Privacy ve RSN üçlüsü EKRANDA', async ({
+  page,
+}) => {
+  await openDecodePanel(page);
+
+  await expect(fieldRow(page, 'mgmt-timestamp')).toContainText('Timestamp');
+  await expect(fieldRow(page, 'mgmt-beacon-interval').getByTestId('decode-field-physical')).toContainText(
+    '100',
+  );
+  await expect(fieldRow(page, 'mgmt-capability').getByTestId('decode-field-physical')).toHaveText(
+    'ESS, Privacy, Short Slot Time',
+  );
+  // Privacy AYRI satır: bit SIFIR olduğunda da görünsün diye.
+  await expect(
+    fieldRow(page, 'mgmt-capability-privacy').getByTestId('decode-field-physical'),
+  ).toContainText('WEP/TKIP/CCMP required');
+
+  await expect(fieldRow(page, 'ie-0').getByTestId('decode-field-physical')).toHaveText('"Coherer"');
+  await expect(fieldRow(page, 'ie-3').getByTestId('decode-field-physical')).toHaveText('channel 1');
+  await expect(fieldRow(page, 'ie-1').getByTestId('decode-field-physical')).toContainText(
+    'Mbit/s',
+  );
+
+  // RSN'in iç içe sayaç zinciri: CCMP + TKIP / PSK üçlüsü.
+  await expect(fieldRow(page, 'rsn-pairwise-suite').getByTestId('decode-field-physical')).toContainText(
+    'CCMP-128',
+  );
+  await expect(
+    fieldRow(page, 'rsn-pairwise-suite-2').getByTestId('decode-field-physical'),
+  ).toContainText('TKIP');
+  await expect(fieldRow(page, 'rsn-akm-suite').getByTestId('decode-field-physical')).toContainText(
+    'PSK',
+  );
+
+  // Element ID 47 UYDURULMADI: Wireshark'ın TAG_ERP_INFO_OLD'u.
+  await expect(fieldRow(page, 'ie-47')).toContainText('ERP Information (802.11g/D4.0)');
+});
+
+test('🚨 aynı Beacon`ın WPA vendor IE`si AYRI satırlarda ve OUI`siyle basılıyor', async ({
+  page,
+}) => {
+  await openDecodePanel(page);
+
+  await expect(fieldRow(page, 'ie-221-2').getByTestId('decode-field-physical')).toContainText(
+    '00-50-F2',
+  );
+  // AYNI süit numarası, FARKLI OUI: iki satır aynı metni BASMAZ.
+  await expect(fieldRow(page, 'wpa-akm-suite').getByTestId('decode-field-physical')).toContainText(
+    '00-50-F2',
+  );
+  await expect(fieldRow(page, 'rsn-akm-suite').getByTestId('decode-field-physical')).toContainText(
+    '00-0F-AC',
+  );
+
+  // Süit adları kapatılınca HAM SEÇİCİ kalır — ad telde yok.
+  await page.locator('#decode-option-rsnSuiteLabels').selectOption('hide');
+  await expect(fieldRow(page, 'rsn-akm-suite').getByTestId('decode-field-physical')).toHaveText(
+    '00-0F-AC:2',
+  );
+});
+
+test('🚨 bozuk RSN sayacı UYARI basar, sayfa ÇÖKMEZ ve kalan alanlar ÇÖZÜLMEYE devam eder', async ({
+  page,
+}) => {
+  const consoleErrors = await openDecodePanel(page);
+  await selectExample(page, 'broken-rsn-counter');
+
+  await expect(page.getByTestId('decode-frame-error')).toHaveAttribute(
+    'data-error-code',
+    'length-mismatch',
+  );
+  await expect(frameWarning(page, tr['protocol.wifi.warning.rsnCounterOverrun'])).toHaveCount(1);
+  // 684 AKM süiti UYDURULMADI: tek bir AKM satırı bile yok.
+  await expect(fieldRow(page, 'rsn-akm-count').getByTestId('decode-field-physical')).toContainText(
+    '684',
+  );
+  await expect(fieldRow(page, 'rsn-akm-suite')).toHaveCount(0);
+  await expect(fieldRow(page, 'rsn-undecoded')).toHaveCount(1);
+  // Zincir durdu ama ÇERÇEVE durmadı: sonraki element ve FCS hâlâ okunuyor.
+  await expect(fieldRow(page, 'ie-50')).toHaveCount(1);
+  await expect(fieldRow(page, 'fcs')).toHaveAttribute('data-valid', 'true');
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
+test('gizli SSID "wildcard" der — BOŞ KART BASMAZ', async ({ page }) => {
+  await openDecodePanel(page);
+  await selectExample(page, 'hidden-ssid');
+
+  const ssid = fieldRow(page, 'ie-0').getByTestId('decode-field-physical');
+  await expect(ssid).toContainText('wildcard');
+  await expect(ssid).toContainText('hidden SSID');
+  await expect(fieldWarning(page, 'ie-0')).toHaveText(tr['protocol.wifi.field.hiddenSsid']);
+});
+
+test('Authentication gövdesi "Open System / seq 1 / Successful" üçlüsünü basar', async ({
+  page,
+}) => {
+  await openDecodePanel(page);
+  await selectExample(page, 'authentication');
+
+  await expect(
+    fieldRow(page, 'mgmt-auth-algorithm').getByTestId('decode-field-physical'),
+  ).toContainText('Open System');
+  await expect(
+    fieldRow(page, 'mgmt-auth-sequence').getByTestId('decode-field-physical'),
+  ).toHaveText('1');
+  await expect(fieldRow(page, 'mgmt-status-code').getByTestId('decode-field-physical')).toContainText(
+    'Successful',
+  );
+  // Auth'ta element zinciri YOK: 24 + 6 + 0 + 4 = 34.
+  await expect(fieldRow(page, 'ie-0')).toHaveCount(0);
+});
+
+test('`ieNameSet` = adlandırma yok DÜZ TLV görünümü verir, RSN zinciri KAPANIR', async ({
+  page,
+}) => {
+  await openDecodePanel(page);
+  await expect(fieldRow(page, 'rsn-version')).toHaveCount(1);
+
+  await page.locator('#decode-option-ieNameSet').selectOption('none');
+  await expect(fieldRow(page, 'rsn-version')).toHaveCount(0);
+  await expect(fieldRow(page, 'ie-0')).toContainText('Element 0');
+  await expect(fieldRow(page, 'ie-0').getByTestId('decode-field-physical')).toContainText(
+    'naming is turned off',
+  );
+
+  // Adlandırılmamış satırlar gizlenince tablo GERÇEKTEN küçülür.
+  await page.locator('#decode-option-unknownIeDisplay').selectOption('hidden');
+  await expect(fieldRow(page, 'ie-0')).toHaveCount(0);
+  await expect(frameWarning(page, tr['protocol.wifi.warning.hiddenElements'])).toHaveCount(1);
 });
 
 test('QoS Data örneği QoS Control ve TID satırlarını basar', async ({ page }) => {
@@ -296,6 +435,10 @@ test('uyarı ve hata metinleri ÇEVRİLMİŞ basılır — ham anahtar sızmaz',
   await selectExample(page, 'protected-data');
   await expectNoRawTranslationKeys(page);
   await selectExample(page, 'corrupt-fcs');
+  await expectNoRawTranslationKeys(page);
+  await selectExample(page, 'broken-rsn-counter');
+  await expectNoRawTranslationKeys(page);
+  await selectExample(page, 'hidden-ssid');
   await expectNoRawTranslationKeys(page);
 });
 
