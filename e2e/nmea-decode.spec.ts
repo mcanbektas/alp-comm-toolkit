@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
+import { allEntries } from '../src/app/catalog';
 import { translations } from '../src/translations';
 
 /**
@@ -22,17 +23,29 @@ const CANONICAL_DECODE_PATH = '/comm/marine-navigation/nmea-family/nmea-0183?tab
 /** Alias kayıt: kendi `pluginId`si YOK, motoru kanonik kayıttan devralır. */
 const ALIAS_DECODE_PATH = '/comm/marine-navigation/gnss-corrections/gps-nmea?tab=decode';
 /**
- * Regresyon bekçisi: aynı ailedeki, motorsuz kalan bir protokol. NMEA 0183
- * motoru bağlandıktan sonra bile motorsuz sayfa "planlandı" basmalı.
+ * Regresyon bekçisi: motoru olmayan bir protokol sayfası, komşusunun motoru
+ * bağlandıktan sonra da "planlandı" basmalı.
  *
- * Dalga 3a'da `nmea-family/nmea-2000`dan TAŞINDI: NMEA 2000 motoru bağlanınca
- * o sayfa artık "planlandı" basmıyor ve bekçi anlamını yitiriyordu (bkz.
- * `nmea2000-decode.spec.ts`). IEC 61162 bilinçli seçildi — aynı ailede (`decode`
- * sekmesi ve `planned` durumu doğrulandı), plan-fazlar.md'deki hiçbir dalga
- * listesinde geçmiyor (PSI5'in `modbus-decode.spec.ts`teki taşınma gerekçesiyle
- * aynı mantık).
+ * Hedef KATALOGDAN TÜRETİLİR (dalga 15b'nin `modbus-decode.spec.ts`teki yapısal
+ * çözümü). Bu bekçi bir kez elle taşındı (`nmea-2000` → `iec-61162`) ve
+ * ikincisi de dalga 16c'de motor aldı. Aynı AİLEDE aday kalmayabileceği için
+ * seçim şu sırayla daralır: önce aynı domain, sonra katalog geneli. Hiç aday
+ * yoksa test AÇIKÇA atlanır, sessizce yeşil kalmaz.
  */
-const PLANNED_DECODE_PATH = '/comm/marine-navigation/nmea-family/iec-61162?tab=decode';
+const isEngineless = (entry: {
+  protocol: { status: string; aliasOf?: string; pluginId?: string; tabs: readonly string[] };
+}) =>
+  entry.protocol.status === 'planned' &&
+  entry.protocol.aliasOf === undefined &&
+  entry.protocol.pluginId === undefined &&
+  entry.protocol.tabs.includes('decode');
+
+const entries = allEntries();
+const plannedEntry =
+  entries.find((e) => e.domain.id === 'marine-navigation' && isEngineless(e)) ??
+  entries.find(isEngineless);
+const PLANNED_DECODE_PATH =
+  plannedEntry === undefined ? undefined : `/comm/${plannedEntry.path}?tab=decode`;
 
 /** Spec §43 fixture'ı — eklentinin ilk örnek çerçevesi de birebir budur. */
 const FIXTURE_HEX =
@@ -262,8 +275,12 @@ test('alias sayfası aynı motoru yükler', async ({ page }) => {
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
 
-test('aynı ailedeki eklentisi olmayan protokol hâlâ "planlandı" bildirimi basıyor', async ({ page }) => {
-  await openPage(page, PLANNED_DECODE_PATH);
+test('motorsuz bir protokol hâlâ "planlandı" bildirimi basıyor', async ({ page }) => {
+  test.skip(
+    PLANNED_DECODE_PATH === undefined,
+    'katalogda motorsuz `planned` kayıt kalmadı — bekçinin koruduğu durum artık yok',
+  );
+  await openPage(page, PLANNED_DECODE_PATH as string);
 
   await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
   await expect(page.getByTestId('decode-panel')).toHaveCount(0);

@@ -3,6 +3,7 @@ import type { RenderResult } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { allEntries } from '@/app/catalog';
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
 import { registerBuiltInProtocols } from '@/protocols';
 import { translations } from '@/translations';
@@ -21,19 +22,22 @@ registerBuiltInProtocols();
 
 /** Motoru olan kayıt (katalogda `pluginId: 'modbus-rtu'`). */
 const PLUGGED_PATH = 'industrial-automation/modbus/modbus-rtu';
-/** Motoru olmayan ama `decode` sekmesi olan kayıt. */
-// Motoru OLMAYAN bir kayıt gerek. Zincir: uart (dalga 11e'de `ready` oldu) →
-// microwire (dalga 11 #11'de `ready` oldu) → flexray. FlexRay seçildi çünkü
-// interfaces-framing dalgası bitti, otomotiv ailesindeki bu kayıt kardeşi
-// (`can`/`lin`) `ready` olduğu hâlde HENÜZ inşa edilmemiş tek üye — yani
-// yakın bir dalgada `ready` olma sırası yok. O da bağlanınca başka bir
-// planned kayda taşı (`status: 'planned'` olan 82 kayıttan `decode` sekmesi
-// olan herhangi biri iş görür).
-// `flexray` dalga 14e'de `ready` oldu ve motora bağlandı; bu test EKLENTİSİZ
-// bir kayda ihtiyaç duyuyor. Automotive'in kalan `planned` kayıtları 14f-14h'de
-// kapanacağı için fixture DOMAIN DIŞINA taşındı — aksi hâlde aynı test iki alt
-// dalga sonra yine kırılırdı.
-const PLANNED_PATH = 'marine-navigation/legacy-proprietary-marine/seatalk';
+/**
+ * Motoru OLMAYAN kayıt KATALOGDAN TÜRETİLİR — elle taşınmaz.
+ * Bu fixture dört kez elle taşındı (uart → microwire → flexray → seatalk) ve her
+ * seferinde bir sonraki dalga onu da bağladı. `e2e/modbus-decode.spec.ts`in
+ * (dalga 15b) yapısal çözümünün aynısı: motoru olmayan, alias olmayan,
+ * `decode` sekmesi olan ilk `planned` kayıt. Hiç kalmazsa test AÇIKÇA atlanır,
+ * sessizce yeşil kalmaz.
+ */
+const plannedEntry = allEntries().find(
+  (entry) =>
+    entry.protocol.status === 'planned' &&
+    entry.protocol.aliasOf === undefined &&
+    entry.protocol.pluginId === undefined &&
+    entry.protocol.tabs.includes('decode'),
+);
+const PLANNED_PATH = plannedEntry?.path;
 
 function renderAt(path: string): RenderResult {
   return render(
@@ -72,14 +76,17 @@ describe('ProtocolPage decode tab', () => {
     expect(screen.getAllByTestId('decode-field-row').length).toBeGreaterThan(0);
   });
 
-  it('keeps the planned notice and the placeholder frame when no plugin is bound', () => {
-    renderAt(`/${PLANNED_PATH}?tab=decode`);
+  it.skipIf(PLANNED_PATH === undefined)(
+    'keeps the planned notice and the placeholder frame when no plugin is bound',
+    () => {
+      renderAt(`/${PLANNED_PATH as string}?tab=decode`);
 
-    expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
-    // Sabit örnek çerçeve YALNIZ bu dalda kalır.
-    expect(screen.getByTestId('byte-viewer')).toHaveTextContent('AA 05 10 03 34 12 7F 4F 55');
-    expect(screen.queryByTestId('decode-panel')).not.toBeInTheDocument();
-  });
+      expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
+      // Sabit örnek çerçeve YALNIZ bu dalda kalır.
+      expect(screen.getByTestId('byte-viewer')).toHaveTextContent('AA 05 10 03 34 12 7F 4F 55');
+      expect(screen.queryByTestId('decode-panel')).not.toBeInTheDocument();
+    },
+  );
 
   it('leaves the other tabs of a plugged protocol untouched', () => {
     renderAt(`/${PLUGGED_PATH}?tab=timing`);
