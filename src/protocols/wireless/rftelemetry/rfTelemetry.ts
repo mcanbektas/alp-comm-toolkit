@@ -10,13 +10,22 @@
  * (`schemaParser.ts` + `schemaEncoder.ts`) TÜKETİLİR; emsal
  * `serial/framing/customBinaryProtocol.ts`.
  *
- * ## 🚨 `createSchemaParser` DOĞRUDAN KULLANILMADI — ve sebebi ÖLÇÜLDÜ
+ * ## `createSchemaParser` DOĞRUDAN KULLANILMADI — ve sebebi ÖLÇÜLDÜ
  *
- * `schemaParser.ts:608` `canParse`i şöyle bitiriyor:
+ * **GÜNCELLEME (2026-08-27): aşağıda anlatılan MAYIN KAPANDI, karar DURUYOR.**
+ * `schemaParser.ts` `canParse`i boş `startBytes`te artık HER ŞEYE `true`
+ * demiyor. Karar bu yüzden yeniden ölçüldü ve DEĞİŞMEDİ: şema tabanlı
+ * `canParse` bu kayıtta 12–33 YABANCI isabet alıyor ve kendi 8 örneğinin
+ * 2–8'ini kaybediyor (`Data` uzunluğu ÇÖZÜLEN çerçeveden geldiği için tek bir
+ * sabit parser örneği auto-detection'a hizmet edemez), elle yazılan imza ise 0
+ * yabancı ölçüyor. Ölçümün tamamı `rfTelemetryCanParseRegistry.test.ts` dosya
+ * başında. Aşağıdaki paragraf o günün TARİHÇESİDİR:
+ *
+ * `schemaParser.ts:608` `canParse`i şöyle bitiriyordu:
  * `return startBytes.every((byte, index) => data[index] === byte);`
  * Boş bir dizide `[].every(...)` **`true`** döner, yani `startBytes`siz bir şema
- * registry'deki HER çerçeveyi sahiplenir. **Bu turda ölçüldü: 929 örneğin
- * 929'u (%100).** `length-based-protocol` bugün tam olarak bu durumda.
+ * registry'deki HER çerçeveyi sahiplenirdi. **O turda ölçüldü: 929 örneğin
+ * 929'u (%100).** `length-based-protocol` o gün tam olarak bu durumdaydı.
  *
  * Brifin iki kabul edilebilir çözümünden **İKİNCİSİ** seçildi: şemaya sabit
  * `startBytes` koymak yerine `canParse` BURADA açıkça yazıldı

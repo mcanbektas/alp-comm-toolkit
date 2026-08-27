@@ -390,3 +390,174 @@ describe('createSchemaParser', () => {
     expect(parser.canParse(new Uint8Array(0))).toBe(false);
   });
 });
+
+/**
+ * MAYIN BEKÇİSİ — boş `startBytes` bir daha HER ŞEYİ sahiplenemez.
+ *
+ * Kapatılan hata: gövde `startBytes.every((byte, index) => data[index] === byte)`
+ * idi ve `[].every(...)` boş dizide `true` döner. `startBytes`i olmayan bir şema
+ * SIFIR bayt karşılaştırıp DAİMA `true` diyordu; ölçüldü, kayıt defterinin
+ * 937 örneğinin 937'sini sahipleniyordu (%100 yanlış pozitif).
+ *
+ * Bu blok mayını `framing.type`ın BEŞİNDE de doğrudan sınar. Ortak sözleşme:
+ * **hiçbir koşul denetlenemiyorsa cevap `true` DEĞİL `false`tur.** Yanlış
+ * negatif kabul edilebilir (kayıt yalnız otomatik seçilmez), yanlış pozitif
+ * değildir (auto-detection'ı zehirler).
+ */
+describe('createSchemaParser.canParse — boş `startBytes` mayını', () => {
+  const oneByte = Uint8Array.from([0x01]);
+  const fourBytes = Uint8Array.from([0x01, 0x02, 0x03, 0x04]);
+
+  it("'none': ayırt edici sinyali OLMAYAN şema hiçbir çerçeveyi sahiplenmez", () => {
+    // Tek alanın boyu `lengthFrom` ile başka bir alandan gelir ama o alan
+    // şemada YOK: çerçeve boyu türetilemez, denetlenecek koşul kalmaz.
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'body', name: 'Body', type: 'rawBytes', lengthFrom: 'missing' }]),
+    );
+
+    expect(parser.canParse(oneByte)).toBe(false);
+    expect(parser.canParse(fourBytes)).toBe(false);
+    expect(parser.canParse(new Uint8Array(64))).toBe(false);
+  });
+
+  it("'none': şemadan türeyen boy teldeki boya EŞİTSE sahiplenir, değilse sahiplenmez", () => {
+    const parser = createSchemaParser(
+      schemaWith([
+        { id: 'a', name: 'A', type: 'uint8', offset: 0, length: 1 },
+        { id: 'b', name: 'B', type: 'uint16', offset: 1, length: 2 },
+      ]),
+    );
+
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02, 0x03]))).toBe(true);
+    // Bir bayt eksik ve bir bayt fazla: ikisi de bu şemanın çerçevesi DEĞİL.
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02]))).toBe(false);
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02, 0x03, 0x04]))).toBe(false);
+  });
+
+  it("'none': `ascii` alanına ikili çöp gelirse sahiplenmez", () => {
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'text', name: 'Text', type: 'ascii', offset: 0, length: 4 }]),
+    );
+
+    expect(parser.canParse(Uint8Array.from([0x54, 0x45, 0x4d, 0x50]))).toBe(true);
+    expect(parser.canParse(Uint8Array.from([0x00, 0xff, 0x80, 0x01]))).toBe(false);
+  });
+
+  it("'lengthField': uzunluk ALANI olmayan şema hiçbir çerçeveyi sahiplenmez", () => {
+    // Mayının tam olarak tetiklendiği yapılandırma: çerçeveleme bir uzunluk
+    // alanı VAAT EDİYOR, şemada yok. Vaat boşsa denetlenecek de bir şey yoktur.
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'first', name: 'First', type: 'uint8', offset: 0, length: 1 }], {
+        framing: { type: 'lengthField', maximumFrameLength: 64 },
+      }),
+    );
+
+    expect(parser.canParse(oneByte)).toBe(false);
+    expect(parser.canParse(fourBytes)).toBe(false);
+  });
+
+  it("'lengthField': bildirilen uzunluk telle TUTARLIYSA sahiplenir", () => {
+    const parser = createSchemaParser(
+      schemaWith(
+        [
+          { id: 'length', name: 'Length', type: 'length', offset: 0, length: 2, endianness: 'big' },
+          { id: 'payload', name: 'Payload', type: 'rawBytes', lengthFrom: 'length' },
+        ],
+        { framing: { type: 'lengthField', maximumFrameLength: 64 } },
+      ),
+    );
+
+    // LENGTH=2 (BE) + 2 bayt yük = 4 bayt, tel de 4 bayt.
+    expect(parser.canParse(Uint8Array.from([0x00, 0x02, 0xaa, 0xbb]))).toBe(true);
+    // Aynı tel, LENGTH=3 diyor: bildirim telle tutarsız.
+    expect(parser.canParse(Uint8Array.from([0x00, 0x03, 0xaa, 0xbb]))).toBe(false);
+    // Bildirilen uzunluk azami çerçeve boyunu aşıyor.
+    expect(parser.canParse(Uint8Array.from([0x03, 0xe8, 0xaa]))).toBe(false);
+  });
+
+  it("'fixedLength': alanlardan türeyen boy teldeki boyla ÖLÇÜLÜR", () => {
+    const parser = createSchemaParser(
+      schemaWith(
+        [
+          { id: 'a', name: 'A', type: 'uint8', offset: 0, length: 1 },
+          { id: 'b', name: 'B', type: 'uint8', offset: 1, length: 1 },
+        ],
+        { framing: { type: 'fixedLength', maximumFrameLength: 8 } },
+      ),
+    );
+
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02]))).toBe(true);
+    expect(parser.canParse(oneByte)).toBe(false);
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02, 0x03]))).toBe(false);
+  });
+
+  it("'startOnly': `startBytes` boşsa çerçeveleme sinyali YOKTUR", () => {
+    // Boyu türetilemeyen şema: `startOnly` adı bir başlangıç deseni vaat eder,
+    // dizi boştur, geriye doğrulanacak hiçbir şey kalmaz.
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'body', name: 'Body', type: 'rawBytes', lengthFrom: 'missing' }], {
+        framing: { type: 'startOnly', maximumFrameLength: 64 },
+      }),
+    );
+
+    expect(parser.canParse(oneByte)).toBe(false);
+    expect(parser.canParse(fourBytes)).toBe(false);
+  });
+
+  it("'startEnd': `startBytes` boşsa BİTİŞ baytları denetlenir", () => {
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'body', name: 'Body', type: 'rawBytes', lengthFrom: 'missing' }], {
+        framing: { type: 'startEnd', endBytes: [0x55], maximumFrameLength: 64 },
+      }),
+    );
+
+    // Boy türetilemiyor ama bitiş baytı GERÇEK bir koşuldur ve `verifyFraming`
+    // de yalnız `startEnd`te ona bakar — `canParse` `parse`ın ötesine geçmez.
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02, 0x55]))).toBe(true);
+    expect(parser.canParse(Uint8Array.from([0x01, 0x02, 0x54]))).toBe(false);
+  });
+
+  it("'startEnd': ne `startBytes` ne `endBytes` varsa sahiplenmez", () => {
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'body', name: 'Body', type: 'rawBytes', lengthFrom: 'missing' }], {
+        framing: { type: 'startEnd', maximumFrameLength: 64 },
+      }),
+    );
+
+    expect(parser.canParse(oneByte)).toBe(false);
+    expect(parser.canParse(fourBytes)).toBe(false);
+  });
+
+  it('koşullu/tekrarlı/bileşik alan varsa boy türetilemez ve sahiplenmez', () => {
+    // Bu alanların çerçevedeki yeri ancak AYRIŞTIRMA sırasında belli olur ve
+    // `canParse` ayrıştırma yapmaz (`parseWithSchema` sıcak yolda çağrılamaz).
+    const conditional = createSchemaParser(
+      schemaWith([
+        { id: 'kind', name: 'Kind', type: 'uint8', offset: 0, length: 1 },
+        {
+          id: 'extra',
+          name: 'Extra',
+          type: 'uint8',
+          length: 1,
+          condition: { field: 'kind', equals: 1 },
+        },
+      ]),
+    );
+    const repeated = createSchemaParser(
+      schemaWith([
+        { id: 'items', name: 'Items', type: 'array', repeatCount: 2, fields: [] },
+      ]),
+    );
+
+    expect(conditional.canParse(Uint8Array.from([0x01, 0x02]))).toBe(false);
+    expect(repeated.canParse(Uint8Array.from([0x01, 0x02]))).toBe(false);
+  });
+
+  it('boş girdi her yapılandırmada `false`tur', () => {
+    const parser = createSchemaParser(
+      schemaWith([{ id: 'a', name: 'A', type: 'uint8', offset: 0, length: 1 }]),
+    );
+
+    expect(parser.canParse(new Uint8Array(0))).toBe(false);
+  });
+});

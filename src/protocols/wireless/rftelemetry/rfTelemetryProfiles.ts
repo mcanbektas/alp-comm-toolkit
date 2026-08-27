@@ -140,10 +140,11 @@ function checksumFieldType(algorithm: ChecksumAlgorithm): 'crc' | 'checksum' {
  *     kullanıcı kendi çerçevesini çözemezdi. Varsayılan profilden SAPMA bir
  *     hata değil, bir UYARIDIR ve `rfTelemetry.ts` onu çerçeve uyarısı olarak
  *     düşürür.
- *  2. Boş `startBytes` `createSchemaParser`in `canParse`ini HER ŞEYE `true`
- *     dedirtir (`schemaParser.ts:608`, `[].every()` boş dizide `true`).
- *     Bu kayıt `createSchemaParser`i HİÇ KULLANMAZ; `canParse` `rfTelemetry.ts`te
+ *  2. Bu kayıt `createSchemaParser`i HİÇ KULLANMAZ; `canParse` `rfTelemetry.ts`te
  *     AÇIKÇA yazılıdır. Gerekçe orada, kanıtı `rfTelemetryCanParseRegistry.test.ts`te.
+ *     (TARİHÇE: bu maddenin ilk gerekçesi boş `startBytes`in `canParse`i HER ŞEYE
+ *     `true` dedirtmesiydi; o mayın 2026-08-27'de KAPANDI. Karar yeniden ölçüldü
+ *     ve DEĞİŞMEDİ — bkz. `rfTelemetryCanParseRegistry.test.ts` dosya başı.)
  *
  * `dataLength` `undefined` verilirse `Data` uzunluğunu `lengthFrom: 'length'`
  * ile `Length` alanından alır — **KODLAMA yolu bunu kullanır**:

@@ -776,10 +776,13 @@ export function registerBuiltInProtocols(registry: ProtocolRegistry = protocolRe
   // yorumlayıcısı TÜKETİLİR, yeni bir tel biçimi yazılmaz. Girdi DEMODÜLE
   // EDİLMİŞ BAYT dizisidir; bit akışı / nabız süresi / SDR dışa aktarımı ayrı
   // GİRDİ DÖNÜŞÜMLERİDİR ve kapsam dışıdır.
-  // 🚨 `createSchemaParser` DOĞRUDAN KULLANILMADI: boş `startBytes`te
-  // `canParse` HER ŞEYE `true` der (`schemaParser.ts:608`, ölçüm 937/937).
-  // İmza bu dosyada AÇIKÇA yazılı ve varsayılan profilin önbelleme + sync
-  // ikilisine bağlı — ölçüm 0/937.
+  // `createSchemaParser` DOĞRUDAN KULLANILMADI. Sebebi eskiden boş
+  // `startBytes` mayınıydı (`canParse` HER ŞEYE `true`, ölçüm 937/937);
+  // o mayın 2026-08-27'de KAPANDI, ama karar DEĞİŞMEDİ ve yeniden ÖLÇÜLDÜ:
+  // şema tabanlı `canParse` bu kayıtta 12–33 yabancı isabet alır ve kendi
+  // örneklerinin bir kısmını kaybeder, çünkü `Data` uzunluğu ÇÖZÜLEN
+  // çerçeveden gelir. İmza bu dosyada AÇIKÇA yazılı ve varsayılan profilin
+  // önbelleme + sync ikilisine bağlı — ölçüm 0/937.
   registerOnce(registry, 'rf-telemetry-custom-frame', () =>
     import('./wireless/rftelemetry/rfTelemetry').then((module) => module.rfTelemetryPlugin),
   );

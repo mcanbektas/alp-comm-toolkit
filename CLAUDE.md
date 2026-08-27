@@ -371,21 +371,62 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `rf-telemetry-custom-frame`in `timing` sekmesi olmadığı için brifin önerdiği
   `/calculators` bağı hiç görünmezdi ve EKLENMEDİ.
 
-  ### Dalga 18'den KALAN İKİ BORÇ (kapatılmadı, KAYDEDİLDİ)
+  ### Dalga 18'den KALAN İKİ BORÇ — BİRİNCİSİ KAPANDI
 
-  **1. `createSchemaParser`in `canParse`i BOŞ `startBytes`te HER ŞEYE `true`
-  der.** `schemaParser.ts:608` `return startBytes.every((byte, index) =>
-  data[index] === byte);` ve `[].every(...)` boş dizide **`true`** döner.
-  **ÖLÇÜLDÜ (2026-08-27): `length-based-protocol` registry'nin 937 örneğinin
-  937'sini sahipleniyor (%100).** 18e bunu DÜZELTMEDİ (18e brifi: *"ayrı bir
-  kayıt, ayrı bir borç"*) ama ondan KAÇINDI: `rf-telemetry-custom-frame`
-  `createSchemaParser`i hiç kullanmaz, `canParse`ı elle yazar ve aynı kümede
-  **0** yabancı çakışma ölçer. Mayının hâlâ orada olduğu
-  `rfTelemetryCanParseRegistry.test.ts`in ikinci ayağında her koşuda YENİDEN
-  ölçülüyor — bekçi bir gün düşerse borç kapanmış demektir ve test o gün
-  GÜNCELLENİR, sessizce silinmez. Düzeltmenin bedeli: `custom-binary-protocol`
-  (9 çakışma) ve `delimiter-based-protocol` (10) dahil tüm tüketicilerin
-  ölçümü değişir, yani düzeltme kendi turunu ve kendi ölçümünü ister.
+  **1. ✅ KAPANDI (2026-08-27): `createSchemaParser`in `canParse`i BOŞ
+  `startBytes`te HER ŞEYE `true` demiyor artık.** Hata `[].every(...)`in boş
+  dizide `true` dönmesiydi: `startBytes`i olmayan bir şema SIFIR bayt
+  karşılaştırıp her çerçeveyi sahipleniyordu.
+
+  **Düzeltme.** `startBytes` DOLU dal KOD YOLU OLARAK DEĞİŞMEDİ. Boş `startBytes`
+  dalı, şemanın KENDİ bildirdiği yapısal kısıtlara düşüyor: (a) `startEnd` ise
+  bitiş baytları — `verifyFraming` de yalnız orada bakar, (b) şemadan türeyen
+  TOPLAM çerçeve boyu `data.length`a eşit mi ve azami boyu aşıyor mu (`lengthFrom`
+  taşıyan alanlar teldeki uzunluk alanından OKUNARAK), (c) `ascii` alanlarının
+  yazdırılabilirliği. **Değişmez ilke: hiçbir koşul denetlenemiyorsa cevap
+  `true` değil `false`tur** — bir `lengthField` şemasında uzunluk kaynağı yoksa,
+  ya da koşullu/tekrarlı/bileşik alan yüzünden boy türetilemiyorsa, kayıt hiçbir
+  çerçeveyi sahiplenmez. `parseWithSchema` `canParse` içinde ÇAĞRILMAZ;
+  alan başına iş şemadan bir kez çıkarılır (`buildCanParsePlan`).
+
+  **ÖLÇÜM (aynı 148 kayıt / 937 örnek, önce → sonra, toplam/kendi/yabancı):**
+
+  | tüketici | framing | `startBytes` | önce | sonra |
+  |---|---|---|---|---|
+  | `custom-binary-protocol` | `startEnd` | VAR | 16/2/14 | **16/2/14 (BİREBİR AYNI)** |
+  | `length-based-protocol` | `lengthField` | yok | 937/2/935 | **1/1/0** |
+  | `ascii-protocol` | `none` | yok | 937/2/935 | **5/1/4** |
+  | uzunluk alanı olmayan sonda | `lengthField` | yok | 937 | **0** |
+
+  Kaybedilen İKİ kendi örneği bilinçlidir ve ikisi de `expectedValid: false`
+  olan, TANIMI GEREĞİ bozuk çerçevelerdir: `length-based-protocol/
+  oversized-length` (bildirilen 1000, telde 3 bayt) ve `ascii-protocol/
+  missing-line-ending` (CRLF kesik, 16 yerine 14 bayt). Bir ön elemenin bozuk
+  çerçeveyi sahiplenmemesi doğru davranıştır. `ascii-protocol`ün kalan 4 yabancı
+  isabeti hata DEĞİL gerçek belirsizliktir: dördü de 16 baytlık yazdırılabilir
+  AT-komut satırıdır (`at-commands` ×2, `hayes-command-set`, `lte-modem-at`).
+
+  **Eski notun İKİ sayısı ÇÜRÜDÜ.** (a) `custom-binary-protocol` "9 çakışma"
+  değil **14**tü — ve zaten değişmedi, çünkü `startBytes`i dolu. (b)
+  `delimiter-based-protocol` bu düzeltmeden HİÇ etkilenmez: `createSchemaParser`i
+  kullanmaz, `canParse`ını elle yazar (`data[0] === HDLC_FLAG`) ve 10/1/9 ölçümü
+  önce de sonra da aynıdır. `createSchemaParser`in üretimdeki tüketicisi ÜÇ
+  tanedir, dördüncüsü yoktur.
+
+  **`rf-telemetry-custom-frame`in KAÇINMA gerekçesi hâlâ geçerli** ve bu turda
+  ÖLÇÜLDÜ: `createSchemaParser(buildRfTelemetrySchema(...))` aynı kümede
+  `dataLength`e göre 12–33 YABANCI isabet alır ve kendi 8 örneğinin 2–8'ini
+  kaybeder — şemanın `Data` uzunluğu ÇÖZÜLEN çerçeveden geldiği için tek bir
+  sabit parser örneği auto-detection'a hizmet edemez. Elle yazılan imza 0
+  yabancı ölçüyor. `rfTelemetry.ts` bu turda YENİDEN YAZILMADI.
+
+  **Bekçiler.** `rfTelemetryCanParseRegistry.test.ts`in ikinci ayağı sözü
+  tutularak GÜNCELLENDİ (silinmedi): artık mayının VARLIĞINI değil YOKLUĞUNU
+  bekçiliyor ve `startBytes` DOLU dalın değişmediğini ESKİ GÖVDEYİ çerçeve
+  çerçeve yeniden koşturarak kanıtlıyor (registry büyüse de geçerli bir kanıt).
+  `schemaParser.test.ts`e beş `framing.type`ı da doğrudan sınayan 11 bekçi
+  eklendi. `parse()` çıktısının değişmediği ayrıca 5625 çağrılık önce/sonra
+  anlık görüntüsüyle doğrulandı: rastgele `RawFrame.id` dışında BİREBİR aynı.
 
   **2. `custom-schema` `definitions` paneli YOK ve 19 kayıt onu bekliyor**
   (`[KARAR 18-7]`, `grep -rn "custom-schema" src/`). `ProtocolPage.tsx`in

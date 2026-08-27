@@ -609,10 +609,10 @@ export function minimumFrameLength(fc: Dot11FrameControl): number {
  * 1093 çerçevesinde **1080 doğru pozitif**.
  *
  * ⚠️ Dört koşulun HİÇBİRİ dejenere girdide `true` dönmez: uzunluk kapısı
- * en başta, CRC gerçekten hesaplanıyor. (`schemaParser.ts:608`in boş
- * `startBytes` üzerinde `[].every(...)` ile HER girdiye `true` demesi
- * devralınan bir mayındır ve 18e'nin işidir; aynı sınıf hata burada
- * TEKRARLANMAZ.)
+ * en başta, CRC gerçekten hesaplanıyor. (`schemaParser.ts`in boş `startBytes`
+ * üzerinde `[].every(...)` ile HER girdiye `true` demesi devralınan bir
+ * mayındı; **2026-08-27'de kapatıldı** — aynı sınıf hata burada zaten
+ * TEKRARLANMAMIŞTI.)
  */
 export function hasDot11Signature(data: Uint8Array): boolean {
   if (data.length < DOT11_MINIMUM_HEADER_LENGTH + DOT11_FCS_LENGTH) return false;

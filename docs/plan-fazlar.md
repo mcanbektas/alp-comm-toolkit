@@ -829,17 +829,27 @@ davranış uygulandı: ALAN YERLEŞİMİ korundu (o bilgi geçerli), SAYILAR mot
 çözdüğü her çerçeve şüphelidir"* dersinin dördüncü vakası ve ilk kez şüpheli
 olan şey deponun KENDİ belgesi.
 
-🚨 **DEVRALINAN MAYIN: `createSchemaParser`in `canParse`i boş `startBytes`te
-HER ŞEYE `true` der** (`schemaParser.ts:608`, `[].every()`). Ölçüldü:
-`length-based-protocol` registry'nin **937 örneğinin 937'sini** sahipleniyor
-(%100). 18e brifinin iki kabul edilebilir çözümünden **ikincisi** seçildi —
-şemaya sabit `startBytes` KONULMADI, `canParse` `rfTelemetry.ts`te AÇIKÇA
-yazıldı; gerekçe: önbelleme ve sync sözcüğü bu kayıtta KULLANICI
-PARAMETRESİDİR, şemaya sabitlenseydi 4 baytlık sync kullanan biri kendi
-çerçevesini çözemezdi. `schemaParser.ts` bu dalgada DÜZELTİLMEDİ (brif:
-*"ayrı bir kayıt, ayrı bir borç"*) ve borç `CLAUDE.md`ye kaydedildi;
-`rfTelemetryCanParseRegistry.test.ts`in ikinci ayağı mayının hâlâ orada
-olduğunu HER KOŞUDA yeniden ölçüyor.
+✅ **DEVRALINAN MAYIN KAPANDI (2026-08-27).** `createSchemaParser`in `canParse`i
+boş `startBytes`te `[].every()` yüzünden HER ŞEYE `true` diyordu; ölçüldü,
+`length-based-protocol` registry'nin **937 örneğinin 937'sini** sahipleniyordu
+(%100). Dalga 18e bunu DÜZELTMEMİŞ ama ondan KAÇINMIŞTI: şemaya sabit
+`startBytes` KONULMADI, `canParse` `rfTelemetry.ts`te AÇIKÇA yazıldı; gerekçe
+önbelleme ve sync sözcüğünün bu kayıtta KULLANICI PARAMETRESİ olmasıydı —
+şemaya sabitlenseydi 4 baytlık sync kullanan biri kendi çerçevesini çözemezdi.
+Borç `CLAUDE.md`ye kaydedilmiş, `rfTelemetryCanParseRegistry.test.ts`in ikinci
+ayağı mayının orada olduğunu HER KOŞUDA yeniden ölçmüştü.
+
+Borç kendi turunda kapatıldı. Boş `startBytes` dalı artık şemanın KENDİ
+bildirdiği yapısal kısıtlara düşüyor (bitiş baytları · şemadan türeyen çerçeve
+boyunun teldeki boya eşitliği · `ascii` alanlarının yazdırılabilirliği) ve
+**hiçbir koşul denetlenemiyorsa `false` dönüyor**. `startBytes` DOLU dal kod
+yolu olarak DEĞİŞMEDİ. Aynı 937 örnekte önce → sonra (toplam/kendi/yabancı):
+`custom-binary-protocol` 16/2/14 → 16/2/14 (birebir aynı), `length-based-protocol`
+937/2/935 → 1/1/0, `ascii-protocol` 937/2/935 → 5/1/4, uzunluk alanı olmayan
+`lengthField` sonda 937 → 0. `parse()` çıktısı 5625 çağrılık önce/sonra
+karşılaştırmasında BİREBİR aynı kaldı. Bu dalganın kaydı için gerekçe, kaybedilen
+iki bozuk-çerçeve örneği ve `rf-telemetry`nin kaçınmasının HÂLÂ doğru olduğunun
+ölçümü: `CLAUDE.md` "Dalga 18'den KALAN İKİ BORÇ" bölümü, madde 1.
 
 **`decodeOptions` ON kanal, ama brifin öngördüğü on DEĞİL.** Brifin dört `text
 hex` kanalı (`preambleBytes`, `syncWord`, `whiteningPolynomial`,

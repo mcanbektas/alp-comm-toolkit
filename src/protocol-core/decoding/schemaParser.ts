@@ -587,6 +587,250 @@ export function parseWithSchema(
   return { success: true, frame, consumedBytes: bytes.length };
 }
 
+// ── `canParse` ön elemesi ───────────────────────────────────────────────
+//
+// ## Boş `startBytes` MAYINI ve kapanışı (2026-08-27)
+//
+// Eski gövde `startBytes.every((byte, index) => data[index] === byte)` idi ve
+// `[].every(...)` boş dizide **`true`** döner: `startBytes`i olmayan bir şema
+// kayıt defterindeki HER çerçeveyi sahiplenirdi. Ölçüldü (148 kayıt, 937
+// örnek): `length-based-protocol` 937/937, `ascii-protocol` 937/937.
+//
+// **Değişmez ilke: SIFIR koşul denetleyen bir `canParse` `true` DÖNMEZ.** Şema
+// ayırt edici bir sinyal sunmuyorsa doğru cevap `false`tur — yanlış negatif
+// kabul edilebilir (kayıt yalnız otomatik seçilmez, elle seçilince yine
+// çözülür), yanlış pozitif değil (auto-detection'ı zehirler).
+//
+// Dolayısıyla boş `startBytes` dalı, ŞEMANIN KENDİ BİLDİRDİĞİ yapısal kısıtları
+// teldeki baytlara uygular — ayrıştırmadan, yalnız bayt karşılaştırmasıyla:
+//
+//  1. `startEnd` ise bitiş baytları kuyrukta tutuyor mu (`verifyFraming` de
+//     bitiş baytlarına YALNIZ orada bakar; öbür türlerde `endBytes` süstür ve
+//     `parse` onu hiç denetlemez, `canParse` de denetlemez).
+//  2. Şemadan türeyen TOPLAM çerçeve boyu `data.length`a EŞİT mi ve azami
+//     çerçeve uzunluğunu aşmıyor mu. `lengthFrom` taşıyan alanların boyu,
+//     teldeki uzunluk alanından OKUNARAK hesaba girer.
+//  3. `ascii` alanlarının kapsadığı baytlar yazdırılabilir mi. Metin olduğunu
+//     şemanın kendisi bildiriyor; ikili bir çöp bloğu o alanı dolduramaz.
+//
+// Bunlardan HİÇBİRİ türetilemiyorsa (koşullu/tekrarlı/bileşik alanlar yüzünden
+// boy belirsizse, ya da `lengthField` çerçeveleme vaat edildiği hâlde şemada
+// `length` alanı yoksa) denetlenecek koşul YOKTUR ve cevap `false`tur.
+//
+// `parseWithSchema` BİLEREK çağrılmaz: `canParse` sıcak yolda her çerçeve için
+// çağrılır, ucuz ön eleme olarak kalmalıdır. Alan başına yapılan iş şemadan
+// bir kez çıkarılır (`buildCanParsePlan`), çerçeve başına yalnız bayt
+// karşılaştırması kalır.
+//
+// ÖLÇÜM (aynı 937 örnek, önce → sonra, toplam/kendi/yabancı):
+//   custom-binary-protocol (startBytes DOLU) 16/2/14 → 16/2/14  (BİREBİR AYNI)
+//   length-based-protocol                    937/2/935 → 1/1/0
+//   ascii-protocol                           937/2/935 → 5/1/4
+//   startBytes'siz `lengthField` sonda       937 → 0
+// Kaybedilen iki KENDİ örneği bilinçlidir ve ikisi de `expectedValid: false`
+// olan, TANIMI GEREĞİ bozuk çerçevelerdir: `length-based-protocol/
+// oversized-length` (bildirilen 1000, telde 3 bayt) ve `ascii-protocol/
+// missing-line-ending` (CRLF kesik, 16 yerine 14 bayt). Bir ön elemenin
+// bozuk çerçeveyi sahiplenmemesi doğru davranıştır. `ascii-protocol`ün kalan
+// 4 yabancı isabeti de hata değil GERÇEK belirsizliktir: hepsi 16 baytlık
+// yazdırılabilir AT-komut satırıdır (`at-commands`, `hayes-command-set`,
+// `lte-modem-at`) ve bir ASCII satırı başka bir ASCII satırından ayırt
+// edilemez — bunu ancak alan İÇERİĞİNİ uyduran bir kural "çözerdi".
+
+/** `bytesToNumber`ın güvenli tamsayı sınırı; uzunluk alanı bundan geniş olamaz. */
+const MAX_LENGTH_FIELD_BYTES = 6;
+
+/** Alanın teldeki veriye BAĞLI OLMAYAN bayt genişliği; şemadan çıkmıyorsa `undefined`. */
+function staticFieldLength(field: ProtocolFieldSchema): number | undefined {
+  // Sıra `fieldByteLength` ile AYNI olmalı: türetilmiş alan kendi genişliğini
+  // algoritmadan alır, şemadaki `length` onu geçersizleştirmez.
+  if (isDerivedField(field.type)) {
+    return field.algorithm === undefined ? 0 : checksumWidthBytes(field.algorithm);
+  }
+  const info = fieldTypeInfo(field.type);
+  if (info.kind === 'bits') {
+    return Math.ceil(((field.bitOffset ?? 0) + (field.bitLength ?? 0)) / 8);
+  }
+  if (field.length !== undefined) {
+    return field.length;
+  }
+  return info.byteLength;
+}
+
+interface CanParseFieldPlan {
+  readonly id: string;
+  readonly offset: number | undefined;
+  readonly staticLength: number | undefined;
+  readonly lengthFrom: string | undefined;
+  /** Sayısal değeri okunup `lengthFrom` referanslarına sunulacak mı. */
+  readonly readsValue: boolean;
+  readonly isAscii: boolean;
+  readonly endianness: Endianness;
+}
+
+interface CanParsePlan {
+  /** Çerçeve boyu şemadan türetilebiliyor mu. Türetilemiyorsa o sinyal YOKTUR. */
+  readonly extentDerivable: boolean;
+  readonly fields: readonly CanParseFieldPlan[];
+  /** Yalnız `startEnd`te dolu — `verifyFraming` de bitiş baytlarına yalnız orada bakar. */
+  readonly endBytes: readonly number[];
+  readonly maximumFrameLength: number;
+}
+
+function buildCanParsePlan(schema: ProtocolSchema): CanParsePlan {
+  const fields: CanParseFieldPlan[] = [];
+  // `lengthFrom` referansının ÇÖZÜLEBİLECEĞİ alan kimlikleri. `parseWithSchema`
+  // sayısal ham değeri olan HER alanı `state.values`a yazar, dolayısıyla uzunluk
+  // kaynağı `type: 'length'` olmak zorunda değildir (spec §9.6'nın kendi örneği
+  // `payloadLength`i `uint8` yazar). Burada işaretsiz ve sabit genişlikli tam
+  // sayı alanlarıyla sınırlanır: gerisini okumak tahmin olurdu.
+  const resolvableLengthSources = new Set<string>();
+  let extentDerivable = true;
+  let hasLengthSource = false;
+
+  for (const field of schema.fields) {
+    // Koşullu, tekrarlı ve bileşik alanların çerçevedeki yeri ancak ayrıştırma
+    // sırasında belli olur; `canParse` ayrıştırma YAPMAZ, o yüzden bu şemadan
+    // bir çerçeve boyu türetilemez.
+    if (
+      field.condition !== undefined ||
+      field.repeatCount !== undefined ||
+      isCompositeField(field.type)
+    ) {
+      extentDerivable = false;
+      break;
+    }
+
+    if (field.lengthFrom !== undefined) {
+      // Kaynak alan daha ÖNCE gelmiş ve sayısal olarak okunabiliyor olmalı.
+      if (!resolvableLengthSources.has(field.lengthFrom)) {
+        extentDerivable = false;
+        break;
+      }
+      hasLengthSource = true;
+    }
+
+    const staticLength = field.lengthFrom === undefined ? staticFieldLength(field) : undefined;
+    if (field.lengthFrom === undefined && staticLength === undefined) {
+      extentDerivable = false;
+      break;
+    }
+
+    const info = fieldTypeInfo(field.type);
+    const signed = field.signed ?? info.signed ?? false;
+    const readsValue =
+      staticLength !== undefined &&
+      staticLength >= 1 &&
+      staticLength <= MAX_LENGTH_FIELD_BYTES &&
+      info.kind === 'integer' &&
+      !signed;
+    if (readsValue) {
+      resolvableLengthSources.add(field.id);
+    }
+
+    fields.push({
+      id: field.id,
+      offset: field.offset,
+      staticLength,
+      lengthFrom: field.lengthFrom,
+      readsValue,
+      isAscii: field.type === 'ascii',
+      endianness: endiannessOf(field, schema),
+    });
+  }
+
+  // `lengthField` çerçeveleme, boyu bir UZUNLUK ALANINDAN gelen bir çerçeve
+  // vaat eder. Şemada öyle bir bağ yoksa vaat boştur: denetlenecek bir şey
+  // kalmaz ve bu şema hiçbir çerçeveyi sahiplenemez.
+  if (schema.framing.type === 'lengthField' && !hasLengthSource) {
+    extentDerivable = false;
+  }
+
+  return {
+    extentDerivable,
+    fields,
+    endBytes: schema.framing.type === 'startEnd' ? (schema.framing.endBytes ?? []) : [],
+    maximumFrameLength: schema.framing.maximumFrameLength,
+  };
+}
+
+function isPrintableAscii(data: Uint8Array, start: number, end: number): boolean {
+  for (let index = start; index < end; index += 1) {
+    const byte = data[index] ?? 0;
+    const printable = byte === 0x09 || byte === 0x0a || byte === 0x0d || (byte >= 0x20 && byte <= 0x7e);
+    if (!printable) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Boş `startBytes` dalının yapısal ön elemesi. `true` ancak EN AZ BİR koşul
+ * gerçekten denetlendiyse döner; hiçbir koşul türetilemiyorsa cevap `false`tur.
+ */
+function structuralPreFilter(plan: CanParsePlan, data: Uint8Array): boolean {
+  let checkedSomething = false;
+
+  if (plan.endBytes.length > 0) {
+    if (data.length < plan.endBytes.length) {
+      return false;
+    }
+    const tailStart = data.length - plan.endBytes.length;
+    for (let index = 0; index < plan.endBytes.length; index += 1) {
+      if (data[tailStart + index] !== plan.endBytes[index]) {
+        return false;
+      }
+    }
+    checkedSomething = true;
+  }
+
+  if (plan.extentDerivable) {
+    const declaredLengths = new Map<string, number>();
+    let cursor = 0;
+    let extent = 0;
+
+    for (const field of plan.fields) {
+      let length: number;
+      if (field.lengthFrom === undefined) {
+        length = field.staticLength ?? 0;
+      } else {
+        const declared = declaredLengths.get(field.lengthFrom);
+        if (declared === undefined || declared < 0) {
+          return false;
+        }
+        length = declared;
+      }
+
+      const offset = field.offset ?? cursor;
+      const end = offset + length;
+      if (offset < 0 || end > data.length) {
+        return false;
+      }
+
+      if (field.readsValue) {
+        declaredLengths.set(field.id, bytesToNumber(data.subarray(offset, end), field.endianness));
+      }
+      if (field.isAscii && !isPrintableAscii(data, offset, end)) {
+        return false;
+      }
+
+      cursor = end;
+      if (end > extent) {
+        extent = end;
+      }
+    }
+
+    extent += plan.endBytes.length;
+    if (extent !== data.length || extent > plan.maximumFrameLength) {
+      return false;
+    }
+    checkedSomething = true;
+  }
+
+  return checkedSomething;
+}
+
 /**
  * Şemadan spec §7 sözleşmesine uyan bir `ProtocolParser` üretir. Böylece
  * kullanıcı tanımlı protokol, kayıt defterine hazır protokollerle AYNI arayüzden
@@ -594,6 +838,8 @@ export function parseWithSchema(
  */
 export function createSchemaParser(schema: ProtocolSchema): ProtocolParser {
   const startBytes = schema.framing.startBytes ?? [];
+  // Boş `startBytes` dalı için şemaya bağlı ön hesap bir KEZ yapılır.
+  const plan = startBytes.length === 0 ? buildCanParsePlan(schema) : undefined;
 
   return {
     protocolId: schema.name,
@@ -603,9 +849,15 @@ export function createSchemaParser(schema: ProtocolSchema): ProtocolParser {
       if (data.length === 0) {
         return false;
       }
-      // Yalnız ucuz bir ön eleme: başlangıç baytları tutuyor mu. Tam ayrıştırma
-      // `parse` içinde; `canParse` sıcak yolda her çerçeve için çağrılabilir.
-      return startBytes.every((byte, index) => data[index] === byte);
+      // Yalnız ucuz bir ön eleme: tam ayrıştırma `parse` içinde; `canParse`
+      // sıcak yolda her çerçeve için çağrılabilir.
+      if (startBytes.length > 0) {
+        // DEĞİŞMEYEN DAL: başlangıç baytları tutuyor mu. `startBytes`
+        // `data.length`ı aşıyorsa `data[index]` `undefined` olur ve karşılaştırma
+        // düşer — eskiden de böyleydi, öyle kalıyor.
+        return startBytes.every((byte, index) => data[index] === byte);
+      }
+      return plan !== undefined && structuralPreFilter(plan, data);
     },
 
     parse(data: Uint8Array, context?: ParseContext): ParseResult {
