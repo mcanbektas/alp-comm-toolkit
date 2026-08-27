@@ -58,7 +58,8 @@ olmaması bir borç DEĞİLDİR: 15 alias kaydın hepsi `planned` yazar ve rozet
 **Sıradaki iş sınıfı KATALOG DIŞIDIR ve seçim kullanıcınındır:**
 çerçeveler-arası (stateful) panolar, `custom-schema` `definitions` paneli
 (19 kayıt bekliyor), Log Analyzer, `protocol-core/capture/pcap.ts`in ilk
-tüketicisi, `length-based-protocol`ın `canParse` borcu.
+tüketicisi. (`length-based-protocol`ın `canParse` borcu bu listeden ÇIKTI —
+2026-08-27'de `39980be` ile kapandı, ayrıntı aşağıda.)
 
 (Bu başlık 2026-08-21'de "Faz 10 TAMAMEN BİTTİ" diyordu; o cümle
 `interfaces-framing`in bittiğini kastediyordu ama fazın tamamı gibi okunuyordu
