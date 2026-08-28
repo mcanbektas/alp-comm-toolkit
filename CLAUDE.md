@@ -35,7 +35,7 @@ açılır ama kimlik uçları sessizce 404 döner.
 
 **Tasarım token'ları `@mcanbektas/design`dan gelir** ve paket henüz yayınlanmadığı için
 `file:../alp-platform/design` ile bağlıdır. İki depo **kardeş dizin** olmak zorunda
-(`~/Desktop/alp-comm-toolkit` ve `~/Desktop/alp-platform`). Token'ları değiştirdiysen
+(`~/dev/alp-comm-toolkit` ve `~/dev/alp-platform`). Token'ları değiştirdiysen
 platform tarafında `npm run build` koşmadan burada göremezsin — `dist/` okunuyor,
 kaynak değil.
 
