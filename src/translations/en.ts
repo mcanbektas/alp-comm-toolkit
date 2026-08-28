@@ -2816,6 +2816,30 @@ export const en: TranslationDictionary = {
   'definition.eds.issue.duplicateObject':
     'The same index/sub-index is defined more than once; the first definition was kept.',
 
+  // --- Custom schema definition panel ---
+  'definition.schema.action.import': 'Import schema file (JSON)',
+  'definition.schema.action.export': 'Download schema as JSON',
+  'definition.schema.sampleNotice':
+    'A sample schema is shown. You can import your own JSON schema; it never leaves your device.',
+  'definition.schema.name': 'Protocol name',
+  'definition.schema.version': 'Version',
+  'definition.schema.framing': 'Framing',
+  'definition.schema.fieldCount': 'Field count',
+  'definition.schema.enumValues': 'values',
+  'definition.schema.decodeHex.label': 'Sample frame (HEX)',
+  'definition.schema.table.fields': 'Schema fields',
+  'definition.schema.table.decoded': 'Decoded fields',
+  'definition.schema.column.field': 'Field',
+  'definition.schema.column.type': 'Type',
+  'definition.schema.column.offset': 'Offset',
+  'definition.schema.column.length': 'Length',
+  'definition.schema.column.detail': 'Detail',
+  'definition.schema.column.physical': 'Physical',
+  'definition.schema.column.bytes': 'Bytes',
+  'definition.schema.error.readFailed': 'The file could not be read.',
+  'definition.schema.error.parseFailed':
+    'The schema file could not be parsed; the JSON is malformed or missing required fields.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',

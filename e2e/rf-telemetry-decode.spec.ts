@@ -181,17 +181,18 @@ test('kayıt ON kanal bildirir ve hiçbiri ham çeviri anahtarı basmaz', async 
   }
 });
 
-test('`definitions` sekmesi "planlandı" basar — `custom-schema` paneli YAZILMADI', async ({
+test('`definitions` sekmesi ŞEMA PANELİNİ açar — `custom-schema` motoru bağlandı', async ({
   page,
 }) => {
   const consoleErrors = await openPage(page, DEFINITIONS_PATH);
 
-  // `[KARAR 18-7]`: katalogda 19 kayıt `custom-schema` bekliyor ve hiçbirinin
-  // paneli yok. Boş kart basmak yasak; sekme neyin geleceğini SÖYLÜYOR.
-  await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
-  await expect(page.getByTestId('eds-panel')).toHaveCount(0);
-  await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
-  // Sayfanın KENDİ rozeti yine "Kısmi"dir: sekme planlı, kayıt değil.
+  // `[KARAR 18-7]` bu kaydı "panel yok" diye işaretlemişti; panel yazıldığı gün
+  // beklenti de döndü. Şema paneli BİÇİME bağlıdır, protokole değil: bu kayıt
+  // `custom-schema` bildirdiği için aynı panel burada da açılır.
+  await expect(page.getByTestId('schema-panel')).toBeVisible();
+  await expect(page.getByText(tr['protocol.plannedNotice'])).toHaveCount(0);
+  // Sayfanın KENDİ rozeti yine "Kısmi"dir: tanım paneli kaydın çözümleme
+  // olgunluğunu değiştirmez.
   await expect(page.getByText(tr['status.partial'], { exact: true })).toBeVisible();
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });

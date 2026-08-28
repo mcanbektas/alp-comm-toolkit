@@ -2818,6 +2818,30 @@ export const tr = {
   'definition.eds.issue.duplicateObject':
     'Aynı index/sub-index birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
 
+  // --- Özel şema (custom-schema) tanım paneli ---
+  'definition.schema.action.import': 'Şema dosyası içe aktar (JSON)',
+  'definition.schema.action.export': 'Şemayı JSON olarak indir',
+  'definition.schema.sampleNotice':
+    'Örnek şema gösteriliyor. Kendi JSON şemanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.schema.name': 'Protokol adı',
+  'definition.schema.version': 'Sürüm',
+  'definition.schema.framing': 'Çerçeveleme',
+  'definition.schema.fieldCount': 'Alan sayısı',
+  'definition.schema.enumValues': 'değer',
+  'definition.schema.decodeHex.label': 'Örnek çerçeve (HEX)',
+  'definition.schema.table.fields': 'Şema alanları',
+  'definition.schema.table.decoded': 'Çözümlenmiş alanlar',
+  'definition.schema.column.field': 'Alan',
+  'definition.schema.column.type': 'Tip',
+  'definition.schema.column.offset': 'Ofset',
+  'definition.schema.column.length': 'Uzunluk',
+  'definition.schema.column.detail': 'Ayrıntı',
+  'definition.schema.column.physical': 'Fiziksel',
+  'definition.schema.column.bytes': 'Baytlar',
+  'definition.schema.error.readFailed': 'Dosya okunamadı.',
+  'definition.schema.error.parseFailed':
+    'Şema dosyası çözümlenemedi; JSON bozuk ya da beklenen alanları taşımıyor.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',

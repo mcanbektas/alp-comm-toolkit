@@ -27,10 +27,11 @@ import type {
   ParseResult,
   ParsedField,
   ParsedFrame,
-  ProtocolErrorCode,
   SchemaIssue,
 } from '@/protocol-core';
 import type { GeneratedArtifact, GeneratedArtifactId } from '@/protocol-core/codegen';
+import { PARSE_ERROR_LABEL_KEYS } from '@/utils/parseDiagnostics';
+
 import type { DraftIssue } from '../schemaDraft';
 
 export interface OutputPanelProps {
@@ -61,22 +62,6 @@ const ARTIFACT_TAB_LABEL_KEYS: Record<GeneratedArtifactId, TranslationKey> = {
   'python-parser': 'studio.output.tab.pythonParser',
   'typescript-parser': 'studio.output.tab.typeScriptParser',
   'markdown-doc': 'studio.output.tab.markdownDoc',
-};
-
-/** Hata KODU çevrilir, `message` çevrilmez: mesaj çözümleyicinin ürettiği veridir. */
-const PARSE_ERROR_LABEL_KEYS: Record<ProtocolErrorCode, TranslationKey> = {
-  'invalid-hex-input': 'studio.output.parseError.code.invalidHexInput',
-  'length-mismatch': 'studio.output.parseError.code.lengthMismatch',
-  'checksum-mismatch': 'studio.output.parseError.code.checksumMismatch',
-  'crc-mismatch': 'studio.output.parseError.code.crcMismatch',
-  'unsupported-function-code': 'studio.output.parseError.code.unsupportedFunctionCode',
-  'start-delimiter-not-found': 'studio.output.parseError.code.startDelimiterNotFound',
-  'value-out-of-range': 'studio.output.parseError.code.valueOutOfRange',
-  'unsupported-encoding': 'studio.output.parseError.code.unsupportedEncoding',
-  'frame-too-long': 'studio.output.parseError.code.frameTooLong',
-  'truncated-frame': 'studio.output.parseError.code.truncatedFrame',
-  'circular-length-reference': 'studio.output.parseError.code.circularLengthReference',
-  'parser-timeout': 'studio.output.parseError.code.parserTimeout',
 };
 
 const SEVERITY_TEXT_CLASS: Record<SchemaIssue['severity'], string> = {

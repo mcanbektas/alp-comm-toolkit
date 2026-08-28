@@ -89,6 +89,16 @@ const EdsPanel = lazy(async () => {
 });
 
 /**
+ * Özel şema paneli de TEMBEL. Kapsamı en genişi (`custom-schema` 20 kayıt
+ * taşıyor) ama yine de yalnız `definitions` sekmesinde gerekiyor; zod
+ * doğrulayıcısı ve şema çözümleyicisi açılış paketine giremez.
+ */
+const SchemaPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/SchemaPanel');
+  return { default: module.SchemaPanel };
+});
+
+/**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
  */
@@ -106,6 +116,7 @@ const CellularInitializationDashboard = lazy(async () => {
 const DEFINITION_PANELS: Partial<Record<DefinitionFormat, typeof DbcPanel>> = {
   dbc: DbcPanel,
   eds: EdsPanel,
+  'custom-schema': SchemaPanel,
 };
 
 /**

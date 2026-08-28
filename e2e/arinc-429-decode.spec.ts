@@ -299,11 +299,11 @@ test.describe('ARINC 429', () => {
     ).toHaveText('107₈');
   });
 
-  test('definitions sekmesi AÇILIR ama BOŞ kalır — ICD veritabanı kapsam dışı', async ({ page }) => {
-    // Katalog `definitions: ['vendor-map','custom-schema']` bildiriyor, ama
-    // hiçbir tanım paneli BAĞLI DEĞİL (`snmp.ts`/`bleGatt.ts`/14'ün a2l-ldf
-    // emsali). Bunu VARSAYMAK yetmez — sekme gerçekten açılıp çökmediği ve
-    // "planlandı" bildirimi basmadığı tarayıcıda görülmeli
+  test('definitions sekmesi ŞEMA PANELİNİ açar — vendor-map hâlâ kapsam dışı', async ({ page }) => {
+    // Katalog `definitions: ['vendor-map','custom-schema']` bildiriyor. İkisinden
+    // yalnız `custom-schema`nın motoru var, ama seçim İLK EŞLEŞENİ alır
+    // (`ProtocolPage`), yani `vendor-map` panelsiz olsa da sekme artık gerçek
+    // bir panel açıyor. Bunu VARSAYMAK yetmez, tarayıcıda görülmeli
     // ([[ekrani-gercekten-ac]]).
     const consoleErrors: string[] = [];
     page.on('pageerror', (error) => consoleErrors.push(error.message));
@@ -317,15 +317,14 @@ test.describe('ARINC 429', () => {
       'aria-selected',
       'true',
     );
-    // Bağlı bir tanım paneli YOK — DBC/EDS panellerinin hiçbiri açılmamalı.
+    // Açılan panel ŞEMA panelidir; DBC/EDS bu kayda bağlı değil.
+    await expect(page.getByTestId('schema-panel')).toBeVisible();
     await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
     await expect(page.getByTestId('eds-panel')).toHaveCount(0);
-    // Panel bağlı olmadığı için sayfa BOŞ KART basmaz, "neyin geleceğini
-    // söyleyen" bildirimi basar — kaydın kendisi `ready` olsa bile. `lin`in
-    // `definitions` sekmesi aynı davranışı gösteriyor ve
-    // `eds-definitions.spec.ts:145` bunu zaten bekçiliyor; ARINC 429 o
-    // emsalin üstüne yeni bir dal AÇMIYOR.
-    await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
+    // Panel bağlandığı için "planlandı" bildirimi DÜŞER. Motoru hâlâ olmayan
+    // biçimlerin bekçiliği `eds-definitions.spec.ts:145`te (LIN → `ldf`) ve
+    // `schema-definitions.spec.ts`te duruyor.
+    await expect(page.getByText(tr['protocol.plannedNotice'])).toHaveCount(0);
     // Ama `decode` sekmesi GERÇEK motorunu gösteriyor — bildirim orada YOK.
     await page.goto('/comm/aerospace-uav/avionics-data-buses/arinc-429?tab=decode');
     await expect(page.getByTestId('decode-panel')).toBeVisible();

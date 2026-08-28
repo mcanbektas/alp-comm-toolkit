@@ -34,40 +34,15 @@ import type {
   ParseResult,
   ParsedField,
   ProtocolError,
-  ProtocolErrorCode,
   ProtocolPlugin,
 } from '@/protocol-core/types';
-import { isTranslationKey } from '@/translations';
 import type { TranslationKey } from '@/translations';
+import { PARSE_ERROR_LABEL_KEYS, translateDiagnostic } from '@/utils/parseDiagnostics';
 
 export interface DecodePanelProps {
   /** Kayıt defteri anahtarı — katalogdaki `pluginId` ile aynı değer. */
   readonly pluginId: string;
 }
-
-/**
- * Hata KODU çevrilir, `message` çevrilmez: mesaj çözümleyicinin ürettiği veridir.
- *
- * Anahtarlar `studio.*` ad uzayından BİLEREK yeniden kullanılıyor: bunlar
- * Studio'nun arayüz metni değil, `protocol-core`daki `ProtocolErrorCode`
- * birleşiminin tek çevirisi. Kopyalamak iki sözlüğün zamanla ayrışması demekti;
- * aynı kod iki ekranda iki farklı cümleyle açıklanırsa kullanıcı hatanın aynı
- * hata olduğunu göremez.
- */
-const PARSE_ERROR_LABEL_KEYS: Record<ProtocolErrorCode, TranslationKey> = {
-  'invalid-hex-input': 'studio.output.parseError.code.invalidHexInput',
-  'length-mismatch': 'studio.output.parseError.code.lengthMismatch',
-  'checksum-mismatch': 'studio.output.parseError.code.checksumMismatch',
-  'crc-mismatch': 'studio.output.parseError.code.crcMismatch',
-  'unsupported-function-code': 'studio.output.parseError.code.unsupportedFunctionCode',
-  'start-delimiter-not-found': 'studio.output.parseError.code.startDelimiterNotFound',
-  'value-out-of-range': 'studio.output.parseError.code.valueOutOfRange',
-  'unsupported-encoding': 'studio.output.parseError.code.unsupportedEncoding',
-  'frame-too-long': 'studio.output.parseError.code.frameTooLong',
-  'truncated-frame': 'studio.output.parseError.code.truncatedFrame',
-  'circular-length-reference': 'studio.output.parseError.code.circularLengthReference',
-  'parser-timeout': 'studio.output.parseError.code.parserTimeout',
-};
 
 const HEX_RADIX = 16;
 /** Değeri olmayan hücrenin işareti; dile bağlı değil, çeviriye girmez. */
@@ -144,10 +119,6 @@ function toErrorDetail(cause: unknown): string {
  * Tarayıcı turunda görülen kusur buydu: uyarı satırı ekranda ham
  * `protocol.modbus.rtu.warning.roleInferredRequest` olarak duruyordu.
  */
-function translateDiagnostic(text: string, t: (key: TranslationKey) => string): string {
-  return isTranslationKey(text) ? t(text) : text;
-}
-
 /**
  * Eklentilerin verdiği örnek adı/açıklaması ÇEVİRİ ANAHTARI olabilir:
  * `modbusRtu.ts` böyle yazıldı ("protocol.modbus.rtu.example.…"). Ama spec §7'nin
