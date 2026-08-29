@@ -25,11 +25,25 @@ import type { StreamBufferState } from '../../../protocol-core/streams/types';
 import { DISPLAY_MODES, TIMESTAMP_RESOLUTIONS } from '../types';
 import type { DisplayMode, TimestampResolution } from '../types';
 import { FRAMING_PRESETS } from '../presets';
+import type { ReplayPacing } from '../../../connection/file/replaySchedule';
 
-export type MonitorSourceKind = 'serial' | 'simulated';
+export type MonitorSourceKind = 'serial' | 'simulated' | 'file';
 
 export interface ConnectionPanelProps {
   readonly sourceKind: MonitorSourceKind;
+  /** Seçili log dosyasının adı; seçilmediyse `undefined`. */
+  readonly fileName: string | undefined;
+  /** Dosyadan okunan kayıt sayısı; dosya okunmadıysa `undefined`. */
+  readonly fileRecordCount: number | undefined;
+  /** Dosya okunamadıysa hata metni. */
+  readonly fileError: string | undefined;
+  /** Oynatma sonuna gelindi mi — kaynak hâlâ açıktır, bağlantıyı kullanıcı kapatır. */
+  readonly filePlaybackFinished: boolean;
+  readonly onFileSelected: (file: File) => void;
+  readonly pacing: ReplayPacing;
+  readonly onPacingChange: (pacing: ReplayPacing) => void;
+  readonly replaySpeed: number;
+  readonly onReplaySpeedChange: (speed: number) => void;
   readonly onSourceKindChange: (kind: MonitorSourceKind) => void;
   readonly serialOptions: SerialConnectionOptions;
   readonly onSerialOptionsChange: (options: SerialConnectionOptions) => void;
@@ -104,6 +118,21 @@ const FLOW_CONTROL_KEYS = {
 } as const satisfies Record<string, TranslationKey>;
 
 const FRAMES_PER_SECOND_CHOICES = [50, 200, 1000, 5000] as const;
+const REPLAY_SPEED_CHOICES = [0.5, 1, 2, 5, 10, 50] as const;
+
+const SOURCE_HINT_KEYS: Record<MonitorSourceKind, TranslationKey> = {
+  serial: 'monitor.source.serialHint',
+  simulated: 'monitor.source.simulatedHint',
+  file: 'monitor.source.fileHint',
+};
+
+const PACING_KEYS = {
+  realtime: 'monitor.pacing.realtime',
+  'fixed-interval': 'monitor.pacing.fixedInterval',
+  immediate: 'monitor.pacing.immediate',
+} as const satisfies Record<ReplayPacing, TranslationKey>;
+
+const PACING_CHOICES: readonly ReplayPacing[] = ['realtime', 'fixed-interval', 'immediate'];
 
 function buttonClass(active: boolean): string {
   const base =
@@ -143,13 +172,55 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
         >
           {t('monitor.source.serial')}
         </button>
+        <button
+          type="button"
+          className={buttonClass(props.sourceKind === 'file')}
+          onClick={() => props.onSourceKindChange('file')}
+          disabled={props.connected}
+        >
+          {t('monitor.source.file')}
+        </button>
       </div>
 
-      <p className="text-sm text-muted">
-        {props.sourceKind === 'serial'
-          ? t('monitor.source.serialHint')
-          : t('monitor.source.simulatedHint')}
-      </p>
+      <p className="text-sm text-muted">{t(SOURCE_HINT_KEYS[props.sourceKind])}</p>
+
+      {props.sourceKind === 'file' ? (
+        <div className="flex flex-col gap-2">
+          <label className="flex flex-col gap-1 text-sm text-muted" htmlFor="monitor-file">
+            {t('monitor.field.logFile')}
+            <input
+              id="monitor-file"
+              data-testid="monitor-file"
+              type="file"
+              accept=".pcap,.cap,.log,.txt,.csv,.tsv,.asc,.json,.ndjson,.bin"
+              disabled={props.connected}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file !== undefined) props.onFileSelected(file);
+              }}
+              className="rounded-token-sm border border-line bg-surface px-2 py-1 text-sm text-text"
+            />
+          </label>
+          {props.fileRecordCount !== undefined ? (
+            <p className="text-sm text-muted" data-testid="monitor-file-summary">
+              {t('monitor.file.loaded', {
+                name: props.fileName ?? '',
+                count: props.fileRecordCount,
+              })}
+            </p>
+          ) : null}
+          {props.filePlaybackFinished ? (
+            <p className="text-sm text-accent-strong" data-testid="monitor-file-finished">
+              {t('monitor.file.finished')}
+            </p>
+          ) : null}
+          {props.fileError !== undefined ? (
+            <p role="alert" className="text-sm text-danger" data-testid="monitor-file-error">
+              {props.fileError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {!serialSupported ? (
         <p className="rounded-token border border-line bg-raised p-3 text-sm text-warn">
@@ -251,6 +322,23 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
                 value: flowControl,
                 label: t(FLOW_CONTROL_KEYS[flowControl]),
               }))}
+            />
+          </>
+        ) : props.sourceKind === 'file' ? (
+          <>
+            <SelectField
+              id="monitor-pacing"
+              label={t('monitor.field.pacing')}
+              value={props.pacing}
+              onChange={(value) => props.onPacingChange(value as ReplayPacing)}
+              options={PACING_CHOICES.map((pacing) => ({ value: pacing, label: t(PACING_KEYS[pacing]) }))}
+            />
+            <SelectField
+              id="monitor-replay-speed"
+              label={t('monitor.field.replaySpeed')}
+              value={String(props.replaySpeed)}
+              onChange={(value) => props.onReplaySpeedChange(Number(value))}
+              options={REPLAY_SPEED_CHOICES.map((speed) => ({ value: String(speed), label: `${speed}x` }))}
             />
           </>
         ) : (

@@ -24,12 +24,14 @@ import type {
   ConnectionError,
   ConnectionStatus,
 } from '../../connection/types';
+import { createFileSource, type FileSourceOptions } from '../../connection/file/fileSource';
 import { createSimulatedSource, type SimulatedSourceOptions } from '../../connection/mock/simulatedSource';
 import { createSerialSource } from '../../connection/serial/serialSource';
 import type { SerialConnectionOptions } from '../../connection/serial/serialOptions';
 import { serialBitsPerByte } from '../../connection/serial/serialOptions';
 import type { WebSerialPort } from '../../connection/serial/webSerialTypes';
 import type { FramingMethodConfig } from '../../protocol-core/framing/createExtractor';
+import type { LogRecord } from '../../protocol-core/logs/types';
 import type { StreamBufferState } from '../../protocol-core/streams/types';
 import {
   EMPTY_COMM_STATISTICS,
@@ -72,6 +74,7 @@ export interface LiveMonitorApi {
   signalStatistics(): SignalStatistics[];
   connectSerial(port: WebSerialPort, options: SerialConnectionOptions): Promise<void>;
   connectSimulated(options?: SimulatedSourceOptions): Promise<void>;
+  connectFile(records: readonly LogRecord[], options?: FileSourceOptions): Promise<void>;
   disconnect(): Promise<void>;
   clear(): void;
   setDisplayPaused(paused: boolean): void;
@@ -311,6 +314,16 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     [ingestor, startSource],
   );
 
+  const connectFile = useCallback(
+    async (records: readonly LogRecord[], options?: FileSourceOptions) => {
+      // Kaydedilmiş logun hattı bilinmiyor: dosya baud hızını taşımaz, bus
+      // load hesaplanamaz. Uydurulmuş bir baud değeri yüzdeyi uydururdu.
+      ingestor.setLink(undefined);
+      await startSource(createFileSource(records, options));
+    },
+    [ingestor, startSource],
+  );
+
   const disconnect = useCallback(async () => {
     await teardown();
     setState((previous) => ({ ...previous, status: 'idle', sourceKind: undefined }));
@@ -356,6 +369,7 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     signalStatistics,
     connectSerial,
     connectSimulated,
+    connectFile,
     disconnect,
     clear,
     setDisplayPaused,

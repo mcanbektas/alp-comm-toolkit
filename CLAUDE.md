@@ -184,6 +184,10 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   candump, Vector ASC, CSV/ayraçlı, JSON/NDJSON, hex metin dökümü, ham ikili.
   **PCAPNG hâlâ desteklenmiyor** — ayrı bir dosya formatıdır, tanınır ve
   yönlendirici bir mesajla reddedilir.
+  **Dosya oynatma (spec §8.1) da yazıldı**: `src/connection/file/` aynı
+  `ByteSource` sözleşmesini gerçekler ve `logs` çekirdeğinden çıkan kayıtları
+  monitörün canlı zincirine besler. `connection/` altında yalnız `usb`,
+  `bluetooth`, `websocket` boş kaldı.
   **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),

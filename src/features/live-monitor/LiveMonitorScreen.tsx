@@ -16,6 +16,10 @@ import {
 } from '../../connection/serial/serialOptions';
 import { requestSerialPort } from '../../connection/serial/webSerialTypes';
 import { DEFAULT_SIMULATED_STREAM_OPTIONS } from '../../connection/mock/simulatedProtocol';
+import { minimumGapForFraming } from '../../connection/file/fileSource';
+import type { ReplayPacing } from '../../connection/file/replaySchedule';
+import type { LogRecord } from '../../protocol-core/logs/types';
+import { parseLogInWorker } from '../../workers/parseLogInWorker';
 import { ConnectionPanel, type MonitorSourceKind } from './components/ConnectionPanel';
 import { FrameTable } from './components/FrameTable';
 import { SignalPanel } from './components/SignalPanel';
@@ -58,6 +62,12 @@ export function LiveMonitorScreen(): ReactNode {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('hex');
   const [timestampResolution, setTimestampResolution] = useState<TimestampResolution>('ms');
   const [framesPerSecond, setFramesPerSecond] = useState(200);
+  const [fileRecords, setFileRecords] = useState<readonly LogRecord[] | undefined>(undefined);
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
+  const [fileError, setFileError] = useState<string | undefined>(undefined);
+  const [pacing, setPacing] = useState<ReplayPacing>('realtime');
+  const [replaySpeed, setReplaySpeed] = useState(1);
+  const [playbackFinished, setPlaybackFinished] = useState(false);
   const [followTail, setFollowTail] = useState(true);
 
   const preset = useMemo(() => findPreset(presetId), [presetId]);
@@ -75,7 +85,44 @@ export function LiveMonitorScreen(): ReactNode {
 
   const connected = monitor.state.sourceKind !== undefined;
 
+  const handleFileSelected = useCallback(async (file: File) => {
+    setFileRecords(undefined);
+    setFileError(undefined);
+    setPlaybackFinished(false);
+    setFileName(file.name);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const { result } = await parseLogInWorker(bytes, file.name);
+      if (result.status === 'error') {
+        setFileError(result.message);
+        return;
+      }
+      setFileRecords(result.records);
+    } catch (cause) {
+      setFileError(cause instanceof Error ? cause.message : String(cause));
+    }
+  }, []);
+
   const handleConnect = useCallback(async () => {
+    if (sourceKind === 'file') {
+      if (fileRecords === undefined) {
+        setFileError(t('monitor.file.needsFile'));
+        return;
+      }
+      setPlaybackFinished(false);
+      await monitor.connectFile(fileRecords, {
+        pacing,
+        speed: replaySpeed,
+        // Kayıt sınırının çerçeve sınırı olarak korunması buna bağlı: seçili
+        // çerçeveleme ayarı zaman tabanlıysa iki kayıt o sessizlikten daha
+        // yakın gönderilemez, yoksa ikisi tek çerçeveye yapışırdı.
+        minimumGapMs: minimumGapForFraming(preset.framing),
+        onCompleted: () => {
+          setPlaybackFinished(true);
+        },
+      });
+      return;
+    }
     if (sourceKind === 'simulated') {
       await monitor.connectSimulated({
         framesPerSecond,
@@ -87,7 +134,7 @@ export function LiveMonitorScreen(): ReactNode {
     // işleyicisinden senkron başlar, o yüzden izin istemi açılır (spec §41).
     const port = await requestSerialPort();
     await monitor.connectSerial(port, serialOptions);
-  }, [framesPerSecond, monitor, serialOptions, sourceKind]);
+  }, [fileRecords, framesPerSecond, monitor, pacing, preset.framing, replaySpeed, serialOptions, sourceKind, t]);
 
   const handleDisconnect = useCallback(() => {
     void monitor.disconnect();
@@ -128,6 +175,15 @@ export function LiveMonitorScreen(): ReactNode {
           onTimestampResolutionChange={setTimestampResolution}
           framesPerSecond={framesPerSecond}
           onFramesPerSecondChange={setFramesPerSecond}
+          fileName={fileName}
+          fileRecordCount={fileRecords?.length}
+          fileError={fileError}
+          filePlaybackFinished={playbackFinished}
+          onFileSelected={(file) => void handleFileSelected(file)}
+          pacing={pacing}
+          onPacingChange={setPacing}
+          replaySpeed={replaySpeed}
+          onReplaySpeedChange={setReplaySpeed}
           status={monitor.state.status}
           error={monitor.state.error}
           parserState={monitor.state.parserState}

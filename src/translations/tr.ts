@@ -8600,6 +8600,21 @@ export const tr = {
   'logAnalyzer.detail.matchHint':
     'Oran bir tahmindir: yüksek oran protokolün doğru olduğunu KANITLAMAZ, yalnız baytların bu motorun beklediği yapıya uyduğunu söyler.',
 
+
+  'monitor.source.file': 'Dosya oynatma',
+  'monitor.source.fileHint':
+    'Kaydedilmiş bir log dosyasını canlı hatmış gibi geri oynatır: çerçeveleme, doğrulama ve istatistik zinciri gerçek veriyle koşar. Dosya tarayıcıda okunur, hiçbir bayt sunucuya gitmez.',
+  'monitor.field.logFile': 'Log dosyası',
+  'monitor.field.pacing': 'Oynatma temposu',
+  'monitor.field.replaySpeed': 'Oynatma hızı',
+  'monitor.pacing.realtime': 'Gerçek zamanlı',
+  'monitor.pacing.fixedInterval': 'Sabit aralık',
+  'monitor.pacing.immediate': 'Beklemesiz',
+  'monitor.file.loaded': '{name} — {count} kayıt okundu',
+  'monitor.file.finished': 'Oynatma bitti.',
+  'monitor.file.needsFile': 'Önce bir log dosyası seçin.',
+  'monitor.framing.recordReplay': 'Kayıt sınırı (dosya oynatma)',
+
 } as const;
 
 /**

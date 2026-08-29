@@ -8608,4 +8608,19 @@ export const en: TranslationDictionary = {
   'logAnalyzer.detail.matchHint':
     'The ratio is an estimate: a high score does not PROVE the protocol is right, it only says the bytes fit what this engine expects.',
 
+
+  'monitor.source.file': 'File playback',
+  'monitor.source.fileHint':
+    'Replays a recorded log file as if it were a live link: framing, validation and statistics run on real data. The file is read in the browser; no byte is sent to a server.',
+  'monitor.field.logFile': 'Log file',
+  'monitor.field.pacing': 'Playback pacing',
+  'monitor.field.replaySpeed': 'Playback speed',
+  'monitor.pacing.realtime': 'Real time',
+  'monitor.pacing.fixedInterval': 'Fixed interval',
+  'monitor.pacing.immediate': 'No waiting',
+  'monitor.file.loaded': '{name} — {count} records read',
+  'monitor.file.finished': 'Playback finished.',
+  'monitor.file.needsFile': 'Select a log file first.',
+  'monitor.framing.recordReplay': 'Record boundary (file playback)',
+
 };

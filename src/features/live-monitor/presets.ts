@@ -87,6 +87,18 @@ export const FRAMING_PRESETS: readonly FramingPreset[] = [
     taps: NO_TAPS,
     timeBased: false,
   },
+  {
+    // Dosya oynatma için: kaydedilmiş log ZATEN çerçevelerden oluşur, sınır
+    // baytların içinde değil kayıtlar ARASINDADIR. Dosya kaynağı kayıtları
+    // `minimumGapForFraming` ile bu zaman aşımının iki katı aralıkla
+    // gönderdiği için her kayıt tam olarak bir çerçeve olur.
+    id: 'record-replay',
+    labelKey: 'monitor.framing.recordReplay',
+    framing: { method: 'inter-frame-timeout', timeoutMs: 5 },
+    validation: DEFAULT_FRAME_VALIDATION,
+    taps: NO_TAPS,
+    timeBased: true,
+  },
 ];
 
 export const DEFAULT_PRESET_ID = SIMULATED_PRESET.id;

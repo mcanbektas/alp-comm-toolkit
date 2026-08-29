@@ -216,3 +216,53 @@ test('360 pikselde yatay kaydırma yok', async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+/**
+ * Dosya oynatma kaynağının gerçek tarayıcı turu (spec §8.1).
+ *
+ * Burada iki Worker birden koşar: log dosyası `logAnalyzer.worker.ts`te
+ * ayrıştırılır, çıkan kayıtlar `streamParser.worker.ts`e beslenir. jsdom'da
+ * `Worker` olmadığı için birim testler bu zinciri hiç kurmuyor.
+ */
+const CANDUMP_REPLAY_LOG = [
+  '(1637856000.100000) can0 123#DEADBEEF',
+  '(1637856000.140000) can0 124#AABBCCDD',
+  '(1637856000.180000) can1 123#0102',
+  '(1637856000.220000) can1 18F00401#0102030405060708',
+].join('\n');
+
+test('dosya oynatma kaynağı logu canlı zincire besler', async ({ page }) => {
+  const consoleErrors = await openMonitor(page);
+
+  await page.getByRole('button', { name: tr['monitor.source.file'] }).click();
+  // Kayıt sınırını çerçeve sınırı yapan hazır ayar.
+  await page
+    .getByLabel(tr['monitor.field.framing'])
+    .selectOption({ label: tr['monitor.framing.recordReplay'] });
+
+  await page.getByTestId('monitor-file').setInputFiles({
+    name: 'kayit.log',
+    mimeType: 'text/plain',
+    buffer: Buffer.from(CANDUMP_REPLAY_LOG, 'utf-8'),
+  });
+  await expect(page.getByTestId('monitor-file-summary')).toContainText('4');
+
+  await page.getByRole('button', { name: tr['monitor.action.connect'] }).click();
+  await expect(page.getByRole('button', { name: tr['monitor.action.disconnect'] })).toBeVisible();
+
+  // Dört kayıt dört çerçeve olmalı: kayıt sınırı çerçeve sınırıdır.
+  await expect.poll(() => recordCount(page), { timeout: 10_000 }).toBe(4);
+  await expect(page.getByTestId('monitor-file-finished')).toBeVisible();
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
+test('dosya seçilmeden bağlanmaya çalışmak uyarı verir', async ({ page }) => {
+  await openMonitor(page);
+
+  await page.getByRole('button', { name: tr['monitor.source.file'] }).click();
+  await page.getByRole('button', { name: tr['monitor.action.connect'] }).click();
+
+  await expect(page.getByTestId('monitor-file-error')).toHaveText(tr['monitor.file.needsFile']);
+  await expect(page.getByRole('button', { name: tr['monitor.action.connect'] })).toBeVisible();
+});

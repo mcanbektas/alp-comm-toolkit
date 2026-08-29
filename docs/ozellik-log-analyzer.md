@@ -79,3 +79,34 @@ hex metin dökümü · ham ikili**.
   içinde gelir.
 - Dosya boyutu sınırı **64 MB**, kayıt sınırı **200 bin** (spec §41 "dosya boyutu
   sınırı uygula"). İkisi ayrıdır: bir dosya az kayıtla da devasa olabilir.
+
+## Ek: dosya oynatma kaynağı (spec §8.1, aynı çekirdek)
+
+`src/connection/file/` — `logs` çekirdeğinden çıkan kayıtları monitörün CANLI
+zincirine besleyen `ByteSource`. `replaySchedule.ts` saf çizelge üretir,
+`fileSource.ts` onu tek bir `setInterval` ile sürer.
+
+Kararlar:
+
+- **Dosyayı kendi ayrıştırmaz.** `createSerialSource` gibi: fabrika çözümlenmiş
+  kayıtları alır, okuma ve biçim saptama çağıranın işidir. Ayrıştırma
+  `src/workers/parseLogInWorker.ts` üzerinden gider — Log Analyzer ekranı ve
+  monitör aynı istemciyi paylaşır.
+- **Zaman damgası yeniden yazılmaz.** `onChunk`in `receivedAt`i sözleşme gereği
+  ŞU ANIN saatidir. Logun özgün damgasını geçirmek zaman tabanlı çerçevelemeyi
+  ve zaman aşımı gözcüsünü iki farklı saatle karşılaştırmaya zorlardı. Logun
+  zamanlaması damgaya değil TEMPOYA yazılır.
+- **Kayıt sınırı çerçeve sınırıdır.** İki kaydı çerçeveleyicinin zaman
+  aşımından yakın göndermek ikisini tek çerçeveye yapıştırır;
+  `minimumGapForFraming()` seçili ayarın zaman aşımının iki katını garanti eder.
+  `record-replay` hazır ayarı (`inter-frame-timeout`, 5 ms) bunun karşılığıdır.
+- **Kayıt başına zamanlayıcı kurulmaz**: 200 bin kayıt 200 bin `setTimeout`
+  demekti. Tek `setInterval`, her turda vakti gelmiş kayıtları boşaltır.
+- **Uzun sessizlik kırpılır** (`maxGapMs`), damgalar değişmeden — dakikalarca
+  sessiz bir logu birebir oynatmak kullanıcıyı boş ekrana baktırırdı.
+- **Oynatma bitince kaynak AÇIK kalır.** Sözleşmede "bitti" durumu yok;
+  uydurulmuş bir `idle` bildirimi ekranda "hiç bağlanmadı" gibi okunurdu.
+  Bitiş `onCompleted` ile ayrı bir kanaldan bildirilir, bağlantıyı kullanıcı
+  kapatır (son çerçevenin zaman aşımıyla kapanmasına da bu sayede vakit kalır).
+- **Bus load hesaplanmaz**: dosya baud hızı taşımaz, uydurulmuş bir değer yüzdeyi
+  uydururdu.
