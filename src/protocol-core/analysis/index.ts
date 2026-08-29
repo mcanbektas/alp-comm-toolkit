@@ -14,3 +14,6 @@ export * from './timestampDetect';
 export * from './endiannessGuess';
 export * from './periodAnalysis';
 export * from './checksumScan';
+export * from './messageClustering';
+export * from './messageDiff';
+export * from './fieldCorrelation';
