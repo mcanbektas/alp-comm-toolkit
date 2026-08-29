@@ -8745,6 +8745,132 @@ export const tr = {
   'reverseEngineering.diff.identical': 'İki çerçeve birebir aynı.',
   'reverseEngineering.diff.outOfRange': 'Seçilen çerçeve yok.',
 
+  // --- Test Automation Studio (spec §38) ---
+  'nav.testAutomation': 'Test otomasyonu',
+
+  'testAutomation.title': 'Test Automation Studio',
+  'testAutomation.intro':
+    'Haberleşme test senaryoları kurar ve koşturur: bağlan, çerçeve gönder, yanıtı bekle, CRC ve alan doğrula, değişken tut, döngü ve koşullu dal kur, raporu dışa aktar.',
+  'testAutomation.privacy':
+    'Senaryo tarayıcıda saklanır ve koşu tamamen istemcide olur; hiçbir bayt sunucuya gönderilmez.',
+
+  'testAutomation.section.connection': 'Bağlantı',
+  'testAutomation.section.scenario': 'Senaryo',
+  'testAutomation.section.run': 'Koşu',
+  'testAutomation.section.report': 'Rapor',
+
+  'testAutomation.source.kind': 'Kaynak',
+  'testAutomation.source.simulated': 'Simüle cihaz',
+  'testAutomation.source.serial': 'Web Serial',
+  'testAutomation.source.simulatedHint':
+    'Simüle cihaz AA 01 isteğine spec §43 örnek çerçevesiyle yanıt verir: AA 05 10 03 34 12 7F 4F 55.',
+  'testAutomation.source.serialUnsupported': 'Bu tarayıcı Web Serial desteklemiyor.',
+  'testAutomation.source.framing': 'Çerçeveleme yöntemi',
+  'testAutomation.source.framingParameter': 'Yöntem parametresi',
+
+  'testAutomation.framing.fixedLength': 'Sabit uzunluk',
+  'testAutomation.framing.startByte': 'Başlangıç imzası',
+  'testAutomation.framing.lineEnding': 'Satır sonu ayracı',
+  'testAutomation.framing.interFrameTimeout': 'Çerçeveler arası sessizlik (ms)',
+  'testAutomation.framing.slip': 'SLIP',
+  'testAutomation.framing.cobs': 'COBS',
+  'testAutomation.framing.hdlcFlag': 'HDLC bayrağı',
+
+  'testAutomation.scenario.name': 'Senaryo adı',
+  'testAutomation.scenario.addStep': 'Adım ekle',
+  'testAutomation.scenario.empty': 'Senaryoda adım yok.',
+
+  'testAutomation.action.run': 'Çalıştır',
+  'testAutomation.action.cancel': 'İptal et',
+  'testAutomation.action.import': 'Senaryo içe aktar',
+  'testAutomation.action.export': 'Senaryoyu indir',
+  'testAutomation.action.reset': 'Örneğe dön',
+  'testAutomation.action.removeStep': 'Sil',
+  'testAutomation.action.exportReport': 'Raporu JSON indir',
+
+  'testAutomation.status.running': 'Koşuyor — {count} adım',
+
+  'testAutomation.step.connect': 'Bağlan',
+  'testAutomation.step.disconnect': 'Bağlantıyı kapat',
+  'testAutomation.step.sendFrame': 'Çerçeve gönder',
+  'testAutomation.step.wait': 'Bekle',
+  'testAutomation.step.waitForFrame': 'Çerçeve bekle',
+  'testAutomation.step.validateField': 'Alan doğrula',
+  'testAutomation.step.validateCrc': 'CRC doğrula',
+  'testAutomation.step.setVariable': 'Değişken ata',
+  'testAutomation.step.incrementVariable': 'Değişken artır',
+  'testAutomation.step.loop': 'Döngü',
+  'testAutomation.step.conditional': 'Koşullu dal',
+  'testAutomation.step.log': 'Günlüğe yaz',
+  'testAutomation.step.exportReport': 'Raporu dışa aktar',
+
+  'testAutomation.field.operand': 'Kaynak',
+  'testAutomation.field.value': 'Değer',
+  'testAutomation.field.variableName': 'Değişken',
+  'testAutomation.field.offset': 'Ofset',
+  'testAutomation.field.width': 'Genişlik',
+  'testAutomation.field.endianness': 'Bayt sırası',
+  'testAutomation.field.scale': 'Ölçek',
+  'testAutomation.field.conditionKind': 'Koşul türü',
+  'testAutomation.field.operator': 'Operatör',
+  'testAutomation.field.mask': 'Maske',
+  'testAutomation.field.expected': 'Beklenen',
+  'testAutomation.field.payloadSource': 'Çerçeve kaynağı',
+  'testAutomation.field.bytes': 'Baytlar',
+  'testAutomation.field.templateId': 'Şablon kimliği',
+  'testAutomation.field.durationMs': 'Süre (ms)',
+  'testAutomation.field.timeoutMs': 'Zaman aşımı (ms)',
+  'testAutomation.field.matchOffset': 'Filtre ofseti',
+  'testAutomation.field.matchBytes': 'Filtre baytları',
+  'testAutomation.field.algorithm': 'Algoritma',
+  'testAutomation.field.dataStart': 'Veri başlangıcı',
+  'testAutomation.field.trailingOffset': 'Kuyruk ofseti',
+  'testAutomation.field.by': 'Artış',
+  'testAutomation.field.count': 'Tur sayısı',
+  'testAutomation.field.message': 'Mesaj',
+  'testAutomation.field.thenBranch': 'Koşul doğruysa',
+  'testAutomation.field.elseBranch': 'Koşul yanlışsa',
+
+  'testAutomation.payload.bytes': 'Ham baytlar',
+  'testAutomation.payload.template': 'Paket şablonu',
+
+  'testAutomation.condition.compare': 'Karşılaştırma',
+  'testAutomation.condition.mask': 'Bit maskesi',
+
+  'testAutomation.operand.constant': 'Sabit',
+  'testAutomation.operand.variable': 'Değişken',
+  'testAutomation.operand.frameField': 'Çerçeve alanı',
+  'testAutomation.operand.frameLength': 'Çerçeve uzunluğu',
+
+  'testAutomation.outcome.pass': 'Geçti',
+  'testAutomation.outcome.fail': 'Kaldı',
+  'testAutomation.outcome.timeout': 'Zaman aşımı',
+  'testAutomation.outcome.error': 'Hata',
+
+  'testAutomation.runStatus.passed': 'Test geçti',
+  'testAutomation.runStatus.failed': 'Test kaldı',
+  'testAutomation.runStatus.cancelled': 'İptal edildi',
+  'testAutomation.runStatus.error': 'Hata',
+
+  'testAutomation.report.pass': 'Geçen',
+  'testAutomation.report.fail': 'Kalan',
+  'testAutomation.report.timeout': 'Zaman aşımı',
+  'testAutomation.report.error': 'Hata',
+  'testAutomation.report.executed': 'Yürütülen adım',
+  'testAutomation.report.duration': 'Süre',
+  'testAutomation.report.truncated': 'Satır bütçesi doldu; sayaçlar tam, tablo kesildi.',
+  'testAutomation.report.dropped': 'Filtreye uymayan {count} çerçeve atıldı.',
+
+  'testAutomation.table.label': 'Koşu adımları',
+  'testAutomation.table.empty': 'Henüz adım koşmadı.',
+  'testAutomation.table.step': 'Adım',
+  'testAutomation.table.kind': 'Tür',
+  'testAutomation.table.outcome': 'Sonuç',
+  'testAutomation.table.iteration': 'Tur',
+  'testAutomation.table.expected': 'Beklenen',
+  'testAutomation.table.actual': 'Gerçekleşen',
+  'testAutomation.table.details': 'Ayrıntı',
+
 } as const;
 
 /**

@@ -142,6 +142,19 @@ export function Sidebar({ onNavigate }: SidebarProps): ReactElement {
         {t('nav.reverseEngineering')}
       </NavLink>
 
+      <NavLink
+        to="/test-automation"
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          [
+            'rounded-token-sm px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-accent',
+            isActive ? 'bg-accent-soft font-medium text-accent-strong' : 'text-muted hover:bg-raised hover:text-text',
+          ].join(' ')
+        }
+      >
+        {t('nav.testAutomation')}
+      </NavLink>
+
       <ul className="mt-2 flex flex-col gap-0.5">
         {catalog.map((domain) => {
           const isExpanded = expandedIds.includes(domain.id);

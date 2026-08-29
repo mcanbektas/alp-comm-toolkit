@@ -54,6 +54,11 @@ const ReverseEngineeringPage = lazy(async () => {
   return { default: module.ReverseEngineeringPage };
 });
 
+const TestAutomationPage = lazy(async () => {
+  const module = await import('@/pages/TestAutomationPage');
+  return { default: module.TestAutomationPage };
+});
+
 function LazyFallback(): ReactElement {
   const { t } = useTranslation();
   return <p className="p-4 text-sm text-muted">{t('common.loading')}</p>;
@@ -114,6 +119,14 @@ export function AppRoutes(): ReactElement {
           element={
             <Suspense fallback={<LazyFallback />}>
               <ReverseEngineeringPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="test-automation"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <TestAutomationPage />
             </Suspense>
           }
         />
