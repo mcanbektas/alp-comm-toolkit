@@ -496,3 +496,14 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **Sonucu:** yeni encoder yazmak bugün tüketicisi olmayan koda kod eklemektir;
   önce bir TÜKETİCİ gerekir. Bu, §33 Protocol Converter'ın da gerçek ön
   koşuludur (§33'ün saydığı sekiz dönüşümün hedef tarafı encoder ister).
+
+  **Tüketiciyi yazacak olana ölçülmüş kolaylık:** `ProtocolEncoder<TMessage>`
+  keyfî bir tip alıyor gibi görünür ve genel bir form kurulamayacağı sanılır —
+  ama 14 encoder'ın girdisi pratikte İKİ kümeye düşüyor: **10'u `Uint8Array`**
+  (yük → çerçevelenmiş bayt: slip, cobs, kiss, hdlc, sdlc, ppp, xmodem,
+  ymodem, zmodem, delimiter-based), **3'ü `EncodeValues`**
+  (`schemaEncoder.ts:49`, yani `Record<alan kimliği, değer>` — Packet
+  Builder'ın şablonlarıyla AYNI şekil: ascii-protocol, custom-binary-protocol,
+  length-based-protocol), biri (`rf-telemetry`) satır içi. İkisi de genel
+  olarak tüketilebilir; engel sanıldığı kadar büyük değil. Bunu bir sonraki
+  nesil yeniden keşfetmesin diye yazıldı.
