@@ -50,9 +50,13 @@ import { fieldTypeInfo } from '@/protocol-core/schemas/fieldTypes';
 import { parseProtocolSchemaJson } from '@/protocol-core/schemas/protocolSchema';
 import type { ProtocolSchema } from '@/protocol-core/schemas/protocolSchema';
 
+import { findEncoderEntry } from '@/protocols/encoderCatalog';
+import { loadProtocolPlugin } from '@/protocol-core/registry';
+
 import type { BuilderConnectionState, BuilderSourceKind, PacketBuilderApi } from './builderTypes';
 import {
   buildPacket,
+  buildPacketWithEncoder,
   describeBuilderFields,
   nextSequenceValues,
   randomizeValues,
@@ -60,6 +64,7 @@ import {
 } from './packetPipeline';
 import type {
   BuilderFieldDescriptor,
+  PacketBuildOptions,
   PacketBuildResult,
   PacketIssue,
   PostProcessing,
@@ -76,6 +81,9 @@ const NOTHING_TO_SEND_KEY = 'builder.error.nothingToSend';
 const PORT_BUSY_KEY = 'builder.error.portBusy';
 const SERIAL_UNSUPPORTED_KEY = 'builder.error.serialUnsupported';
 const INVALID_VALUE_KEY = 'builder.issue.invalidValue';
+/** Motor chunk'ı inene kadar paket ÜRETİLMEZ: yarım seçimle çerçevesiz bayt göndermek sessiz bir hata olurdu. */
+const ENCODER_LOADING_KEY = 'builder.issue.encoderLoading';
+const ENCODER_LOAD_FAILED_KEY = 'builder.error.encoderLoadFailed';
 
 /**
  * Bağlantı katmanının kod'u → çeviri anahtarı. Şablonla anahtar üretmek yerine
@@ -293,12 +301,17 @@ function buildFromForm(
   schema: ProtocolSchema,
   fields: readonly BuilderFieldDescriptor[],
   values: Readonly<Record<string, string>>,
-  postProcessing: PostProcessing,
+  options: PacketBuildOptions,
+  /** Verilirse çerçeveyi ŞEMA değil bu plugin encoder'ı üretir (spec §7 `values` ailesi). */
+  encode: ((values: EncodeValues) => Uint8Array) | null,
   extraValues?: EncodeValues,
 ): PacketBuildResult {
   const { encodeValues, issues } = toEncodeValues(fields, values);
   const merged = extraValues === undefined ? encodeValues : { ...encodeValues, ...extraValues };
-  const result = buildPacket(schema, merged, { postProcessing });
+  const result =
+    encode === null
+      ? buildPacket(schema, merged, options)
+      : buildPacketWithEncoder(schema, encode, merged, options);
 
   if (issues.length === 0) {
     return result;
@@ -309,6 +322,40 @@ function buildFromForm(
     framedBytes: null,
     issues: [...issues, ...result.issues],
   };
+}
+
+/**
+ * Yüklenmiş plugin encoder'ları SARMAL içinde tutulur: `useState` çıplak bir
+ * fonksiyonu güncelleyici sanar ve onu çağırırdı.
+ */
+interface LoadedFrameEncoder {
+  readonly encode: (payload: Uint8Array) => Uint8Array;
+}
+
+interface LoadedValuesEncoder {
+  readonly schema: ProtocolSchema;
+  readonly encode: (values: EncodeValues) => Uint8Array;
+  /** Encoder'ın kendi varsayılanlarının form karşılığı; defterden gelir. */
+  readonly seedValues?: Readonly<Record<string, string>>;
+}
+
+/**
+ * Seçim + yüklenmiş encoder → boru hattı seçenekleri.
+ *
+ * `null` "çerçeveleyici seçildi ama daha inmedi" demektir ve paket üretimini
+ * DURDURUR. Yerleşik dala düşmek, kullanıcının seçtiği zarf olmadan bayt
+ * göndermek olurdu.
+ */
+function resolveBuildOptions(
+  postProcessing: PostProcessing,
+  framingEncoder: LoadedFrameEncoder | null,
+): PacketBuildOptions | null {
+  if (postProcessing !== 'plugin') {
+    return { postProcessing };
+  }
+  return framingEncoder === null
+    ? null
+    : { postProcessing: 'plugin', frameEncoder: framingEncoder.encode };
 }
 
 interface ParsedOverride {
@@ -386,17 +433,32 @@ export function usePacketBuilder(): PacketBuilderApi {
     [schemaJson, reloadToken],
   );
 
-  const schema = parsed.success ? parsed.schema : null;
-  const schemaErrorKey = parsed.success ? null : INVALID_SCHEMA_KEY;
+  const [values, setValues] = useState<Readonly<Record<string, string>>>({});
+  const [hexOverride, setHexOverrideState] = useState<string | null>(null);
+  const [postProcessing, setPostProcessingState] = useState<PostProcessing>('none');
+  /** `payload` ailesi: çerçeveyi saran zarf. Seçim kimlikte, motor state'te. */
+  const [framingPluginId, setFramingPluginIdState] = useState<string | null>(null);
+  const [framingEncoder, setFramingEncoder] = useState<LoadedFrameEncoder | null>(null);
+  /** `values` ailesi: çerçevenin ÜRETİCİSİ. `null` iken şema tabanlı yol koşar. */
+  const [encoderPluginId, setEncoderPluginIdState] = useState<string | null>(null);
+  const [valuesEncoder, setValuesEncoder] = useState<LoadedValuesEncoder | null>(null);
+  const [encoderErrorKey, setEncoderErrorKey] = useState<string | null>(null);
+
+  const storeSchema = parsed.success ? parsed.schema : null;
+
+  /**
+   * Formu çizen şema. Plugin encoder seçiliyse onun şeması, değilse store'daki.
+   * İkisi aynı anda geçerli olamaz: form tek bir alan kümesi gösterir.
+   */
+  const schema = valuesEncoder === null ? storeSchema : valuesEncoder.schema;
+  // Store'daki metin bozuk olsa bile plugin kaynağı çalışır; o hatayı orada
+  // göstermek kullanıcıya çözemeyeceği bir sorun bildirmek olurdu.
+  const schemaErrorKey = valuesEncoder !== null || parsed.success ? null : INVALID_SCHEMA_KEY;
 
   const fields = useMemo(
     () => (schema === null ? EMPTY_FIELDS : describeBuilderFields(schema)),
     [schema],
   );
-
-  const [values, setValues] = useState<Readonly<Record<string, string>>>({});
-  const [hexOverride, setHexOverrideState] = useState<string | null>(null);
-  const [postProcessing, setPostProcessingState] = useState<PostProcessing>('none');
   const [connection, setConnection] = useState<BuilderConnectionState>(INITIAL_CONNECTION);
   const [schedulerState, setSchedulerState] = useState<SendSchedulerState>(INITIAL_SCHEDULER_STATE);
   const [schedulerConfig, setSchedulerConfigState] = useState<SendSchedulerConfig>(INITIAL_SCHEDULER_CONFIG);
@@ -406,9 +468,87 @@ export function usePacketBuilder(): PacketBuilderApi {
   // Şema değişince form baştan kurulur: eski protokolün alan yolları yeni
   // şemada olmayabilir ve orada kalan değerler hiçbir zaman görünmeden
   // kodlayıcıya geçmeye devam ederdi.
+  //
+  // Tohum en sona yazılır: `initialValues` bayt alanlarını BOŞ bırakır, boş
+  // değer ise encoder'ın kendi varsayılanını EZERDİ (bkz. `encoderCatalog.ts`).
   useEffect(() => {
-    setValues(initialValues(fields));
-  }, [fields]);
+    setValues({ ...initialValues(fields), ...(valuesEncoder?.seedValues ?? {}) });
+  }, [fields, valuesEncoder]);
+
+  /**
+   * Zarf motorunun yüklenmesi. Kimlik değişirse ESKİ yükleme yok sayılır:
+   * yavaş inen bir chunk, kullanıcı çoktan başka bir zarfa geçtikten sonra
+   * gelip seçimi geri alırdı.
+   */
+  useEffect(() => {
+    if (framingPluginId === null) {
+      setFramingEncoder(null);
+      return;
+    }
+
+    let cancelled = false;
+    setFramingEncoder(null);
+
+    loadProtocolPlugin(framingPluginId)
+      .then((plugin) => {
+        if (cancelled) return;
+        const encoder = plugin.encoder;
+        if (encoder === undefined) {
+          setEncoderErrorKey(ENCODER_LOAD_FAILED_KEY);
+          return;
+        }
+        setFramingEncoder({ encode: (payload) => encoder.encode(payload) });
+        setEncoderErrorKey(null);
+      })
+      .catch(() => {
+        if (!cancelled) setEncoderErrorKey(ENCODER_LOAD_FAILED_KEY);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [framingPluginId]);
+
+  /** Üretici motorun ve şemasının yüklenmesi — ikisi TEK adımda, yarım durum yok. */
+  useEffect(() => {
+    if (encoderPluginId === null) {
+      setValuesEncoder(null);
+      setEncoderErrorKey(null);
+      return;
+    }
+
+    const entry = findEncoderEntry(encoderPluginId);
+    if (entry === undefined || entry.role !== 'values') {
+      setEncoderErrorKey(ENCODER_LOAD_FAILED_KEY);
+      return;
+    }
+
+    let cancelled = false;
+    setValuesEncoder(null);
+
+    Promise.all([entry.load(), loadProtocolPlugin(encoderPluginId)])
+      .then(([definition, plugin]) => {
+        if (cancelled) return;
+        const encoder = plugin.encoder;
+        if (encoder === undefined) {
+          setEncoderErrorKey(ENCODER_LOAD_FAILED_KEY);
+          return;
+        }
+        setValuesEncoder({
+          schema: definition.schema,
+          seedValues: definition.seedValues,
+          encode: (encodeValues) => encoder.encode(encodeValues),
+        });
+        setEncoderErrorKey(null);
+      })
+      .catch(() => {
+        if (!cancelled) setEncoderErrorKey(ENCODER_LOAD_FAILED_KEY);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [encoderPluginId]);
 
   const sourceRef = useRef<ByteSource | undefined>(undefined);
   /** Gelen bayt paketlerini bekleyenler — `waitForResponse` buraya abone olur. */
@@ -420,9 +560,29 @@ export function usePacketBuilder(): PacketBuilderApi {
    * EN SON değerleri okumalı. İkisini bağdaştıran tek yol: değişenleri ref'te
    * tutmak, geri çağırımı ref üzerinden çağırmak.
    */
-  const latestRef = useRef({ schema, fields, values, hexOverride, postProcessing, responseTimeoutMs });
+  const latestRef = useRef({
+    schema,
+    fields,
+    values,
+    hexOverride,
+    postProcessing,
+    responseTimeoutMs,
+    framingEncoder,
+    encoderPluginId,
+    valuesEncoder,
+  });
   useEffect(() => {
-    latestRef.current = { schema, fields, values, hexOverride, postProcessing, responseTimeoutMs };
+    latestRef.current = {
+      schema,
+      fields,
+      values,
+      hexOverride,
+      postProcessing,
+      responseTimeoutMs,
+      framingEncoder,
+      encoderPluginId,
+      valuesEncoder,
+    };
   });
 
   const sendOnceRef = useRef<(index: number) => Promise<void>>(async () => undefined);
@@ -439,7 +599,21 @@ export function usePacketBuilder(): PacketBuilderApi {
   // --- Türetilenler -------------------------------------------------------
 
   const buildResult = useMemo<PacketBuildResult | null>(() => {
-    const formResult = schema === null ? null : buildFromForm(schema, fields, values, postProcessing);
+    const options = resolveBuildOptions(postProcessing, framingEncoder);
+    /** Motoru inmemiş bir seçim: form dursun, ama kabloya çıkacak bayt OLMASIN. */
+    const pending = encoderPluginId !== null && valuesEncoder === null;
+
+    const formResult =
+      schema === null
+        ? null
+        : options === null || pending
+          ? {
+              ok: false,
+              rawFrame: null,
+              framedBytes: null,
+              issues: [{ fieldId: null, messageKey: ENCODER_LOADING_KEY }],
+            }
+          : buildFromForm(schema, fields, values, options, valuesEncoder?.encode ?? null);
 
     if (hexOverride === null) {
       return formResult;
@@ -458,7 +632,7 @@ export function usePacketBuilder(): PacketBuilderApi {
       framedBytes: override.bytes,
       issues: [...(formResult?.issues ?? []), ...overrideIssues],
     };
-  }, [schema, fields, values, postProcessing, hexOverride]);
+  }, [schema, fields, values, postProcessing, framingEncoder, encoderPluginId, valuesEncoder, hexOverride]);
 
   const outgoingBytes = buildResult?.framedBytes ?? null;
 
@@ -520,8 +694,25 @@ export function usePacketBuilder(): PacketBuilderApi {
     setHexOverrideState(hex);
   }, []);
 
-  const setPostProcessing = useCallback((mode: PostProcessing) => {
+  /**
+   * Yerleşik dal seçilince plugin zarfı DÜŞER. İki alanı ayrı ayrı yazılabilir
+   * bırakmak, "plugin seçili ama kimlik yok" gibi tutarsız bir durumu mümkün
+   * kılardı; değişmez tek yerde, burada korunuyor.
+   */
+  const setPostProcessing = useCallback((mode: Exclude<PostProcessing, 'plugin'>) => {
     setPostProcessingState(mode);
+    setFramingPluginIdState(null);
+  }, []);
+
+  const setFramingPlugin = useCallback((pluginId: string) => {
+    setPostProcessingState('plugin');
+    setFramingPluginIdState(pluginId);
+  }, []);
+
+  /** `null` şema tabanlı üretime döndürür — ikinci yol, YERİNE GEÇEN yol değil. */
+  const setEncoderPlugin = useCallback((pluginId: string | null) => {
+    setEncoderPluginIdState(pluginId);
+    setHexOverrideState(null);
   }, []);
 
   /**
@@ -693,12 +884,19 @@ export function usePacketBuilder(): PacketBuilderApi {
       } else if (current.schema === null) {
         bytes = null;
       } else {
+        const options = resolveBuildOptions(current.postProcessing, current.framingEncoder);
+        const pending = current.encoderPluginId !== null && current.valuesEncoder === null;
+        if (options === null || pending) {
+          // Motor inmeden gönderim: `NOTHING_TO_SEND_KEY` ile durur.
+          throw new Error(NOTHING_TO_SEND_KEY);
+        }
         const sequenceValues = nextSequenceValues(current.schema, {}, index);
         bytes = buildFromForm(
           current.schema,
           current.fields,
           current.values,
-          current.postProcessing,
+          options,
+          current.valuesEncoder?.encode ?? null,
           sequenceValues,
         ).framedBytes;
         // Sayaç formda da görünsün; aksi hâlde gönderilen paketle ekrandaki
@@ -757,6 +955,9 @@ export function usePacketBuilder(): PacketBuilderApi {
     buildResult,
     hexOverride,
     postProcessing,
+    framingPluginId,
+    encoderPluginId,
+    encoderErrorKey,
     outgoingBytes,
     connection,
     scheduler: schedulerState,
@@ -768,6 +969,8 @@ export function usePacketBuilder(): PacketBuilderApi {
     randomize,
     setHexOverride,
     setPostProcessing,
+    setFramingPlugin,
+    setEncoderPlugin,
     setSchedulerConfig,
     setResponseTimeoutMs,
     saveAsTemplate,

@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useProtocolSchemaStore } from '@/app/store/protocolSchemaStore';
@@ -11,7 +11,16 @@ import {
   SPEC_SENSOR_PROTOCOL_JSON,
 } from '@/protocol-core/schemas/specFixture';
 
+import { protocolRegistry } from '@/protocol-core/registry';
+import { registerBuiltInProtocols } from '@/protocols';
+import { asciiProtocolPlugin } from '@/protocols/serial/framing/asciiProtocol';
+import { encodeHdlcSyncFrame } from '@/protocols/serial/framing/hdlcCore';
+import { rfTelemetryPlugin } from '@/protocols/wireless/rftelemetry/rfTelemetry';
+
 import { usePacketBuilder } from './usePacketBuilder';
+
+// Hook motorları global registry'den yükler; üretimde `main.tsx` kaydeder.
+registerBuiltInProtocols(protocolRegistry);
 
 /**
  * Bağlantı katmanı BÜTÜNÜYLE sahte: gerçek Web Serial jsdom'da yok ve
@@ -605,5 +614,123 @@ describe('usePacketBuilder', () => {
     // Kırpma `scheduler.start` içinde; form alanında "5" yazmak "50"nin ön adımıdır.
     expect(result.current.schedulerConfig.intervalMs).toBe(5);
     expect(result.current.responseTimeoutMs).toBe(500);
+  });
+});
+
+/**
+ * Plugin encoder yolu (spec §7). Registry LAZY olduğu için her seçim bir
+ * `await` gerektirir; testler yüklemeyi `act` içinde bekler, çünkü asıl
+ * sorulan şey "motor indikten sonra kabloya ne çıkıyor".
+ */
+describe('usePacketBuilder — plugin encoder', () => {
+  it('wraps the schema frame in the selected plugin envelope', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    act(() => {
+      fillSpecBuilderValues(result.current.setValue);
+    });
+    act(() => {
+      result.current.setFramingPlugin('hdlc');
+    });
+
+    expect(result.current.postProcessing).toBe('plugin');
+    expect(result.current.framingPluginId).toBe('hdlc');
+    // Motor inene kadar paket ÜRETİLMEZ; yerleşik dala düşülmez.
+    expect(result.current.outgoingBytes).toBeNull();
+
+    await waitFor(() => {
+      expect(result.current.outgoingBytes).not.toBeNull();
+    });
+
+    // Ham çerçeve DEĞİŞMEZ; zarf onun üstüne biner.
+    expect(result.current.buildResult?.rawFrame).toEqual(SPEC_BUILDER_FRAME);
+    expect(result.current.outgoingBytes).toEqual(encodeHdlcSyncFrame(SPEC_BUILDER_FRAME));
+  });
+
+  it('drops the plugin envelope when a built-in mode is picked again', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    await act(async () => {
+      result.current.setFramingPlugin('hdlc');
+    });
+    act(() => {
+      result.current.setPostProcessing('none');
+    });
+
+    expect(result.current.framingPluginId).toBeNull();
+    expect(result.current.postProcessing).toBe('none');
+  });
+
+  it('builds the frame with the plugin encoder instead of the store schema', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    await act(async () => {
+      result.current.setEncoderPlugin('ascii-protocol');
+    });
+
+    expect(result.current.schema?.name).toBe('ASCII Protocol Example');
+    expect(result.current.fields.map((field) => field.path)).toEqual([
+      'command',
+      'parameters',
+      'lineEnding',
+    ]);
+
+    act(() => {
+      result.current.setValue('command', 'TEMP');
+      result.current.setValue('parameters', ',25.3,40.2');
+      result.current.setValue('lineEnding', '0D0A');
+    });
+
+    const encode = asciiProtocolPlugin.encoder?.encode;
+    if (encode === undefined) {
+      throw new Error('ascii-protocol encoder taşımıyor');
+    }
+    expect(result.current.outgoingBytes).toEqual(
+      encode({ command: 'TEMP', parameters: ',25.3,40.2', lineEnding: Uint8Array.from([0x0d, 0x0a]) }),
+    );
+  });
+
+  /**
+   * Tohumun varlık sebebi: boş bir bayt alanı encoder'ın KENDİ varsayılanını
+   * ezerdi ve çerçeve preamble'sız çıkardı.
+   */
+  it('seeds the form with the defaults the encoder would apply itself', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    await act(async () => {
+      result.current.setEncoderPlugin('rf-telemetry-custom-frame');
+    });
+
+    expect(result.current.values.preamble).toBe('AAAAAA');
+    expect(result.current.values.syncWord).toBe('2DD4');
+    expect(Array.from(result.current.outgoingBytes ?? [])).toEqual(
+      Array.from(rfTelemetryPlugin.encoder?.encode({}) ?? []),
+    );
+  });
+
+  it('returns to the store schema when the plugin source is cleared', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    await act(async () => {
+      result.current.setEncoderPlugin('ascii-protocol');
+    });
+    await act(async () => {
+      result.current.setEncoderPlugin(null);
+    });
+
+    expect(result.current.encoderPluginId).toBeNull();
+    expect(result.current.schema?.name).toBe('ALP Sensor Protocol');
+  });
+
+  it('reports an unknown encoder instead of silently building with the schema', async () => {
+    const { result } = renderHook(() => usePacketBuilder());
+
+    await act(async () => {
+      result.current.setEncoderPlugin('modbus-rtu');
+    });
+
+    expect(result.current.encoderErrorKey).toBe('builder.error.encoderLoadFailed');
+    // Seçim ayakta kaldığı sürece paket ÜRETİLMEZ: yanlış motorla bayt göndermek sessiz bir hata olurdu.
+    expect(result.current.outgoingBytes).toBeNull();
   });
 });

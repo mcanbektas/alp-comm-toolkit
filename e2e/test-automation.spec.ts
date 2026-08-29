@@ -106,3 +106,32 @@ test('1440 ve 390 pikselde yatay taşma yok', async ({ page }) => {
   const narrow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(narrow, 'sayfa 390px genişlikte yatayda taşıyor').toBeLessThanOrEqual(0);
 });
+
+/**
+ * `send-frame`in üçüncü kaynağı: yükü protokolün KENDİ encoder'ının zarfına
+ * sarar (spec §7). Motor lazy yüklendiği için gerçek tarayıcıda seçim ile
+ * yazılan bayt arasında bir ağ isteği vardır — jsdom'da görünmeyen tek şey bu.
+ */
+test('gönderim adımı yükü protokolün kendi zarfıyla çerçeveler', async ({ page }) => {
+  const consoleErrors = await openStudio(page);
+
+  await page.getByTestId('ta-add-step').selectOption('send-frame');
+  await expect(page.getByTestId('ta-step-send-frame-1')).toBeVisible();
+  // Yeni adım sonda; bağlantı kapanmasın diye `disconnect` kaldırılıyor.
+  await page.getByTestId('ta-remove-disconnect').click();
+
+  await page.getByTestId('step-send-frame-1-source').selectOption('plugin-frame');
+  await page.getByTestId('step-send-frame-1-plugin').selectOption('hdlc');
+  await page.getByTestId('step-send-frame-1-bytes').fill('01 02');
+
+  await page.getByTestId('ta-run').click();
+  await expect(page.getByTestId('ta-run-status')).toHaveText(tr['testAutomation.runStatus.passed'], {
+    timeout: 15_000,
+  });
+
+  // Kabloya çıkan şey yük DEĞİL, HDLC zarfıdır: 7E … FCS FCS 7E.
+  const row = page.getByRole('row').filter({ hasText: 'send-frame-1' });
+  await expect(row).toContainText(/7E 01 02 .. .. 7E/);
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});

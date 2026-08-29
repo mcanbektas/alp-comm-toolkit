@@ -50,7 +50,15 @@ export interface FrameMatch {
  */
 export type FramePayload =
   | { readonly source: 'bytes'; readonly bytes: readonly number[] }
-  | { readonly source: 'template'; readonly templateId: string };
+  | { readonly source: 'template'; readonly templateId: string }
+  /**
+   * Ham yük, protokolün KENDİ encoder'ının zarfına sarılarak gider (spec §7'nin
+   * `payload` ailesi). Üçüncü bir kaynak gerekiyor çünkü `bytes` çerçeveyi elle
+   * yazdırır — bayrak, kaçışlama ve FCS'i kullanıcının hesaplamasını istemek,
+   * test senaryosunu protokolün kendi kodunun DIŞINDA ikinci bir gerçekleme
+   * hâline getirirdi.
+   */
+  | { readonly source: 'plugin-frame'; readonly pluginId: string; readonly bytes: readonly number[] };
 
 export interface StepBase {
   /** Senaryo içinde tekil; rapor satırları buna bağlanır. */
@@ -190,6 +198,16 @@ export function validateScenario(scenario: TestScenario): ScenarioIssue[] {
         }
         if (step.payload.source === 'template' && step.payload.templateId.length === 0) {
           issues.push({ stepId: step.id, message: 'şablon seçilmedi' });
+        }
+        if (step.payload.source === 'plugin-frame') {
+          if (step.payload.pluginId.length === 0) {
+            issues.push({ stepId: step.id, message: 'protokol encoder\'ı seçilmedi' });
+          }
+          // Boş yük geçerlidir: bazı zarflar (HDLC) yüksüz de anlamlı bir
+          // çerçeve üretir. Aralık dışı bayt ise sessizce kırpılamaz.
+          if (step.payload.bytes.some((byte) => !Number.isInteger(byte) || byte < 0 || byte > 0xff)) {
+            issues.push({ stepId: step.id, message: 'yük baytı 0-255 aralığında olmalı' });
+          }
         }
         break;
       case 'set-variable':

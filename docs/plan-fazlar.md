@@ -40,6 +40,25 @@
 
 ## Sıradaki adım
 
+## ✅ Plugin encoder tüketicisi YAZILDI (2026-08-29)
+
+`ProtocolPlugin.encoder` artık ölü alan değil. Üç tüketici: Packet Builder'ın
+çerçeveleme aşaması (`payload` ailesi, 8 yeni zarf), Packet Builder'ın ikinci
+üretim kaynağı (`values` ailesi, 4 kayıt) ve Test Automation `send-frame`in
+üçüncü kaynağı (`plugin-frame`). Rol defteri `src/protocols/encoderCatalog.ts`,
+iki yönlü testiyle birlikte.
+
+**Üç karar, gerekçeleriyle CLAUDE.md "Bilinen borçlar" 3. maddesinde:**
+(1) iki aile tek arayüzde BİRLEŞTİRİLMEDİ — boru hattının farklı aşamalarına
+düşüyorlar; (2) tüketici İKİ ekranda; (3) `protocol-core/types.ts`in
+`ProtocolEncoder<TMessage>` sözleşmesine DOKUNULMADI (kilitli karar) — bedeli
+xmodem/ymodem/zmodem/kiss'te sabitlenen parametrelerdir ve ekranda uyarı olarak
+görünür.
+
+**Ölçüm:** birim 6748 → 6776 (hepsi yeşil), e2e'ye 5 test eklendi ve tam
+süit yeşil koştu (1340 geçti · 2 atlandı).
+
+
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 
 Comm SPA'sında **Faz 9 bitti ve Faz 10 (protokol dalgaları) da BİTTİ.**

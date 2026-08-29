@@ -62,6 +62,12 @@ export interface PacketBuilderApi {
   /** Doluysa gönderilecek baytlar formdan DEĞİL bu metinden üretilir (spec §10 "HEX düzenleme"). */
   readonly hexOverride: string | null;
   readonly postProcessing: PostProcessing;
+  /** `postProcessing: 'plugin'` iken zarfı üreten plugin; başka türlü `null`. */
+  readonly framingPluginId: string | null;
+  /** Çerçeveyi şema yerine üreten plugin encoder'ı; `null` iken şema tabanlı yol koşar. */
+  readonly encoderPluginId: string | null;
+  /** Motor chunk'ı inmediyse çeviri anahtarı; başarılı yüklemede `null`. */
+  readonly encoderErrorKey: string | null;
   /** Kabloya çıkacak baytlar; üretilemiyorsa `null` — gönderim de engellenir. */
   readonly outgoingBytes: Uint8Array | null;
   readonly connection: BuilderConnectionState;
@@ -74,7 +80,12 @@ export interface PacketBuilderApi {
   readonly stepValue: (path: string, delta: number) => void;
   readonly randomize: () => void;
   readonly setHexOverride: (hex: string | null) => void;
-  readonly setPostProcessing: (mode: PostProcessing) => void;
+  /** Yerleşik dallar; plugin zarfını da DÜŞÜRÜR (değişmez tek yerde korunur). */
+  readonly setPostProcessing: (mode: Exclude<PostProcessing, 'plugin'>) => void;
+  /** Zarfı plugin encoder'ına devreder; motor arka planda yüklenir. */
+  readonly setFramingPlugin: (pluginId: string) => void;
+  /** `null` şema tabanlı üretime döndürür. */
+  readonly setEncoderPlugin: (pluginId: string | null) => void;
   readonly setSchedulerConfig: (config: SendSchedulerConfig) => void;
   readonly setResponseTimeoutMs: (ms: number) => void;
   readonly connect: (kind: BuilderSourceKind) => Promise<void>;
@@ -132,6 +143,20 @@ export interface FieldValueFormProps {
  * Studio'nun işi, burada iki farklı bayt dizisi göstermek kullanıcıyı hangisinin
  * gönderileceği konusunda ikilemde bırakırdı.
  */
+/**
+ * Çerçeveleme listesinin plugin tarafı (spec §7 `payload` ailesi).
+ *
+ * `encoderCatalog`tan TÜRETİLİR ve motor yüklenmeden çizilir: listeyi görmek
+ * için 10 chunk indirmek, açılmayacak bir menü uğruna paket indirmek olurdu.
+ */
+export interface FramingPluginOption {
+  readonly pluginId: string;
+  /** Protokol adı veridir, çeviriye girmez (CLAUDE.md). */
+  readonly displayName: string;
+  /** Tek parametreli `encode`in sabitlediği parametrelerin çeviri anahtarı. */
+  readonly fixedParametersKey?: string;
+}
+
 export interface PacketPreviewPanelProps {
   readonly bytes: Uint8Array | null;
   readonly issues: readonly PacketIssue[];
@@ -139,7 +164,12 @@ export interface PacketPreviewPanelProps {
   readonly hexOverride: string | null;
   readonly onHexOverrideChange: (hex: string | null) => void;
   readonly postProcessing: PostProcessing;
-  readonly onPostProcessingChange: (mode: PostProcessing) => void;
+  readonly onPostProcessingChange: (mode: Exclude<PostProcessing, 'plugin'>) => void;
+  /** Seçili zarf plugin'i; `postProcessing` `'plugin'` değilken `null`. */
+  readonly framingPluginId: string | null;
+  /** Listelenecek plugin zarfları — yerleşik karşılığı olanlar BURADA YOK. */
+  readonly framingPlugins: readonly FramingPluginOption[];
+  readonly onFramingPluginChange: (pluginId: string) => void;
 }
 
 /** Gönderim denetimi — mod, periyot, tekrar, yanıt bekleme (spec §10). */

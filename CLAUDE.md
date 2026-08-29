@@ -214,8 +214,9 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   KALDI: sürümü artırmak, salt ekleme yapan bir değişiklik için var olan bütün
   proje dosyalarını reddetmek olurdu.
   `features/` altında hiç açılmamış TEK klasör kaldı: `protocol-converter`
-  (§33). Bekletilmesi bilinçli: 146 plugin dosyasından yalnız 14'ünde `encoder`
-  var (hepsi `serial/framing`), yani §33'ün saydığı sekiz dönüşümün HEDEF tarafı
+  (§33). Bekletilmesi bilinçli: 191 plugin dosyasından yalnız 14'ünde `encoder`
+  var (13'ü `serial/framing`, biri `wireless/rftelemetry`; TÜKETİCİLERİ
+  2026-08-29'da yazıldı, aşağıdaki 3. madde), yani §33'ün saydığı sekiz dönüşümün HEDEF tarafı
   (Modbus, MQTT, NMEA, DBC, J1939, BACnet) yazılmamış; üstüne iki bağlantıyı
   aynı anda tutan köprü katmanı ve MQTT/UDP taşıması da yok. §33 ayrıca §46'nın
   geliştirme sırasında ve §50'nin revize ana sayfa kategorilerinde HİÇ geçmiyor,
@@ -487,23 +488,55 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   ("9 çakışma" gerçekte 14'tü). **Yazılı bir borç ölçümünü KULLANMADAN ÖNCE
   yeniden ölç** — bu depoda kural hâline geldi.
 
-  **3. `ProtocolPlugin.encoder`in TÜKETİCİSİ YOK** (2026-08-29 ölçümü).
-  191 plugin dosyasının **14'ünde** `encoder:` var (13'ü `serial/framing`,
-  biri `wireless/rftelemetry`) ve hepsinin birim testi de var — ama
-  `plugin.encoder` alanını `src/` içinde OKUYAN tek yer `protocol-core/
-  types.ts`teki tanımın kendisi. Packet Builder ve Test Automation çerçeveyi
-  şema üzerinden üretiyor (`encodeWithSchema`), plugin encoder'ından değil.
-  **Sonucu:** yeni encoder yazmak bugün tüketicisi olmayan koda kod eklemektir;
-  önce bir TÜKETİCİ gerekir. Bu, §33 Protocol Converter'ın da gerçek ön
-  koşuludur (§33'ün saydığı sekiz dönüşümün hedef tarafı encoder ister).
+  **3. ✅ KAPANDI: `ProtocolPlugin.encoder`in TÜKETİCİSİ YAZILDI** (2026-08-29).
+  Eski not "191 plugin dosyasının 14'ünde `encoder:` var ama `plugin.encoder`ı
+  OKUYAN tek yer `types.ts`teki tanımın kendisi" diyordu; ölçüm doğruydu ve
+  artık geçerli DEĞİL. Bugün alanı okuyan üç yer var: `usePacketBuilder`
+  (iki yol), `test-automation/byteSourceIo` ve rol defteri testi.
 
-  **Tüketiciyi yazacak olana ölçülmüş kolaylık:** `ProtocolEncoder<TMessage>`
-  keyfî bir tip alıyor gibi görünür ve genel bir form kurulamayacağı sanılır —
-  ama 14 encoder'ın girdisi pratikte İKİ kümeye düşüyor: **10'u `Uint8Array`**
-  (yük → çerçevelenmiş bayt: slip, cobs, kiss, hdlc, sdlc, ppp, xmodem,
-  ymodem, zmodem, delimiter-based), **3'ü `EncodeValues`**
-  (`schemaEncoder.ts:49`, yani `Record<alan kimliği, değer>` — Packet
-  Builder'ın şablonlarıyla AYNI şekil: ascii-protocol, custom-binary-protocol,
-  length-based-protocol), biri (`rf-telemetry`) satır içi. İkisi de genel
-  olarak tüketilebilir; engel sanıldığı kadar büyük değil. Bunu bir sonraki
-  nesil yeniden keşfetmesin diye yazıldı.
+  **Rol defteri: `src/protocols/encoderCatalog.ts`.** `ProtocolEncoder<TMessage>`
+  bir mesajı bayta çevirdiğini söyler, o mesajın NE olduğunu söylemez; iki aile
+  boru hattının FARKLI aşamalarına düşer (`payload` 10 kayıt = zarf,
+  `values` 4 kayıt = üretici). Ayrım TİPE değil BİLDİRİME yazıldı —
+  `types.ts` kilitli karar, açılmadı. `PROTOCOL_CATEGORIES` ↔ `DOMAIN_IDS`
+  ile aynı disiplin: kopya liste + iki yönlü test (`encoderCatalog.test.ts`),
+  ayrışma derlemede değil TESTTE kırmızıya döner.
+
+  **Tüketici 1 — Packet Builder çerçeveleme.** `PostProcessing` artık
+  `'plugin'` dalını da taşıyor ve `PacketBuildOptions` AYRIK BİRLİK: `'plugin'`
+  seçilip encoder'ın verilmediği durum temsil edilemez. Yerleşik beş dal
+  DEĞİŞMEDİ (senkron, chunk indirmez); listeye 8 yeni zarf eklendi (hdlc, sdlc,
+  ppp, kiss, delimiter-based, xmodem, ymodem, zmodem). `cobs`/`slip` defterde
+  `builtInEquivalent` taşır ve listede İKİ KEZ GÖRÜNMEZ: `packetPipeline` o iki
+  fonksiyonu zaten doğrudan çağırıyor, defter testi ikisinin aynı baytı
+  ürettiğini bayt bayt kanıtlıyor.
+
+  **Tüketici 2 — Packet Builder üretim kaynağı.** Şema tabanlı yolun YANINDA
+  ikinci bir kaynak (`builder.setEncoderPlugin`): form alanları plugin'in kendi
+  şemasından çizilir, çerçeveyi `plugin.encoder.encode` üretir
+  (`buildPacketWithEncoder`). `rf-telemetry`de fark somut: encoder preamble ve
+  sync sözcüğünü kendi varsayılanıyla doldurur, `encodeWithSchema` doldurmaz.
+  Bu yüzden defter TOHUM taşır (`seedValues`) ve tohum plugin'in dışa açtığı
+  SABİTLERDEN türetilir — boş bir bayt alanı varsayılanı EZERDİ.
+
+  **Tüketici 3 — Test Automation `send-frame`.** Üçüncü kaynak
+  `{ source: 'plugin-frame', pluginId, bytes }`: ham yük protokolün kendi
+  zarfıyla gider. Salt EKLEME; `SCENARIO_FORMAT_VERSION` 1'de KALDI (§40'ın
+  `testScenarios` kararıyla aynı gerekçe) ve `parseScenarioJson` sığ doğruladığı
+  için eski senaryolar etkilenmedi.
+
+  **Registry LAZY olduğu için motor FONKSİYON olarak enjekte edilir**,
+  `pluginId` olarak değil: `buildPacket` saf ve senkron, her tuş vuruşunda
+  çağrılıyor. Motor inene kadar paket ÜRETİLMEZ ve yerleşik dala DÜŞÜLMEZ —
+  seçilen zarf olmadan bayt göndermek sessiz bir hata olurdu.
+
+  **Kalan kayıp — tek parametreli `encode` sözleşmesi KAYIPLI.**
+  `xmodem`/`ymodem` blok numarasını 1'e ve CRC modunu, `zmodem` ZDATA + sıfır
+  konum + binary16'yı SABİTLER; `kiss`in encoder'ı `encodeSlip`in KENDİSİDİR ve
+  KISS komut baytını EKLEMEZ. Bu dördü defterde `fixedParametersKey` taşır ve
+  ekranda uyarı olarak GÖRÜNÜR. Düzeltmek `encode(message, options)` demektir,
+  yani `types.ts` sözleşmesini açmak — bilinçli olarak YAPILMADI.
+
+  **§33 Protocol Converter'ın ön koşulu bu maddeydi ve artık karşılandı**;
+  hedef tarafın motorları hâlâ yazılmamış olduğu için §33 yine de açılmadı.
+

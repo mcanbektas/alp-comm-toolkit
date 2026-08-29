@@ -11,11 +11,12 @@ import type { ReactNode } from 'react';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { CHECKSUM_ALGORITHMS } from '@/protocol-core/checksums/algorithmCatalogue';
+import { PAYLOAD_ENCODERS } from '@/protocols/encoderCatalog';
 import { COMPARISON_OPERATORS } from '../conditions';
 import type { ChecksumAlgorithm } from '@/protocol-core/checksums/algorithmCatalogue';
 import type { Condition, ComparisonOperator, Operand } from '../conditions';
 import type { FieldEndianness, FieldWidth } from '@/protocol-core/analysis/types';
-import type { TestStep } from '../scenario';
+import type { FramePayload, TestStep } from '../scenario';
 import type { TranslationKey } from '@/translations';
 
 const FIELD_CLASS = 'rounded-token-sm border border-line bg-surface px-2 py-1 text-sm text-text';
@@ -31,6 +32,9 @@ const OPERAND_LABELS: Record<Operand['kind'], TranslationKey> = {
 const WIDTHS: readonly FieldWidth[] = [1, 2, 4];
 const ENDIANNESSES: readonly FieldEndianness[] = ['big', 'little'];
 
+/** Boş bir gönderim adımı anlamsız olurdu; iki baytlık asgari yük. */
+const DEFAULT_PAYLOAD_BYTES: readonly number[] = [0xaa, 0x01];
+
 function hexOf(bytes: readonly number[]): string {
   return bytes.map((byte) => byte.toString(16).toUpperCase().padStart(2, '0')).join(' ');
 }
@@ -45,6 +49,30 @@ function bytesOf(text: string): number[] {
     }
   }
   return bytes;
+}
+
+/** Bayt taşıyan iki kaynağın ortak okuması; şablon kaynağında bayt yoktur. */
+function payloadBytesOf(payload: FramePayload): readonly number[] {
+  return payload.source === 'template' ? [] : payload.bytes;
+}
+
+/**
+ * Kaynak değişince yük KORUNUR: kullanıcı `bytes` ile yazdığı yükü zarfa
+ * sarmak istediğinde onu yeniden yazmak zorunda kalmamalı. Şablona geçişte
+ * korunacak bir bayt yoktur.
+ */
+function payloadFor(source: string, previous: FramePayload): FramePayload {
+  if (source === 'template') {
+    return { source: 'template', templateId: '' };
+  }
+  const bytes = payloadBytesOf(previous);
+  const carried = bytes.length === 0 ? DEFAULT_PAYLOAD_BYTES : bytes;
+
+  if (source === 'plugin-frame') {
+    const first = PAYLOAD_ENCODERS[0];
+    return { source: 'plugin-frame', pluginId: first?.pluginId ?? '', bytes: carried };
+  }
+  return { source: 'bytes', bytes: carried };
 }
 
 function numberOr(text: string, fallback: number): number {
@@ -305,30 +333,38 @@ export function StepFields({ step, onChange }: StepFieldsProps): ReactNode {
               data-testid={`${id}-source`}
               className={FIELD_CLASS}
               value={step.payload.source}
-              onChange={(event) =>
-                onChange(
-                  event.target.value === 'template'
-                    ? { ...step, payload: { source: 'template', templateId: '' } }
-                    : { ...step, payload: { source: 'bytes', bytes: [0xaa, 0x01] } },
-                )
-              }
+              onChange={(event) => onChange({ ...step, payload: payloadFor(event.target.value, step.payload) })}
             >
               <option value="bytes">{t('testAutomation.payload.bytes')}</option>
               <option value="template">{t('testAutomation.payload.template')}</option>
+              <option value="plugin-frame">{t('testAutomation.payload.pluginFrame')}</option>
             </select>
           </label>
-          {step.payload.source === 'bytes' ? (
-            <label className={LABEL_CLASS} htmlFor={`${id}-bytes`}>
-              {t('testAutomation.field.bytes')}
-              <input
-                id={`${id}-bytes`}
-                data-testid={`${id}-bytes`}
-                className={`${FIELD_CLASS} font-mono`}
-                value={hexOf(step.payload.bytes)}
-                onChange={(event) => onChange({ ...step, payload: { source: 'bytes', bytes: bytesOf(event.target.value) } })}
-              />
+          {step.payload.source === 'plugin-frame' ? (
+            <label className={LABEL_CLASS} htmlFor={`${id}-plugin`}>
+              {t('testAutomation.field.frameEncoder')}
+              <select
+                id={`${id}-plugin`}
+                data-testid={`${id}-plugin`}
+                className={FIELD_CLASS}
+                value={step.payload.pluginId}
+                onChange={(event) =>
+                  onChange({
+                    ...step,
+                    payload: { source: 'plugin-frame', pluginId: event.target.value, bytes: payloadBytesOf(step.payload) },
+                  })
+                }
+              >
+                {/* Protokol adları veridir, sözlükten geçmez. */}
+                {PAYLOAD_ENCODERS.map((entry) => (
+                  <option key={entry.pluginId} value={entry.pluginId}>
+                    {entry.displayName}
+                  </option>
+                ))}
+              </select>
             </label>
-          ) : (
+          ) : null}
+          {step.payload.source === 'template' ? (
             <label className={LABEL_CLASS} htmlFor={`${id}-template`}>
               {t('testAutomation.field.templateId')}
               <input
@@ -336,6 +372,31 @@ export function StepFields({ step, onChange }: StepFieldsProps): ReactNode {
                 className={FIELD_CLASS}
                 value={step.payload.templateId}
                 onChange={(event) => onChange({ ...step, payload: { source: 'template', templateId: event.target.value } })}
+              />
+            </label>
+          ) : (
+            <label className={LABEL_CLASS} htmlFor={`${id}-bytes`}>
+              {step.payload.source === 'bytes'
+                ? t('testAutomation.field.bytes')
+                : t('testAutomation.field.payloadBytes')}
+              <input
+                id={`${id}-bytes`}
+                data-testid={`${id}-bytes`}
+                className={`${FIELD_CLASS} font-mono`}
+                value={hexOf(payloadBytesOf(step.payload))}
+                onChange={(event) =>
+                  onChange({
+                    ...step,
+                    payload:
+                      step.payload.source === 'plugin-frame'
+                        ? {
+                            source: 'plugin-frame',
+                            pluginId: step.payload.pluginId,
+                            bytes: bytesOf(event.target.value),
+                          }
+                        : { source: 'bytes', bytes: bytesOf(event.target.value) },
+                  })
+                }
               />
             </label>
           )}

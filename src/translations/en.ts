@@ -1069,6 +1069,17 @@ export const en: TranslationDictionary = {
   'builder.form.maximum': 'max',
   'builder.field.increment': 'Increase',
   'builder.field.decrement': 'Decrease',
+  'builder.error.encoderLoadFailed': 'The protocol engine could not be loaded; change the selection or reload the page.',
+  'builder.issue.encoderLoading': 'The selected protocol engine has not loaded yet; no packet was built.',
+  'builder.field.frameSource': 'Frame produced by',
+  'builder.frameSource.schema': 'Studio schema',
+  'builder.frameSource.pluginNote': 'Fields come from the protocol\'s own schema; the frame is produced by the protocol\'s own encoder.',
+  'builder.encoder.fixed.kiss': 'This encoder only applies SLIP framing; you add the KISS command byte to the payload yourself.',
+  'builder.encoder.fixed.xmodem':
+    'The payload must be exactly 128 or 1024 bytes; block number 1 and CRC mode are fixed.',
+  'builder.encoder.fixed.ymodem':
+    'The payload must be exactly 128 or 1024 bytes; block 1 and CRC mode are fixed, and the file header (block 0) is not produced.',
+  'builder.encoder.fixed.zmodem': 'The ZDATA header, zero position and binary16 header format are fixed.',
   'builder.field.postProcessing': 'Post-framing processing',
   'builder.postProcessing.none': 'None',
   'builder.postProcessing.byteStuffing': 'Byte stuffing',
@@ -8840,6 +8851,9 @@ export const en: TranslationDictionary = {
   'testAutomation.field.thenBranch': 'If the condition holds',
   'testAutomation.field.elseBranch': 'Otherwise',
 
+  'testAutomation.field.payloadBytes': 'Payload bytes',
+  'testAutomation.field.frameEncoder': 'Protocol envelope',
+  'testAutomation.payload.pluginFrame': 'Frame with the protocol encoder',
   'testAutomation.payload.bytes': 'Raw bytes',
   'testAutomation.payload.template': 'Packet template',
 

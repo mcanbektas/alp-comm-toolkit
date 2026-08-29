@@ -88,15 +88,40 @@ const BCD_DIGITS_PER_BYTE = 2n;
 
 // --- Dışa açılan tipler ---------------------------------------------------
 
-export type PostProcessing = 'none' | 'byteStuffing' | 'bitStuffing' | 'cobs' | 'slip';
+/**
+ * `'plugin'` DIŞINDAKİ dallar şemayı okur ve senkron çalışır; `'plugin'` ise
+ * çerçeveyi bir plugin encoder'ına sarar (spec §7 `ProtocolEncoder`in `payload`
+ * ailesi, bkz. `protocols/encoderCatalog.ts`).
+ */
+export type PostProcessing = 'none' | 'byteStuffing' | 'bitStuffing' | 'cobs' | 'slip' | 'plugin';
 
-export interface PacketBuildOptions {
-  readonly postProcessing: PostProcessing;
+interface BuiltInPostProcessingOptions {
+  readonly postProcessing: Exclude<PostProcessing, 'plugin'>;
   /** `byteStuffing` için kaçış baytı; verilmezse 0x7D. */
   readonly escapeByte?: number;
   /** Kaçışlanacak baytlar; verilmezse şemanın start/end baytları. */
   readonly escapedBytes?: readonly number[];
 }
+
+/**
+ * Encoder FONKSİYON olarak alınır, `pluginId` olarak değil.
+ *
+ * Registry lazy (`protocols/index.ts`): kimlikten motora inmek `await`
+ * gerektirir, oysa bu modül saf ve senkron — her tuş vuruşunda çağrılıyor.
+ * Yüklemeyi çağıran katman yapar, buraya yüklenmiş fonksiyon iner. Aynı
+ * gerekçe `random`da da geçerli (dosya başı "Güvenlik").
+ */
+interface PluginPostProcessingOptions {
+  readonly postProcessing: 'plugin';
+  readonly frameEncoder: (payload: Uint8Array) => Uint8Array;
+}
+
+/**
+ * Ayrık birlik: `'plugin'` seçilip encoder'ın verilmediği durum TEMSİL
+ * EDİLEMEZ. Çalışma zamanında "encoder yok" dalı yazmak, o dalın sessizce
+ * çerçevelenmemiş bayt döndürmesi riskini açardı.
+ */
+export type PacketBuildOptions = BuiltInPostProcessingOptions | PluginPostProcessingOptions;
 
 export interface PacketIssue {
   /** Sorunun bağlı olduğu alan yolu; çerçeve genelindeyse `null`. */
@@ -272,7 +297,7 @@ function splitFrame(schema: ProtocolSchema, frame: Uint8Array): FrameSegments {
   };
 }
 
-function escapeRuleFor(schema: ProtocolSchema, options: PacketBuildOptions): EscapeRule {
+function escapeRuleFor(schema: ProtocolSchema, options: BuiltInPostProcessingOptions): EscapeRule {
   const declared =
     options.escapedBytes ?? [
       ...(schema.framing.startBytes ?? []),
@@ -323,6 +348,12 @@ function applyPostProcessing(
 
     case 'slip':
       return encodeSlip(rawFrame);
+
+    case 'plugin':
+      // Zarf çerçevenin TAMAMINI sarar — COBS/SLIP dallarıyla aynı kural:
+      // checksum ham çerçeve üzerinde hesaplandı, taşıma katmanı onun üstüne
+      // biner. Encoder fırlatırsa `buildPacket` yakalar ve paket ÜRETİLMEZ.
+      return options.frameEncoder(rawFrame);
   }
 }
 
@@ -376,24 +407,72 @@ export function buildPacket(
     return { ok: false, rawFrame: null, framedBytes: null, issues };
   }
 
-  const rawFrame = encoded.bytes;
+  return finishFrame(schema, encoded.bytes, issues, options);
+}
+
+/**
+ * Ham çerçeveye post-processing uygular ve sonucu paketler — üretim yolundan
+ * BAĞIMSIZ olan kısım. İki üretici (şema ve plugin encoder) buraya iner;
+ * kopyalanan bir `try/catch` iki yolun hata davranışını sessizce ayrıştırırdı.
+ */
+function finishFrame(
+  schema: ProtocolSchema,
+  rawFrame: Uint8Array,
+  issues: readonly PacketIssue[],
+  options: PacketBuildOptions,
+): PacketBuildResult {
+  const carried = [...issues];
 
   let framedBytes: Uint8Array;
   try {
-    framedBytes = applyPostProcessing(schema, rawFrame, options, issues);
+    framedBytes = applyPostProcessing(schema, rawFrame, options, carried);
   } catch (cause) {
     return {
       ok: false,
       rawFrame,
       framedBytes: null,
       issues: [
-        ...issues,
+        ...carried,
         { fieldId: null, messageKey: POST_PROCESSING_FAILED_KEY, params: { detail: describeError(cause) } },
       ],
     };
   }
 
-  return { ok: true, rawFrame, framedBytes, issues };
+  return { ok: true, rawFrame, framedBytes, issues: carried };
+}
+
+/**
+ * Aynı boru hattı, ama çerçeveyi şema yerine bir PLUGIN ENCODER'ı üretir
+ * (spec §7 `ProtocolEncoder`in `values` ailesi).
+ *
+ * `schema` yine gerekiyor ama yalnız post-processing yerleşimi için: bayt
+ * doldurma çerçevenin start/end baytlarını dokunulmadan bırakmak zorunda ve
+ * bunu ancak şemadan bilir. Çerçevenin İÇERİĞİNE burada şema karışmaz.
+ *
+ * Sorun listesi tek parçadır: `values` ailesindeki encoder'lar `EncodeIssue`
+ * DÖNDÜRMEZ, başarısızlıkta FIRLATIRLAR (`asciiProtocol.ts:47`). Bu yüzden
+ * hata tek bir çerçeve sorununa iner; alan bazlı ayrıntı üretmek, olmayan bir
+ * bilgiyi uydurmak olurdu.
+ */
+export function buildPacketWithEncoder(
+  schema: ProtocolSchema,
+  encode: (values: EncodeValues) => Uint8Array,
+  values: EncodeValues,
+  options: PacketBuildOptions,
+): PacketBuildResult {
+  let rawFrame: Uint8Array;
+  try {
+    rawFrame = encode(values);
+  } catch (cause) {
+    return {
+      ok: false,
+      rawFrame: null,
+      framedBytes: null,
+      issues: [{ fieldId: null, messageKey: ENCODE_FAILED_KEY, params: { detail: describeError(cause) } }],
+    };
+  }
+
+  return finishFrame(schema, rawFrame, [], options);
 }
 
 // --- describeBuilderFields ------------------------------------------------

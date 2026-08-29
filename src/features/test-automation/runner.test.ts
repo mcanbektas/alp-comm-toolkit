@@ -51,6 +51,12 @@ function fakeIo(frames: readonly (Uint8Array | undefined)[] = [], overrides: Par
       calls.push(`encodeTemplate:${templateId}`);
       return Uint8Array.from([0x01, 0x02]);
     },
+    encodePluginFrame: async (pluginId, payload) => {
+      calls.push(`encodePluginFrame:${pluginId}`);
+      // Sahte zarf: yükü iki bayrak arasına alır — gerçek encoder'ın
+      // davranışını taklit etmez, koşucunun onu ÇAĞIRDIĞINI kanıtlar.
+      return Uint8Array.from([0x7e, ...payload, 0x7e]);
+    },
     abort: () => {
       calls.push('abort');
     },
@@ -372,6 +378,45 @@ describe('runScenario — şablondan gönderim', () => {
     const report = await run.report;
     expect(fake.calls).toContain('encodeTemplate:status-request');
     expect(report.steps[0]?.actualValue).toBe('01 02');
+  });
+
+  it('plugin-frame yükü protokolün kendi zarfına sardırır', async () => {
+    const fake = fakeIo();
+    const run = runScenario(
+      scenario([
+        {
+          id: 's1',
+          kind: 'send-frame',
+          payload: { source: 'plugin-frame', pluginId: 'hdlc', bytes: [0x01, 0x02] },
+        },
+      ]),
+      fake.io,
+    );
+
+    await run.report;
+
+    expect(fake.calls).toContain('encodePluginFrame:hdlc');
+    // Kabloya çıkan şey YÜK DEĞİL, zarfın kendisidir.
+    expect(Array.from(fake.written[0] ?? [])).toEqual([0x7e, 0x01, 0x02, 0x7e]);
+  });
+
+  it('zarf çözülemezse adım HATA olur ve hiçbir bayt yazılmaz', async () => {
+    const fake = fakeIo([], {
+      encodePluginFrame: vi.fn(async () => {
+        throw new Error('motor yüklenemedi');
+      }),
+    });
+    const run = runScenario(
+      scenario([
+        { id: 's1', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'yok', bytes: [0x01] } },
+      ]),
+      fake.io,
+    );
+
+    const report = await run.report;
+
+    expect(report.steps[0]?.outcome).toBe('error');
+    expect(fake.written).toHaveLength(0);
   });
 
   it('şablon çözülemezse adım HATA olur', async () => {

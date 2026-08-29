@@ -26,6 +26,7 @@
  */
 
 import { createExtractorFromConfig } from '../../protocol-core/framing/createExtractor';
+import { loadProtocolPlugin } from '../../protocol-core/registry';
 import { createStreamBuffer } from '../../protocol-core/streams/streamBuffer';
 import type { FramingMethodConfig } from '../../protocol-core/framing/createExtractor';
 import type { ByteSource, ConnectionError } from '../../connection/types';
@@ -208,6 +209,20 @@ export function createByteSourceIo(options: ByteSourceIoOptions): ByteSourceScen
       const encode = options.encodeTemplate;
       if (encode === undefined) throw new Error('şablon deposu bağlı değil');
       return encode(templateId);
+    },
+
+    /**
+     * Motor registry'den TALEP ÜZERİNE yüklenir: senaryo hangi protokolü
+     * kullanacağını çalışma zamanında söyler, ekran açılırken 14 motoru birden
+     * indirmenin bir sebebi yoktur.
+     */
+    async encodePluginFrame(pluginId: string, payload: Uint8Array): Promise<Uint8Array> {
+      const plugin = await loadProtocolPlugin(pluginId);
+      const encoder = plugin.encoder;
+      if (encoder === undefined) {
+        throw new Error(`${pluginId} bir encoder taşımıyor`);
+      }
+      return encoder.encode(payload);
     },
 
     abort(): void {

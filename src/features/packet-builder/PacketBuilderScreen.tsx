@@ -28,7 +28,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
-import { CopyButton, ResultField, TextField } from '@/components/forms';
+import { CopyButton, ResultField, SelectField, TextField } from '@/components/forms';
 import { ProjectPanel } from '@/features/projects';
 import { bytesToHex } from '@/protocol-core/buffers/representation';
 import {
@@ -37,6 +37,7 @@ import {
   generatePythonArray,
 } from '@/protocol-core/encoding/codeGenerators';
 import { SPEC_BUILDER_FRAME, SPEC_SENSOR_PROTOCOL_JSON } from '@/protocol-core/schemas/specFixture';
+import { PAYLOAD_ENCODERS, VALUES_ENCODERS } from '@/protocols/encoderCatalog';
 import type { TranslationKey } from '@/translations';
 import { downloadTextFile } from '@/utils/downloadTextFile';
 
@@ -50,6 +51,24 @@ import { usePacketBuilder } from './usePacketBuilder';
 
 /** Üretilen kod ve indirilen dosyadaki değişken adı — tanımlayıcı, çeviriye girmez. */
 const PACKET_VARIABLE_NAME = 'packet';
+
+/**
+ * Çerçeveleme listesine giren plugin zarfları: yerleşik karşılığı OLMAYANLAR.
+ *
+ * COBS ve SLIP dışarıda kalır çünkü `packetPipeline` o iki fonksiyonu zaten
+ * doğrudan çağırıyor; listeye ikinci kez koymak aynı baytı iki adla sunmak ve
+ * seçildiğinde gereksiz bir chunk indirmek olurdu (`encoderCatalog.ts`).
+ */
+const FRAMING_PLUGIN_OPTIONS = PAYLOAD_ENCODERS.filter(
+  (entry) => entry.builtInEquivalent === undefined,
+).map((entry) => ({
+  pluginId: entry.pluginId,
+  displayName: entry.displayName,
+  fixedParametersKey: entry.fixedParametersKey,
+}));
+
+/** Şema tabanlı üretimin seçim değeri — plugin kimlikleriyle çakışmaz. */
+const SCHEMA_SOURCE_VALUE = 'schema';
 
 /** İndirilen dosya adları. Dosya adı veri değil kimliktir; çevrilmez. */
 const DOWNLOAD_NAMES = {
@@ -168,6 +187,42 @@ export function PacketBuilderScreen(): ReactNode {
       <section className={sectionClass()} data-testid="builder-schema-strip">
         <h2 className={headingClass()}>{t('builder.section.schema')}</h2>
 
+        {/* Çerçeveyi ne üretecek: Studio'daki şema mı, protokolün kendi
+            encoder'ı mı (spec §7). İkinci yol, şema yolunun YERİNE GEÇMEZ. */}
+        <div className="max-w-sm" data-testid="builder-frame-source">
+          <SelectField
+            id="builder-frame-source-select"
+            label={t('builder.field.frameSource')}
+            value={builder.encoderPluginId ?? SCHEMA_SOURCE_VALUE}
+            onChange={(value) => {
+              builder.setEncoderPlugin(value === SCHEMA_SOURCE_VALUE ? null : value);
+            }}
+            options={[
+              { value: SCHEMA_SOURCE_VALUE, label: t('builder.frameSource.schema') },
+              // Protokol adları veridir, sözlükten geçmez.
+              ...VALUES_ENCODERS.map((entry) => ({
+                value: entry.pluginId,
+                label: entry.displayName,
+              })),
+            ]}
+          />
+          {builder.encoderPluginId === null ? null : (
+            <p className="mt-1 text-xs text-muted" data-testid="builder-frame-source-note">
+              {t('builder.frameSource.pluginNote')}
+            </p>
+          )}
+        </div>
+
+        {builder.encoderErrorKey !== null ? (
+          <p
+            role="alert"
+            data-testid="builder-encoder-error"
+            className="rounded-token border border-line bg-danger-soft p-3 text-sm text-danger-strong"
+          >
+            {t(builder.encoderErrorKey as TranslationKey)}
+          </p>
+        ) : null}
+
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           {builder.schema === null ? (
             <p className="text-sm text-muted" data-testid="builder-schema-missing">
@@ -282,6 +337,9 @@ export function PacketBuilderScreen(): ReactNode {
               onHexOverrideChange={builder.setHexOverride}
               postProcessing={builder.postProcessing}
               onPostProcessingChange={builder.setPostProcessing}
+              framingPluginId={builder.framingPluginId}
+              framingPlugins={FRAMING_PLUGIN_OPTIONS}
+              onFramingPluginChange={builder.setFramingPlugin}
             />
           </section>
 

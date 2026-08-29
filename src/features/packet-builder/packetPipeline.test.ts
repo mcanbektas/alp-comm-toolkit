@@ -19,10 +19,15 @@ import { computeChecksum } from '../../protocol-core/checksums/algorithmCatalogu
 import type { EncodeValues } from '../../protocol-core/encoding/schemaEncoder';
 import { stuffBits } from '../../protocol-core/framing/bitStuffing';
 import { decodeCobs } from '../../protocol-core/framing/cobs';
+import { encodeSlip } from '../../protocol-core/framing/slip';
+import { ASCII_PROTOCOL_SCHEMA, asciiProtocolPlugin } from '../../protocols/serial/framing/asciiProtocol';
+import { encodeHdlcSyncFrame } from '../../protocols/serial/framing/hdlcCore';
+import { xmodemPlugin } from '../../protocols/serial/framing/xmodem';
 import type { ProtocolFieldSchema, ProtocolSchema } from '../../protocol-core/schemas/protocolSchema';
 import { SPEC_BUILDER_FRAME, SPEC_SENSOR_PROTOCOL } from '../../protocol-core/schemas/specFixture';
 import {
   buildPacket,
+  buildPacketWithEncoder,
   describeBuilderFields,
   nextSequenceValues,
   randomizeValues,
@@ -661,5 +666,113 @@ describe('stepFieldValue', () => {
     expect(stepFieldValue(NESTED_SCHEMA, {}, 'header.deviceAddress', 2)).toEqual({
       'header.deviceAddress': 2,
     });
+  });
+});
+
+/**
+ * Plugin encoder'ının TÜKETİLDİĞİ iki yol (spec §7). Sahte encoder yerine
+ * gerçek plugin fonksiyonları kullanılıyor: uydurulmuş bir `encode` yalnız
+ * boru hattını sınardı, oysa asıl soru gerçek encoder'ların bu hattan
+ * geçtiğinde doğru baytı üretip üretmediği.
+ */
+/** ASCII protokolün satır sonu alanı — spec örneğindeki `\r\n`. */
+const CRLF = Uint8Array.from([0x0d, 0x0a]);
+
+describe('plugin encoder tüketimi', () => {
+  it('payload ailesini post-processing aşamasında çalıştırır', () => {
+    const result = buildPacket(SPEC_SENSOR_PROTOCOL, SET_OUTPUT_VALUES, {
+      postProcessing: 'plugin',
+      frameEncoder: encodeHdlcSyncFrame,
+    });
+
+    // Zarf HAM çerçevenin tamamını sarar: 0x7E bayrak, FCS, 0x7E bayrak.
+    expect(rawOf(result)).toEqual(Array.from(SPEC_BUILDER_FRAME));
+    expect(framedOf(result)?.[0]).toBe(0x7e);
+    expect(framedOf(result)?.at(-1)).toBe(0x7e);
+    expect(framedOf(result)).toEqual(Array.from(encodeHdlcSyncFrame(SPEC_BUILDER_FRAME)));
+  });
+
+  it('payload ailesi fırlatırsa paket ÜRETİLMEZ, istisna ekrana kaçmaz', () => {
+    const result = buildPacket(SPEC_SENSOR_PROTOCOL, SET_OUTPUT_VALUES, {
+      postProcessing: 'plugin',
+      frameEncoder: () => {
+        throw new Error('zarf reddetti');
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.framedBytes).toBeNull();
+    // Ham çerçeve KORUNUR: kullanıcı checksum'un neyin üzerinde hesaplandığını görebilmeli.
+    expect(rawOf(result)).toEqual(Array.from(SPEC_BUILDER_FRAME));
+    expect(firstIssue(result).messageKey).toBe('builder.error.postProcessingFailed');
+  });
+
+  /**
+   * Gerçek bir encoder'ın gerçek kısıtı: `encodeXmodemBlock` 128/1024 dışında
+   * FIRLATIR ve bu tüketici onu ilk kez KULLANICI girdisiyle çağırıyor.
+   */
+  it('kısıtını çiğneyen gerçek zarf paketi ÜRETMEZ', () => {
+    const encode = xmodemPlugin.encoder?.encode;
+    if (encode === undefined) {
+      throw new Error('xmodem encoder taşımıyor');
+    }
+
+    const result = buildPacket(SPEC_SENSOR_PROTOCOL, SET_OUTPUT_VALUES, {
+      postProcessing: 'plugin',
+      frameEncoder: (payload) => encode(payload),
+    });
+
+    // 8 baytlık çerçeve XMODEM bloğu olamaz; hata sorun listesine iner, ekrana kaçmaz.
+    expect(result.ok).toBe(false);
+    expect(result.framedBytes).toBeNull();
+    expect(firstIssue(result).messageKey).toBe('builder.error.postProcessingFailed');
+  });
+
+  it('values ailesinde çerçeveyi ŞEMA değil encoder üretir', () => {
+    const encode = asciiProtocolPlugin.encoder?.encode;
+    if (encode === undefined) {
+      throw new Error('ascii-protocol encoder taşımıyor');
+    }
+    const values: EncodeValues = { command: 'TEMP', parameters: ',25.3,40.2', lineEnding: CRLF };
+
+    const result = buildPacketWithEncoder(ASCII_PROTOCOL_SCHEMA, encode, values, {
+      postProcessing: 'none',
+    });
+
+    expect(result.ok).toBe(true);
+    expect(rawOf(result)).toEqual(Array.from(encode(values)));
+    expect(result.issues).toEqual([]);
+  });
+
+  it('values ailesi post-processing ile birleşebilir', () => {
+    const encode = asciiProtocolPlugin.encoder?.encode;
+    if (encode === undefined) {
+      throw new Error('ascii-protocol encoder taşımıyor');
+    }
+    const values: EncodeValues = { command: 'TEMP', parameters: ',25.3,40.2', lineEnding: CRLF };
+
+    const result = buildPacketWithEncoder(ASCII_PROTOCOL_SCHEMA, encode, values, {
+      postProcessing: 'plugin',
+      frameEncoder: encodeSlip,
+    });
+
+    expect(framedOf(result)).toEqual(Array.from(encodeSlip(encode(values))));
+  });
+
+  it('values ailesi fırlatırsa sorun ALAN BAZLI değil çerçeve genelindedir', () => {
+    const result = buildPacketWithEncoder(
+      ASCII_PROTOCOL_SCHEMA,
+      () => {
+        throw new Error('kodlanamadı');
+      },
+      {},
+      { postProcessing: 'none' },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.rawFrame).toBeNull();
+    // `values` ailesi `EncodeIssue` DÖNDÜRMEZ, fırlatır: alan kimliği uydurulmaz.
+    expect(firstIssue(result).fieldId).toBeNull();
+    expect(firstIssue(result).messageKey).toBe('builder.error.encodeFailed');
   });
 });

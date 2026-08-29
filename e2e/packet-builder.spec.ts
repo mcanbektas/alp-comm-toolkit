@@ -176,3 +176,60 @@ test('yatay taşma yok', async ({ page }) => {
   );
   expect(overflow, 'sayfa yatayda taşıyor').toBeLessThanOrEqual(0);
 });
+
+/**
+ * Plugin encoder'ının EKRANDAKİ turu (spec §7).
+ *
+ * Bu iki testin birim testlerle sınanamayan kısmı şu: motor chunk'ı LAZY
+ * yüklenir ve seçim ile bayt arasında bir `await` vardır. jsdom'da o yükleme
+ * anında çözülür; gerçek tarayıcıda ayrı bir ağ isteğidir.
+ */
+test('plugin zarfı seçilince çerçeve HDLC bayrakları arasına alınır', async ({ page }) => {
+  const consoleErrors = await openBuilder(page);
+
+  await fillSetOutputExample(page);
+  await expect(packetHex(page)).toHaveText(SPEC_PACKET_HEX);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:hdlc');
+
+  // Ham çerçeve DEĞİŞMEZ; zarf onun üstüne biner (7E … FCS FCS 7E).
+  await expect(packetHex(page)).toHaveText(/^7E.*7E$/);
+  await expect(packetHex(page)).toContainText(SPEC_PACKET_HEX);
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('12');
+  expect(consoleErrors).toEqual([]);
+});
+
+test('sabitlenen encoder parametreleri ekranda uyarı olarak görünür', async ({ page }) => {
+  await openBuilder(page);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:xmodem');
+
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.xmodem'],
+  );
+
+  // Yerleşik dala dönünce uyarı da düşer.
+  await page.locator('#builder-post-processing').selectOption('none');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveCount(0);
+});
+
+test('çerçeve kaynağı protokol encoder\'ına devredilince form o şemadan çizilir', async ({
+  page,
+}) => {
+  const consoleErrors = await openBuilder(page);
+
+  await page.locator('#builder-frame-source-select').selectOption('rf-telemetry-custom-frame');
+
+  // Şema adı plugin'in kendi şemasından gelir.
+  await expect(page.getByTestId('builder-schema-name')).toHaveText('RF Telemetry Custom Frame');
+  await expect(page.getByTestId('builder-frame-source-note')).toBeVisible();
+
+  // Tohum: encoder'ın kendi varsayılanları forma yazılır, boş bırakılıp EZİLMEZ.
+  await expect(page.locator('#builder-field-preamble')).toHaveValue('AAAAAA');
+  await expect(page.locator('#builder-field-syncWord')).toHaveValue('2DD4');
+  await expect(packetHex(page)).toHaveText(/^AAAAAA2DD4/);
+
+  await page.locator('#builder-frame-source-select').selectOption('schema');
+  await expect(page.getByTestId('builder-schema-name')).toHaveText(SAMPLE_SCHEMA_NAME);
+  expect(consoleErrors).toEqual([]);
+});

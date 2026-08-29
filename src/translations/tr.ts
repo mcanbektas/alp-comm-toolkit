@@ -1070,6 +1070,17 @@ export const tr = {
   'builder.form.maximum': 'azami',
   'builder.field.increment': 'Artır',
   'builder.field.decrement': 'Azalt',
+  'builder.error.encoderLoadFailed': 'Protokol motoru yüklenemedi; seçimi değiştirin ya da sayfayı yenileyin.',
+  'builder.issue.encoderLoading': 'Seçilen protokol motoru henüz yüklenmedi; paket üretilmedi.',
+  'builder.field.frameSource': 'Çerçeveyi üreten',
+  'builder.frameSource.schema': 'Studio şeması',
+  'builder.frameSource.pluginNote': 'Alanlar protokolün kendi şemasından geliyor; çerçeveyi protokolün kendi encoder\'ı üretiyor.',
+  'builder.encoder.fixed.kiss': 'Bu encoder yalnız SLIP çerçevelemesi uygular; KISS komut baytını yüke siz eklersiniz.',
+  'builder.encoder.fixed.xmodem':
+    'Yük TAM 128 ya da 1024 bayt olmalı; blok numarası 1 ve CRC modu sabittir.',
+  'builder.encoder.fixed.ymodem':
+    'Yük TAM 128 ya da 1024 bayt olmalı; blok 1 ve CRC modu sabit, dosya başlığı (blok 0) üretilmez.',
+  'builder.encoder.fixed.zmodem': 'ZDATA başlığı, sıfır konum ve binary16 başlık biçimi sabittir.',
   'builder.field.postProcessing': 'Çerçeveleme sonrası işlem',
   'builder.postProcessing.none': 'Yok',
   'builder.postProcessing.byteStuffing': 'Bayt doldurma',
@@ -8832,6 +8843,9 @@ export const tr = {
   'testAutomation.field.thenBranch': 'Koşul doğruysa',
   'testAutomation.field.elseBranch': 'Koşul yanlışsa',
 
+  'testAutomation.field.payloadBytes': 'Yük baytları',
+  'testAutomation.field.frameEncoder': 'Protokol zarfı',
+  'testAutomation.payload.pluginFrame': 'Protokol encoder\'ı ile çerçevele',
   'testAutomation.payload.bytes': 'Ham baytlar',
   'testAutomation.payload.template': 'Paket şablonu',
 

@@ -57,6 +57,11 @@ export interface ScenarioIo {
   sleep(durationMs: number): Promise<void>;
   /** Paket şablonundan çerçeve üretir; şablon deposunu koşucu tanımaz. */
   encodeTemplate(templateId: string): Promise<Uint8Array>;
+  /**
+   * Yükü protokolün kendi encoder'ının zarfına sarar. `Promise` döner çünkü
+   * motor registry'de LAZY durur; koşucu registry'yi tanımaz, io katmanı tanır.
+   */
+  encodePluginFrame(pluginId: string, payload: Uint8Array): Promise<Uint8Array>;
   /** Bekleyen `sleep`/`waitForFrame` çağrılarını erken bitirir (iptal). */
   abort(): void;
   now(): number;
@@ -145,6 +150,9 @@ export function runScenario(scenario: TestScenario, io: ScenarioIo, options: Run
 
   async function payloadBytes(step: Extract<TestStep, { kind: 'send-frame' }>): Promise<Uint8Array> {
     if (step.payload.source === 'bytes') return Uint8Array.from(step.payload.bytes);
+    if (step.payload.source === 'plugin-frame') {
+      return io.encodePluginFrame(step.payload.pluginId, Uint8Array.from(step.payload.bytes));
+    }
     return io.encodeTemplate(step.payload.templateId);
   }
 

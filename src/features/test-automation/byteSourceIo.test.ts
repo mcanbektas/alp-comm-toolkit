@@ -4,6 +4,9 @@ import { createByteSourceIo } from './byteSourceIo';
 import { runScenario } from './runner';
 import { SCENARIO_FORMAT_VERSION } from './scenario';
 import { createSimulatedDevice } from '../../connection/mock/simulatedDevice';
+import { protocolRegistry } from '../../protocol-core/registry';
+import { registerBuiltInProtocols } from '../../protocols';
+import { encodeHdlcSyncFrame } from '../../protocols/serial/framing/hdlcCore';
 import type { TestScenario, TestStep } from './scenario';
 
 /**
@@ -15,6 +18,9 @@ import type { TestScenario, TestStep } from './scenario';
 /** Spec §43 custom protocol fixture'ı; 9 bayt, XOR checksum geçerli. */
 const DEVICE_RESPONSE = [0xaa, 0x05, 0x10, 0x03, 0x34, 0x12, 0x7f, 0x4f, 0x55];
 const STATUS_REQUEST = [0xaa, 0x01];
+
+// Zarf motorları registry'den yüklenir; üretimde `main.tsx` kaydeder.
+registerBuiltInProtocols(protocolRegistry);
 
 function scenario(steps: readonly TestStep[]): TestScenario {
   return { formatVersion: SCENARIO_FORMAT_VERSION, name: 'uçtan uca', steps };
@@ -181,6 +187,52 @@ describe('createByteSourceIo — simüle cihazla uçtan uca', () => {
 
     const report = await run.report;
     expect(report.status).toBe('cancelled');
+    await io.dispose();
+  });
+});
+
+/**
+ * Plugin encoder'ının TA tarafındaki tüketicisi (spec §7). Sahte zarf yok:
+ * cihaz kuralı HDLC bayrağıyla başlayan çerçeveyi bekliyor, yani ham yük
+ * yazılsaydı eşleşme olmaz ve test zaman aşımına düşerdi.
+ */
+describe('createByteSourceIo — plugin zarfı', () => {
+  it('yükü protokolün kendi encoder\'ıyla çerçeveleyip yazar', async () => {
+    const payload = [0x01, 0x02];
+    const framed = Array.from(encodeHdlcSyncFrame(Uint8Array.from(payload)));
+    expect(framed[0]).toBe(0x7e);
+
+    const io = deviceIo([{ match: { offset: 0, bytes: framed }, response: DEVICE_RESPONSE, delayMs: 5 }]);
+    const run = runScenario(
+      scenario([
+        { id: 'c', kind: 'connect' },
+        { id: 's', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'hdlc', bytes: payload } },
+        { id: 'w', kind: 'wait-for-frame', timeoutMs: 1000, match: { offset: 2, bytes: [0x10] } },
+      ]),
+      io,
+    );
+
+    const report = await run.report;
+    expect(report.status).toBe('passed');
+    expect(report.steps[1]?.actualValue).toBe(
+      framed.map((byte) => byte.toString(16).toUpperCase().padStart(2, '0')).join(' '),
+    );
+    await io.dispose();
+  });
+
+  it('encoder taşımayan bir protokol istenirse adım HATA olur', async () => {
+    const io = deviceIo([]);
+    const run = runScenario(
+      scenario([
+        { id: 'c', kind: 'connect' },
+        { id: 's', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'modbus-rtu', bytes: [0x01] } },
+      ]),
+      io,
+    );
+
+    const report = await run.report;
+    expect(report.steps[1]?.outcome).toBe('error');
+    expect(report.steps[1]?.errorDetails).toContain('encoder');
     await io.dispose();
   });
 });

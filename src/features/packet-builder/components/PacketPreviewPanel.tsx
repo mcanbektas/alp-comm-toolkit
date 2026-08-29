@@ -38,7 +38,9 @@ const NO_REGIONS: readonly ByteRegion[] = [];
 /** Üretilen kodda kullanılacak değişken adı — tanımlayıcı, çeviriye girmez. */
 const PACKET_VARIABLE_NAME = 'packet';
 
-const POST_PROCESSING_MODES: readonly PostProcessing[] = [
+type BuiltInPostProcessing = Exclude<PostProcessing, 'plugin'>;
+
+const POST_PROCESSING_MODES: readonly BuiltInPostProcessing[] = [
   'none',
   'byteStuffing',
   'bitStuffing',
@@ -46,7 +48,7 @@ const POST_PROCESSING_MODES: readonly PostProcessing[] = [
   'slip',
 ];
 
-const POST_PROCESSING_KEYS: Record<PostProcessing, TranslationKey> = {
+const POST_PROCESSING_KEYS: Record<BuiltInPostProcessing, TranslationKey> = {
   none: 'builder.postProcessing.none',
   byteStuffing: 'builder.postProcessing.byteStuffing',
   bitStuffing: 'builder.postProcessing.bitStuffing',
@@ -54,7 +56,17 @@ const POST_PROCESSING_KEYS: Record<PostProcessing, TranslationKey> = {
   slip: 'builder.postProcessing.slip',
 };
 
-function isPostProcessing(value: string): value is PostProcessing {
+/**
+ * Plugin zarflarının seçim değerindeki ön eki.
+ *
+ * Tek bir açılır liste tutuluyor: çerçeveleme kullanıcı için TEK bir sorudur
+ * ("bu çerçeve nasıl sarılacak"), iki ayrı kutu aynı soruyu iki kez sorup
+ * hangisinin kazandığını belirsiz bırakırdı. Değer uzayı bu yüzden ön ekle
+ * ayrılıyor: yerleşik dallar kendi adlarıyla, plugin'ler `plugin:` ile.
+ */
+const PLUGIN_VALUE_PREFIX = 'plugin:';
+
+function isPostProcessing(value: string): value is BuiltInPostProcessing {
   return (POST_PROCESSING_MODES as readonly string[]).includes(value);
 }
 
@@ -65,22 +77,49 @@ export function PacketPreviewPanel(props: PacketPreviewPanelProps): ReactNode {
   const hex = bytesToHex(bytes);
   const overrideEnabled = props.hexOverride !== null;
 
+  const selectedFraming =
+    props.framingPluginId === null
+      ? props.postProcessing
+      : `${PLUGIN_VALUE_PREFIX}${props.framingPluginId}`;
+
+  const selectedPlugin =
+    props.framingPluginId === null
+      ? undefined
+      : props.framingPlugins.find((option) => option.pluginId === props.framingPluginId);
+
   return (
     <div className="flex flex-col gap-4" data-testid="builder-preview-panel">
       <SelectField
         id="builder-post-processing"
         label={t('builder.field.postProcessing')}
-        value={props.postProcessing}
+        value={selectedFraming}
         onChange={(value) => {
+          if (value.startsWith(PLUGIN_VALUE_PREFIX)) {
+            props.onFramingPluginChange(value.slice(PLUGIN_VALUE_PREFIX.length));
+            return;
+          }
           if (isPostProcessing(value)) {
             props.onPostProcessingChange(value);
           }
         }}
-        options={POST_PROCESSING_MODES.map((mode) => ({
-          value: mode,
-          label: t(POST_PROCESSING_KEYS[mode]),
-        }))}
+        options={[
+          ...POST_PROCESSING_MODES.map((mode) => ({
+            value: mode,
+            label: t(POST_PROCESSING_KEYS[mode]),
+          })),
+          ...props.framingPlugins.map((option) => ({
+            value: `${PLUGIN_VALUE_PREFIX}${option.pluginId}`,
+            // Protokol adı veridir; çeviri sözlüğünden GEÇMEZ.
+            label: option.displayName,
+          })),
+        ]}
       />
+
+      {selectedPlugin?.fixedParametersKey === undefined ? null : (
+        <p className="text-xs text-warn" data-testid="builder-framing-fixed-note">
+          {t(selectedPlugin.fixedParametersKey as TranslationKey)}
+        </p>
+      )}
 
       {props.bytes === null ? (
         <p className="text-sm text-muted" data-testid="builder-preview-empty">

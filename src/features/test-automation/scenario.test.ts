@@ -117,3 +117,32 @@ describe('validateScenario', () => {
     expect(issues).toHaveLength(2);
   });
 });
+
+describe('validateScenario — plugin zarfı taşıyan gönderim', () => {
+  it('encoder seçilmemiş adımı yakalar', () => {
+    const issues = validateScenario(
+      scenario([{ id: 's1', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: '', bytes: [1] } }]),
+    );
+
+    expect(issues.map((issue) => issue.message)).toContain('protokol encoder\'ı seçilmedi');
+  });
+
+  /** Boş yük geçerlidir: bazı zarflar yüksüz de anlamlı bir çerçeve üretir. */
+  it('boş yükü sorun SAYMAZ', () => {
+    const issues = validateScenario(
+      scenario([{ id: 's1', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'hdlc', bytes: [] } }]),
+    );
+
+    expect(issues).toEqual([]);
+  });
+
+  it('aralık dışı yük baytını yakalar', () => {
+    const issues = validateScenario(
+      scenario([
+        { id: 's1', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'hdlc', bytes: [0x100] } },
+      ]),
+    );
+
+    expect(issues.map((issue) => issue.message)).toContain('yük baytı 0-255 aralığında olmalı');
+  });
+});
