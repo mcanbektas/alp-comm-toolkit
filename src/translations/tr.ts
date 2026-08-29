@@ -2842,6 +2842,49 @@ export const tr = {
   'definition.schema.error.parseFailed':
     'Şema dosyası çözümlenemedi; JSON bozuk ya da beklenen alanları taşımıyor.',
 
+  // --- Üretici kayıt haritası (vendor-map) tanım paneli ---
+  'definition.vendorMap.action.import': 'Kayıt haritası içe aktar (CSV/JSON)',
+  'definition.vendorMap.action.export': 'Haritayı JSON olarak indir',
+  'definition.vendorMap.importHint':
+    'Sütun sırası önemli değil; başlıklar adlarından eşlenir (address/adres/register, name/ad, type/tip…). Noktalı virgül ayraçlı Excel dosyaları da okunur.',
+  'definition.vendorMap.sampleNotice':
+    'Örnek harita gösteriliyor. Üreticinin tablosunu CSV olarak kaydedip içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.vendorMap.device': 'Cihaz',
+  'definition.vendorMap.vendor': 'Üretici',
+  'definition.vendorMap.wordOrder': 'Kelime sırası',
+  'definition.vendorMap.wordOrder.highFirst': 'Yüksek register önce',
+  'definition.vendorMap.wordOrder.lowFirst': 'Düşük register önce',
+  'definition.vendorMap.entryCount': 'Girdi sayısı',
+  'definition.vendorMap.line': 'Satır',
+  'definition.vendorMap.entry.label': 'Kayıt girdisi',
+  'definition.vendorMap.decodeHex.label': 'Register baytları (HEX)',
+  'definition.vendorMap.table.entries': 'Kayıt haritası',
+  'definition.vendorMap.column.address': 'Adres',
+  'definition.vendorMap.column.name': 'Ad',
+  'definition.vendorMap.column.type': 'Tip',
+  'definition.vendorMap.column.space': 'Adres uzayı',
+  'definition.vendorMap.column.scale': 'Ölçek',
+  'definition.vendorMap.column.access': 'Erişim',
+  'definition.vendorMap.column.physical': 'Fiziksel',
+  'definition.vendorMap.space.coil': 'Coil',
+  'definition.vendorMap.space.discreteInput': 'Discrete input',
+  'definition.vendorMap.space.inputRegister': 'Input register',
+  'definition.vendorMap.space.holdingRegister': 'Holding register',
+  'definition.vendorMap.space.command': 'Komut/tip kodu',
+  'definition.vendorMap.space.unspecified': 'Belirtilmemiş',
+  'definition.vendorMap.decode.tooShort': 'Bayt yetmiyor; bu girdi şu kadar bayt ister:',
+  'definition.vendorMap.error.readFailed': 'Dosya okunamadı.',
+  'definition.vendorMap.error.parseFailed':
+    'Kayıt haritası çözümlenemedi; başlık satırı bulunamadı ya da hiç girdi çıkmadı.',
+  'definition.vendorMap.issue.headerNotFound':
+    'Başlık satırı bulunamadı; en az adres ve ad sütunları gerekiyor.',
+  'definition.vendorMap.issue.noEntries': 'Tabloda hiç kullanılabilir girdi yok.',
+  'definition.vendorMap.issue.rowSkipped': 'Satır atlandı: adres ya da ad okunamadı.',
+  'definition.vendorMap.issue.unknownType': 'Tip tanınmadı; ham baytlar gösterilecek.',
+  'definition.vendorMap.issue.duplicateAddress':
+    'Aynı adres birden çok kez yazılmış; ilk tanım geçerli sayıldı.',
+  'definition.vendorMap.issue.invalidJson': 'JSON çözümlenemedi.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',

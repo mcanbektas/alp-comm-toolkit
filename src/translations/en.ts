@@ -2840,6 +2840,49 @@ export const en: TranslationDictionary = {
   'definition.schema.error.parseFailed':
     'The schema file could not be parsed; the JSON is malformed or missing required fields.',
 
+  // --- Vendor register map definition panel ---
+  'definition.vendorMap.action.import': 'Import register map (CSV/JSON)',
+  'definition.vendorMap.action.export': 'Download map as JSON',
+  'definition.vendorMap.importHint':
+    'Column order does not matter; headers are matched by name (address/register, name, type…). Semicolon-separated spreadsheet exports are read too.',
+  'definition.vendorMap.sampleNotice':
+    'A sample map is shown. Save the vendor table as CSV and import it; the file never leaves your device.',
+  'definition.vendorMap.device': 'Device',
+  'definition.vendorMap.vendor': 'Vendor',
+  'definition.vendorMap.wordOrder': 'Word order',
+  'definition.vendorMap.wordOrder.highFirst': 'High register first',
+  'definition.vendorMap.wordOrder.lowFirst': 'Low register first',
+  'definition.vendorMap.entryCount': 'Entry count',
+  'definition.vendorMap.line': 'Line',
+  'definition.vendorMap.entry.label': 'Map entry',
+  'definition.vendorMap.decodeHex.label': 'Register bytes (HEX)',
+  'definition.vendorMap.table.entries': 'Register map',
+  'definition.vendorMap.column.address': 'Address',
+  'definition.vendorMap.column.name': 'Name',
+  'definition.vendorMap.column.type': 'Type',
+  'definition.vendorMap.column.space': 'Address space',
+  'definition.vendorMap.column.scale': 'Scale',
+  'definition.vendorMap.column.access': 'Access',
+  'definition.vendorMap.column.physical': 'Physical',
+  'definition.vendorMap.space.coil': 'Coil',
+  'definition.vendorMap.space.discreteInput': 'Discrete input',
+  'definition.vendorMap.space.inputRegister': 'Input register',
+  'definition.vendorMap.space.holdingRegister': 'Holding register',
+  'definition.vendorMap.space.command': 'Command/type code',
+  'definition.vendorMap.space.unspecified': 'Unspecified',
+  'definition.vendorMap.decode.tooShort': 'Not enough bytes; this entry requires:',
+  'definition.vendorMap.error.readFailed': 'The file could not be read.',
+  'definition.vendorMap.error.parseFailed':
+    'The register map could not be parsed; no header row was found or no entries were produced.',
+  'definition.vendorMap.issue.headerNotFound':
+    'No header row found; at least address and name columns are required.',
+  'definition.vendorMap.issue.noEntries': 'The table contains no usable entries.',
+  'definition.vendorMap.issue.rowSkipped': 'Row skipped: address or name could not be read.',
+  'definition.vendorMap.issue.unknownType': 'Unknown type; raw bytes will be shown.',
+  'definition.vendorMap.issue.duplicateAddress':
+    'The same address is listed more than once; the first definition was kept.',
+  'definition.vendorMap.issue.invalidJson': 'The JSON could not be parsed.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',

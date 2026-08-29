@@ -99,6 +99,15 @@ const SchemaPanel = lazy(async () => {
 });
 
 /**
+ * Üretici kayıt haritası paneli de TEMBEL. CSV ayrıştırıcısı ve register
+ * çözücüsü yalnız `definitions` sekmesinde gerekiyor.
+ */
+const VendorMapPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/VendorMapPanel');
+  return { default: module.VendorMapPanel };
+});
+
+/**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
  */
@@ -117,6 +126,7 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, typeof DbcPanel>> = {
   dbc: DbcPanel,
   eds: EdsPanel,
   'custom-schema': SchemaPanel,
+  'vendor-map': VendorMapPanel,
 };
 
 /**

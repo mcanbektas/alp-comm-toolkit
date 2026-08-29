@@ -299,11 +299,13 @@ test.describe('ARINC 429', () => {
     ).toHaveText('107₈');
   });
 
-  test('definitions sekmesi ŞEMA PANELİNİ açar — vendor-map hâlâ kapsam dışı', async ({ page }) => {
-    // Katalog `definitions: ['vendor-map','custom-schema']` bildiriyor. İkisinden
-    // yalnız `custom-schema`nın motoru var, ama seçim İLK EŞLEŞENİ alır
-    // (`ProtocolPage`), yani `vendor-map` panelsiz olsa da sekme artık gerçek
-    // bir panel açıyor. Bunu VARSAYMAK yetmez, tarayıcıda görülmeli
+  test('definitions sekmesi KAYIT HARİTASI panelini açar — listedeki ilk biçim kazanır', async ({
+    page,
+  }) => {
+    // Katalog `definitions: ['vendor-map','custom-schema']` bildiriyor ve ikisinin
+    // de motoru var artık. Seçim İLK EŞLEŞENİ alır (`ProtocolPage`), yani açılan
+    // panel `vendor-map`inkidir — sıra kaydın kendi verisidir, panel tablosunun
+    // sırası değil. Bunu VARSAYMAK yetmez, tarayıcıda görülmeli
     // ([[ekrani-gercekten-ac]]).
     const consoleErrors: string[] = [];
     page.on('pageerror', (error) => consoleErrors.push(error.message));
@@ -317,8 +319,10 @@ test.describe('ARINC 429', () => {
       'aria-selected',
       'true',
     );
-    // Açılan panel ŞEMA panelidir; DBC/EDS bu kayda bağlı değil.
-    await expect(page.getByTestId('schema-panel')).toBeVisible();
+    // Açılan panel KAYIT HARİTASI panelidir; şema paneli ikinci sırada kaldığı
+    // için AÇILMAZ, DBC/EDS ise bu kayda hiç bağlı değil.
+    await expect(page.getByTestId('vendor-map-panel')).toBeVisible();
+    await expect(page.getByTestId('schema-panel')).toHaveCount(0);
     await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
     await expect(page.getByTestId('eds-panel')).toHaveCount(0);
     // Panel bağlandığı için "planlandı" bildirimi DÜŞER. Motoru hâlâ olmayan
