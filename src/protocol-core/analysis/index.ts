@@ -13,3 +13,4 @@ export * from './asciiFieldDetect';
 export * from './timestampDetect';
 export * from './endiannessGuess';
 export * from './periodAnalysis';
+export * from './checksumScan';
