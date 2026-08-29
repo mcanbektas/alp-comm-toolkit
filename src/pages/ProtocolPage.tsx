@@ -107,6 +107,12 @@ const VendorMapPanel = lazy(async () => {
   return { default: module.VendorMapPanel };
 });
 
+/** A2L paneli de TEMBEL: belirteçleyici ve dönüşüm motoru yalnız XCP/CCP'nin `definitions` sekmesinde gerekir. */
+const A2lPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/A2lPanel');
+  return { default: module.A2lPanel };
+});
+
 /**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
@@ -127,6 +133,7 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, typeof DbcPanel>> = {
   eds: EdsPanel,
   'custom-schema': SchemaPanel,
   'vendor-map': VendorMapPanel,
+  a2l: A2lPanel,
 };
 
 /**

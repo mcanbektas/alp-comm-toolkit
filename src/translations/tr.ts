@@ -2885,6 +2885,45 @@ export const tr = {
     'Aynı adres birden çok kez yazılmış; ilk tanım geçerli sayıldı.',
   'definition.vendorMap.issue.invalidJson': 'JSON çözümlenemedi.',
 
+  // --- A2L (ASAM MCD-2 MC) tanım paneli ---
+  'definition.a2l.action.import': 'A2L dosyası içe aktar',
+  'definition.a2l.sampleNotice':
+    'Örnek A2L gösteriliyor. Kendi dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.a2l.project': 'Proje',
+  'definition.a2l.module': 'Modül',
+  'definition.a2l.byteOrder': 'Bayt sırası',
+  'definition.a2l.measurementCount': 'Ölçüm sayısı',
+  'definition.a2l.characteristicCount': 'Parametre sayısı',
+  'definition.a2l.line': 'Satır',
+  'definition.a2l.measurement.label': 'Ölçüm',
+  'definition.a2l.decodeHex.label': 'Ölçüm baytları (HEX)',
+  'definition.a2l.table.measurements': 'Ölçümler',
+  'definition.a2l.column.name': 'Ad',
+  'definition.a2l.column.dataType': 'Veri tipi',
+  'definition.a2l.column.address': 'ECU adresi',
+  'definition.a2l.column.conversion': 'Dönüşüm',
+  'definition.a2l.column.limits': 'Sınırlar',
+  'definition.a2l.column.physical': 'Fiziksel',
+  'definition.a2l.decode.tooShort': 'Bayt yetmiyor; bu ölçüm şu kadar bayt ister:',
+  'definition.a2l.error.readFailed': 'Dosya okunamadı.',
+  'definition.a2l.error.parseFailed':
+    'A2L dosyası çözümlenemedi; içinde hiç MEASUREMENT ya da CHARACTERISTIC bulunamadı.',
+  'definition.a2l.issue.noObjects': 'Dosyada hiç ölçüm ya da parametre yok.',
+  'definition.a2l.issue.badMeasurement': 'Ölçüm okunamadı; veri tipi tanınmıyor.',
+  'definition.a2l.issue.badCharacteristic': 'Parametre okunamadı; adres alanı çözülemedi.',
+  'definition.a2l.issue.badCompuMethod': 'Dönüşüm bloğu okunamadı.',
+  'definition.a2l.issue.unknownConversion': 'Dönüşüm türü tanınmadı; ham değer gösterilecek.',
+  'definition.a2l.note.missingCoeffs': 'Dönüşüm katsayıları dosyada yok; ham değer gösteriliyor.',
+  'definition.a2l.note.nonLinearRatFunc':
+    'RAT_FUNC ikinci derece terim taşıyor; tersi tek değerli değil, ham değer gösteriliyor.',
+  'definition.a2l.note.notInvertible': 'Dönüşüm tersine çevrilemiyor; ham değer gösteriliyor.',
+  'definition.a2l.note.noVerbalMatch': 'Bu ham değerin sözlükte karşılığı yok.',
+  'definition.a2l.note.tableNotLoaded':
+    'Tablo tabanlı dönüşüm (TAB_INTP/TAB_NOINTP) bu turda uygulanmıyor; ham değer gösteriliyor.',
+  'definition.a2l.note.formulaUnsupported':
+    'FORM dönüşümü serbest formül taşır ve çalıştırılmaz (spec §41); ham değer gösteriliyor.',
+  'definition.a2l.note.unknownConversion': 'Dönüşüm türü tanınmıyor; ham değer gösteriliyor.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',

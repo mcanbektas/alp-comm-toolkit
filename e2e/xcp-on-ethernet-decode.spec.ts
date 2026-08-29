@@ -58,12 +58,15 @@ test.describe('XCP on Ethernet katalog sayfası', () => {
     expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
   });
 
-  test('definitions sekmesi A2L panelsiz "planlandı" bildirimi basar', async ({ page }) => {
+  test('definitions sekmesi A2L panelini açar — kaydın beklediği tanım geldi', async ({ page }) => {
+    // Kayıt "Ham DTO baytları A2L olmadan anlamsızdır" diyerek A2L Import'u
+    // ertelemişti; motor yazılınca beklenti de döndü. Bildirim artık DÜŞER.
     await page.addInitScript(() => {
       window.localStorage.setItem('alp-comm-lang', 'tr');
     });
     await page.goto(DEFINITIONS_PATH);
-    await expect(page.getByText(tr['protocol.plannedNotice'], { exact: true })).toBeVisible();
+    await expect(page.getByTestId('a2l-panel')).toBeVisible();
+    await expect(page.getByText(tr['protocol.plannedNotice'], { exact: true })).toHaveCount(0);
   });
 });
 

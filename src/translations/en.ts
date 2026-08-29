@@ -2883,6 +2883,45 @@ export const en: TranslationDictionary = {
     'The same address is listed more than once; the first definition was kept.',
   'definition.vendorMap.issue.invalidJson': 'The JSON could not be parsed.',
 
+  // --- A2L (ASAM MCD-2 MC) definition panel ---
+  'definition.a2l.action.import': 'Import A2L file',
+  'definition.a2l.sampleNotice':
+    'A sample A2L is shown. You can import your own file; it never leaves your device.',
+  'definition.a2l.project': 'Project',
+  'definition.a2l.module': 'Module',
+  'definition.a2l.byteOrder': 'Byte order',
+  'definition.a2l.measurementCount': 'Measurements',
+  'definition.a2l.characteristicCount': 'Characteristics',
+  'definition.a2l.line': 'Line',
+  'definition.a2l.measurement.label': 'Measurement',
+  'definition.a2l.decodeHex.label': 'Measurement bytes (HEX)',
+  'definition.a2l.table.measurements': 'Measurements',
+  'definition.a2l.column.name': 'Name',
+  'definition.a2l.column.dataType': 'Data type',
+  'definition.a2l.column.address': 'ECU address',
+  'definition.a2l.column.conversion': 'Conversion',
+  'definition.a2l.column.limits': 'Limits',
+  'definition.a2l.column.physical': 'Physical',
+  'definition.a2l.decode.tooShort': 'Not enough bytes; this measurement requires:',
+  'definition.a2l.error.readFailed': 'The file could not be read.',
+  'definition.a2l.error.parseFailed':
+    'The A2L file could not be parsed; no MEASUREMENT or CHARACTERISTIC was found.',
+  'definition.a2l.issue.noObjects': 'The file contains no measurements or characteristics.',
+  'definition.a2l.issue.badMeasurement': 'Measurement could not be read; unknown data type.',
+  'definition.a2l.issue.badCharacteristic': 'Characteristic could not be read; address unreadable.',
+  'definition.a2l.issue.badCompuMethod': 'The conversion block could not be read.',
+  'definition.a2l.issue.unknownConversion': 'Unknown conversion type; the raw value will be shown.',
+  'definition.a2l.note.missingCoeffs': 'Conversion coefficients are missing; showing the raw value.',
+  'definition.a2l.note.nonLinearRatFunc':
+    'This RAT_FUNC has quadratic terms; its inverse is not single-valued, so the raw value is shown.',
+  'definition.a2l.note.notInvertible': 'The conversion cannot be inverted; showing the raw value.',
+  'definition.a2l.note.noVerbalMatch': 'This raw value has no entry in the verbal table.',
+  'definition.a2l.note.tableNotLoaded':
+    'Table-based conversions (TAB_INTP/TAB_NOINTP) are not applied in this round; showing the raw value.',
+  'definition.a2l.note.formulaUnsupported':
+    'FORM conversions carry a free-form formula and are never executed (spec §41); showing the raw value.',
+  'definition.a2l.note.unknownConversion': 'Unknown conversion type; showing the raw value.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',
