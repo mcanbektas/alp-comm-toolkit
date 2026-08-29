@@ -470,11 +470,29 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   eklendi. `parse()` çıktısının değişmediği ayrıca 5625 çağrılık önce/sonra
   anlık görüntüsüyle doğrulandı: rastgele `RawFrame.id` dışında BİREBİR aynı.
 
-  **2. `custom-schema` `definitions` paneli YOK ve 19 kayıt onu bekliyor**
-  (`[KARAR 18-7]`, `grep -rn "custom-schema" src/`). `ProtocolPage.tsx`in
-  `DEFINITION_PANELS`inde yalnız `dbc` ve `eds` var; `custom-schema` taşıyan
-  19 kaydın hepsi "planlandı" basıyor — **`ble-gatt` `ready` olduğu hâlde
-  dahil.** `lonworks`un `xif` borcuyla AYNI sınıf: biçim belgeli, motor yok,
-  ve panel 19 kaydı BİRDEN ilgilendirdiği için domain'i kapatan dalgada
-  yazılması ikinci bir motor riski demekti (`[Karar 15h-1]` gerekçesi).
-  **Bu doğru davranıştır**, bir mayın değil.
+  **2. ✅ KAPANDI: `custom-schema` `definitions` paneli YAZILDI** (`ddc0d9d`).
+  Eski not "panel YOK, 19 kayıt bekliyor" diyordu; **o ölçüm ÇÜRÜDÜ**.
+  `ProtocolPage.tsx`in `DEFINITION_PANELS`inde bugün **DOKUZ panel** var:
+  `dbc · eds · custom-schema · vendor-map · a2l · gsdml · iodd · scl · dsdl`.
+
+  **Panel borcunun bugünkü ölçümü (2026-08-29, KODDAN sayıldı — 12 biçimin
+  kayıt dağılımı ve panel durumu):** paneli olmayan ÜÇ biçim kaldı —
+  **`gsd` (1 kayıt) · `ldf` (1 kayıt) · `xif` (1 kayıt)**, toplam **3 kayıt**.
+  `custom-schema` 21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2 kayıt
+  taşıyor ve hepsinin paneli var. `xif`in gerekçesi ve kaynakları yukarıda
+  duruyor; `gsd` ile `ldf` aynı sınıf, birer kayıt ilgilendiriyor.
+
+  **Ders (yazılı borç çürür):** bu not aylarca "19 kayıt bekliyor" dedi ve
+  yanlıştı. Yukarıdaki `createSchemaParser` maddesinde de aynısı olmuştu
+  ("9 çakışma" gerçekte 14'tü). **Yazılı bir borç ölçümünü KULLANMADAN ÖNCE
+  yeniden ölç** — bu depoda kural hâline geldi.
+
+  **3. `ProtocolPlugin.encoder`in TÜKETİCİSİ YOK** (2026-08-29 ölçümü).
+  191 plugin dosyasının **14'ünde** `encoder:` var (13'ü `serial/framing`,
+  biri `wireless/rftelemetry`) ve hepsinin birim testi de var — ama
+  `plugin.encoder` alanını `src/` içinde OKUYAN tek yer `protocol-core/
+  types.ts`teki tanımın kendisi. Packet Builder ve Test Automation çerçeveyi
+  şema üzerinden üretiyor (`encodeWithSchema`), plugin encoder'ından değil.
+  **Sonucu:** yeni encoder yazmak bugün tüketicisi olmayan koda kod eklemektir;
+  önce bir TÜKETİCİ gerekir. Bu, §33 Protocol Converter'ın da gerçek ön
+  koşuludur (§33'ün saydığı sekiz dönüşümün hedef tarafı encoder ister).

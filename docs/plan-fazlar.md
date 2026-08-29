@@ -1886,13 +1886,30 @@ Bu bir faz olarak planlanmadı.
 
 Faz 9'a girmeden bilinmesi gerekenler — hiçbiri Faz 9'u engellemiyor:
 
-- `src/features/` altında **log-analyzer · protocol-converter · reverse-engineering ·
-  test-automation** klasörleri hiç açılmadı (spec §33/§34/§35/§38).
-- `src/connection/` altında **usb · bluetooth · websocket · file** yok. `file` olmadan
-  log dosyası içe aktarma yapılamaz, yani §48'in "büyük log dosyası" kriteri
-  ölçülemiyor bile.
-- `src/protocols/` klasörünün kendisi yok — Faz 9 onu açacak.
-- `src/components/` altında **packet-viewer · signal-viewer · protocol-tree** yok.
+- ~~`src/features/` altında **log-analyzer · protocol-converter ·
+  reverse-engineering · test-automation** klasörleri hiç açılmadı~~ →
+  **üçü yazıldı** (log-analyzer §34 `b39fc2e`, reverse-engineering §35+§36
+  `61233e0`, test-automation §38 `af1f975`). Açılmamış TEK klasör
+  **`protocol-converter` (§33)** ve bekletilmesi bilinçli: `plugin.encoder`in
+  tüketicisi yok (14/191 plugin'de encoder var, hiçbirini okuyan yok), yani
+  §33'ün saydığı sekiz dönüşümün hedef tarafı yazılamaz. Ayrıntı `CLAUDE.md`
+  "Bilinen borçlar" 3. maddede.
+- ~~`src/connection/` altında **usb · bluetooth · websocket · file** yok~~ →
+  **`file` yazıldı** (§8.1, `5c04ebd`) ve §48'in "büyük log dosyası" kriteri
+  artık ölçülebiliyor. Kalan üçü (**usb · bluetooth · websocket**) hâlâ yok;
+  `ByteSource` sözleşmesine yazıldıkları gün monitör, Packet Builder ve Test
+  Automation üçü de onları bedavaya kullanır.
+- ~~`src/protocols/` klasörünün kendisi yok~~ → **açıldı ve doldu**: 8 domain
+  klasörü + `pluginBinding.ts`, 191 plugin dosyası (2026-08-29 sayımı).
+- `src/components/` altında **packet-viewer · signal-viewer · protocol-tree**
+  hâlâ yok (bugün: `byte-viewer · charts · common · forms · layout ·
+  navigation · virtualized-tables`). Spec §6'nın klasör listesindeki bu üç
+  görüntüleyici yazılmadı; işlevlerinin bir kısmını `byte-viewer` ve
+  `DecodePanel` karşılıyor.
+
+**Bu bölümün satırları 2026-08-29'da KODDAN yeniden ölçüldü.** Öncesinde dört
+maddenin üçü çürüktü (feature klasörleri, `connection/file`, `src/protocols/`);
+bir sonraki okuyan da kullanmadan önce ölçsün.
 
 ## Faz 2'den çıkan kararlar ve borçlar
 
