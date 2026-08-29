@@ -1222,6 +1222,7 @@ export const en: TranslationDictionary = {
   'projects.error.invalidName': 'The project name cannot be empty.',
   'projects.error.invalidPacketTemplate': 'One of the packet templates could not be read.',
   'projects.error.invalidPacketTemplates': 'The packet template list is not an array.',
+  'projects.error.invalidTestScenarios': 'The test scenario list is not an array of strings.',
   'projects.error.invalidProtocols': 'The protocol list has to be an array of strings.',
   'projects.error.invalidSavedAt': 'The saved-at stamp is not a readable date.',
   'projects.error.missingProject': 'The file carries no project section.',

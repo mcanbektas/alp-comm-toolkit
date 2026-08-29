@@ -31,13 +31,14 @@ import { DEFAULT_DEVICE_RULES, DEFAULT_SCENARIO } from './defaultScenario';
 import { MAX_RECORDED_STEP_RESULTS, reportToJson } from './report';
 import { runScenario } from './runner';
 import { SCENARIO_FORMAT_VERSION, validateScenario } from './scenario';
+import { readStoredScenario, writeStoredScenario } from './scenarioStorage';
 import type { ByteSourceScenarioIo } from './byteSourceIo';
 import type { FramingMethodConfig } from '@/protocol-core/framing/createExtractor';
 import type { StepResult, TestReport } from './report';
 import type { TestRun } from './runner';
 import type { TestScenario } from './scenario';
 
-export const SCENARIO_STORAGE_KEY = 'alp-comm-test-scenario';
+export { SCENARIO_STORAGE_KEY } from './scenarioStorage';
 
 export type TestSourceKind = 'simulated-device' | 'serial';
 
@@ -71,10 +72,14 @@ export const DEFAULT_CONNECTION: ConnectionConfig = {
   framingParameter: '9',
 };
 
-export type RunStatus = 'idle' | 'running' | 'finished';
+/**
+ * Ekranın koşu EVRESİ. `report.ts`teki `RunStatus`tan ayrı bir sorudur ve adı
+ * da ayrı olmalı: o "test geçti mi", bu "koşu sürüyor mu".
+ */
+export type RunPhase = 'idle' | 'running' | 'finished';
 
 export interface TestAutomationState {
-  readonly status: RunStatus;
+  readonly status: RunPhase;
   readonly steps: readonly StepResult[];
   readonly report: TestReport | undefined;
   readonly errorMessage: string | undefined;
@@ -126,24 +131,6 @@ export function buildFraming(connection: ConnectionConfig): FramingMethodConfig 
   }
 }
 
-function readStoredScenario(): TestScenario | undefined {
-  try {
-    const raw = window.localStorage.getItem(SCENARIO_STORAGE_KEY);
-    if (raw === null) return undefined;
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) return undefined;
-    const candidate = parsed as TestScenario;
-    // Sürümü tutmayan kayıt SESSİZCE yüklenmez: eski bir şemayı yeni model
-    // sanmak, adım alanlarını `undefined` bırakıp koşuyu ortasında düşürürdü.
-    if (candidate.formatVersion !== SCENARIO_FORMAT_VERSION) return undefined;
-    if (!Array.isArray(candidate.steps)) return undefined;
-    return candidate;
-  } catch {
-    // Bozuk JSON ekranı açılmaz yapmamalı; varsayılana düşülür.
-    return undefined;
-  }
-}
-
 export interface UseTestAutomationResult {
   readonly scenario: TestScenario;
   readonly connection: ConnectionConfig;
@@ -180,11 +167,7 @@ export function useTestAutomation(): UseTestAutomationResult {
 
   const setScenario = useCallback((next: TestScenario) => {
     setScenarioState(next);
-    try {
-      window.localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Depolama kapalıysa (gizli sekme, kota) senaryo yine düzenlenebilmeli.
-    }
+    writeStoredScenario(next);
   }, []);
 
   const setConnection = useCallback((patch: Partial<ConnectionConfig>) => {

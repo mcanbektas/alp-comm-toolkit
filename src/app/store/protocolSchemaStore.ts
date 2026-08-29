@@ -6,6 +6,7 @@ import { create } from 'zustand';
 // store bilerek `./projectFile`a bakar, `features/projects` barrel'ına değil —
 // barrel bileşeni de taşıdığı için store React'e bağlanırdı.
 import type { PacketTemplate, ProjectPayload } from '@/features/projects/projectFile';
+import { readStoredScenarioJson, writeStoredScenarioJson } from '@/features/test-automation/scenarioStorage';
 // Yalnız metin sabiti alınıyor. `specFixture` şema tipini `import type` ile
 // çektiği için bu satır zod'u pakete TAŞIMAZ — barrel'dan uzak durma gerekçesi
 // için bkz. src/protocol-core/index.ts.
@@ -321,6 +322,14 @@ export const useProtocolSchemaStore = create<ProtocolSchemaState>()((set, get) =
     adoptTemplateCounter(templates);
     writeStoredPacketTemplates(templates);
 
+    // §40 39513'ün "Test scenarios" yuvası. Yalnız ilki uygulanıyor: Test
+    // Automation ekranı da tek senaryo tutuyor (`scenarioStorage.ts`), aynı
+    // gerekçe `protocols[0]`daki gibi. Geçersiz metin depoya YAZILMAZ —
+    // kullanıcının çalışan senaryosunu bozuk bir kayıtla değiştirmek, hiç
+    // yüklememekten kötüdür.
+    const [firstScenario] = payload.testScenarios ?? [];
+    if (firstScenario !== undefined) writeStoredScenarioJson(firstScenario);
+
     const [firstProtocol] = payload.protocols;
     if (firstProtocol === undefined) {
       set({ packetTemplates: templates });
@@ -336,10 +345,16 @@ export const useProtocolSchemaStore = create<ProtocolSchemaState>()((set, get) =
    * parçasını görmezden gelmeye zorlardı (`projectFile` de aynı gerekçeyle
    * damgayı üretmiyor).
    */
-  buildProjectPayload: (name, savedAt) => ({
-    name,
-    savedAt,
-    protocols: [get().schemaJson],
-    packetTemplates: get().packetTemplates,
-  }),
+  buildProjectPayload: (name, savedAt) => {
+    const scenarioJson = readStoredScenarioJson();
+    return {
+      name,
+      savedAt,
+      protocols: [get().schemaJson],
+      packetTemplates: get().packetTemplates,
+      // Kayıt yoksa alan HİÇ yazılmaz; boş dizi, "senaryosu silinmiş proje"
+      // ile "senaryosu hiç olmamış proje"yi aynı gösterirdi.
+      ...(scenarioJson === undefined ? {} : { testScenarios: [scenarioJson] }),
+    };
+  },
 }));

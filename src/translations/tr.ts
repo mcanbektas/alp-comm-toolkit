@@ -1224,6 +1224,7 @@ export const tr = {
   'projects.error.invalidName': 'Proje adı boş olamaz.',
   'projects.error.invalidPacketTemplate': 'Paket şablonlarından biri okunamadı.',
   'projects.error.invalidPacketTemplates': 'Paket şablonu listesi dizi değil.',
+  'projects.error.invalidTestScenarios': 'Test senaryosu listesi metin dizisi değil.',
   'projects.error.invalidProtocols': 'Protokol listesi metin dizisi olmalı.',
   'projects.error.invalidSavedAt': 'Kayıt zamanı okunabilir bir tarih değil.',
   'projects.error.missingProject': 'Dosyada proje bölümü yok.',

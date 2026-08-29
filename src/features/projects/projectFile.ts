@@ -53,6 +53,20 @@ export interface ProjectPayload {
   /** Şema JSON METİNLERİ — çözümlenmiş nesneler değil; store da metin saklıyor. */
   readonly protocols: readonly string[];
   readonly packetTemplates: readonly PacketTemplate[];
+  /**
+   * §40 satır 39513'ün "Test scenarios" yuvası (spec §38'in senaryoları).
+   *
+   * `protocols` gibi METİN saklanır, çözümlenmiş nesne değil: senaryo modeli
+   * on üç adım tipinin özyineli bir birliği ve onu burada ikinci kez
+   * doğrulamak, `test-automation` ile bu dosya arasında sessizce ayrışacak iki
+   * doğrulayıcı üretirdi. Metni okuyan taraf `parseScenarioJson` ile çözer.
+   *
+   * ALAN OPSİYONEL ve `formatVersion` 1'de KALDI. Sürümü 2'ye çıkarmak, salt
+   * EKLEME yapan bir değişiklik için var olan bütün proje dosyalarını
+   * reddetmek olurdu (`checkFormatVersion` eşitlik arıyor). Eski bir dosyada
+   * alan yoktur ve yokluğu bir hata değildir.
+   */
+  readonly testScenarios?: readonly string[];
 }
 
 export interface ProjectFile {
@@ -200,6 +214,13 @@ export function parseProjectFile(text: string): ProjectParseResult {
   const protocols = project['protocols'];
   if (!isStringArray(protocols)) return failure('projects.error.invalidProtocols');
 
+  const rawScenarios = project['testScenarios'];
+  // Yokluk geçerli (eski dosya); VARSA metin dizisi olmak zorunda — bozuk bir
+  // yuvayı sessizce boş saymak, kullanıcının senaryosunu kayıp gösterirdi.
+  if (rawScenarios !== undefined && !isStringArray(rawScenarios)) {
+    return failure('projects.error.invalidTestScenarios');
+  }
+
   const rawTemplates = project['packetTemplates'];
   if (!isUnknownArray(rawTemplates)) return failure('projects.error.invalidPacketTemplates');
 
@@ -220,6 +241,7 @@ export function parseProjectFile(text: string): ProjectParseResult {
       savedAt,
       protocols,
       packetTemplates,
+      ...(rawScenarios === undefined ? {} : { testScenarios: rawScenarios }),
     },
   };
 }

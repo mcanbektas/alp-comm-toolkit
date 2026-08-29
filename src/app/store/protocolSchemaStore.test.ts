@@ -427,3 +427,71 @@ describe('project payload', () => {
     expect(first).toEqual(second);
   });
 });
+
+describe('test senaryosu proje dosyasına bağlanır (§40 satır 39513)', () => {
+  const SCENARIO_KEY = 'alp-comm-test-scenario';
+  const SCENARIO_JSON = JSON.stringify({ formatVersion: 1, name: 'proje senaryosu', steps: [] });
+
+  function payload(extra: Partial<ProjectPayload> = {}): ProjectPayload {
+    return {
+      name: 'proje',
+      savedAt: '2026-08-29T12:00:00.000Z',
+      protocols: [],
+      packetTemplates: [],
+      ...extra,
+    };
+  }
+
+  it('depodaki senaryoyu proje yüküne yazar', async () => {
+    const fake = createFakeStorage({ [SCENARIO_KEY]: SCENARIO_JSON });
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    const built = useProtocolSchemaStore.getState().buildProjectPayload('proje', '2026-08-29T12:00:00.000Z');
+    expect(built.testScenarios).toEqual([SCENARIO_JSON]);
+  });
+
+  it('depo boşsa alanı HİÇ yazmaz', async () => {
+    const fake = createFakeStorage();
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    const built = useProtocolSchemaStore.getState().buildProjectPayload('proje', '2026-08-29T12:00:00.000Z');
+    expect(built.testScenarios).toBeUndefined();
+  });
+
+  it('bozuk depo kaydını projeye TAŞIMAZ', async () => {
+    const fake = createFakeStorage({ [SCENARIO_KEY]: '{bozuk' });
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    expect(useProtocolSchemaStore.getState().buildProjectPayload('proje', 'x').testScenarios).toBeUndefined();
+  });
+
+  it('proje dosyasındaki senaryoyu depoya koyar', async () => {
+    const fake = createFakeStorage();
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    useProtocolSchemaStore.getState().applyProject(payload({ testScenarios: [SCENARIO_JSON] }));
+    expect(fake.entries.get(SCENARIO_KEY)).toBe(SCENARIO_JSON);
+  });
+
+  it('geçersiz senaryo metni çalışan kaydı EZMEZ', async () => {
+    const fake = createFakeStorage({ [SCENARIO_KEY]: SCENARIO_JSON });
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    useProtocolSchemaStore.getState().applyProject(payload({ testScenarios: ['{bozuk'] }));
+    expect(fake.entries.get(SCENARIO_KEY)).toBe(SCENARIO_JSON);
+  });
+
+  it('yuvası olmayan proje senaryoya DOKUNMAZ', async () => {
+    const fake = createFakeStorage({ [SCENARIO_KEY]: SCENARIO_JSON });
+    installStorage(fake.storage);
+    const { useProtocolSchemaStore } = await loadStore();
+
+    useProtocolSchemaStore.getState().applyProject(payload());
+    expect(fake.entries.get(SCENARIO_KEY)).toBe(SCENARIO_JSON);
+  });
+});

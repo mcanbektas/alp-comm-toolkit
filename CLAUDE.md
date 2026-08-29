@@ -199,9 +199,27 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **k-means'in reddi** (bayt değeri metrik uzayda anlamsız, rastgele başlangıç
   determinizmi bozar), **checksum'da ölçütün tek çerçeve değil ORAN olması**
   (28 algoritma × konum denendiği için tek çerçevelik uyum tesadüftür) ve
-  **"bilinmiyor" ile "sıfır"un her yerde ayrı tutulması**. `features/` altında
-  hiç açılmamış iki klasör kaldı: `protocol-converter` (§33) ve
-  `test-automation` (§38).
+  **"bilinmiyor" ile "sıfır"un her yerde ayrı tutulması**.
+  **Test Automation Studio (spec §38) YAZILDI**: `src/features/test-automation/`
+  (13 adım tipi, yapılandırılmış koşul modeli, iptal edilebilir adım makinesi,
+  `ByteSource` köprüsü, §40 proje dosyası bağı), `src/connection/mock/
+  simulatedDevice.ts` (kural tabanlı, `canWrite: true`), rota
+  `/test-automation`. Kararlar `docs/ozellik-test-automation.md`de — özellikle
+  **ifade dili yerine yapılandırılmış koşul** (§41 39563-39564 `eval` ve dinamik
+  kod yasağı; küçük bir ayrıştırıcı yazmak yasağın harfini kurtarıp ruhunu
+  çiğnerdi), **koşulun üç cevabı** (`unresolved`u `false` saymak testi sessizce
+  yeşil geçirirdi) ve **sonsuz loop'un İKİ sınırı** (döngü sayısı + toplam adım
+  bütçesi; iç içe üç döngü tek tek sınırın altında kalıp çarpımda milyarlara
+  çıkabilir). §40'ın "Test scenarios" yuvası METİN taşır ve `formatVersion` 1'de
+  KALDI: sürümü artırmak, salt ekleme yapan bir değişiklik için var olan bütün
+  proje dosyalarını reddetmek olurdu.
+  `features/` altında hiç açılmamış TEK klasör kaldı: `protocol-converter`
+  (§33). Bekletilmesi bilinçli: 146 plugin dosyasından yalnız 14'ünde `encoder`
+  var (hepsi `serial/framing`), yani §33'ün saydığı sekiz dönüşümün HEDEF tarafı
+  (Modbus, MQTT, NMEA, DBC, J1939, BACnet) yazılmamış; üstüne iki bağlantıyı
+  aynı anda tutan köprü katmanı ve MQTT/UDP taşıması da yok. §33 ayrıca §46'nın
+  geliştirme sırasında ve §50'nin revize ana sayfa kategorilerinde HİÇ geçmiyor,
+  §38 ikisinde de adıyla var.
   **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),

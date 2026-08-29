@@ -235,3 +235,52 @@ describe('parseProjectFile', () => {
     expect(result).toEqual({ ok: true, project: makePayload() });
   });
 });
+
+describe('test senaryosu yuvası (§40 satır 39513)', () => {
+  const SCENARIO_JSON = JSON.stringify({ formatVersion: 1, name: 'senaryo', steps: [] });
+
+  function projectText(extra: Record<string, unknown>): string {
+    return JSON.stringify({
+      formatVersion: 1,
+      project: {
+        name: 'proje',
+        savedAt: '2026-08-29T12:00:00.000Z',
+        protocols: [],
+        packetTemplates: [],
+        ...extra,
+      },
+    });
+  }
+
+  it('senaryo METNİ olduğu gibi taşınır', () => {
+    const result = parseProjectFile(projectText({ testScenarios: [SCENARIO_JSON] }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('çözümleme başarısız');
+    expect(result.project.testScenarios).toEqual([SCENARIO_JSON]);
+  });
+
+  it('alan YOKSA hata değil — eski proje dosyaları açılmaya devam eder', () => {
+    const result = parseProjectFile(projectText({}));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('çözümleme başarısız');
+    expect(result.project.testScenarios).toBeUndefined();
+  });
+
+  it('metin dizisi olmayan yuvayı REDDEDER', () => {
+    const result = parseProjectFile(projectText({ testScenarios: [{ name: 'nesne' }] }));
+    expect(result).toMatchObject({ ok: false, errorKey: 'projects.error.invalidTestScenarios' });
+  });
+
+  it('serileştirme turunu kayıpsız atlatır', () => {
+    const text = serializeProject({
+      name: 'proje',
+      savedAt: '2026-08-29T12:00:00.000Z',
+      protocols: [],
+      packetTemplates: [],
+      testScenarios: [SCENARIO_JSON],
+    });
+    const result = parseProjectFile(text);
+    if (!result.ok) throw new Error('çözümleme başarısız');
+    expect(result.project.testScenarios).toEqual([SCENARIO_JSON]);
+  });
+});
