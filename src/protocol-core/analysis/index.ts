@@ -17,3 +17,5 @@ export * from './checksumScan';
 export * from './messageClustering';
 export * from './messageDiff';
 export * from './fieldCorrelation';
+export * from './packedFrames';
+export * from './report';
