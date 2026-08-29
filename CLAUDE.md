@@ -540,3 +540,24 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **§33 Protocol Converter'ın ön koşulu bu maddeydi ve artık karşılandı**;
   hedef tarafın motorları hâlâ yazılmamış olduğu için §33 yine de açılmadı.
 
+  **4. ✅ KAPANDI: Test Automation'ın ŞABLON koltuğu bağlandı** (2026-08-29,
+  encoder tüketicisiyle aynı gün, ayrı commit). `byteSourceIo`nun
+  `encodeTemplate` seçeneği testler dışında HİÇ verilmiyordu:
+  `send-frame` + `source: 'template'` gerçek ekranda "şablon deposu bağlı
+  değil" fırlatırdı — model, koşucu ve doğrulayıcı yazılmış ama ucu boşta
+  kalmış bir yoldu.
+
+  Bağlantı `useTestAutomation`da; çeviri `features/packet-builder/
+  packetTemplates.ts`te (saf, senkron). Metin→`EncodeValues` dönüşümü
+  `usePacketBuilder`dan `formValues.ts`e ÇIKARILDI: iki tüketici aynı
+  fonksiyonu çağırdığı için "Builder'da gördüğüm paket testin gönderdiğinden
+  farklı" sınıfı bir hata yapısal olarak imkânsız. Mantık değişmedi, yer
+  değiştirdi.
+
+  **Şablon `schemaName` taşır ama şemanın KENDİSİNİ taşımaz** (`projectFile.ts`).
+  Studio'daki şema o günden beri değişmiş olabilir; ad tutmuyorsa üretim
+  REDDEDİLİR (`schema-mismatch`). Sessizce üretmek, alan kimlikleri tutmadığı
+  için sıfırlarla dolu bir çerçeve göndermek olurdu. Şablon kimliğini store
+  üretir (`template-1`), o yüzden adım formunda serbest metin değil SEÇİM var;
+  depo boşken seçenek yerine "Packet Builder'da kaydedin" yazar.
+

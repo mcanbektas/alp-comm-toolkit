@@ -8851,6 +8851,8 @@ export const en: TranslationDictionary = {
   'testAutomation.field.thenBranch': 'If the condition holds',
   'testAutomation.field.elseBranch': 'Otherwise',
 
+  'testAutomation.field.templateEmpty': 'No saved templates — save a form on the Packet Builder screen.',
+  'testAutomation.field.templateUnset': 'Choose a template…',
   'testAutomation.field.payloadBytes': 'Payload bytes',
   'testAutomation.field.frameEncoder': 'Protocol envelope',
   'testAutomation.payload.pluginFrame': 'Frame with the protocol encoder',

@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
+import { useProtocolSchemaStore } from '@/app/store/protocolSchemaStore';
 import { CHECKSUM_ALGORITHMS } from '@/protocol-core/checksums/algorithmCatalogue';
 import { PAYLOAD_ENCODERS } from '@/protocols/encoderCatalog';
 import { COMPARISON_OPERATORS } from '../conditions';
@@ -315,6 +316,13 @@ export interface StepFieldsProps {
 
 export function StepFields({ step, onChange }: StepFieldsProps): ReactNode {
   const { t } = useTranslation();
+  /**
+   * Şablon listesi store'dan DOĞRUDAN okunuyor, prop olarak indirilmiyor:
+   * `ScenarioPanel` → adım satırı → burası üç katmanlık bir aktarım demekti ve
+   * araya giren iki bileşenin şablonlarla hiçbir işi yok. Okuma bir seçim
+   * (`selector`); protokol hesabı hâlâ bileşenin dışında.
+   */
+  const templates = useProtocolSchemaStore((store) => store.packetTemplates);
   const id = `step-${step.id}`;
 
   switch (step.kind) {
@@ -367,12 +375,32 @@ export function StepFields({ step, onChange }: StepFieldsProps): ReactNode {
           {step.payload.source === 'template' ? (
             <label className={LABEL_CLASS} htmlFor={`${id}-template`}>
               {t('testAutomation.field.templateId')}
-              <input
-                id={`${id}-template`}
-                className={FIELD_CLASS}
-                value={step.payload.templateId}
-                onChange={(event) => onChange({ ...step, payload: { source: 'template', templateId: event.target.value } })}
-              />
+              {/* Şablon kimliğini store üretir (`template-1`); elle yazmak
+                  imkânsıza yakındı. Boş depo bir hata değil, bir DURUM: seçenek
+                  yerine nereden geleceği yazılır. */}
+              {templates.length === 0 ? (
+                <span className="text-xs text-warn" data-testid={`${id}-template-empty`}>
+                  {t('testAutomation.field.templateEmpty')}
+                </span>
+              ) : (
+                <select
+                  id={`${id}-template`}
+                  data-testid={`${id}-template`}
+                  className={FIELD_CLASS}
+                  value={step.payload.templateId}
+                  onChange={(event) =>
+                    onChange({ ...step, payload: { source: 'template', templateId: event.target.value } })
+                  }
+                >
+                  <option value="">{t('testAutomation.field.templateUnset')}</option>
+                  {/* Şablon adı kullanıcı verisidir, çeviriye girmez. */}
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </label>
           ) : (
             <label className={LABEL_CLASS} htmlFor={`${id}-bytes`}>

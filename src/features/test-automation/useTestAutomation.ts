@@ -22,7 +22,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createByteSourceIo } from './byteSourceIo';
+import { useProtocolSchemaStore } from '@/app/store/protocolSchemaStore';
 import { createSimulatedDevice } from '@/connection/mock/simulatedDevice';
+import { encodeTemplateFrame } from '@/features/packet-builder/packetTemplates';
+import type { TemplateFrameFailure } from '@/features/packet-builder/packetTemplates';
 import { createSerialSource } from '@/connection/serial/serialSource';
 import { DEFAULT_SERIAL_OPTIONS } from '@/connection/serial/serialOptions';
 import { getWebSerial, isWebSerialSupported } from '@/connection/serial/webSerialTypes';
@@ -147,14 +150,39 @@ export interface UseTestAutomationResult {
   readonly exportReport: () => void;
 }
 
+/**
+ * Şablon çözülemediğinde adım raporuna düşen tanı metni. Bu katmanın öteki
+ * metinleri gibi (`runner.ts`: "değişken tanımsız: …") arayüz metni DEĞİL,
+ * rapor satırındaki tanıdır; kullanıcı hangi şablonun neden çözülmediğini
+ * görmeden koşuyu düzeltemez.
+ */
+const TEMPLATE_FAILURE_MESSAGES: Readonly<
+  Record<TemplateFrameFailure, (detail: string | undefined) => string>
+> = {
+  'template-not-found': (detail) => `paket şablonu bulunamadı: ${detail ?? ''}`,
+  'invalid-schema': () => 'Studio şeması çözülemedi',
+  'schema-mismatch': (detail) =>
+    `şablon başka bir şemaya ait: ${detail ?? ''} (Studio şeması değişmiş olabilir)`,
+  'invalid-values': (detail) => `şablon değerleri çevrilemedi: ${detail ?? ''}`,
+  'encode-failed': (detail) => `şablon kodlanamadı: ${detail ?? ''}`,
+};
+
 export function useTestAutomation(): UseTestAutomationResult {
   const [scenario, setScenarioState] = useState<TestScenario>(() => readStoredScenario() ?? DEFAULT_SCENARIO);
   const [connection, setConnectionState] = useState<ConnectionConfig>(DEFAULT_CONNECTION);
   const [state, setState] = useState<TestAutomationState>(INITIAL_STATE);
 
+  const packetTemplates = useProtocolSchemaStore((store) => store.packetTemplates);
+  const schemaJson = useProtocolSchemaStore((store) => store.schemaJson);
+
   const runRef = useRef<TestRun | undefined>(undefined);
   const ioRef = useRef<ByteSourceScenarioIo | undefined>(undefined);
   const mountedRef = useRef(true);
+  /** Şablon deposunun EN SON hâli; `run` uzun ömürlü bir kapanış kuruyor. */
+  const templateSourceRef = useRef({ templates: packetTemplates, schemaJson });
+  useEffect(() => {
+    templateSourceRef.current = { templates: packetTemplates, schemaJson };
+  }, [packetTemplates, schemaJson]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -185,6 +213,21 @@ export function useTestAutomation(): UseTestAutomationResult {
       return;
     }
 
+    /**
+     * Şablon deposu ADIM ÇALIŞIRKEN okunur, kapanış kurulurken değil: koşu
+     * dakikalarca sürebilir ve kullanıcı bu sırada Packet Builder'da şablonu
+     * güncelleyebilir. Donmuş bir liste, ekranda görünen şablonla gönderilen
+     * çerçevenin ayrışması demekti — ref bunu tek satırla kapatıyor.
+     */
+    const encodeTemplate = async (templateId: string): Promise<Uint8Array> => {
+      const { templates, schemaJson } = templateSourceRef.current;
+      const result = encodeTemplateFrame(templateId, templates, schemaJson);
+      if (!result.ok) {
+        throw new Error(TEMPLATE_FAILURE_MESSAGES[result.reason](result.detail));
+      }
+      return result.bytes;
+    };
+
     let io: ByteSourceScenarioIo;
     try {
       if (connection.sourceKind === 'serial') {
@@ -192,9 +235,17 @@ export function useTestAutomation(): UseTestAutomationResult {
         if (serial === undefined) throw new Error('unsupported');
         // Tıklama işleyicisinden SENKRON başlayan zincir: port seçimi burada.
         const port = await serial.requestPort({});
-        io = createByteSourceIo({ source: createSerialSource(port, DEFAULT_SERIAL_OPTIONS), framing });
+        io = createByteSourceIo({
+          source: createSerialSource(port, DEFAULT_SERIAL_OPTIONS),
+          framing,
+          encodeTemplate,
+        });
       } else {
-        io = createByteSourceIo({ source: createSimulatedDevice({ rules: DEFAULT_DEVICE_RULES }), framing });
+        io = createByteSourceIo({
+          source: createSimulatedDevice({ rules: DEFAULT_DEVICE_RULES }),
+          framing,
+          encodeTemplate,
+        });
       }
     } catch (cause) {
       setState({ ...INITIAL_STATE, errorMessage: cause instanceof Error ? cause.message : String(cause) });

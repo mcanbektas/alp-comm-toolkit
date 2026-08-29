@@ -8,6 +8,12 @@
  * her yerini kırabilir hâle gelirdi (live-monitor barrel'ı ile aynı gerekçe).
  *
  * Sıra bağımlılık yönünü izler: tipler → saf motorlar → durum → ekran.
+ *
+ * `formValues` ve `packetTemplates` de BİLEREK dışarıda: ikisinin tek dış
+ * tüketicisi Test Automation ve barrel'dan almak `PacketBuilderScreen`i onun
+ * chunk'ına da sürüklerdi. O iki modül derin yolla (`@/features/packet-builder/
+ * packetTemplates`) alınıyor — saf, React'siz ve bağımsız oldukları için
+ * güvenli.
  */
 
 export * from './builderTypes';

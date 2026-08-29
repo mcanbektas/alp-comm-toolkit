@@ -8843,6 +8843,8 @@ export const tr = {
   'testAutomation.field.thenBranch': 'Koşul doğruysa',
   'testAutomation.field.elseBranch': 'Koşul yanlışsa',
 
+  'testAutomation.field.templateEmpty': 'Kayıtlı şablon yok — Paket kurucu ekranında bir form kaydedin.',
+  'testAutomation.field.templateUnset': 'Şablon seçin…',
   'testAutomation.field.payloadBytes': 'Yük baytları',
   'testAutomation.field.frameEncoder': 'Protokol zarfı',
   'testAutomation.payload.pluginFrame': 'Protokol encoder\'ı ile çerçevele',

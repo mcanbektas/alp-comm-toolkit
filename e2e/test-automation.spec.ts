@@ -135,3 +135,70 @@ test('gönderim adımı yükü protokolün kendi zarfıyla çerçeveler', async 
 
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
+
+/**
+ * Şablonla gönderim — İKİ EKRANI birbirine bağlayan tek tur.
+ *
+ * Şablon Packet Builder'da kaydedilir, `localStorage` üzerinden aynı store'a
+ * düşer ve Test Automation koşarken çerçeveye çevrilir. Bu zincir yalnız
+ * gerçek tarayıcıda uçtan uca sınanabilir: jsdom testi iki ekranı aynı anda
+ * ayakta tutmaz.
+ */
+test('Packet Builder\'da kaydedilen şablon senaryodan gönderilebilir', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
+
+  // `addInitScript` HER gezinmede koşar; temizlik bir kez yapılmalı, yoksa
+  // ikinci ekrana geçerken ilk ekranda kaydedilen şablon da silinirdi.
+  await page.addInitScript(() => {
+    window.localStorage.setItem('alp-comm-lang', 'tr');
+    if (window.localStorage.getItem('e2e-storage-cleared') === null) {
+      window.localStorage.removeItem('alp-comm-test-scenario');
+      window.localStorage.removeItem('alp-comm-packet-templates');
+      window.localStorage.setItem('e2e-storage-cleared', '1');
+    }
+  });
+
+  // 1) Şablonu kur. Adres 1 seçiliyor: simüle cihazın kuralı `AA 01` önekiyle
+  //    eşleşiyor, yani şablondan üretilen çerçeve gerçek bir yanıt alıyor.
+  await page.goto('/comm/packet-builder');
+  await page.locator('#builder-field-address').fill('1');
+  await page.locator('#builder-field-command').selectOption('32');
+  await page.locator('#builder-field-payload').fill('024B');
+  await expect(page.locator('#builder-preview-hex-value')).toHaveText(/^AA01/);
+
+  await page.locator('#builder-template-name').fill('Durum isteği');
+  await page.getByTestId('builder-save-template').click();
+
+  // 2) Senaryoda gönderim kaynağını şablona çevir.
+  await page.goto('/comm/test-automation');
+  await expect(page.getByRole('heading', { level: 1, name: tr['testAutomation.title'] })).toBeVisible();
+
+  await page.getByTestId('step-send-source').selectOption('template');
+  await page.getByTestId('step-send-template').selectOption({ label: 'Durum isteği' });
+
+  await page.getByTestId('ta-run').click();
+
+  await expect(page.getByTestId('ta-run-status')).toHaveText(tr['testAutomation.runStatus.passed'], {
+    timeout: 15_000,
+  });
+  // Gönderilen çerçeve şablondan üretildi: Builder'ın ürettiği baytların aynısı.
+  const row = page.getByRole('row').filter({ hasText: 'send' }).first();
+  await expect(row).toContainText('AA 01 20 02 02 4B');
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
+test('şablon kaydedilmemişken adım seçilecek şablon olmadığını söyler', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.removeItem('alp-comm-packet-templates');
+  });
+  await openStudio(page);
+
+  await page.getByTestId('step-send-source').selectOption('template');
+
+  await expect(page.getByTestId('step-send-template-empty')).toBeVisible();
+});

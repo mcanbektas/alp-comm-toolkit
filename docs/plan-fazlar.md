@@ -55,8 +55,17 @@ düşüyorlar; (2) tüketici İKİ ekranda; (3) `protocol-core/types.ts`in
 xmodem/ymodem/zmodem/kiss'te sabitlenen parametrelerdir ve ekranda uyarı olarak
 görünür.
 
-**Ölçüm:** birim 6748 → 6776 (hepsi yeşil), e2e'ye 5 test eklendi ve tam
+**Ölçüm:** birim 6748 → 6777 (hepsi yeşil), e2e'ye 5 test eklendi ve tam
 süit yeşil koştu (1340 geçti · 2 atlandı).
+
+**Aynı gün, ayrı commit — Test Automation'ın ŞABLON koltuğu da bağlandı.**
+`byteSourceIo.encodeTemplate` testler dışında hiç verilmiyordu; `send-frame` +
+`template` gerçek ekranda "şablon deposu bağlı değil" fırlatırdı. Metin→değer
+dönüşümü `usePacketBuilder`dan `formValues.ts`e çıkarıldı (iki tüketici artık
+AYNI fonksiyonu çağırıyor), şablon→çerçeve `packetTemplates.ts`te. Adım
+formunda serbest metin yerine şablon SEÇİMİ var; şema adı tutmuyorsa üretim
+REDDEDİLİR. İki ekranı bağlayan e2e turu yazıldı (Builder'da kaydet →
+senaryodan gönder). Birim 6777 → 6782.
 
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
