@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent, ReactElement } from 'react';
+import type { ComponentType, KeyboardEvent, ReactElement, ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { WORKSPACE_TABS, findEntry } from '@/app/catalog';
@@ -114,6 +114,29 @@ const A2lPanel = lazy(async () => {
 });
 
 /**
+ * XML aygıt tanımı paneli (GSDML/IODD/SCL) TEK bileşendir; biçim farkı
+ * `format` özelliğiyle taşınır. Tablo `DefinitionFormat`tan bileşene eşlediği
+ * için üç ince sarmalayıcı yazılıyor — alternatifi, üç ayrı panel dosyası
+ * tutup aynı tabloyu üç kez çizmekti.
+ */
+const XmlDevicePanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/XmlDevicePanel');
+  return { default: module.XmlDevicePanel };
+});
+
+function GsdmlPanel(): ReactNode {
+  return <XmlDevicePanel format="gsdml" />;
+}
+
+function IoddPanel(): ReactNode {
+  return <XmlDevicePanel format="iodd" />;
+}
+
+function SclPanel(): ReactNode {
+  return <XmlDevicePanel format="scl" />;
+}
+
+/**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
  */
@@ -128,12 +151,15 @@ const CellularInitializationDashboard = lazy(async () => {
  * büyütmek yerine seçici bir yapıya çevrildi — üçüncü bir biçim geldiğinde
  * yalnız bu tabloya satır eklenir, render dalına dokunulmaz.
  */
-const DEFINITION_PANELS: Partial<Record<DefinitionFormat, typeof DbcPanel>> = {
+const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   dbc: DbcPanel,
   eds: EdsPanel,
   'custom-schema': SchemaPanel,
   'vendor-map': VendorMapPanel,
   a2l: A2lPanel,
+  gsdml: GsdmlPanel,
+  iodd: IoddPanel,
+  scl: SclPanel,
 };
 
 /**

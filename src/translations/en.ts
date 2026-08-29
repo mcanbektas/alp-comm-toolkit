@@ -2922,6 +2922,49 @@ export const en: TranslationDictionary = {
     'FORM conversions carry a free-form formula and are never executed (spec §41); showing the raw value.',
   'definition.a2l.note.unknownConversion': 'Unknown conversion type; showing the raw value.',
 
+  // --- XML device description (GSDML/IODD/SCL) panel ---
+  'definition.xmlDevice.action.import': 'Import device description (XML)',
+  'definition.xmlDevice.importHint':
+    'GSDML, IODD and SCL are accepted; the format is detected from the root element, not the file name.',
+  'definition.xmlDevice.sampleNotice':
+    'A sample description is shown. You can import your own file; it never leaves your device.',
+  'definition.xmlDevice.format': 'Format',
+  'definition.xmlDevice.vendor': 'Vendor',
+  'definition.xmlDevice.device': 'Device',
+  'definition.xmlDevice.itemCount': 'Items',
+  'definition.xmlDevice.line': 'Line',
+  'definition.xmlDevice.item.label': 'Data item',
+  'definition.xmlDevice.decodeHex.label': 'Process data bytes (HEX)',
+  'definition.xmlDevice.table.items': 'Device data items',
+  'definition.xmlDevice.column.id': 'Identifier',
+  'definition.xmlDevice.column.name': 'Name',
+  'definition.xmlDevice.column.group': 'Group',
+  'definition.xmlDevice.column.dataType': 'Data type',
+  'definition.xmlDevice.column.layout': 'Layout',
+  'definition.xmlDevice.column.default': 'Default',
+  'definition.xmlDevice.column.value': 'Value',
+  'definition.xmlDevice.group.parameter': 'Parameter',
+  'definition.xmlDevice.group.processData': 'Process data',
+  'definition.xmlDevice.group.dataObject': 'Data object',
+  'definition.xmlDevice.decode.noLayout':
+    'This item has no byte layout in the description, so it cannot be decoded from a frame (SCL data objects are configuration, not a position on the wire).',
+  'definition.xmlDevice.decode.tooShort': 'Not enough bytes; this item requires:',
+  'definition.xmlDevice.error.readFailed': 'The file could not be read.',
+  'definition.xmlDevice.error.parseFailed':
+    'The device description could not be parsed; the XML is malformed or the root element belongs to an unknown format.',
+  'definition.xmlDevice.issue.unknownFormat': 'Unknown root element; GSDML, IODD or SCL was expected.',
+  'definition.xmlDevice.issue.noItems': 'No data items were found in the file.',
+  'definition.xmlDevice.issue.noIed': 'The SCL file contains no IED element.',
+  'definition.xmlDevice.issue.itemWithoutName': 'The item name could not be resolved; showing its identifier.',
+  'definition.xmlDevice.issue.itemWithoutId': 'Item without an identifier; skipped.',
+  'definition.xmlDevice.issue.unknownProcessDataLength':
+    'The total process data length is missing; the bit layout could not be converted.',
+  'definition.xmlDevice.issue.unterminatedTag': 'Unterminated tag (missing `>`).',
+  'definition.xmlDevice.issue.mismatchedTag': 'Closing tag does not match the opening tag.',
+  'definition.xmlDevice.issue.badTag': 'The tag name could not be read.',
+  'definition.xmlDevice.issue.unclosedElement': 'An element was left unclosed at end of file.',
+  'definition.xmlDevice.issue.noRoot': 'No root element found in the file.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',

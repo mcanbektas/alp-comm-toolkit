@@ -2924,6 +2924,50 @@ export const tr = {
     'FORM dönüşümü serbest formül taşır ve çalıştırılmaz (spec §41); ham değer gösteriliyor.',
   'definition.a2l.note.unknownConversion': 'Dönüşüm türü tanınmıyor; ham değer gösteriliyor.',
 
+  // --- XML aygıt tanımı (GSDML/IODD/SCL) paneli ---
+  'definition.xmlDevice.action.import': 'Aygıt tanımı içe aktar (XML)',
+  'definition.xmlDevice.importHint':
+    'GSDML, IODD ve SCL kabul edilir; biçim dosya adından değil kök öğeden anlaşılır.',
+  'definition.xmlDevice.sampleNotice':
+    'Örnek tanım gösteriliyor. Kendi dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.xmlDevice.format': 'Biçim',
+  'definition.xmlDevice.vendor': 'Üretici',
+  'definition.xmlDevice.device': 'Aygıt',
+  'definition.xmlDevice.itemCount': 'Kalem sayısı',
+  'definition.xmlDevice.line': 'Satır',
+  'definition.xmlDevice.item.label': 'Veri kalemi',
+  'definition.xmlDevice.decodeHex.label': 'Süreç verisi baytları (HEX)',
+  'definition.xmlDevice.table.items': 'Aygıt veri kalemleri',
+  'definition.xmlDevice.column.id': 'Kimlik',
+  'definition.xmlDevice.column.name': 'Ad',
+  'definition.xmlDevice.column.group': 'Küme',
+  'definition.xmlDevice.column.dataType': 'Veri tipi',
+  'definition.xmlDevice.column.layout': 'Yerleşim',
+  'definition.xmlDevice.column.default': 'Varsayılan',
+  'definition.xmlDevice.column.value': 'Değer',
+  'definition.xmlDevice.group.parameter': 'Parametre',
+  'definition.xmlDevice.group.processData': 'Süreç verisi',
+  'definition.xmlDevice.group.dataObject': 'Veri nesnesi',
+  'definition.xmlDevice.decode.noLayout':
+    'Bu kalemin bayt yerleşimi tanımda yok; çerçeveden çözülemez (SCL veri nesneleri yapılandırmadır, telde konumu yoktur).',
+  'definition.xmlDevice.decode.tooShort': 'Bayt yetmiyor; bu kalem şu kadar bayt ister:',
+  'definition.xmlDevice.error.readFailed': 'Dosya okunamadı.',
+  'definition.xmlDevice.error.parseFailed':
+    'Aygıt tanımı çözümlenemedi; XML bozuk ya da kök öğe tanınan bir biçime ait değil.',
+  'definition.xmlDevice.issue.unknownFormat':
+    'Kök öğe tanınmadı; GSDML, IODD ya da SCL bekleniyordu.',
+  'definition.xmlDevice.issue.noItems': 'Dosyada hiç veri kalemi bulunamadı.',
+  'definition.xmlDevice.issue.noIed': 'SCL dosyasında IED öğesi yok.',
+  'definition.xmlDevice.issue.itemWithoutName': 'Kalemin adı çözülemedi; kimliği gösteriliyor.',
+  'definition.xmlDevice.issue.itemWithoutId': 'Kalem kimliksiz; atlandı.',
+  'definition.xmlDevice.issue.unknownProcessDataLength':
+    'Süreç verisinin toplam uzunluğu yazmıyor; bit yerleşimi çevrilemedi.',
+  'definition.xmlDevice.issue.unterminatedTag': 'Etiket kapanmamış (`>` yok).',
+  'definition.xmlDevice.issue.mismatchedTag': 'Kapanış etiketi açılışla eşleşmiyor.',
+  'definition.xmlDevice.issue.badTag': 'Etiket adı okunamadı.',
+  'definition.xmlDevice.issue.unclosedElement': 'Dosya sonunda kapanmamış öğe kaldı.',
+  'definition.xmlDevice.issue.noRoot': 'Dosyada kök öğe bulunamadı.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',
