@@ -44,6 +44,16 @@ const LogAnalyzerPage = lazy(async () => {
   return { default: module.LogAnalyzerPage };
 });
 
+/**
+ * Bilinmeyen protokol analizi de TEMBEL: on analiz motoru, sanallaştırılmış
+ * sütun tablosu ve kendi Worker'ı ana pakete binmemeli — Log Analyzer ile aynı
+ * gerekçe.
+ */
+const ReverseEngineeringPage = lazy(async () => {
+  const module = await import('@/pages/ReverseEngineeringPage');
+  return { default: module.ReverseEngineeringPage };
+});
+
 function LazyFallback(): ReactElement {
   const { t } = useTranslation();
   return <p className="p-4 text-sm text-muted">{t('common.loading')}</p>;
@@ -96,6 +106,14 @@ export function AppRoutes(): ReactElement {
           element={
             <Suspense fallback={<LazyFallback />}>
               <LogAnalyzerPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="reverse-engineering"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <ReverseEngineeringPage />
             </Suspense>
           }
         />
