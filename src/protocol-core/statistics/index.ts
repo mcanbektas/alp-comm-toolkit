@@ -6,3 +6,5 @@ export * from './rateMeter';
 export * from './commStatistics';
 export * from './signalStatistics';
 export * from './downsample';
+export * from './entropy';
+export * from './correlation';
