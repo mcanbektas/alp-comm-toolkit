@@ -39,6 +39,11 @@ const PacketBuilderPage = lazy(async () => {
   return { default: module.PacketBuilderPage };
 });
 
+const LogAnalyzerPage = lazy(async () => {
+  const module = await import('@/pages/LogAnalyzerPage');
+  return { default: module.LogAnalyzerPage };
+});
+
 function LazyFallback(): ReactElement {
   const { t } = useTranslation();
   return <p className="p-4 text-sm text-muted">{t('common.loading')}</p>;
@@ -83,6 +88,14 @@ export function AppRoutes(): ReactElement {
           element={
             <Suspense fallback={<LazyFallback />}>
               <PacketBuilderPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="log-analyzer"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <LogAnalyzerPage />
             </Suspense>
           }
         />

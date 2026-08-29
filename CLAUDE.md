@@ -176,8 +176,14 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   4 kanonik kayıt: 1 `ready` (`esp-now`) + 3 `partial`); domain toplamı
   **9 `ready` + 7 `partial` + 3 alias**, `planned` KALMADI.
   Sıradaki domain seçimi YAPILMADI ve **zaten seçenek kalmadı**: bir sonraki iş
-  sınıfı katalog DIŞIDIR (çerçeveler-arası panolar, `custom-schema` paneli,
-  Log Analyzer, `pcap.ts` tüketicisi) ve seçim kullanıcınındır.
+  sınıfı katalog DIŞIDIR (çerçeveler-arası panolar, `custom-schema` paneli) ve
+  seçim kullanıcınındır. **Log Analyzer (§34) YAZILDI** ve `pcap.ts` artık
+  tüketicisiz değil: `src/protocol-core/logs/` (biçim ayrıştırıcıları + filtre +
+  istatistik + dışa aktarım), `src/workers/logAnalyzer.worker.ts`,
+  `src/features/log-analyzer/`, rota `/log-analyzer`. Okunan biçimler: pcap,
+  candump, Vector ASC, CSV/ayraçlı, JSON/NDJSON, hex metin dökümü, ham ikili.
+  **PCAPNG hâlâ desteklenmiyor** — ayrı bir dosya formatıdır, tanınır ve
+  yönlendirici bir mesajla reddedilir.
   **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
