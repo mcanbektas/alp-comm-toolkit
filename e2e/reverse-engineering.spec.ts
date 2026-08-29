@@ -95,3 +95,17 @@ test('log dosyasını okuyup aynı analizi koşar', async ({ page }) => {
 
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
+
+test('1440 ve 390 pikselde yatay taşma yok', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openAnalyzer(page);
+  await page.getByTestId('re-analyze').click();
+  await expect(page.getByTestId('re-diff-summary')).toBeVisible({ timeout: 15_000 });
+
+  const wide = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(wide, 'sayfa 1440px genişlikte yatayda taşıyor').toBeLessThanOrEqual(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const narrow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(narrow, 'sayfa 390px genişlikte yatayda taşıyor').toBeLessThanOrEqual(0);
+});

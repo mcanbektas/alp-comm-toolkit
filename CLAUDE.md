@@ -188,6 +188,20 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `ByteSource` sözleşmesini gerçekler ve `logs` çekirdeğinden çıkan kayıtları
   monitörün canlı zincirine besler. `connection/` altında yalnız `usb`,
   `bluetooth`, `websocket` boş kaldı.
+  **Unknown Protocol Analyzer (spec §35 + §36) YAZILDI**: `src/protocol-core/analysis/`
+  (11 saf motor + ortak okuma/tip modülleri + 10 fazlı iptal edilebilir koşucu +
+  Worker'a kopyasız aktarım),
+  `src/workers/reverseEngineering.worker.ts` + `analyzeInWorker.ts`,
+  `src/features/reverse-engineering/`, rota `/reverse-engineering`. §35'in 13
+  maddesinin hepsi ve §36'nın fark/rol tablosu karşılandı; fixture uydurulmadı,
+  spec'in kendi örnekleri (35060 RF seti, 39339-39353, 16283 gyro) kullanıldı.
+  Kararlar ve eşikler `docs/ozellik-reverse-engineering.md`de — özellikle
+  **k-means'in reddi** (bayt değeri metrik uzayda anlamsız, rastgele başlangıç
+  determinizmi bozar), **checksum'da ölçütün tek çerçeve değil ORAN olması**
+  (28 algoritma × konum denendiği için tek çerçevelik uyum tesadüftür) ve
+  **"bilinmiyor" ile "sıfır"un her yerde ayrı tutulması**. `features/` altında
+  hiç açılmamış iki klasör kaldı: `protocol-converter` (§33) ve
+  `test-automation` (§38).
   **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı
   taşıyıcı), `cc-link` link-cihazı görüntüsü (telgraf biçimi kamuya açık değil),
