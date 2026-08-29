@@ -136,6 +136,12 @@ function SclPanel(): ReactNode {
   return <XmlDevicePanel format="scl" />;
 }
 
+/** DSDL paneli de TEMBEL: yalnız DroneCAN/Cyphal'ın `definitions` sekmesinde gerekir. */
+const DsdlPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/DsdlPanel');
+  return { default: module.DsdlPanel };
+});
+
 /**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
@@ -160,6 +166,7 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   gsdml: GsdmlPanel,
   iodd: IoddPanel,
   scl: SclPanel,
+  dsdl: DsdlPanel,
 };
 
 /**

@@ -2965,6 +2965,39 @@ export const en: TranslationDictionary = {
   'definition.xmlDevice.issue.unclosedElement': 'An element was left unclosed at end of file.',
   'definition.xmlDevice.issue.noRoot': 'No root element found in the file.',
 
+  // --- DSDL (Cyphal / DroneCAN) definition panel ---
+  'definition.dsdl.action.import': 'Import DSDL file',
+  'definition.dsdl.sampleNotice':
+    'A sample definition is shown. You can import your own .dsdl file; it never leaves your device.',
+  'definition.dsdl.kind': 'Kind',
+  'definition.dsdl.kind.message': 'Message',
+  'definition.dsdl.kind.service': 'Service (request + response)',
+  'definition.dsdl.fieldCount': 'Fields',
+  'definition.dsdl.line': 'Line',
+  'definition.dsdl.field.label': 'Field',
+  'definition.dsdl.decodeHex.label': 'Serialized bytes (HEX)',
+  'definition.dsdl.table.fields': 'Fields',
+  'definition.dsdl.section.message': 'Message',
+  'definition.dsdl.section.request': 'Request',
+  'definition.dsdl.section.response': 'Response',
+  'definition.dsdl.column.name': 'Name',
+  'definition.dsdl.column.type': 'Type',
+  'definition.dsdl.column.layout': 'Layout',
+  'definition.dsdl.column.comment': 'Comment',
+  'definition.dsdl.column.value': 'Value',
+  'definition.dsdl.lengthPrefix': 'length prefix',
+  'definition.dsdl.decode.noLayout':
+    'This field has no fixed position: a variable-length array or a composite type precedes it, so the layout depends on the wire content.',
+  'definition.dsdl.decode.tooShort': 'Not enough bytes; this field requires:',
+  'definition.dsdl.error.readFailed': 'The file could not be read.',
+  'definition.dsdl.error.parseFailed':
+    'The DSDL file could not be parsed; no fields or constants were found.',
+  'definition.dsdl.issue.empty': 'The file contains no fields or constants.',
+  'definition.dsdl.issue.badField': 'The line could not be read as a field declaration.',
+  'definition.dsdl.issue.fieldWithoutName': 'The field has no name; only void padding may be unnamed.',
+  'definition.dsdl.issue.extraServiceSeparator':
+    'A second `---` separator was ignored; a type has at most a request and a response section.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'The message is incomplete: at least 3 bytes are required (FMT, SID, Checksum).',

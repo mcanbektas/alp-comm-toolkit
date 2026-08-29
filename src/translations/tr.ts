@@ -2968,6 +2968,39 @@ export const tr = {
   'definition.xmlDevice.issue.unclosedElement': 'Dosya sonunda kapanmamış öğe kaldı.',
   'definition.xmlDevice.issue.noRoot': 'Dosyada kök öğe bulunamadı.',
 
+  // --- DSDL (Cyphal / DroneCAN) tanım paneli ---
+  'definition.dsdl.action.import': 'DSDL dosyası içe aktar',
+  'definition.dsdl.sampleNotice':
+    'Örnek tanım gösteriliyor. Kendi .dsdl dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.dsdl.kind': 'Tip',
+  'definition.dsdl.kind.message': 'Mesaj',
+  'definition.dsdl.kind.service': 'Servis (istek + yanıt)',
+  'definition.dsdl.fieldCount': 'Alan sayısı',
+  'definition.dsdl.line': 'Satır',
+  'definition.dsdl.field.label': 'Alan',
+  'definition.dsdl.decodeHex.label': 'Seri gösterim baytları (HEX)',
+  'definition.dsdl.table.fields': 'Alanlar',
+  'definition.dsdl.section.message': 'Mesaj',
+  'definition.dsdl.section.request': 'İstek',
+  'definition.dsdl.section.response': 'Yanıt',
+  'definition.dsdl.column.name': 'Ad',
+  'definition.dsdl.column.type': 'Tip',
+  'definition.dsdl.column.layout': 'Yerleşim',
+  'definition.dsdl.column.comment': 'Yorum',
+  'definition.dsdl.column.value': 'Değer',
+  'definition.dsdl.lengthPrefix': 'uzunluk öneki',
+  'definition.dsdl.decode.noLayout':
+    'Bu alanın konumu tanımdan çıkmıyor: kendisinden önce değişken uzunluklu bir dizi ya da bileşik tip var, yerleşim telin içeriğine bağlı.',
+  'definition.dsdl.decode.tooShort': 'Bayt yetmiyor; bu alan şu kadar bayt ister:',
+  'definition.dsdl.error.readFailed': 'Dosya okunamadı.',
+  'definition.dsdl.error.parseFailed':
+    'DSDL dosyası çözümlenemedi; içinde hiç alan ya da sabit bulunamadı.',
+  'definition.dsdl.issue.empty': 'Dosyada hiç alan ya da sabit yok.',
+  'definition.dsdl.issue.badField': 'Satır alan bildirimi olarak okunamadı.',
+  'definition.dsdl.issue.fieldWithoutName': 'Alanın adı yok; yalnız void dolgusu adsız olabilir.',
+  'definition.dsdl.issue.extraServiceSeparator':
+    'İkinci `---` ayracı yok sayıldı; bir tipte en fazla istek ve yanıt bölümü olur.',
+
   // --- ISO 14230 (KWP2000) ---
   'protocol.iso14230.error.frameTooShort':
     'Mesaj eksik: en az 3 bayt gerekir (FMT, SID, Checksum).',
