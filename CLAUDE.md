@@ -645,3 +645,23 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   Transport Protocol (çok çerçeveli aktarım) ÜRETİLMEZ: 8 baytı aşan veri
   reddedilir. TP bir oturum protokolüdür, tek atımlık `encode` sözleşmesine
   sığmaz.
+
+  **8. ✅ BACnet/IP ve BACnet MS/TP encoder'ları — §33'ün SEKİZ dönüşümünün
+  hedef tarafı TAMAM** (2026-08-30). İkisi de kendi dosyalarındaki yazılı
+  tuzakların tam üstünde duruyor, o yüzden uzunluk ve CRC alanlarının HİÇBİRİ
+  çağırana sorulmuyor:
+
+  - **BVLC Length KENDİNİ DE SAYAR** (MBAP'ın tersine): gövde uzunluğu değil
+    `4 + gövde`. Yanlış yazılan bir Length çözücüde uyarı, gerçek ağda kayma
+    demekti. Sabitlenen parametre: Function = Original-Unicast-NPDU (0x0A).
+    Forwarded-NPDU (0x04) BİLEREK dışarıda — başlıktan sonraki 6 baytlık B/IP
+    adresi gövdenin değil ZARFIN parçası, tek parametreyle doğru üretilemez.
+  - **MS/TP Length YALNIZ VERİYİ sayar** ve **Data CRC KOŞULLUDUR**: Length 0
+    ise o iki bayt hiç yazılmaz (Token, Poll For Master). Sabit uzunluk varsayan
+    bir üretici Token çerçevesine iki bayt çöp eklerdi. Data CRC LSB-first.
+    MS/TP'de sabitlenen parametre YOK: Frame Type, adresler ve veri gövdeden.
+
+  §33'ün sekiz örnek dönüşümünün hedef tarafı artık eksiksiz: 10 motor
+  (3 Modbus · MQTT · 2 CAN · J1939 · NMEA 2000 · 2 BACnet) + JSON/CSV hedefleri
+  encoder istemiyor. **Ekranın kendisi (`features/protocol-converter`) hâlâ
+  yazılmadı** — sıradaki iş odur.

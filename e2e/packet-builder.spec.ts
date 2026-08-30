@@ -328,3 +328,33 @@ test('J1939 ve NMEA 2000 aynı kısıt notunu gösterir, geçersiz önceliği re
 
   expect(consoleErrors).toEqual([]);
 });
+
+/**
+ * BACnet'in iki taşıması, iki farklı uzunluk tuzağının üstünde: BVLC Length
+ * KENDİNİ sayar, MS/TP Length yalnız VERİYİ sayar. Tur ikisini de ölçüyor.
+ */
+test('BACnet/IP ve MS/TP zarfları uzunluk alanlarını kendi kurallarıyla yazar', async ({ page }) => {
+  const consoleErrors = await openBuilder(page);
+
+  await fillSetOutputExample(page);
+  await expect(packetHex(page)).toHaveText(SPEC_PACKET_HEX);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:bacnet-ip');
+
+  // 81 0A + Length 000C: 4 başlık + 8 gövde = 12, yani başlık kendi içinde sayılı.
+  await expect(packetHex(page)).toHaveText(`810A000C${SPEC_PACKET_HEX}`);
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('12');
+
+  await page.locator('#builder-post-processing').selectOption('plugin:bacnet-mstp');
+
+  // 55 FF · Frame Type AA · hedef 05 · kaynak 20 · Length 0005 (YALNIZ veri) ·
+  // Header CRC · 5 veri baytı · Data CRC. CRC'ler birim testte doğrulanıyor.
+  await expect(packetHex(page)).toHaveText(/^55FFAA05200005[0-9A-F]{2}02024B6E55[0-9A-F]{4}$/);
+  // 8 başlık + 5 veri + 2 Data CRC = 15; Length alanındaki 5 ile karıştırılmasın.
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('15');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.bacnetMstp'],
+  );
+
+  expect(consoleErrors).toEqual([]);
+});

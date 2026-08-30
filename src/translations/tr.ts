@@ -1091,6 +1091,10 @@ export const tr = {
     'Yük "identifier sözcüğü (4 bayt, little-endian) + en çok 8 veri baytı" olmalı; çerçeve extended formatta üretilir ve DLC hesaplanır.',
   'builder.encoder.fixed.j1939':
     'Yük "öncelik (1) + PGN (3, big-endian) + hedef adresi (1) + kaynak adresi (1) + en çok 8 veri baytı" olmalı; yayın (PDU2) PGN\'lerinde hedef adresi 0xFF yazılır, reserved biti 0 sabittir ve çok çerçeveli aktarım (TP) üretilmez.',
+  'builder.encoder.fixed.bacnetIp':
+    'Paket Original-Unicast-NPDU (0x0A) olarak üretilir; yük BVLC başlığından sonraki NPDU olmalı ve Length alanı — kendisini de sayarak — hesaplanır.',
+  'builder.encoder.fixed.bacnetMstp':
+    'Yük "Frame Type (1) + hedef adresi (1) + kaynak adresi (1) + veri" olmalı; Preamble, Length ve iki CRC hesaplanır, veri yoksa Data CRC hiç yazılmaz.',
   'builder.field.postProcessing': 'Çerçeveleme sonrası işlem',
   'builder.postProcessing.none': 'Yok',
   'builder.postProcessing.byteStuffing': 'Bayt doldurma',

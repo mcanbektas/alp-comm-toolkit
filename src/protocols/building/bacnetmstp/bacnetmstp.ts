@@ -91,6 +91,14 @@ const PROTOCOL_DISPLAY_NAME = 'BACnet MS/TP';
 
 const HEX_RADIX = 16;
 
+/** Encoder gövdesinin başlığı: Frame Type + Destination + Source. */
+const MSTP_ENCODER_HEADER_LENGTH = 3;
+/** ASHRAE 135 §9: MS/TP çerçevesinin veri alanı en çok 501 bayttır. */
+const MSTP_MAX_DATA_LENGTH = 501;
+const PREAMBLE_LENGTH = 2;
+const BITS_PER_BYTE = 8;
+const BYTE_MASK = 0xff;
+
 const PREAMBLE_BYTE_1 = 0x55;
 const PREAMBLE_BYTE_2 = 0xff;
 const FRAME_TYPE_OFFSET = 2;
@@ -452,6 +460,67 @@ function parseBacnetMstpFrame(data: Uint8Array, options: BacnetMstpParseOptions)
   return { success: true, frame, consumedBytes: totalRequired };
 }
 
+/**
+ * ENCODER — girdi `Frame Type (1) + Destination (1) + Source (1) + veri`.
+ *
+ * Zarfı encoder hesaplar: Preamble, Length ve İKİ CRC. Bunların hiçbiri
+ * çağırana sorulamaz, çünkü üçü de dosya başındaki tuzakların tam üstünde
+ * duruyor:
+ *
+ * - **Length yalnız VERİYİ sayar** — başlığı da CRC'leri de değil (off-by-one
+ *   klasiği).
+ * - **Data CRC KOŞULLUDUR**: Length 0 ise o iki bayt HİÇ YAZILMAZ. Token ve
+ *   Poll For Master çerçeveleri Header CRC'de biter; sabit uzunluk varsayan
+ *   bir üretici onlara iki bayt çöp eklerdi.
+ * - **Data CRC LSB-first iletilir**, Header CRC ise tek bayt. Ters yazmak hata
+ *   VERMEDEN her çerçeveyi karşı tarafta geçersiz kılardı.
+ *
+ * Sabitlenen parametre YOK: Frame Type, adresler ve veri tamamen çağıranın.
+ * Token/Poll For Master gibi verisiz çerçeveler de bu encoder'la üretilebilir —
+ * gövdeye veri koymamak yeter.
+ */
+export function encodeBacnetMstpFrame(body: Uint8Array): Uint8Array {
+  if (body.length < MSTP_ENCODER_HEADER_LENGTH) {
+    throw new RangeError(
+      `encodeBacnetMstpFrame: gövde en az ${MSTP_ENCODER_HEADER_LENGTH} bayt olmalı (Frame Type + Destination + Source)`,
+    );
+  }
+
+  const data = body.subarray(MSTP_ENCODER_HEADER_LENGTH);
+  if (data.length > MSTP_MAX_DATA_LENGTH) {
+    throw new RangeError(
+      `encodeBacnetMstpFrame: veri ${data.length} bayt, MS/TP üst sınırı ${MSTP_MAX_DATA_LENGTH}`,
+    );
+  }
+
+  const header = Uint8Array.from([
+    byteAt(body, 0),
+    byteAt(body, 1),
+    byteAt(body, 2),
+    (data.length >> BITS_PER_BYTE) & BYTE_MASK,
+    data.length & BYTE_MASK,
+  ]);
+  const headerCrc = Number(computeNamedCrc(header, 'CRC8_BACNET_MSTP'));
+
+  const hasData = data.length > 0;
+  const frame = new Uint8Array(
+    PREAMBLE_LENGTH + header.length + 1 + data.length + (hasData ? DATA_CRC_LENGTH : 0),
+  );
+  frame[0] = PREAMBLE_BYTE_1;
+  frame[1] = PREAMBLE_BYTE_2;
+  frame.set(header, PREAMBLE_LENGTH);
+  frame[HEADER_CRC_OFFSET] = headerCrc;
+
+  if (hasData) {
+    frame.set(data, DATA_OFFSET);
+    const dataCrc = Number(computeNamedCrc(data, 'CRC16_X25'));
+    frame[DATA_OFFSET + data.length] = dataCrc & BYTE_MASK;
+    frame[DATA_OFFSET + data.length + 1] = (dataCrc >> BITS_PER_BYTE) & BYTE_MASK;
+  }
+
+  return frame;
+}
+
 export function parseBacnetMstp(data: Uint8Array): ParseResult {
   return parseBacnetMstpFrame(data, {});
 }
@@ -562,6 +631,8 @@ export const bacnetMstpPlugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'building-automation',
   parser: bacnetMstpParser,
+  // Girdi: Frame Type + Destination + Source + veri (bkz. `encodeBacnetMstpFrame`).
+  encoder: { encode: encodeBacnetMstpFrame },
   documentation: {
     summary: 'protocol.bacnetMstp.documentation.summary',
     layer: 'data-link',

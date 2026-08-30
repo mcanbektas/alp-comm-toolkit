@@ -1090,6 +1090,10 @@ export const en: TranslationDictionary = {
     'The payload must be "identifier word (4 bytes, little-endian) + up to 8 data bytes"; the frame is built in extended format and the DLC is computed.',
   'builder.encoder.fixed.j1939':
     'The payload must be "priority (1) + PGN (3, big-endian) + destination address (1) + source address (1) + up to 8 data bytes"; broadcast (PDU2) PGNs take 0xFF as the destination, the reserved bit is fixed at 0 and multi-frame transport (TP) is not produced.',
+  'builder.encoder.fixed.bacnetIp':
+    'The packet is built as Original-Unicast-NPDU (0x0A); the payload must be the NPDU that follows the BVLC header and the Length field — which counts itself — is computed.',
+  'builder.encoder.fixed.bacnetMstp':
+    'The payload must be "frame type (1) + destination address (1) + source address (1) + data"; the preamble, length and both CRCs are computed, and with no data the Data CRC is not written at all.',
   'builder.field.postProcessing': 'Post-framing processing',
   'builder.postProcessing.none': 'None',
   'builder.postProcessing.byteStuffing': 'Byte stuffing',

@@ -106,6 +106,13 @@ const BVLC_LENGTH_FIELD_WIDTH = 2;
 /** Type(1) + Function(1) + Length(2) — dosya başı kaynak uyarısı. */
 const BVLC_HEADER_LENGTH = 4;
 
+/** NPDU'nun taşıyabileceği en kısa hâli: sürüm baytı + kontrol baytı. */
+const NPDU_MINIMUM_LENGTH = 2;
+/** Length alanı 16 bit; başlık dahil toplam bundan uzun olamaz. */
+const MAX_BVLC_LENGTH = 0xffff;
+const BITS_PER_BYTE = 8;
+const BYTE_MASK = 0xff;
+
 /** `BVLL_TYPE_BACNET_IP` / `BACNET_IP_ANNEX_J` — dosya başı kaynak uyarısı. */
 const BVLC_TYPE_BACNET_IP = 0x81;
 
@@ -462,6 +469,51 @@ function parseBacnetIpFrame(data: Uint8Array, options: BacnetIpParseOptions): Pa
   return { success: true, frame, consumedBytes: data.length };
 }
 
+/**
+ * ENCODER — girdi BVLC başlığından SONRAKİ baytlar, yani NPDU (+APDU).
+ *
+ * Zarfı encoder hesaplar: Type, Function ve Length. Bunlardan **Length'i
+ * çağırana bırakmak** dosya başında anlatılan tuzağı kullanıcının kucağına
+ * bırakmak olurdu — BVLC Length KENDİSİNİ DE SAYAR (MBAP'ın tersine), yani
+ * gövde uzunluğu değil `4 + gövde`dir. Yanlış yazılan bir Length çözücüde
+ * uyarıya döner ve gerçek bir ağda paketi kaydırır.
+ *
+ * ## Sabitlenen parametre: Function
+ *
+ * Tek parametreli `ProtocolEncoder` sözleşmesi (CLAUDE.md, kilitli karar)
+ * ikinci bir alan taşımıyor; 12 BVLC fonksiyonundan **Original-Unicast-NPDU**
+ * (0x0A) yazılıyor. Neden bu: NPDU taşıyan iki fonksiyondan tekil olanı ve
+ * §33'ün "BACnet property → MQTT" dönüşümünün ters yönü de tekil bir okuma/
+ * yazma isteğidir. Kısıt defterde ilan ediliyor, ekranda uyarı olarak görünür.
+ *
+ * Forwarded-NPDU (0x04) BİLEREK dışarıda: 4 baytlık başlıktan sonra 6 baytlık
+ * B/IP adresi geliyor ve o adres gövdenin parçası DEĞİL, zarfın parçasıdır —
+ * tek parametreyle doğru üretilemez.
+ */
+export function encodeBacnetIpFrame(body: Uint8Array): Uint8Array {
+  if (body.length < NPDU_MINIMUM_LENGTH) {
+    throw new RangeError(
+      `encodeBacnetIpFrame: gövde en az ${NPDU_MINIMUM_LENGTH} bayt olmalı (NPDU sürümü + kontrol baytı)`,
+    );
+  }
+
+  const totalLength = BVLC_HEADER_LENGTH + body.length;
+  if (totalLength > MAX_BVLC_LENGTH) {
+    throw new RangeError(
+      `encodeBacnetIpFrame: toplam uzunluk ${totalLength}, BVLC Length alanının üst sınırı ${MAX_BVLC_LENGTH}`,
+    );
+  }
+
+  const frame = new Uint8Array(totalLength);
+  frame[BVLC_TYPE_OFFSET] = BVLC_TYPE_BACNET_IP;
+  frame[BVLC_FUNCTION_OFFSET] = FUNCTION_ORIGINAL_UNICAST_NPDU;
+  // Length BIG-ENDIAN ve KENDİNİ DE SAYAR — dosya başındaki tuzak.
+  frame[BVLC_LENGTH_OFFSET] = (totalLength >> BITS_PER_BYTE) & BYTE_MASK;
+  frame[BVLC_LENGTH_OFFSET + 1] = totalLength & BYTE_MASK;
+  frame.set(body, BVLC_HEADER_LENGTH);
+  return frame;
+}
+
 export function parseBacnetIp(data: Uint8Array): ParseResult {
   return parseBacnetIpFrame(data, {});
 }
@@ -580,6 +632,8 @@ export const bacnetIpPlugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'building-automation',
   parser: bacnetIpParser,
+  // Girdi: BVLC başlığından sonraki baytlar (bkz. `encodeBacnetIpFrame`).
+  encoder: { encode: encodeBacnetIpFrame },
   documentation: {
     summary: 'protocol.bacnetIp.documentation.summary',
     layer: 'multi-layer',

@@ -111,6 +111,20 @@ istemiyor (saf serileştirme); kalan tek eksik BACnet.
 
 **Ölçüm:** birim 6809 → 6822 (yeşil), e2e 1344 → 1345.
 
+## ✅ BACnet encoder'ları — §33'ün hedef tarafı tamamlandı (2026-08-30)
+
+BACnet/IP: gövde BVLC başlığından sonraki NPDU; Type/Function/Length encoder'da.
+BVLC Length KENDİNİ sayar (MBAP'ın tersine) — bu yüzden çağırana sorulmuyor.
+Function sabit: Original-Unicast-NPDU. MS/TP: gövde `Frame Type + hedef + kaynak
++ veri`; Preamble, Length ve iki CRC hesaplanıyor. Length yalnız veriyi sayar ve
+veri yoksa Data CRC hiç yazılmaz (Token çerçevesi Header CRC'de biter).
+
+Hedef tarafta artık 10 motor var; §33'ün sekiz örnek dönüşümünün hepsi
+karşılanabiliyor (JSON/CSV hedefleri encoder istemiyor). Eksik olan tek şey
+`src/features/protocol-converter` — spec §6'nın açılmamış TEK feature klasörü.
+
+**Ölçüm:** birim 6822 → 6832 (yeşil), e2e 1345 → 1346.
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 

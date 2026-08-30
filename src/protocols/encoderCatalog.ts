@@ -186,6 +186,21 @@ export const ENCODER_CATALOG: readonly EncoderEntry[] = [
     fixedParametersKey: 'builder.encoder.fixed.j1939',
   },
 
+  // BACnet'in iki taşıması. IP'de Function SABİT (sözleşme ikinci alan
+  // taşımıyor); MS/TP'de sabitlenen parametre YOK, hepsi gövdeden geliyor.
+  {
+    pluginId: 'bacnet-ip',
+    displayName: 'BACnet/IP',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.bacnetIp',
+  },
+  {
+    pluginId: 'bacnet-mstp',
+    displayName: 'BACnet MS/TP',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.bacnetMstp',
+  },
+
   // --- values ailesi -------------------------------------------------------
   {
     pluginId: 'ascii-protocol',
