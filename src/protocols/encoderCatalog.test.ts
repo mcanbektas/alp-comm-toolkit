@@ -97,6 +97,8 @@ describe('encoder catalog', () => {
   it('finds entries by plugin id', () => {
     expect(findEncoderEntry('slip')?.role).toBe('payload');
     expect(findEncoderEntry('ascii-protocol')?.role).toBe('values');
-    expect(findEncoderEntry('modbus-rtu')).toBeUndefined();
+    expect(findEncoderEntry('modbus-rtu')?.role).toBe('payload');
+    // Encoder taşımayan bir plugin defterde de yoktur.
+    expect(findEncoderEntry('nmea-0183')).toBeUndefined();
   });
 });

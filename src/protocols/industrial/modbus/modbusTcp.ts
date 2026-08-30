@@ -45,6 +45,7 @@
  */
 
 import { bytesToNumber } from '@/protocol-core/buffers/endianness';
+import { encodeModbusTcpFrame } from './modbusEncoders';
 import { createRawFrame } from '@/protocol-core/types';
 import type {
   ExampleFrame,
@@ -489,6 +490,8 @@ export const modbusTcpPlugin: ProtocolPlugin = {
   name: DISPLAY_NAME,
   category: 'industrial-automation',
   parser: modbusTcpParser,
+  // Girdi: adres/unit baytı + PDU (bkz. `modbusEncoders.ts` dosya başı).
+  encoder: { encode: encodeModbusTcpFrame },
   documentation: {
     // Katalogdaki `modbus-tcp` kaydının özetiyle aynı cümle: iki yerde ayrışmasın diye
     // birebir kopyalandı (katalog verisi İngilizce tutulur, çeviriye girmez).

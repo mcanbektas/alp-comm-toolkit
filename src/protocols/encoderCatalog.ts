@@ -137,6 +137,17 @@ export const ENCODER_CATALOG: readonly EncoderEntry[] = [
     fixedParametersKey: 'builder.encoder.fixed.zmodem',
   },
 
+  // Modbus'un üç taşıyıcısı AYNI girdiyi alır (adres/unit + PDU) ve yalnız
+  // zarfta ayrılır — taşıyıcılar arası dönüşümün (spec §33) dayanağı bu.
+  { pluginId: 'modbus-rtu', displayName: 'Modbus RTU', role: 'payload' },
+  { pluginId: 'modbus-ascii', displayName: 'Modbus ASCII', role: 'payload' },
+  {
+    pluginId: 'modbus-tcp',
+    displayName: 'Modbus TCP',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.modbusTcp',
+  },
+
   // --- values ailesi -------------------------------------------------------
   {
     pluginId: 'ascii-protocol',

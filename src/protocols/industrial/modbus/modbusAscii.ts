@@ -44,6 +44,7 @@
  */
 
 import { lrcChecksum } from '@/protocol-core/checksums/lrc';
+import { encodeModbusAsciiFrame } from './modbusEncoders';
 import { createRawFrame } from '@/protocol-core/types';
 import type {
   ExampleFrame,
@@ -674,6 +675,8 @@ export const modbusAsciiPlugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'industrial-automation',
   parser: modbusAsciiParser,
+  // Girdi: adres/unit baytı + PDU (bkz. `modbusEncoders.ts` dosya başı).
+  encoder: { encode: encodeModbusAsciiFrame },
   documentation: {
     summary: 'protocol.modbus.ascii.documentation.summary',
     layer: 'multi-layer',

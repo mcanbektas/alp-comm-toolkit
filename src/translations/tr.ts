@@ -1081,6 +1081,8 @@ export const tr = {
   'builder.encoder.fixed.ymodem':
     'Yük TAM 128 ya da 1024 bayt olmalı; blok 1 ve CRC modu sabit, dosya başlığı (blok 0) üretilmez.',
   'builder.encoder.fixed.zmodem': 'ZDATA başlığı, sıfır konum ve binary16 başlık biçimi sabittir.',
+  'builder.encoder.fixed.modbusTcp':
+    'MBAP transaction ID 0 yazılır; yanıt eşleştirmesi bu alana bakan bir karşı taraf için sabit kalır.',
   'builder.field.postProcessing': 'Çerçeveleme sonrası işlem',
   'builder.postProcessing.none': 'Yok',
   'builder.postProcessing.byteStuffing': 'Bayt doldurma',

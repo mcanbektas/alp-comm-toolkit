@@ -29,6 +29,7 @@ import {
   computeChecksum,
   readStoredChecksum,
 } from '@/protocol-core/checksums/algorithmCatalogue';
+import { encodeModbusRtuFrame } from './modbusEncoders';
 import { createRawFrame } from '@/protocol-core/types';
 import type {
   ExampleFrame,
@@ -569,6 +570,8 @@ export const modbusRtuPlugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'industrial-automation',
   parser: modbusRtuParser,
+  // Girdi: adres/unit baytı + PDU (bkz. `modbusEncoders.ts` dosya başı).
+  encoder: { encode: encodeModbusRtuFrame },
   documentation: {
     summary: 'protocol.modbus.rtu.documentation.summary',
     // Katalogdaki kayıtla aynı sözcük: seri çerçeveleme + function-code uygulaması.

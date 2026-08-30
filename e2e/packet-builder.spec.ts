@@ -233,3 +233,35 @@ test('çerçeve kaynağı protokol encoder\'ına devredilince form o şemadan ç
   await expect(page.getByTestId('builder-schema-name')).toHaveText(SAMPLE_SCHEMA_NAME);
   expect(consoleErrors).toEqual([]);
 });
+
+/**
+ * Modbus'un üç taşıyıcısı (spec §3.3): ekranda BİRER ZARF olarak durur ve
+ * şemadan üretilen çerçevenin üstüne biner. TCP dalı seçildi çünkü çıktısının
+ * tamamı — MBAP dahil — checksum hesabı olmadan yazılabilir; kayan tek şey
+ * uzunluk alanıdır ve zaten sınanmak istenen de odur.
+ */
+test('Modbus TCP zarfı MBAP başlığını çerçevenin önüne yazar', async ({ page }) => {
+  const consoleErrors = await openBuilder(page);
+
+  await fillSetOutputExample(page);
+  await expect(packetHex(page)).toHaveText(SPEC_PACKET_HEX);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:modbus-tcp');
+
+  // transaction 0000 · protocol 0000 · length 0008 (unit ID dahil gövde) · gövde.
+  await expect(packetHex(page)).toHaveText(`000000000008${SPEC_PACKET_HEX}`);
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('14');
+
+  // Sabitlenen transaction ID gizli bir varsayılan değil, ekranda yazılı bir kısıt.
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.modbusTcp'],
+  );
+
+  // RTU aynı gövdeyi CRC ile kapatır: gövde değişmez, iki bayt eklenir.
+  await page.locator('#builder-post-processing').selectOption('plugin:modbus-rtu');
+  await expect(packetHex(page)).toHaveText(new RegExp(`^${SPEC_PACKET_HEX}[0-9A-F]{4}$`));
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('10');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveCount(0);
+
+  expect(consoleErrors).toEqual([]);
+});

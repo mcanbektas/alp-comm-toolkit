@@ -225,7 +225,9 @@ describe('createByteSourceIo — plugin zarfı', () => {
     const run = runScenario(
       scenario([
         { id: 'c', kind: 'connect' },
-        { id: 's', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'modbus-rtu', bytes: [0x01] } },
+        // `nmea-0183` çözer ama üretmez; encoder kazanan bir plugin buraya
+        // yazılırsa test ADIM HATASINI değil o encoder'ın kendi kısıtını ölçer.
+        { id: 's', kind: 'send-frame', payload: { source: 'plugin-frame', pluginId: 'nmea-0183', bytes: [0x01] } },
       ]),
       io,
     );

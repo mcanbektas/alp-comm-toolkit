@@ -1080,6 +1080,8 @@ export const en: TranslationDictionary = {
   'builder.encoder.fixed.ymodem':
     'The payload must be exactly 128 or 1024 bytes; block 1 and CRC mode are fixed, and the file header (block 0) is not produced.',
   'builder.encoder.fixed.zmodem': 'The ZDATA header, zero position and binary16 header format are fixed.',
+  'builder.encoder.fixed.modbusTcp':
+    'The MBAP transaction ID is written as 0; a peer that matches responses on that field always sees the same value.',
   'builder.field.postProcessing': 'Post-framing processing',
   'builder.postProcessing.none': 'None',
   'builder.postProcessing.byteStuffing': 'Byte stuffing',

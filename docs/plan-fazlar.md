@@ -67,6 +67,22 @@ formunda serbest metin yerine şablon SEÇİMİ var; şema adı tutmuyorsa üret
 REDDEDİLİR. İki ekranı bağlayan e2e turu yazıldı (Builder'da kaydet →
 senaryodan gönder). Birim 6777 → 6782.
 
+## ✅ Modbus'un üç taşıyıcısına encoder (2026-08-30)
+
+§7'nin tüketicisi hazır olduğu için hedef tarafın ilk taşı: `modbusEncoders.ts`
+— RTU · ASCII · TCP, üçü de AYNI girdiyi alır (adres/unit baytı + PDU) ve yalnız
+zarfta ayrışır. Ortak girdi §33'ün ön koşuludur: ayrı girdi tipleriyle her
+taşıyıcı çifti için ayrı bir uyarlama katmanı gerekirdi.
+
+Girdi ADU'nun kendisi DEĞİL gövdesidir; CRC · LRC · MBAP burada HESAPLANIR. Hazır
+bir çerçeveyi sarmak checksum'u iki kez yazmak olurdu. Kısıtlar: RTU'da CRC telde
+LOW bayt önce, ASCII'de hex BÜYÜK harf (spec'in kendi dizgesi `:010300000002FA`),
+TCP'de CRC YOK ve `Length` alanı unit ID'yi SAYAR. Sabitlenen tek parametre MBAP
+transaction ID'dir (0) — üçüncü maddedeki tek parametreli `encode` sözleşmesinin
+bedeli; defterde ilan ediliyor, ekranda uyarı olarak görünüyor.
+
+**Ölçüm:** birim 6782 → 6794 (yeşil), e2e 1342 → 1343 (2 atlandı).
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 

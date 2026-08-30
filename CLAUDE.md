@@ -561,3 +561,33 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   üretir (`template-1`), o yüzden adım formunda serbest metin değil SEÇİM var;
   depo boşken seçenek yerine "Packet Builder'da kaydedin" yazar.
 
+  **5. ✅ Modbus'un ÜÇ taşıyıcısına encoder YAZILDI** (2026-08-30). 3. madde
+  tüketiciyi yazmıştı, bu madde §33'ün hedef tarafına ilk motorları koyuyor:
+  `industrial/modbus/modbusEncoders.ts` — RTU · ASCII · TCP tek dosyada ve üçü
+  de AYNI girdiyi alır: **adres/unit baytı + PDU**. Modbus'ta değişen PDU değil
+  ZARFTIR; ayrı girdi tipleri seçilseydi taşıyıcılar arası dönüşüm her çift için
+  ayrı bir uyarlama katmanı isterdi.
+
+  **Girdi ADU'nun KENDİSİ DEĞİL gövdesidir** — CRC · LRC · MBAP burada
+  HESAPLANIR. Kullanıcıdan gelen hazır bir çerçeveyi sarmak checksum'u iki kez
+  yazmak olurdu. Kısıtlar çözücülerle aynı yerden okundu: RTU'da CRC telde LOW
+  bayt önce gider (veri alanları big-endian olsa da), ASCII'de hex BÜYÜK harf
+  (spec'in kendi dizgesi `:010300000002FA`), TCP'de **CRC YOKTUR** ve `Length`
+  alanı unit ID'yi SAYAR.
+
+  **Sabitlenen parametre: MBAP transaction ID = 0.** 3. maddedeki tek parametreli
+  `encode` sözleşmesinin bedeli burada da vuruyor; `fixedParametersKey` ile
+  defterde ilan edilip ekranda uyarı olarak gösteriliyor.
+
+  **Encoder yazma ölçütü korundu:** üç kaydın da katalogda `build` sekmesi VAR
+  (dalga 16 bulgu 11'in kuralı). `protocol-core/types.ts` yine AÇILMADI.
+
+  **İki mevcut test iddiası güncellendi**, ikisi de "modbus encoder taşımaz"
+  varsayımına dayanıyordu: `encoderCatalog.test.ts`in negatif örneği ve
+  `byteSourceIo.test.ts`in "encoder taşımayan protokol" fixture'ı `nmea-0183`e
+  taşındı. Davranış regresyonu değil, varsayımın eskimesi — encoder kazanan bir
+  plugin'i negatif örnek olarak bırakmak testi kendi kısıtını ölçer hâle
+  getiriyordu.
+
+  **§33 yine de AÇILMADI:** sekiz dönüşümün hedef tarafında şimdilik üç motor
+  var.
