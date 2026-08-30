@@ -301,3 +301,30 @@ test('CAN 2.0B zarfı SocketCAN çerçevesi üretir, MQTT aynı yükü reddeder'
 
   expect(consoleErrors).toEqual([]);
 });
+
+/**
+ * J1939 ile NMEA 2000 listede AYRI iki zarftır ama AYNI encoder'ı paylaşır.
+ * Ekranda sınanan şey ikisinin de kısıt notunu göstermesi ve reddedilen yolun
+ * sessiz kalmaması: §10 çerçevesinin ilk baytı 0xAA, J1939 önceliği ise 3 bit.
+ */
+test('J1939 ve NMEA 2000 aynı kısıt notunu gösterir, geçersiz önceliği reddeder', async ({
+  page,
+}) => {
+  const consoleErrors = await openBuilder(page);
+
+  await fillSetOutputExample(page);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:j1939');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.j1939'],
+  );
+  await expect(page.getByTestId('builder-preview-issues')).toContainText('encodeJ1939Identifier');
+  await expect(page.getByTestId('builder-preview-empty')).toBeVisible();
+
+  await page.locator('#builder-post-processing').selectOption('plugin:nmea-2000');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.j1939'],
+  );
+
+  expect(consoleErrors).toEqual([]);
+});

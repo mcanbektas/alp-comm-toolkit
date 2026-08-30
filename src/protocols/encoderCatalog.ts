@@ -169,6 +169,23 @@ export const ENCODER_CATALOG: readonly EncoderEntry[] = [
     fixedParametersKey: 'builder.encoder.fixed.canExtended',
   },
 
+  // J1939 ile NMEA 2000 AYNI encoder'ı paylaşır: NMEA 2000'in identifier'ı
+  // J1939-21'in identifier'ıdır (`nmea2000.ts` çözerken de onu çağırıyor).
+  // İkisi de `can-2-0b`den AYRIDIR — girdileri ham identifier sözcüğü değil,
+  // öncelik/PGN/adres ALANLARIDIR.
+  {
+    pluginId: 'j1939',
+    displayName: 'J1939',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.j1939',
+  },
+  {
+    pluginId: 'nmea-2000',
+    displayName: 'NMEA 2000',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.j1939',
+  },
+
   // --- values ailesi -------------------------------------------------------
   {
     pluginId: 'ascii-protocol',

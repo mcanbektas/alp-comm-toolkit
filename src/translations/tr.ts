@@ -1089,6 +1089,8 @@ export const tr = {
     'Yük "identifier sözcüğü (4 bayt, little-endian) + en çok 8 veri baytı" olmalı; çerçeve base formatta üretilir ve DLC hesaplanır.',
   'builder.encoder.fixed.canExtended':
     'Yük "identifier sözcüğü (4 bayt, little-endian) + en çok 8 veri baytı" olmalı; çerçeve extended formatta üretilir ve DLC hesaplanır.',
+  'builder.encoder.fixed.j1939':
+    'Yük "öncelik (1) + PGN (3, big-endian) + hedef adresi (1) + kaynak adresi (1) + en çok 8 veri baytı" olmalı; yayın (PDU2) PGN\'lerinde hedef adresi 0xFF yazılır, reserved biti 0 sabittir ve çok çerçeveli aktarım (TP) üretilmez.',
   'builder.field.postProcessing': 'Çerçeveleme sonrası işlem',
   'builder.postProcessing.none': 'Yok',
   'builder.postProcessing.byteStuffing': 'Bayt doldurma',

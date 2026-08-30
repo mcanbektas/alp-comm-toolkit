@@ -66,7 +66,7 @@ import {
   formatHex,
   readUint32Le,
 } from '../../automotive/can/canFrame';
-import { decodeJ1939Identifier } from '../../automotive/j1939/j1939';
+import { decodeJ1939Identifier, encodeJ1939Frame } from '../../automotive/j1939/j1939';
 
 const PROTOCOL_ID = 'nmea-2000';
 /** Protokol adı veridir, çeviriye girmez (CLAUDE.md). */
@@ -494,6 +494,15 @@ export const nmea2000Plugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'marine-navigation',
   parser: nmea2000Parser,
+  /**
+   * Encoder J1939'unkinin KENDİSİDİR, kopyası değil. NMEA 2000 identifier'ı
+   * J1939-21'in identifier'ıdır (çözücü de bu dosyada `decodeJ1939Identifier`i
+   * çağırıyor); ikinci bir üretici yazmak aynı biti iki yerde tanımlamak
+   * olurdu. Farkı PGN'lerin ANLAMI taşır, tel biçimi değil.
+   *
+   * Girdi: öncelik + PGN + hedef + kaynak + veri (`encodeJ1939Frame`).
+   */
+  encoder: { encode: encodeJ1939Frame },
   documentation: {
     summary: 'protocol.nmea.2000.documentation.summary',
     layer: 'multi-layer',

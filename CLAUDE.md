@@ -619,3 +619,29 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
   Üçünün de katalog kaydında `build` sekmesi var (kural 5. maddede). §33 hâlâ
   açılmadı; hedef taraf artık altı motor taşıyor.
+
+  **7. ✅ J1939 ve NMEA 2000 encoder'ları — §33'ün hedef tarafı SEKİZ MOTOR**
+  (2026-08-30). `encodeJ1939Identifier`, `decodeJ1939Identifier`in TERSİ olarak
+  yazıldı ve testi de tam olarak bunu ölçüyor: her iddia ya spec'in kendi
+  identifier'ıyla ya çözücünün çıktısıyla karşılaştırılıyor.
+
+  **Girdi ham identifier sözcüğü DEĞİL, ALANLAR:** `öncelik (1) + PGN (3, BE) +
+  hedef adresi (1) + kaynak adresi (1) + veri (≤8)`. Ham sözcük isteseydik
+  `can-2-0b` ile aynı işi ikinci bir adla listelemiş olurduk; bu encoder'ın
+  eklediği şey identifier'ı ALANLARDAN kurmak — PDU1/PDU2 ayrımını ve hedef
+  adresin nereye gittiğini bilerek.
+
+  Reddedilen üç durum, üçü de SESSİZ HATA olurdu: PDU2 (yayın) PGN'ine hedef
+  adresi verilmesi (identifier'da o alan yok, değer düşerdi), PDU1'de hedefin
+  verilmemesi, PDU1 PGN'inin alt baytının sıfır olmaması (çözücüde PGN başka
+  bir PGN'e dönerdi). `reserved` biti 0 sabit.
+
+  **NMEA 2000 encoder'ı J1939'unkinin KENDİSİDİR, kopyası değil** — N2K
+  identifier'ı J1939-21'in identifier'ıdır ve `nmea2000.ts` çözerken zaten
+  `decodeJ1939Identifier`i çağırıyor. Testi bu kararı koruyor: iki plugin aynı
+  gövdede aynı baytı üretmeli. Defterde ikisi AYRI kayıt ama aynı
+  `fixedParametersKey`i paylaşıyor.
+
+  Transport Protocol (çok çerçeveli aktarım) ÜRETİLMEZ: 8 baytı aşan veri
+  reddedilir. TP bir oturum protokolüdür, tek atımlık `encode` sözleşmesine
+  sığmaz.

@@ -96,6 +96,21 @@ sözcüğü + veri`, DLC ve dolgu hesaplanır; format biti SAYFADAN gelir (2.0A 
 
 **Ölçüm:** birim 6794 → 6809 (yeşil), e2e 1343 → 1344.
 
+## ✅ J1939 ve NMEA 2000 encoder'ları (2026-08-30)
+
+`encodeJ1939Identifier` = `decodeJ1939Identifier`in tersi. Encoder girdisi ham
+identifier sözcüğü değil ALANLAR (öncelik + PGN + hedef + kaynak + veri); ham
+sözcük `can-2-0b`nin işiydi, bunun eklediği identifier'ı alanlardan kurmak.
+NMEA 2000'in encoder'ı J1939'unkinin kendisidir — N2K identifier'ı J1939-21'in
+identifier'ı; kopya üretici sızarsa test ayrıştırır. TP (çok çerçeveli aktarım)
+üretilmez, 8 baytı aşan veri reddedilir.
+
+§33'ün hedef tarafı artık SEKİZ motor taşıyor: 3 Modbus · MQTT · 2 CAN · J1939 ·
+NMEA 2000. §33'ün sekiz örnek dönüşümünden JSON/CSV hedefli ikisi encoder
+istemiyor (saf serileştirme); kalan tek eksik BACnet.
+
+**Ölçüm:** birim 6809 → 6822 (yeşil), e2e 1344 → 1345.
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 

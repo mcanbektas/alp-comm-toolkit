@@ -130,6 +130,24 @@ export const J1939_STRUCTURAL_PGNS: ReadonlyMap<number, string> = new Map([
   [60928, 'Address Claimed'],
 ]);
 
+/** Bir PGN 18 bittir: data page + PF + PS. */
+const MAX_PGN = 0x3ffff;
+/** J1939-21'in global (yayın) adresi. */
+const GLOBAL_ADDRESS = 0xff;
+/** Encoder gövdesinin başlığı: öncelik + PGN(3) + hedef + kaynak. */
+const J1939_ENCODER_HEADER_LENGTH = 6;
+/** Tek çerçevelik veri; daha uzunu Transport Protocol işidir (bu encoder yapmaz). */
+const J1939_MAX_PAYLOAD_LENGTH = 8;
+
+/** `encodeJ1939Identifier`in girdisi — `J1939Identifier`in TÜRETİLEBİLİR olmayan alanları. */
+export interface J1939IdentifierParts {
+  readonly priority: number;
+  readonly pgn: number;
+  readonly sourceAddress: number;
+  /** PDU1'de ZORUNLU (PS hedef adrestir), PDU2'de VERİLEMEZ. */
+  readonly destinationAddress?: number;
+}
+
 /** Çözümlenmiş J1939 identifier'ı — arayüz ve testler bunun üzerinden konuşur. */
 export interface J1939Identifier {
   readonly priority: number;
@@ -177,6 +195,118 @@ export function decodeJ1939Identifier(extendedId: number): J1939Identifier {
     pduFormatType: isPdu2 ? 'PDU2' : 'PDU1',
     destinationAddress: isPdu2 ? undefined : pduSpecific,
   };
+}
+
+/**
+ * `decodeJ1939Identifier`in TERSİ (spec §18). Ayrı bir fonksiyon olarak duruyor
+ * çünkü encoder'ın dışında hesap araçları da PGN'den identifier üretmek
+ * isteyecek — ve tersi kendi testiyle karşılaştırılabilir olmalı.
+ *
+ * `reserved` biti 0 yazılır: J1939-21 onu ayrılmış tutar ve 1 yazan bir üretici
+ * kendi çerçevesini kendi çözücüsüne "reserved=1" diye okutur.
+ */
+export function encodeJ1939Identifier(parts: J1939IdentifierParts): number {
+  const { priority, pgn, sourceAddress, destinationAddress } = parts;
+
+  if (priority < 0 || priority > PRIORITY_MASK) {
+    throw new RangeError(`encodeJ1939Identifier: öncelik 0..${PRIORITY_MASK} aralığında olmalı, alınan ${priority}`);
+  }
+  if (pgn < 0 || pgn > MAX_PGN) {
+    throw new RangeError(`encodeJ1939Identifier: PGN 0..${MAX_PGN} aralığında olmalı, alınan ${pgn}`);
+  }
+  if (sourceAddress < 0 || sourceAddress > BYTE_MASK) {
+    throw new RangeError(`encodeJ1939Identifier: kaynak adresi tek bayta sığmalı, alınan ${sourceAddress}`);
+  }
+
+  const dataPage = (pgn >>> DATA_PAGE_PGN_SHIFT) & SINGLE_BIT_MASK;
+  const pduFormat = (pgn >>> PS_SHIFT) & BYTE_MASK;
+  const isPdu2 = pduFormat >= PDU2_FORMAT_THRESHOLD;
+
+  let pduSpecific: number;
+  if (isPdu2) {
+    // PDU2 YAYINDIR: PS group extension'dır ve PGN'in kendisinden gelir. Hedef
+    // adres alanı yoktur; verilmişse sessizce DÜŞERDİ, bu yüzden reddediliyor.
+    if (destinationAddress !== undefined) {
+      throw new RangeError(
+        `encodeJ1939Identifier: PGN ${pgn} PDU2 (yayın), hedef adresi taşıyamaz`,
+      );
+    }
+    pduSpecific = pgn & BYTE_MASK;
+  } else {
+    if (destinationAddress === undefined) {
+      throw new RangeError(`encodeJ1939Identifier: PGN ${pgn} PDU1, hedef adresi ZORUNLU`);
+    }
+    if (destinationAddress < 0 || destinationAddress > BYTE_MASK) {
+      throw new RangeError(
+        `encodeJ1939Identifier: hedef adresi tek bayta sığmalı, alınan ${destinationAddress}`,
+      );
+    }
+    // PDU1'de PGN'in alt baytı SIFIRDIR (hedef adres orada taşınır); sıfır
+    // olmayan bir değer, çözücüde PGN'i başka bir PGN'e döndürürdü.
+    if ((pgn & BYTE_MASK) !== 0) {
+      throw new RangeError(`encodeJ1939Identifier: PDU1 PGN'inin alt baytı 0 olmalı, alınan ${pgn}`);
+    }
+    pduSpecific = destinationAddress;
+  }
+
+  return (
+    ((priority & PRIORITY_MASK) << PRIORITY_SHIFT) |
+    (dataPage << DATA_PAGE_SHIFT) |
+    (pduFormat << PF_SHIFT) |
+    (pduSpecific << PS_SHIFT) |
+    sourceAddress
+  ) >>> 0;
+}
+
+/**
+ * ENCODER'IN GİRDİSİ: `öncelik (1) + PGN (3, big-endian) + hedef adresi (1) +
+ * kaynak adresi (1) + en çok 8 veri baytı`. Çıktı, extended formatta bir
+ * Classical CAN çerçevesidir (spec §33'ün "J1939 SPN" tarafının hedefi).
+ *
+ * Neden ham identifier sözcüğü DEĞİL de alanlar: J1939'un tel biçimi zaten
+ * `can-2-0b`nin encoder'ında var. Bu encoder'ın eklediği tek şey, identifier'ı
+ * ALANLARDAN kurmaktır — PGN'i, PDU1/PDU2 ayrımını ve hedef adresin nereye
+ * gittiğini bilerek. Ham sözcük isteseydi `can-2-0b` ile aynı işi ikinci bir
+ * adla listelemiş olurduk.
+ *
+ * PDU2 (yayın) çerçevelerde hedef adres alanı GLOBAL (0xFF) yazılmalıdır:
+ * identifier'da öyle bir alan yoktur ve başka bir değer sessizce düşerdi.
+ */
+export function encodeJ1939Frame(body: Uint8Array): Uint8Array {
+  if (body.length < J1939_ENCODER_HEADER_LENGTH) {
+    throw new RangeError(
+      `encodeJ1939Frame: gövde en az ${J1939_ENCODER_HEADER_LENGTH} bayt olmalı (öncelik + PGN + hedef + kaynak)`,
+    );
+  }
+
+  const payload = body.subarray(J1939_ENCODER_HEADER_LENGTH);
+  if (payload.length > J1939_MAX_PAYLOAD_LENGTH) {
+    throw new RangeError(
+      `encodeJ1939Frame: veri ${payload.length} bayt, tek çerçevenin üst sınırı ${J1939_MAX_PAYLOAD_LENGTH}`,
+    );
+  }
+
+  const priority = byteAt(body, 0);
+  const pgn = (byteAt(body, 1) << PF_SHIFT) | (byteAt(body, 2) << PS_SHIFT) | byteAt(body, 3);
+  const destination = byteAt(body, 4);
+  const sourceAddress = byteAt(body, 5);
+
+  const pduFormat = (pgn >>> PS_SHIFT) & BYTE_MASK;
+  const isPdu2 = pduFormat >= PDU2_FORMAT_THRESHOLD;
+  if (isPdu2 && destination !== GLOBAL_ADDRESS) {
+    throw new RangeError(
+      `encodeJ1939Frame: PGN ${pgn} yayın (PDU2), hedef adresi 0x${GLOBAL_ADDRESS.toString(16).toUpperCase()} olmalı`,
+    );
+  }
+
+  const identifier = encodeJ1939Identifier({
+    priority,
+    pgn,
+    sourceAddress,
+    destinationAddress: isPdu2 ? undefined : destination,
+  });
+
+  return buildCanClassicFrame(identifier, Array.from(payload), { extended: true });
 }
 
 export type J1939FrameMetadata = {
@@ -570,6 +700,8 @@ export const j1939Plugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'automotive',
   parser: j1939Parser,
+  // Girdi: öncelik + PGN + hedef + kaynak + veri (bkz. `encodeJ1939Frame`).
+  encoder: { encode: encodeJ1939Frame },
   documentation: {
     summary: 'protocol.j1939.documentation.summary',
     layer: 'multi-layer',
