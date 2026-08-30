@@ -27,10 +27,16 @@ import type {
 import { createFileSource, type FileSourceOptions } from '../../connection/file/fileSource';
 import { createSimulatedSource, type SimulatedSourceOptions } from '../../connection/mock/simulatedSource';
 import { createSerialSource } from '../../connection/serial/serialSource';
+import { createUsbSource } from '../../connection/usb/usbSource';
+import { createBluetoothSource } from '../../connection/bluetooth/bluetoothSource';
 import { createWebSocketSource } from '../../connection/websocket/webSocketSource';
 import type { SerialConnectionOptions } from '../../connection/serial/serialOptions';
 import { serialBitsPerByte } from '../../connection/serial/serialOptions';
 import type { WebSerialPort } from '../../connection/serial/webSerialTypes';
+import type { UsbConnectionOptions } from '../../connection/usb/usbOptions';
+import type { WebUsbDevice } from '../../connection/usb/webUsbTypes';
+import type { BluetoothConnectionOptions } from '../../connection/bluetooth/bluetoothOptions';
+import type { WebBluetoothDevice } from '../../connection/bluetooth/webBluetoothTypes';
 import type { FramingMethodConfig } from '../../protocol-core/framing/createExtractor';
 import type { LogRecord } from '../../protocol-core/logs/types';
 import type { StreamBufferState } from '../../protocol-core/streams/types';
@@ -74,6 +80,8 @@ export interface LiveMonitorApi {
   chartData(): ChartDatum[];
   signalStatistics(): SignalStatistics[];
   connectSerial(port: WebSerialPort, options: SerialConnectionOptions): Promise<void>;
+  connectUsb(device: WebUsbDevice, options: UsbConnectionOptions): Promise<void>;
+  connectBluetooth(device: WebBluetoothDevice, options: BluetoothConnectionOptions): Promise<void>;
   connectSimulated(options?: SimulatedSourceOptions): Promise<void>;
   connectFile(records: readonly LogRecord[], options?: FileSourceOptions): Promise<void>;
   connectWebSocket(url: string): Promise<void>;
@@ -307,6 +315,25 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     [ingestor, startSource],
   );
 
+  const connectUsb = useCallback(
+    async (device: WebUsbDevice, options: UsbConnectionOptions) => {
+      // Toplu (bulk) transferin bir baud hızı yok: hattın fiziği bilinmiyor,
+      // bus load hesaplanamaz — dosya/WebSocket kaynaklarıyla aynı gerekçe.
+      ingestor.setLink(undefined);
+      await startSource(createUsbSource(device, options));
+    },
+    [ingestor, startSource],
+  );
+
+  const connectBluetooth = useCallback(
+    async (device: WebBluetoothDevice, options: BluetoothConnectionOptions) => {
+      // GATT bildirimlerinin de bir baud hızı yok — aynı gerekçe.
+      ingestor.setLink(undefined);
+      await startSource(createBluetoothSource(device, options));
+    },
+    [ingestor, startSource],
+  );
+
   const connectSimulated = useCallback(
     async (options?: SimulatedSourceOptions) => {
       // Simülasyonun fiziksel bir hattı yok; bus load anlamsız olurdu.
@@ -381,6 +408,8 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     chartData,
     signalStatistics,
     connectSerial,
+    connectUsb,
+    connectBluetooth,
     connectSimulated,
     connectFile,
     connectWebSocket,

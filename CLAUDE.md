@@ -186,8 +186,9 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   yönlendirici bir mesajla reddedilir.
   **Dosya oynatma (spec §8.1) da yazıldı**: `src/connection/file/` aynı
   `ByteSource` sözleşmesini gerçekler ve `logs` çekirdeğinden çıkan kayıtları
-  monitörün canlı zincirine besler. `connection/` altında yalnız `usb`,
-  `bluetooth`, `websocket` boş kaldı.
+  monitörün canlı zincirine besler. (Bu satır 2026-08-30'da çürüdü: `usb` ve
+  `bluetooth` de doldu, aşağıdaki 13. maddeye bak — `connection/`de boş
+  klasör KALMADI.)
   **Unknown Protocol Analyzer (spec §35 + §36) YAZILDI**: `src/protocol-core/analysis/`
   (11 saf motor + ortak okuma/tip modülleri + 10 fazlı iptal edilebilir koşucu +
   Worker'a kopyasız aktarım),
@@ -802,3 +803,56 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **İkinci tuzak:** `loadDictionary` "harita var mı" diye bakıyordu, oysa harita
   PARÇALI — protokol namespace'i çekirdekten önce inebiliyor. Artık ayrı bir
   `loadedCoreLanguages` kümesi var.
+
+  **13. ✅ WebUSB ve Web Bluetooth `ByteSource`ları YAZILDI, Live Monitor'a
+  BAĞLANDI** (2026-08-30). `connection/`ın son iki boş klasörü kapandı — spec
+  §8.1'in yedi kaynağının HEPSİ artık aynı `ByteSource` sözleşmesini
+  gerçekliyor.
+
+  **WebUSB'nin okuma döngüsünün KAPANMA SIRASI seri porttan TERSTİR.**
+  `createSerialSource`ta sıra `reader.cancel()` → `port.close()`: kilitli
+  stream'de `close()` reddedilir, önce cancel gerekir. WebUSB'de `transferIn`in
+  bekleyen çağrısını doğrudan iptal eden bir API YOK — spec'in kendi davranışı
+  `releaseInterface`/`close()`in bekleyen transferi REDDETTİRMESİ. Sırayı seri
+  porttakiyle aynı yazmak `stop()`u sonsuza kadar askıda bırakırdı: cihaz veri
+  göndermeyi keserse `transferIn` süresiz bekler. `usbSource.test.ts`teki
+  "stop() bekleyen transferIn çağrısını takılmadan çözer" testi tam bunu
+  bekçiliyor.
+
+  **Web Bluetooth'ta `optionalServices` unutmak, cihaz seçildikten SONRA
+  patlar.** `requestDevice`e bildirilmeyen bir servise `getPrimaryService`
+  sonradan `SecurityError` verir — kullanıcı cihazı seçmiş olsa bile.
+  `LiveMonitorScreen.tsx` bu yüzden
+  `requestBluetoothDevice({ acceptAllDevices: true, optionalServices:
+  [bluetoothOptions.serviceUuid] })` çağırıyor; `acceptAllDevices` de ayrı bir
+  zorunluluk — `filters` boşken Web Bluetooth `requestDevice` TypeError atar.
+
+  **Bağlantı ayarları spec'ten DEĞİL, API'nin kendi zorunlu parametrelerinden
+  türetildi** — §8.1'in "Bağlantı ayarları" listesi (Baud rate, Parity…)
+  UART'a özgü, WebUSB'nin `selectConfiguration`/`claimInterface`/`transferIn`
+  ve Web Bluetooth'un `getPrimaryService`/`getCharacteristic` ikilisinin
+  karşılığı yok (WebSocket'in "adres" alanıyla aynı durum, 10. madde). USB
+  tarafı `configurationValue`/`interfaceNumber`/`endpointIn`/`endpointOut`/
+  `transferSize`, Bluetooth tarafı `serviceUuid`/`notifyCharacteristicUuid`/
+  `writeCharacteristicUuid` — varsayılan Bluetooth UUID'leri Nordic UART
+  Service'in (en yaygın "GATT üzerinden seri" köprüsü).
+
+  **İkisinin de bus load'u YOK** — `connectUsb`/`connectBluetooth`
+  `ingestor.setLink(undefined)` çağırır, dosya/WebSocket kaynaklarıyla aynı
+  gerekçeyle (hattın fiziği bilinmiyor, uydurulmuş baud değeri yüzdeyi de
+  uydururdu).
+
+  **Bağlantının KENDİSİ turlanamaz, FORMU turlanabilir.** headless
+  Chromium'da `navigator.usb`/`navigator.bluetooth`ın cihaz seçtirme akışı
+  otomatikleştirilemez (işletim sistemi seçicisi ister) — bu spec §8.1'in
+  kalan iki kaynağının "tarayıcı turu YOK" notunun gerekçesiydi. `e2e/
+  live-monitor.spec.ts`teki iki yeni test bu sınırın içinde kalıp yalnız
+  kaynak seçilince doğru alanların/varsayılanların gerçek tarayıcıda
+  çizildiğini ölçüyor; bağlanma turlanmadı.
+
+  Ölçüm: birim 6891/1 atlandı (+25 yeni: 12 usb + 13 bluetooth), e2e 1358/2
+  atlandı (+2 yeni, form-seviyesi).
+
+  `connection/` KLASÖR BORCU SIFIRLANDI: `serial`/`usb`/`bluetooth`/
+  `websocket`/`file`/`mock` hepsi dolu, spec §6'nın `connection/` iskeleti
+  tamamlandı.

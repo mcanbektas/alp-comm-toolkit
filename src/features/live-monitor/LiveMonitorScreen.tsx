@@ -15,6 +15,16 @@ import {
   type SerialConnectionOptions,
 } from '../../connection/serial/serialOptions';
 import { requestSerialPort } from '../../connection/serial/webSerialTypes';
+import {
+  DEFAULT_USB_OPTIONS,
+  type UsbConnectionOptions,
+} from '../../connection/usb/usbOptions';
+import { requestUsbDevice } from '../../connection/usb/webUsbTypes';
+import {
+  DEFAULT_BLUETOOTH_OPTIONS,
+  type BluetoothConnectionOptions,
+} from '../../connection/bluetooth/bluetoothOptions';
+import { requestBluetoothDevice } from '../../connection/bluetooth/webBluetoothTypes';
 import { DEFAULT_SIMULATED_STREAM_OPTIONS } from '../../connection/mock/simulatedProtocol';
 import { minimumGapForFraming } from '../../connection/file/fileSource';
 import type { ReplayPacing } from '../../connection/file/replaySchedule';
@@ -61,6 +71,9 @@ export function LiveMonitorScreen(): ReactNode {
   const [webSocketUrl, setWebSocketUrl] = useState('ws://localhost:8080');
   const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID);
   const [serialOptions, setSerialOptions] = useState<SerialConnectionOptions>(DEFAULT_SERIAL_OPTIONS);
+  const [usbOptions, setUsbOptions] = useState<UsbConnectionOptions>(DEFAULT_USB_OPTIONS);
+  const [bluetoothOptions, setBluetoothOptions] =
+    useState<BluetoothConnectionOptions>(DEFAULT_BLUETOOTH_OPTIONS);
   const [displayMode, setDisplayMode] = useState<DisplayMode>('hex');
   const [timestampResolution, setTimestampResolution] = useState<TimestampResolution>('ms');
   const [framesPerSecond, setFramesPerSecond] = useState(200);
@@ -136,11 +149,44 @@ export function LiveMonitorScreen(): ReactNode {
       await monitor.connectWebSocket(webSocketUrl);
       return;
     }
+    if (sourceKind === 'usb') {
+      // `requestUsbDevice` KULLANICI JESTİ içinde çağrılmalı — `requestSerialPort`
+      // ile aynı kısıt (spec §41).
+      const device = await requestUsbDevice();
+      await monitor.connectUsb(device, usbOptions);
+      return;
+    }
+    if (sourceKind === 'bluetooth') {
+      // `acceptAllDevices` ZORUNLU: `filters` boşken Web Bluetooth `requestDevice`
+      // TypeError atar, ekran cihazın adını/görünümünü önceden bilmiyor.
+      // `optionalServices` de ZORUNLU: burada bildirilmeyen bir servise
+      // `getPrimaryService` sonradan `SecurityError` verir — kullanıcı cihazı
+      // seçse bile (bkz. `webBluetoothTypes.ts`).
+      const device = await requestBluetoothDevice({
+        acceptAllDevices: true,
+        optionalServices: [bluetoothOptions.serviceUuid],
+      });
+      await monitor.connectBluetooth(device, bluetoothOptions);
+      return;
+    }
     // `requestPort` KULLANICI JESTİ içinde çağrılmalı — bu geri çağırım tıklama
     // işleyicisinden senkron başlar, o yüzden izin istemi açılır (spec §41).
     const port = await requestSerialPort();
     await monitor.connectSerial(port, serialOptions);
-  }, [fileRecords, framesPerSecond, monitor, pacing, preset.framing, replaySpeed, serialOptions, sourceKind, t, webSocketUrl]);
+  }, [
+    bluetoothOptions,
+    fileRecords,
+    framesPerSecond,
+    monitor,
+    pacing,
+    preset.framing,
+    replaySpeed,
+    serialOptions,
+    sourceKind,
+    t,
+    usbOptions,
+    webSocketUrl,
+  ]);
 
   const handleDisconnect = useCallback(() => {
     void monitor.disconnect();
@@ -175,6 +221,10 @@ export function LiveMonitorScreen(): ReactNode {
           onSourceKindChange={setSourceKind}
           serialOptions={serialOptions}
           onSerialOptionsChange={setSerialOptions}
+          usbOptions={usbOptions}
+          onUsbOptionsChange={setUsbOptions}
+          bluetoothOptions={bluetoothOptions}
+          onBluetoothOptionsChange={setBluetoothOptions}
           presetId={presetId}
           onPresetIdChange={setPresetId}
           displayMode={displayMode}

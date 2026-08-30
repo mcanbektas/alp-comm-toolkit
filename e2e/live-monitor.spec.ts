@@ -43,6 +43,53 @@ async function recordCount(page: import('@playwright/test').Page): Promise<numbe
   return Number(value ?? '0');
 }
 
+/**
+ * WebUSB/Web Bluetooth kaynaklarının FORM tarafı (2026-08-30,
+ * `docs/brief-monitor-grafik-ayirma.md`nin sıradaki adaylarından).
+ * Bağlantının KENDİSİ turlanamaz — headless Chromium'da `navigator.usb`/
+ * `navigator.bluetooth` cihaz seçtirme akışı otomatikleştirilemez (gerçek bir
+ * kullanıcı jesti + işletim sistemi seçicisi ister) — ama kaynak seçilince
+ * doğru alanların çizildiği ve varsayılan değerlerin doğru geldiği gerçek
+ * tarayıcıda ölçülebilir, birim test bunu (jsdom CSS/DOM sınırı yüzünden)
+ * kanıtlayamaz.
+ */
+test('WebUSB kaynağı seçilince konfigürasyon alanları doğru varsayılanla çizilir', async ({ page }) => {
+  const consoleErrors = await openMonitor(page);
+
+  await page.getByTestId('monitor-source-usb').click();
+  await expect(page.getByText(tr['monitor.source.usbHint'])).toBeVisible();
+
+  await expect(page.getByLabel(tr['monitor.field.usbConfiguration'])).toHaveValue('1');
+  await expect(page.getByLabel(tr['monitor.field.usbInterface'])).toHaveValue('0');
+  await expect(page.getByLabel(tr['monitor.field.usbEndpointIn'])).toHaveValue('1');
+  await expect(page.getByLabel(tr['monitor.field.usbEndpointOut'])).toHaveValue('1');
+  await expect(page.getByLabel(tr['monitor.field.usbTransferSize'])).toHaveValue('64');
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
+test('Web Bluetooth kaynağı seçilince servis/karakteristik alanları doğru varsayılanla çizilir', async ({
+  page,
+}) => {
+  const consoleErrors = await openMonitor(page);
+
+  await page.getByTestId('monitor-source-bluetooth').click();
+  await expect(page.getByText(tr['monitor.source.bluetoothHint'])).toBeVisible();
+
+  const nordicUartServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+  const nordicUartTxUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+  const nordicUartRxUuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+  await expect(page.getByLabel(tr['monitor.field.bluetoothService'])).toHaveValue(nordicUartServiceUuid);
+  await expect(page.getByLabel(tr['monitor.field.bluetoothNotifyCharacteristic'])).toHaveValue(
+    nordicUartTxUuid,
+  );
+  await expect(page.getByLabel(tr['monitor.field.bluetoothWriteCharacteristic'])).toHaveValue(
+    nordicUartRxUuid,
+  );
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
 test('monitör açılır ve simülasyon kaynağı canlı çerçeve üretir', async ({ page }) => {
   const consoleErrors = await openMonitor(page);
 

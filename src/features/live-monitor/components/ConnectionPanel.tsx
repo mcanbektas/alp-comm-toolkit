@@ -8,7 +8,7 @@
 
 import type { ReactNode } from 'react';
 
-import { SelectField } from '../../../components/forms';
+import { NumberField, SelectField, TextField } from '../../../components/forms';
 import { useTranslation } from '../../../app/providers/LanguageProvider';
 import type { TranslationKey } from '../../../translations';
 import type { ConnectionError, ConnectionStatus } from '../../../connection/types';
@@ -21,13 +21,17 @@ import {
   type SerialConnectionOptions,
 } from '../../../connection/serial/serialOptions';
 import { isWebSerialSupported } from '../../../connection/serial/webSerialTypes';
+import type { UsbConnectionOptions } from '../../../connection/usb/usbOptions';
+import { isWebUsbSupported } from '../../../connection/usb/webUsbTypes';
+import type { BluetoothConnectionOptions } from '../../../connection/bluetooth/bluetoothOptions';
+import { isWebBluetoothSupported } from '../../../connection/bluetooth/webBluetoothTypes';
 import type { StreamBufferState } from '../../../protocol-core/streams/types';
 import { DISPLAY_MODES, TIMESTAMP_RESOLUTIONS } from '../types';
 import type { DisplayMode, TimestampResolution } from '../types';
 import { FRAMING_PRESETS } from '../presets';
 import type { ReplayPacing } from '../../../connection/file/replaySchedule';
 
-export type MonitorSourceKind = 'serial' | 'simulated' | 'file' | 'websocket';
+export type MonitorSourceKind = 'serial' | 'usb' | 'bluetooth' | 'simulated' | 'file' | 'websocket';
 
 export interface ConnectionPanelProps {
   readonly sourceKind: MonitorSourceKind;
@@ -50,6 +54,10 @@ export interface ConnectionPanelProps {
   readonly onWebSocketUrlChange: (url: string) => void;
   readonly serialOptions: SerialConnectionOptions;
   readonly onSerialOptionsChange: (options: SerialConnectionOptions) => void;
+  readonly usbOptions: UsbConnectionOptions;
+  readonly onUsbOptionsChange: (options: UsbConnectionOptions) => void;
+  readonly bluetoothOptions: BluetoothConnectionOptions;
+  readonly onBluetoothOptionsChange: (options: BluetoothConnectionOptions) => void;
   readonly presetId: string;
   readonly onPresetIdChange: (id: string) => void;
   readonly displayMode: DisplayMode;
@@ -125,6 +133,8 @@ const REPLAY_SPEED_CHOICES = [0.5, 1, 2, 5, 10, 50] as const;
 
 const SOURCE_HINT_KEYS: Record<MonitorSourceKind, TranslationKey> = {
   serial: 'monitor.source.serialHint',
+  usb: 'monitor.source.usbHint',
+  bluetooth: 'monitor.source.bluetoothHint',
   simulated: 'monitor.source.simulatedHint',
   file: 'monitor.source.fileHint',
   websocket: 'monitor.source.websocketHint',
@@ -149,9 +159,19 @@ function buttonClass(active: boolean): string {
 export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
   const { t } = useTranslation();
   const serialSupported = isWebSerialSupported();
+  const usbSupported = isWebUsbSupported();
+  const bluetoothSupported = isWebBluetoothSupported();
 
   const updateSerial = (patch: Partial<SerialConnectionOptions>): void => {
     props.onSerialOptionsChange({ ...props.serialOptions, ...patch });
+  };
+
+  const updateUsb = (patch: Partial<UsbConnectionOptions>): void => {
+    props.onUsbOptionsChange({ ...props.usbOptions, ...patch });
+  };
+
+  const updateBluetooth = (patch: Partial<BluetoothConnectionOptions>): void => {
+    props.onBluetoothOptionsChange({ ...props.bluetoothOptions, ...patch });
   };
 
   return (
@@ -175,6 +195,24 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
           disabled={props.connected || !serialSupported}
         >
           {t('monitor.source.serial')}
+        </button>
+        <button
+          type="button"
+          data-testid="monitor-source-usb"
+          className={buttonClass(props.sourceKind === 'usb')}
+          onClick={() => props.onSourceKindChange('usb')}
+          disabled={props.connected || !usbSupported}
+        >
+          {t('monitor.source.usb')}
+        </button>
+        <button
+          type="button"
+          data-testid="monitor-source-bluetooth"
+          className={buttonClass(props.sourceKind === 'bluetooth')}
+          onClick={() => props.onSourceKindChange('bluetooth')}
+          disabled={props.connected || !bluetoothSupported}
+        >
+          {t('monitor.source.bluetooth')}
         </button>
         <button
           type="button"
@@ -255,6 +293,18 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
       {!serialSupported ? (
         <p className="rounded-token border border-line bg-raised p-3 text-sm text-warn">
           {t('monitor.serialUnsupported')}
+        </p>
+      ) : null}
+
+      {!usbSupported ? (
+        <p className="rounded-token border border-line bg-raised p-3 text-sm text-warn">
+          {t('monitor.usbUnsupported')}
+        </p>
+      ) : null}
+
+      {!bluetoothSupported ? (
+        <p className="rounded-token border border-line bg-raised p-3 text-sm text-warn">
+          {t('monitor.bluetoothUnsupported')}
         </p>
       ) : null}
 
@@ -352,6 +402,64 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
                 value: flowControl,
                 label: t(FLOW_CONTROL_KEYS[flowControl]),
               }))}
+            />
+          </>
+        ) : props.sourceKind === 'usb' ? (
+          <>
+            <NumberField
+              id="monitor-usb-configuration"
+              label={t('monitor.field.usbConfiguration')}
+              value={String(props.usbOptions.configurationValue)}
+              onChange={(value) => updateUsb({ configurationValue: Number(value) })}
+            />
+            <NumberField
+              id="monitor-usb-interface"
+              label={t('monitor.field.usbInterface')}
+              value={String(props.usbOptions.interfaceNumber)}
+              onChange={(value) => updateUsb({ interfaceNumber: Number(value) })}
+            />
+            <NumberField
+              id="monitor-usb-endpoint-in"
+              label={t('monitor.field.usbEndpointIn')}
+              value={String(props.usbOptions.endpointIn)}
+              onChange={(value) => updateUsb({ endpointIn: Number(value) })}
+            />
+            <NumberField
+              id="monitor-usb-endpoint-out"
+              label={t('monitor.field.usbEndpointOut')}
+              value={String(props.usbOptions.endpointOut)}
+              onChange={(value) => updateUsb({ endpointOut: Number(value) })}
+            />
+            <NumberField
+              id="monitor-usb-transfer-size"
+              label={t('monitor.field.usbTransferSize')}
+              value={String(props.usbOptions.transferSize)}
+              onChange={(value) => updateUsb({ transferSize: Number(value) })}
+              suffix="B"
+            />
+          </>
+        ) : props.sourceKind === 'bluetooth' ? (
+          <>
+            <TextField
+              id="monitor-bluetooth-service"
+              label={t('monitor.field.bluetoothService')}
+              value={props.bluetoothOptions.serviceUuid}
+              onChange={(value) => updateBluetooth({ serviceUuid: value })}
+              monospace
+            />
+            <TextField
+              id="monitor-bluetooth-notify"
+              label={t('monitor.field.bluetoothNotifyCharacteristic')}
+              value={props.bluetoothOptions.notifyCharacteristicUuid}
+              onChange={(value) => updateBluetooth({ notifyCharacteristicUuid: value })}
+              monospace
+            />
+            <TextField
+              id="monitor-bluetooth-write"
+              label={t('monitor.field.bluetoothWriteCharacteristic')}
+              value={props.bluetoothOptions.writeCharacteristicUuid}
+              onChange={(value) => updateBluetooth({ writeCharacteristicUuid: value })}
+              monospace
             />
           </>
         ) : props.sourceKind === 'file' ? (
