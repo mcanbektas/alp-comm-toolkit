@@ -142,6 +142,25 @@ görüyordu. Düzeltildi.
 
 **Ölçüm:** birim 6832 → 6848 (yeşil), e2e 1346 → 1351.
 
+## ✅ WebSocket ByteSource (2026-08-30)
+
+`src/connection/websocket` — spec §8.1'in kaynak listesindeki WebSocket maddesi.
+Sözleşme aynı olduğu için monitör/Builder/TA üçü de kullanabilir; bu turda
+Packet Builder bağlandı (rozet kalktı, adres kutusu yalnız o kaynak seçiliyken
+görünüyor).
+
+Kararlar: soketi üreten fabrika dışa açık (sahte soket enjekte edilebilsin),
+metin çerçeveleri UTF-8 bayta çevrilir (atmak sessiz veri kaybı olurdu),
+`binaryType = 'arraybuffer'` zorunlu, `stop()` sonrası kapanış hata sayılmaz,
+karşı tarafın kapatması `'idle'`dır. Builder'ın `connect()`i WebSocket dalında
+"bağlandı" yazmaz — onu `onopen` yazar.
+
+Tarayıcı turu için `e2e/support/wsBridgeServer.mjs` elle yazıldı (depoda `ws`
+paketi yok): SHA-1 el sıkışma + tek parçalı çerçeve, yankı köprüsü.
+`playwright.config.ts` artık iki `webServer` koşuyor.
+
+**Ölçüm:** birim 6848 → 6859 (yeşil), e2e 1351 → 1352.
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 
@@ -1999,10 +2018,12 @@ Faz 9'a girmeden bilinmesi gerekenler — hiçbiri Faz 9'u engellemiyor:
   "Bilinen borçlar" 3. ve 9. maddelerde. **Spec §6'nın feature klasörlerinin
   hepsi artık açık.**
 - ~~`src/connection/` altında **usb · bluetooth · websocket · file** yok~~ →
-  **`file` yazıldı** (§8.1, `5c04ebd`) ve §48'in "büyük log dosyası" kriteri
-  artık ölçülebiliyor. Kalan üçü (**usb · bluetooth · websocket**) hâlâ yok;
-  `ByteSource` sözleşmesine yazıldıkları gün monitör, Packet Builder ve Test
-  Automation üçü de onları bedavaya kullanır.
+  **`file` yazıldı** (§8.1, `5c04ebd`) ve **`websocket` yazıldı** (2026-08-30):
+  Packet Builder'ın "planlandı" rozeti kalktı, seçenek gerçek bir köprüye
+  bağlanıyor ve tarayıcı turu elle yazılmış bir RFC 6455 köprüsüyle veri yolunu
+  ölçüyor. Kalan ikisi (**usb · bluetooth**) hâlâ yok. WebSocket'i Live Monitor
+  ile Test Automation da henüz listelemiyor — sözleşme aynı, ikisi de yalnız
+  kendi kaynak seçimine bir dal eklemekle kazanır.
 - ~~`src/protocols/` klasörünün kendisi yok~~ → **açıldı ve doldu**: 8 domain
   klasörü + `pluginBinding.ts`, 191 plugin dosyası (2026-08-29 sayımı).
 - `src/components/` altında **packet-viewer · signal-viewer · protocol-tree**

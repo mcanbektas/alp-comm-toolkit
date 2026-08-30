@@ -9,7 +9,7 @@
  * gerçeklemesine bağlı — yoksa ekran yalnız donanım varken test edilebilirdi.
  */
 
-export type ByteSourceKind = 'web-serial' | 'simulated' | 'file';
+export type ByteSourceKind = 'web-serial' | 'simulated' | 'file' | 'websocket';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'closing' | 'error';
 

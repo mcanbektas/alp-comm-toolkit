@@ -27,17 +27,20 @@ function connectionState(patch: Partial<BuilderConnectionState> = {}): BuilderCo
 interface RenderOptions {
   readonly connection?: BuilderConnectionState;
   readonly selectedKind?: BuilderSourceKind;
+  readonly webSocketUrl?: string;
 }
 
 function renderPanel(options: RenderOptions = {}): {
   readonly onSelectedKindChange: ReturnType<typeof vi.fn>;
   readonly onConnect: ReturnType<typeof vi.fn>;
   readonly onDisconnect: ReturnType<typeof vi.fn>;
+  readonly onWebSocketUrlChange: ReturnType<typeof vi.fn>;
 } {
   const handlers = {
     onSelectedKindChange: vi.fn(),
     onConnect: vi.fn(),
     onDisconnect: vi.fn(),
+    onWebSocketUrlChange: vi.fn(),
   };
 
   const element: ReactElement = (
@@ -45,6 +48,7 @@ function renderPanel(options: RenderOptions = {}): {
       <BuilderConnectionPanel
         connection={options.connection ?? connectionState()}
         selectedKind={options.selectedKind ?? 'simulated'}
+        webSocketUrl={options.webSocketUrl ?? 'ws://localhost:8080'}
         {...handlers}
       />
     </LanguageProvider>
@@ -73,12 +77,24 @@ describe('BuilderConnectionPanel', () => {
     expect(handlers.onSelectedKindChange).toHaveBeenCalledWith('serial');
   });
 
-  it('shows WebSocket as a planned but disabled option', () => {
-    renderPanel();
+  /** Uzun süre "planlandı" rozetli devre dışı bir düğmeydi; kaynak yazılınca seçilebilir oldu. */
+  it('offers WebSocket as a real source and asks for its address only then', () => {
+    renderPanel({ selectedKind: 'simulated' });
 
-    // Spec §10 listeliyor, `connection/websocket` henüz yok: sessizce atlamak yasak.
-    expect(screen.getByTestId('builder-source-websocket')).toBeDisabled();
-    expect(screen.getByTestId('builder-source-websocket-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('builder-source-websocket')).toBeEnabled();
+    // Adres kutusu seri/simülasyon seçiliyken görünmez: karşılığı olmayan alan basılmaz.
+    expect(screen.queryByTestId('builder-websocket-url')).not.toBeInTheDocument();
+  });
+
+  it('shows the address field with the WebSocket source selected', () => {
+    const handlers = renderPanel({ selectedKind: 'websocket', webSocketUrl: 'ws://localhost:9099' });
+
+    expect(screen.getByTestId('builder-websocket-url')).toHaveValue('ws://localhost:9099');
+
+    fireEvent.change(screen.getByTestId('builder-websocket-url'), {
+      target: { value: 'wss://bridge.example/line' },
+    });
+    expect(handlers.onWebSocketUrlChange).toHaveBeenCalledWith('wss://bridge.example/line');
   });
 
   it('disables the serial source and explains why when the browser lacks Web Serial', () => {

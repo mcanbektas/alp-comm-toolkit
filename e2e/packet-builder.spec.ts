@@ -150,21 +150,43 @@ test('simülasyon kaynağına bağlanınca yazamama uyarısı çıkar ve gönder
   );
 });
 
-test('WebSocket seçeneği listede var ama devre dışı ve planlandı rozetli', async ({ page }) => {
+/**
+ * WebSocket kaynağı (spec §8.1) — GERÇEK köprüye bağlanır. Köprü
+ * `playwright.config.ts`in ikinci `webServer`ıdır ve gönderileni yankılar,
+ * yani tur yalnız bağlantıyı değil VERİ YOLUNU da ölçer.
+ */
+test('WebSocket köprüsüne bağlanır, paketi gönderir ve yankıyı gösterir', async ({ page }) => {
+  const consoleErrors = await openBuilder(page);
+  await fillSetOutputExample(page);
+  await expect(packetHex(page)).toHaveText(SPEC_PACKET_HEX);
+
+  await page.getByTestId('builder-source-websocket').click();
+  await expect(page.getByTestId('builder-websocket-url')).toHaveValue('ws://localhost:8080');
+
+  await page.getByTestId('builder-websocket-url').fill('ws://localhost:9099');
+  await page.getByTestId('builder-connect').click();
+
+  await expect(page.getByTestId('builder-connection-status')).toHaveText(tr['builder.status.connected']);
+
+  await page.getByTestId('builder-send').click();
+  // Köprü aynı baytları geri yollar: son yanıt üretilen paketin kendisidir.
+  await expect(page.getByTestId('builder-last-response')).toHaveText(SPEC_PACKET_HEX);
+
+  await page.getByTestId('builder-disconnect').click();
+  await expect(page.getByTestId('builder-connection-status')).toHaveText(
+    tr['builder.status.disconnected'],
+  );
+  expect(consoleErrors).toEqual([]);
+});
+
+test('ws:// olmayan adres bağlanmadan reddedilir', async ({ page }) => {
   await openBuilder(page);
 
-  const websocket = page.getByTestId('builder-source-websocket');
-  await expect(websocket).toBeVisible();
-  await expect(websocket).toHaveText(tr['builder.source.websocket']);
-  await expect(websocket).toBeDisabled();
-  await expect(page.getByTestId('builder-source-websocket-badge')).toHaveText(
-    tr['builder.source.plannedBadge'],
-  );
+  await page.getByTestId('builder-source-websocket').click();
+  await page.getByTestId('builder-websocket-url').fill('http://localhost:9099');
+  await page.getByTestId('builder-connect').click();
 
-  // §42/10 sınırlar bölümü de aynı şeyi yazmalı: rozet ile belge ayrışmasın.
-  await expect(page.getByTestId('builder-limit-websocket')).toHaveText(
-    tr['builder.doc.limits.websocket'],
-  );
+  await expect(page.getByTestId('builder-connection-status')).toHaveText(tr['builder.status.error']);
 });
 
 test('yatay taşma yok', async ({ page }) => {

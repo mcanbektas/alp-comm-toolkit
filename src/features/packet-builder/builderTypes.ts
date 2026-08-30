@@ -29,11 +29,11 @@ import type { SendSchedulerConfig, SendSchedulerState } from './sendScheduler';
  * tek tipe indirmek, ileride aynı seçimden farklı bir kaynak (yerel bridge)
  * kurulduğunda ekranı da değiştirmeyi gerektirirdi.
  *
- * WebSocket bilerek YOK: `src/connection/websocket` henüz gerçeklenmedi ve
- * seçilebilir bir değer olarak burada durursa `connect()` sessizce hiçbir şey
- * yapmayan bir dala düşerdi. Panel onu devre dışı bir seçenek olarak gösterir.
+ * WebSocket 2026-08-30'da EKLENDİ (`src/connection/websocket` yazıldı):
+ * paneldeki "planlandı" rozeti kalktı, seçenek gerçekten bağlanıyor. Seri
+ * porttan farkı adres istemesi — o yüzden `webSocketUrl` durumu da var.
  */
-export type BuilderSourceKind = 'serial' | 'simulated';
+export type BuilderSourceKind = 'serial' | 'simulated' | 'websocket';
 
 export interface BuilderConnectionState {
   readonly status: 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -88,7 +88,8 @@ export interface PacketBuilderApi {
   readonly setEncoderPlugin: (pluginId: string | null) => void;
   readonly setSchedulerConfig: (config: SendSchedulerConfig) => void;
   readonly setResponseTimeoutMs: (ms: number) => void;
-  readonly connect: (kind: BuilderSourceKind) => Promise<void>;
+  /** `webSocketUrl` yalnız `'websocket'` kaynağında okunur. */
+  readonly connect: (kind: BuilderSourceKind, webSocketUrl?: string) => Promise<void>;
   readonly disconnect: () => Promise<void>;
   readonly send: () => void;
   readonly stopSending: () => void;
@@ -116,6 +117,9 @@ export interface BuilderConnectionPanelProps {
   readonly onSelectedKindChange: (kind: BuilderSourceKind) => void;
   readonly onConnect: () => void;
   readonly onDisconnect: () => void;
+  /** WebSocket köprüsünün adresi; yalnız o kaynak seçiliyken görünür. */
+  readonly webSocketUrl: string;
+  readonly onWebSocketUrlChange: (url: string) => void;
 }
 
 /**

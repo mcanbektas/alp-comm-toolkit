@@ -1042,7 +1042,9 @@ export const tr = {
   'builder.source.simulated': 'Simülasyon',
   'builder.source.serial': 'Seri port',
   'builder.source.websocket': 'WebSocket',
-  'builder.source.plannedBadge': 'planlandı',
+  'builder.source.websocketUrl': 'WebSocket adresi',
+  'builder.source.websocketHint':
+    'WebSocket köprüsü hattı tarayıcıya taşır; adres ws:// ya da wss:// olmalı ve köprü paketleri ikili çerçeve olarak iletmeli.',
   'builder.source.simulatedHint':
     'Simülasyon kaynağı yalnız veri üretir; bu kaynağa paket gönderilemez.',
   'builder.source.serialHint':
@@ -1187,7 +1189,7 @@ export const tr = {
     'Yanıt beklendiğinde gelen ilk bayt öbeği son yanıt alanında hex olarak gösterilir; çözümlemesi Live Monitor ekranının işidir.',
   'builder.doc.limits.title': 'Sınırlamalar',
   'builder.doc.limits.websocket':
-    'WebSocket kaynağı henüz gerçeklenmedi; seçenek görünür ama devre dışıdır.',
+    'WebSocket kaynağı bir KÖPRÜ ister: tarayıcı seri porta ws:// ile bağlanamaz, karşı tarafta hattı ileten bir sunucu (ser2net, socketcand, kendi köprünüz) çalışmalı.',
   'builder.doc.limits.singleOwner':
     'Bir seri portu aynı anda tek sekme tutabilir; Live Monitor aynı portu tutuyorsa buradan bağlanamazsınız.',
   'builder.doc.limits.checksumOrder':

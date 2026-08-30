@@ -128,6 +128,12 @@ export function PacketBuilderScreen(): ReactNode {
    */
   const [selectedKind, setSelectedKind] = useState<BuilderSourceKind>('simulated');
   /**
+   * WebSocket köprüsünün adresi. Varsayılan `localhost`tur çünkü köprü
+   * genellikle kullanıcının kendi makinesinde koşar (ser2net, socketcand);
+   * boş bir kutu ise ilk denemede kesin hata demekti.
+   */
+  const [webSocketUrl, setWebSocketUrl] = useState('ws://localhost:8080');
+  /**
    * "Paketi oluştur" kaç kez basıldı. Duyuru metni yalnız durum değişince
    * yenilenir; sayaç bir kez bile basılmadığını ("henüz istenmedi") ayırt
    * etmek için tutuluyor.
@@ -149,8 +155,8 @@ export function PacketBuilderScreen(): ReactNode {
     // `requestSerialPort` KULLANICI JESTİ içinde çağrılmalı (spec §41); bu
     // geri çağırım tıklama işleyicisinden senkron başladığı için izin istemi
     // açılır. `void` ile beklenmiyor: tıklama işleyicisi senkron kalmalı.
-    void builder.connect(selectedKind);
-  }, [builder, selectedKind]);
+    void builder.connect(selectedKind, webSocketUrl);
+  }, [builder, selectedKind, webSocketUrl]);
 
   const handleDisconnect = useCallback(() => {
     void builder.disconnect();
@@ -283,6 +289,8 @@ export function PacketBuilderScreen(): ReactNode {
           onSelectedKindChange={setSelectedKind}
           onConnect={handleConnect}
           onDisconnect={handleDisconnect}
+          webSocketUrl={webSocketUrl}
+          onWebSocketUrlChange={setWebSocketUrl}
         />
       </section>
 

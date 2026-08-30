@@ -1039,7 +1039,9 @@ export const en: TranslationDictionary = {
   'builder.source.simulated': 'Simulation',
   'builder.source.serial': 'Serial port',
   'builder.source.websocket': 'WebSocket',
-  'builder.source.plannedBadge': 'planned',
+  'builder.source.websocketUrl': 'WebSocket address',
+  'builder.source.websocketHint':
+    'A WebSocket bridge carries the line into the browser; the address must be ws:// or wss:// and the bridge must relay packets as binary frames.',
   'builder.source.simulatedHint':
     'The simulation source only produces data; packets cannot be sent to it.',
   'builder.source.serialHint':
@@ -1185,7 +1187,7 @@ export const en: TranslationDictionary = {
     'When a response is awaited, the first incoming chunk is shown as hex in the last response box; parsing it is the job of the Live Monitor screen.',
   'builder.doc.limits.title': 'Limitations',
   'builder.doc.limits.websocket':
-    'The WebSocket source is not implemented yet; the option is visible but disabled.',
+    'The WebSocket source needs a BRIDGE: a browser cannot reach a serial port over ws://, so a server that relays the line (ser2net, socketcand, your own bridge) must be running on the other end.',
   'builder.doc.limits.singleOwner':
     'A serial port can be held by one tab at a time; if the Live Monitor holds the same port you cannot connect from here.',
   'builder.doc.limits.checksumOrder':

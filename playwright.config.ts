@@ -16,14 +16,28 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // Derlenmiş çıktıyı sınar, dev sunucusunu değil: kırılan şey üretimde de kırıktır.
-  webServer: {
-    command: 'npm run build && npm run preview -- --port 4319 --strictPort',
-    url: 'http://localhost:4319',
-    // Var olan sunucuyu ASLA yeniden kullanma. 4173 gibi yaygın bir portta başka bir
-    // uygulama dinliyorsa Playwright sessizce ona bağlanır ve testler yanlış uygulamayı
-    // ölçer — bir kez yaşandı, teşhisi pahalı.
-    reuseExistingServer: false,
-    timeout: 120_000,
-  },
+  // İKİ sunucu: uygulamanın derlenmiş çıktısı ve WebSocket köprüsü.
+  webServer: [
+    // Derlenmiş çıktıyı sınar, dev sunucusunu değil: kırılan şey üretimde de kırıktır.
+    {
+      command: 'npm run build && npm run preview -- --port 4319 --strictPort',
+      url: 'http://localhost:4319',
+      // Var olan sunucuyu ASLA yeniden kullanma. 4173 gibi yaygın bir portta başka bir
+      // uygulama dinliyorsa Playwright sessizce ona bağlanır ve testler yanlış uygulamayı
+      // ölçer — bir kez yaşandı, teşhisi pahalı.
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    /**
+     * WebSocket kaynağının (spec §8.1) gerçek tarayıcıda sınanabilmesi için
+     * yankı köprüsü. Sahte soket birim testin işi; burada ölçülen şey gerçek
+     * el sıkışma ve gerçek çerçeveler.
+     */
+    {
+      command: 'node e2e/support/wsBridgeServer.mjs 9099',
+      url: 'http://localhost:9099',
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
+  ],
 });

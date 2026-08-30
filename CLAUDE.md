@@ -697,3 +697,38 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   iner, ÖTEKİ satırlar üretilmeye devam eder. Hiç değer üretilmese bile sorun
   listesi BASILIR — "çıktı yok" deyip nedenini saklamak sessiz bir boşluk
   bırakırdı (tarayıcı turu tam olarak bunu yakaladı).
+
+  **10. ✅ WebSocket `ByteSource` YAZILDI** (2026-08-30). `connection/`ın üç
+  eksik kaynağından biri kapandı (`usb` ile `bluetooth` duruyor). Packet
+  Builder'daki "planlandı" rozeti kalktı: seçenek artık gerçekten bağlanıyor.
+
+  **Soket bu modülde AÇILIR ama SEÇTİRİLMEZ.** `createSerialSource` hazır bir
+  port tutamağı alır çünkü `requestPort()` kullanıcı jesti ister; WebSocket'te
+  öyle bir kısıt yok, adres bir metindir. Buna karşılık soketi ÜRETEN fabrika
+  dışa açık (`socketFactory`) — testler bir tarayıcı sınıfını taklit etmeden
+  sahte soket enjekte edebilsin diye.
+
+  **Metin çerçeveleri de BAYTTIR:** köprülerin bir kısmı (satır tabanlı NMEA
+  köprüleri) metin çerçevesi yollar; atmak sessiz veri kaybı olurdu, UTF-8'e
+  çevrilip aynı `onChunk`a veriliyor. `binaryType = 'arraybuffer'` ZORUNLU:
+  `'blob'` asenkron okuma ister ve `onChunk`ın senkron sözleşmesini bozardı.
+
+  **`stop()` sonrası gelen `onclose` HATA DEĞİLDİR** — kapanışı biz istedik;
+  bayrak olmadan her normal kapanış ekranda kırmızıya dönerdi. Karşı taraf
+  kapattığında da hata değil `'idle'` yazılır: hattın bitmesi bir arıza değil.
+
+  **Builder'da `connect()` WebSocket dalında "bağlandı" YAZMAZ.** `start()`
+  soketi açmaz, açılışı BAŞLATIR; durumu `onopen` yazar. Zorla yazmak, el
+  sıkışma sürerken bağlanmış gibi göstermek olurdu (seri portta böyle bir
+  aralık yok).
+
+  **Tarayıcı turu için elle yazılmış bir köprü var** (`e2e/support/
+  wsBridgeServer.mjs`): depoda `ws` paketi yok ve tek tur için üretim
+  bağımlılığı eklemek pahalıydı. RFC 6455'in gereken dar kısmı (SHA-1 el
+  sıkışma + tek parçalı çerçeve) yazıldı; `playwright.config.ts` artık İKİ
+  `webServer` koşuyor. Tur yalnız bağlantıyı değil veri yolunu da ölçüyor:
+  köprü gönderileni yankılıyor, ekranda "son yanıt" olarak görünüyor.
+
+  **Kalan iş:** Live Monitor ve Test Automation ekranları bu kaynağı HENÜZ
+  listelemiyor; sözleşme aynı olduğu için ikisi de yalnız kendi kaynak
+  seçimlerine bir dal eklemekle kazanır.

@@ -42,6 +42,7 @@ import { createSimulatedSource } from '@/connection/mock/simulatedSource';
 import type { PacketTemplate } from '@/features/projects/projectFile';
 import { DEFAULT_SERIAL_OPTIONS } from '@/connection/serial/serialOptions';
 import { createSerialSource } from '@/connection/serial/serialSource';
+import { createWebSocketSource } from '@/connection/websocket/webSocketSource';
 import { requestSerialPort } from '@/connection/serial/webSerialTypes';
 import type { ByteSource, ByteSourceHandlers, ConnectionError, ConnectionStatus } from '@/connection/types';
 import { hexToBytes } from '@/protocol-core/buffers/representation';
@@ -647,7 +648,7 @@ export function usePacketBuilder(): PacketBuilderApi {
   }, []);
 
   const connect = useCallback(
-    async (kind: BuilderSourceKind): Promise<void> => {
+    async (kind: BuilderSourceKind, webSocketUrl?: string): Promise<void> => {
       scheduler.stop();
       await teardownSource();
       setConnection({ status: 'connecting', kind, canWrite: false, errorKey: null });
@@ -660,6 +661,8 @@ export function usePacketBuilder(): PacketBuilderApi {
           // bu geri çağırım tıklama işleyicisinden senkron başlar.
           const port = await requestSerialPort();
           source = createSerialSource(port, DEFAULT_SERIAL_OPTIONS);
+        } else if (kind === 'websocket') {
+          source = createWebSocketSource(webSocketUrl ?? '');
         } else {
           source = createSimulatedSource();
         }
@@ -680,13 +683,18 @@ export function usePacketBuilder(): PacketBuilderApi {
         return;
       }
 
-      setConnection((previous) =>
+      setConnection((previous) => {
         // `start` hata bildirdiyse (handlers.onError) durum zaten 'error';
         // üstüne "bağlandı" yazmak hatayı görünmez kılardı.
-        previous.status === 'error'
-          ? previous
-          : { status: 'connected', kind, canWrite: source.canWrite, errorKey: null },
-      );
+        if (previous.status === 'error') return previous;
+        // WebSocket'te `start()` soketi AÇMAZ, açılışı BAŞLATIR: "bağlandı"yı
+        // `onopen` yazar. Burada zorla yazmak, el sıkışma sürerken bağlanmış
+        // gibi göstermek olurdu — seri portta böyle bir aralık yok.
+        if (kind === 'websocket') {
+          return { ...previous, kind, canWrite: source.canWrite };
+        }
+        return { status: 'connected', kind, canWrite: source.canWrite, errorKey: null };
+      });
     },
     [handlers, scheduler, teardownSource],
   );

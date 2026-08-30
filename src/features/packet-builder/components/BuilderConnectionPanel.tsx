@@ -5,13 +5,14 @@
  * içe aktarmaz: iki ekran ayrı özelliklerdir ve biri diğerinin panelini
  * kullanırsa Monitor'ün seri port ayarları (baud, parity…) Builder'a da sızar.
  *
- * ## WebSocket neden devre dışı bir düğme
+ * ## WebSocket artık gerçek bir seçenek
  *
- * Spec §10 kaynak listesinde WebSocket'i sayıyor, ama `src/connection/websocket`
- * henüz yok. Seçeneği sessizce listeden düşürmek, spec'i okuyan kullanıcıya
- * "bu araç WebSocket'i desteklemiyor" yalanını söylerdi; tıklanabilir bırakmak
- * ise hiçbir şey yapmayan bir düğme demekti. Üçüncü yol seçildi: görünür,
- * devre dışı ve "planlandı" rozetli (CLAUDE.md "boş kart basmak yasak").
+ * Uzun süre "planlandı" rozetli devre dışı bir düğmeydi: spec §10 sayıyordu ama
+ * `src/connection/websocket` yoktu. Kaynak 2026-08-30'da yazıldı, rozet kalktı.
+ *
+ * Adres kutusu YALNIZ bu kaynak seçiliyken görünür: seri portta karşılığı olmayan
+ * bir alanı hep basmak, kullanıcının doldurması gerekip gerekmediğini belirsiz
+ * bırakırdı.
  */
 
 import type { ReactNode } from 'react';
@@ -32,15 +33,17 @@ const STATUS_LABEL_KEYS: Record<BuilderConnectionState['status'], TranslationKey
 const SOURCE_LABEL_KEYS: Record<BuilderSourceKind, TranslationKey> = {
   simulated: 'builder.source.simulated',
   serial: 'builder.source.serial',
+  websocket: 'builder.source.websocket',
 };
 
 const SOURCE_HINT_KEYS: Record<BuilderSourceKind, TranslationKey> = {
   simulated: 'builder.source.simulatedHint',
   serial: 'builder.source.serialHint',
+  websocket: 'builder.source.websocketHint',
 };
 
-/** Seçim sırası: donanımsız kaynak önce — Web Serial'i olmayan tarayıcı da bir şey görsün. */
-const SOURCE_KINDS: readonly BuilderSourceKind[] = ['simulated', 'serial'];
+/** Seçim sırası: donanımsız kaynaklar önce — Web Serial'i olmayan tarayıcı da bir şey görsün. */
+const SOURCE_KINDS: readonly BuilderSourceKind[] = ['simulated', 'websocket', 'serial'];
 
 function buttonClass(active: boolean): string {
   const base =
@@ -81,24 +84,23 @@ export function BuilderConnectionPanel(props: BuilderConnectionPanelProps): Reac
           </button>
         ))}
 
-        {/* Gerçeklenmemiş kaynak: görünür ama seçilemez. Bkz. dosya başlığı. */}
-        <span className="inline-flex items-center gap-2">
-          <button
-            type="button"
-            data-testid="builder-source-websocket"
-            className={buttonClass(false)}
-            disabled
-          >
-            {t('builder.source.websocket')}
-          </button>
-          <span
-            data-testid="builder-source-websocket-badge"
-            className="rounded-token-sm bg-accent-soft px-2 py-0.5 text-xs text-accent"
-          >
-            {t('builder.source.plannedBadge')}
-          </span>
-        </span>
       </div>
+
+      {props.selectedKind === 'websocket' ? (
+        <label className="flex max-w-md flex-col gap-1 text-xs text-muted" htmlFor="builder-websocket-url">
+          {t('builder.source.websocketUrl')}
+          <input
+            id="builder-websocket-url"
+            data-testid="builder-websocket-url"
+            className="rounded-token-sm border border-line bg-surface px-2 py-1 font-mono text-sm text-text"
+            value={props.webSocketUrl}
+            disabled={busy}
+            onChange={(event) => {
+              props.onWebSocketUrlChange(event.target.value);
+            }}
+          />
+        </label>
+      ) : null}
 
       <p className="text-sm text-muted" data-testid="builder-source-hint">
         {t(SOURCE_HINT_KEYS[props.selectedKind])}
