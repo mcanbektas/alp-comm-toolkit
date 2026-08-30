@@ -44,28 +44,35 @@ describe('routing', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the protocol workspace for a valid protocol path', () => {
+  /**
+   * Protokol rotası artık LAZY: sayfa chunk'ıyla birlikte `protocol.*` sözlüğü
+   * de iniyor (bkz. `AppRouter`in `withProtocolStrings`i). `find*` bu yüzden —
+   * `get*` Suspense fallback'ini ölçerdi.
+   */
+  it('renders the protocol workspace for a valid protocol path', async () => {
     const entry = findEntry(MODBUS_RTU_PATH);
     expect(entry).toBeDefined();
 
     renderAt(`/${MODBUS_RTU_PATH}`);
     expect(
-      screen.getByRole('heading', { level: 1, name: entry?.protocol.name ?? '' }),
+      await screen.findByRole('heading', { level: 1, name: entry?.protocol.name ?? '' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('tablist')).toBeInTheDocument();
   });
 
-  it('falls back to the overview tab when the tab query is not part of the protocol', () => {
+  it('falls back to the overview tab when the tab query is not part of the protocol', async () => {
     renderAt(`/${MODBUS_RTU_PATH}?tab=not-a-tab`);
     expect(
-      screen.getByRole('tab', { name: translations.tr['tab.overview'], selected: true }),
+      await screen.findByRole('tab', { name: translations.tr['tab.overview'], selected: true }),
     ).toBeInTheDocument();
   });
 
-  it('renders the not-found page for made-up paths', () => {
+  it('renders the not-found page for made-up paths', async () => {
+    // Üç segmentli yol protokol rotasına düşer; "bulunamadı" kararını sayfanın
+    // KENDİSİ veriyor, o yüzden chunk inene kadar beklenir.
     renderAt('/not-a-real-domain/not-a-real-family/not-a-real-protocol');
     expect(
-      screen.getByRole('heading', { level: 1, name: translations.tr['notFound.title'] }),
+      await screen.findByRole('heading', { level: 1, name: translations.tr['notFound.title'] }),
     ).toBeInTheDocument();
   });
 

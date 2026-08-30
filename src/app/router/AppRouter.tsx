@@ -2,7 +2,8 @@ import { lazy, Suspense } from 'react';
 import type { ReactElement } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import { useTranslation } from '@/app/providers/LanguageProvider';
+import { detectInitialLanguage, useTranslation } from '@/app/providers/LanguageProvider';
+import { loadProtocolStrings } from '@/translations';
 import { AppShell } from '@/components/layout/AppShell';
 import { CalculatorPage } from '@/pages/CalculatorPage';
 import { CalculatorsPage } from '@/pages/CalculatorsPage';
@@ -10,7 +11,6 @@ import { DomainPage } from '@/pages/DomainPage';
 import { FamilyPage } from '@/pages/FamilyPage';
 import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
-import { ProtocolPage } from '@/pages/ProtocolPage';
 
 /**
  * Canlı monitör TEMBEL yüklenir: grafik kütüphanesi ana paketin yarısından
@@ -18,8 +18,28 @@ import { ProtocolPage } from '@/pages/ProtocolPage';
  * gerekçe protokol kayıt defterinin lazy olmasının gerekçesiyle bir (bkz.
  * `registry.ts`).
  */
+/**
+ * `protocol.*` metinleri KENDİ CHUNK'INDA (bkz. `translations/trProtocols.ts`)
+ * ve yalnız parser çıktısı basan ekranlarda okunuyor. Yükleme o ekranların LAZY
+ * SINIRINA bağlandı: sayfa inerken sözlük de iner, böylece ekranda ham anahtar
+ * görünen bir aralık oluşmaz.
+ *
+ * Dil, sayfa inerken KAYITLI TERCİHTEN okunuyor; sonradan değiştirilirse yeni
+ * dilin namespace'ini `loadDictionary` peşinden getiriyor (`translations/
+ * index.ts`) — rota sınırı ikinci kez koşmadığı için o yol gerekli.
+ */
+async function withProtocolStrings<T>(load: Promise<T>): Promise<T> {
+  const [module] = await Promise.all([load, loadProtocolStrings(detectInitialLanguage())]);
+  return module;
+}
+
+const ProtocolPage = lazy(async () => {
+  const module = await withProtocolStrings(import('@/pages/ProtocolPage'));
+  return { default: module.ProtocolPage };
+});
+
 const LiveMonitorPage = lazy(async () => {
-  const module = await import('@/pages/LiveMonitorPage');
+  const module = await withProtocolStrings(import('@/pages/LiveMonitorPage'));
   return { default: module.LiveMonitorPage };
 });
 
@@ -40,7 +60,7 @@ const PacketBuilderPage = lazy(async () => {
 });
 
 const LogAnalyzerPage = lazy(async () => {
-  const module = await import('@/pages/LogAnalyzerPage');
+  const module = await withProtocolStrings(import('@/pages/LogAnalyzerPage'));
   return { default: module.LogAnalyzerPage };
 });
 
@@ -50,7 +70,7 @@ const LogAnalyzerPage = lazy(async () => {
  * gerekçe.
  */
 const ReverseEngineeringPage = lazy(async () => {
-  const module = await import('@/pages/ReverseEngineeringPage');
+  const module = await withProtocolStrings(import('@/pages/ReverseEngineeringPage'));
   return { default: module.ReverseEngineeringPage };
 });
 
@@ -65,7 +85,7 @@ const TestAutomationPage = lazy(async () => {
  * gerekçe).
  */
 const ProtocolConverterPage = lazy(async () => {
-  const module = await import('@/pages/ProtocolConverterPage');
+  const module = await withProtocolStrings(import('@/pages/ProtocolConverterPage'));
   return { default: module.ProtocolConverterPage };
 });
 
@@ -150,7 +170,14 @@ export function AppRoutes(): ReactElement {
         />
         <Route path=":domainId" element={<DomainPage />} />
         <Route path=":domainId/:familyId" element={<FamilyPage />} />
-        <Route path=":domainId/:familyId/:protocolId" element={<ProtocolPage />} />
+        <Route
+          path=":domainId/:familyId/:protocolId"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <ProtocolPage />
+            </Suspense>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

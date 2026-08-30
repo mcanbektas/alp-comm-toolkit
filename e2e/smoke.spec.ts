@@ -95,3 +95,40 @@ test('İngilizce sözlük ilk yükte inmez, yalnız dil değişince istenir', as
   await expect(page.getByRole('heading', { level: 1, name: en['home.heading'] })).toBeVisible();
   expect(dictionaryRequests).toHaveLength(1);
 });
+
+/**
+ * Protokol metinleri kendi chunk'ında (2026-08-30): sözlüğün 4314 anahtarı ve
+ * ham metnin %86'sı orada. Tur iki şeyi ölçüyor — ana sayfada o chunk hiç
+ * istenmiyor, protokol sayfasında iniyor VE metinler gerçekten çeviriye
+ * dönüşüyor (ham anahtar basılmıyor).
+ */
+test('protokol sözlüğü ana sayfada inmez, protokol sayfasında iner', async ({ page }) => {
+  const namespaceRequests: string[] = [];
+  page.on('request', (request) => {
+    if (/\/assets\/trProtocols-[A-Za-z0-9_-]+\.js$/.test(request.url())) {
+      namespaceRequests.push(request.url());
+    }
+  });
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem('alp-comm-lang', 'tr');
+  });
+  await page.goto('/comm/');
+  await expect(page.getByRole('heading', { level: 1, name: tr['home.heading'] })).toBeVisible();
+  expect(namespaceRequests, `beklenmeyen istek: ${namespaceRequests.join(' | ')}`).toEqual([]);
+
+  await page.goto('/comm/industrial-automation/modbus/modbus-rtu');
+  await expect(page.getByRole('heading', { level: 1, name: 'Modbus RTU' })).toBeVisible();
+
+  expect(namespaceRequests).toHaveLength(1);
+
+  // Sayfa inerken sözlük de indi: ekranda HAM ANAHTAR yok. Doğrudan bunu
+  // ölçmek tek tek metin aramaktan güçlü — sözlük gelmeseydi `t` anahtarın
+  // kendisini basardı (bkz. `LanguageProvider`).
+  const body = await page.locator('body').innerText();
+  const rawKeys = body.match(/\bprotocol\.[a-zA-Z]+\.[a-zA-Z.]+/g) ?? [];
+  expect(rawKeys, `ekranda ham anahtar var: ${rawKeys.join(' | ')}`).toEqual([]);
+
+  // Çeviri gerçekten uygulanmış: sekme adı sözlükten geliyor.
+  await expect(page.getByRole('tab', { name: tr['tab.overview'] })).toBeVisible();
+});

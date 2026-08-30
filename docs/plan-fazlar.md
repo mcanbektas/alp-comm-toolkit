@@ -179,6 +179,25 @@ yapıyor: Türkçe açılışta `assets/en-*.js` isteği yok, dil değişince bi
 
 **Ölçüm:** birim 6860 (yeşil), e2e 1353 → 1354.
 
+## ✅ Protokol metinleri ayrı chunk'a (2026-08-30)
+
+İkinci ölçüm: Türkçe sözlüğün 4314 anahtarı ve ham metnin %86'sı `protocol.*`
+altındaydı ve yalnız parser çıktısı basan ekranlarda okunuyordu. Ayrıldı.
+
+`LanguageProvider` chunk'ı **199 → 34 kB gzip**; `trProtocols` (161 kB) ve
+`enProtocols` (157 kB) ayrı ve ön yüklemesiz. Günün toplamı: ilk yükteki çeviri
+maliyeti **379 → 34 kB gzip**.
+
+Yükleme rotaların lazy sınırında (`withProtocolStrings`), yani sayfa chunk'ıyla
+birlikte iniyor; ham anahtar görünen bir aralık yok. `protocol.` önekli 11 kabuk
+anahtarı çekirdekte kaldı (aile/alan sayfaları basıyor).
+
+İki tuzak tarayıcı turunda çıktı: `isTranslationKey` yalnız `tr`ye bakıyordu (İngilizce
+oturumda protokol mesajları ham basılıyordu) ve `loadDictionary` "harita var mı"
+diye bakıyordu (harita parçalı; namespace çekirdekten önce inebiliyor).
+
+**Ölçüm:** birim 6860 (yeşil), e2e 1354 → 1355.
+
 Monitör yalnız dinlediği için köprüye İTME kipi eklendi
 (`?push=<hex>&interval=<ms>`); turdaki baytları `buildSimulatedFrame` üretiyor,
 test elle çerçeve yazmıyor. Monitörde bus load hesaplanmaz: köprünün ardındaki

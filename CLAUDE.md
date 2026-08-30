@@ -767,3 +767,38 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   **Tarayıcı turu ölçümü ağdan yapıyor** (`smoke.spec.ts`): Türkçe açılışta
   `assets/en-*.js` isteği HİÇ YOK, dil düğmesine basınca TAM BİR tane var.
   Birim test bunu kanıtlayamazdı — ölçülen şey inen bayt.
+
+  **12. ✅ PROTOKOL METİNLERİ KENDİ CHUNK'INA ÇIKTI — ilk yük 199 → 34 kB gzip**
+  (2026-08-30, 11. maddenin devamı). Ölçüm: Türkçe sözlüğün 6009 anahtarının
+  **4314'ü** ve 624 kB ham metnin **536 kB'ı (%86)** `protocol.*` altındaydı ve
+  yalnız parser çıktısı basan ekranlarda okunuyordu.
+
+  Sonuç: `LanguageProvider` chunk'ı **34 kB gzip**; `trProtocols` (161 kB) ve
+  `enProtocols` (157 kB) ayrı chunk'lar ve `index.html`de ÖN YÜKLEME YOK.
+  Günün toplamı: ilk yükteki çeviri maliyeti **379 → 34 kB gzip**.
+
+  **Yükleme ROTALARIN lazy sınırına bağlandı** (`AppRouter.withProtocolStrings`):
+  sayfa chunk'ı ile sözlük AYNI `Promise.all`da bekleniyor, böylece ekranda ham
+  anahtar görünen bir aralık yok. Bağlanan rotalar: protokol sayfası, monitör,
+  log analizi, tersine mühendislik, dönüştürücü — yani parser çıktısı basan
+  ekranlar. Ana sayfa, katalog ve hesap araçları bu chunk'ı HİÇ indirmiyor.
+
+  **`protocol.` önekli 11 anahtar çekirdekte KALDI** (`protocol.status`,
+  `protocol.canonical`, `protocol.plannedNotice`…): önek aynı ama bunlar
+  protokol METNİ değil, aile/alan sayfalarının KABUĞU ve o rotalar namespace'i
+  indirmiyor. Prefix'e bakıp toptan taşımak FamilyPage'i kırdı; testler yakaladı.
+
+  **`t` karşılığı olmayan anahtarı ANAHTARIN KENDİSİYLE basar** — yedek çeviri
+  değil, GÖRÜNÜR arıza. Namespace'i beklemeden çizen bir rota eklenirse ekranda
+  `protocol.foo.bar` yazar; boş string aynı hatayı görünmez kılardı.
+
+  **TUZAK, tarayıcı turu yakaladı:** `isTranslationKey` yalnız `tr`ye bakıyordu.
+  Arayüz İngilizce açıldığında Türkçe namespace hiç inmez, dolayısıyla
+  `parseDiagnostics` her protokol anahtarına "bu bir anahtar değil" deyip mesajı
+  HAM basıyordu. Artık YÜKLÜ OLAN her dile bakıyor (anahtar kümesi iki dilde
+  derleyici zoruyla aynı). Birim testler bunu göremezdi: jsdom'da chunk sınırı
+  yok.
+
+  **İkinci tuzak:** `loadDictionary` "harita var mı" diye bakıyordu, oysa harita
+  PARÇALI — protokol namespace'i çekirdekten önce inebiliyor. Artık ayrı bir
+  `loadedCoreLanguages` kümesi var.

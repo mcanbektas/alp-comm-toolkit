@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { TOOL_RENDERERS } from '@/pages/CalculatorPage';
-import { tr } from '@/translations/tr';
+// Tam sözlük: bazı araçların özeti `protocol.*` namespace'inden geliyor ve o
+// namespace artık ayrı bir chunk (bkz. `translations/all.ts`).
+import { translations } from '@/translations/all';
 import { CALCULATOR_TOOLS } from './registry';
 
 /**
@@ -19,11 +21,12 @@ describe('CALCULATOR_TOOLS', () => {
   });
 
   it('points nameKey/summaryKey at real, non-blank tr.ts entries', () => {
+    const dictionary = translations.tr;
     for (const tool of CALCULATOR_TOOLS) {
-      expect(tr[tool.nameKey], `${tool.id}.nameKey (${tool.nameKey})`).toBeDefined();
-      expect(tr[tool.nameKey].trim(), `${tool.id}.nameKey (${tool.nameKey}) is blank`).not.toBe('');
-      expect(tr[tool.summaryKey], `${tool.id}.summaryKey (${tool.summaryKey})`).toBeDefined();
-      expect(tr[tool.summaryKey].trim(), `${tool.id}.summaryKey (${tool.summaryKey}) is blank`).not.toBe('');
+      expect(dictionary[tool.nameKey], `${tool.id}.nameKey (${tool.nameKey})`).toBeDefined();
+      expect(dictionary[tool.nameKey].trim(), `${tool.id}.nameKey (${tool.nameKey}) is blank`).not.toBe('');
+      expect(dictionary[tool.summaryKey], `${tool.id}.summaryKey (${tool.summaryKey})`).toBeDefined();
+      expect(dictionary[tool.summaryKey].trim(), `${tool.id}.summaryKey (${tool.summaryKey}) is blank`).not.toBe('');
     }
   });
 

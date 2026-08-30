@@ -1,7 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 // `matchLanguageTag` bilerek kullanılmıyor — bkz. detectInitialLanguage yorumu.
-import { DEFAULT_LANGUAGE, dictionaryFor, interpolate, loadDictionary, resolveLanguage, tr } from '@/translations';
+import {
+  DEFAULT_LANGUAGE,
+  dictionaryFor,
+  interpolate,
+  loadDictionary,
+  resolveLanguage,
+  subscribeToDictionaries,
+  tr,
+} from '@/translations';
 import type { Language, TranslationKey } from '@/translations';
 
 /** localStorage anahtarı. Süit içindeki diğer SPA'larla çakışmaması için `alp-comm-` önekli. */
@@ -50,7 +58,7 @@ function writeStoredLanguage(lang: Language): void {
  * tarayıcıdır — o zaten varsayılana düşüyor, yani ek koda gerek yok.
  * Dil pazarlığı istenirse buradan tek fonksiyonla açılır.
  */
-function detectInitialLanguage(): Language {
+export function detectInitialLanguage(): Language {
   if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
 
   const stored = readStoredLanguage();
@@ -72,7 +80,7 @@ export function LanguageProvider({ children }: { children: ReactNode }): ReactEl
    * seçili dil `en` olsa bile ilk boya Türkçedir ve sözlük inince değişir;
    * varsayılan dili de tembelleştirmek uygulamayı boş bir kabukla açardı.
    */
-  const [dictionary, setDictionary] = useState<Record<TranslationKey, string>>(
+  const [dictionary, setDictionary] = useState<Partial<Record<TranslationKey, string>>>(
     () => dictionaryFor(detectInitialLanguage()) ?? tr,
   );
 
@@ -83,8 +91,20 @@ export function LanguageProvider({ children }: { children: ReactNode }): ReactEl
       // eski seçim yeni ekranın üstüne düşerdi (`DecodePanel`in aynı deseni).
       if (!cancelled) setDictionary(loaded);
     });
+
+    /**
+     * Sözlük parça parça büyüyor: rota lazy sınırı `protocol.*` namespace'ini
+     * indirdiğinde bu bileşen HABERSİZ kalırsa ekran eski (eksik) sözlükle
+     * çizili durur. Abonelik o yüzden var.
+     */
+    const unsubscribe = subscribeToDictionaries(() => {
+      const current = dictionaryFor(lang);
+      if (!cancelled && current !== undefined) setDictionary(current);
+    });
+
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, [lang]);
 
@@ -103,9 +123,13 @@ export function LanguageProvider({ children }: { children: ReactNode }): ReactEl
 
   const t = useCallback(
     (key: TranslationKey, vars?: Readonly<Record<string, string | number>>): string =>
-      // Sözlükler sonlu mapped type; anahtarın karşılığı derleyici tarafından
-      // garanti, çalışma zamanı fallback'i gereksiz.
-      interpolate(dictionary[key], vars),
+      /**
+       * Karşılığı olmayan anahtar ANAHTARIN KENDİSİYLE basılır. Bu bir yedek
+       * çeviri değil, GÖRÜNÜR bir arıza: namespace'i beklemeden çizen bir rota
+       * eklenirse ekranda `protocol.foo.bar` yazar ve hemen fark edilir. Boş
+       * string basmak aynı hatayı görünmez kılardı.
+       */
+      interpolate(dictionary[key] ?? key, vars),
     [dictionary],
   );
 

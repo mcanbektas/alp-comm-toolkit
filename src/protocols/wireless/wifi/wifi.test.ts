@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { isParseSuccess } from '@/protocol-core/types';
 import type { ParseResult, ParsedFrame } from '@/protocol-core/types';
-import { tr } from '@/translations/tr';
+// Tam sözlük: plugin metinleri `protocol.*` namespace'inde ve o namespace
+// ayrı bir chunk (bkz. `translations/all.ts`).
+import { translations } from '@/translations/all';
 
 import { wifiParser, wifiPlugin } from './wifi';
 
@@ -108,7 +110,7 @@ describe('wifi eklentisi — kimlik ve yüzey', () => {
     const summary = wifiPlugin.documentation?.summary;
     if (summary !== undefined) keys.add(summary);
 
-    const dictionary = tr as Record<string, string | undefined>;
+    const dictionary = translations.tr as Record<string, string | undefined>;
     const missing = [...keys].filter((key) => dictionary[key] === undefined);
     expect(missing, `sözlükte olmayan anahtarlar: ${missing.join(', ')}`).toEqual([]);
   });
