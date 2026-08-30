@@ -125,6 +125,23 @@ karşılanabiliyor (JSON/CSV hedefleri encoder istemiyor). Eksik olan tek şey
 
 **Ölçüm:** birim 6822 → 6832 (yeşil), e2e 1345 → 1346.
 
+## ✅ §33 Protocol Converter ekranı (2026-08-30)
+
+`src/features/protocol-converter` açıldı — spec §6'nın açılmamış SON feature
+klasörü. Motor (`converterEngine.ts`) saf ve senkron; ekran hesap yapmaz.
+
+Kaynak alan kimliğiyle eşlenir (bayt aralığıyla değil), değer
+`physicalValue ?? rawValue` sırasıyla okunur, dönüşüm `value × k + c`nin dört
+hâli. Hedefler: MQTT PUBLISH (gerçek paket, `mqtt` encoder'ıyla), JSON, CSV.
+Ekran boş açılmaz: §33'ün kendi örneği (Modbus Register × 0.1 →
+`sensors/temperature`) hazır gelir ve ilk açılışta gerçek bir paket üretir.
+
+Tarayıcı turu bir eksik yakaladı: hiç değer üretilmediğinde sorun listesi
+basılmıyordu, yani kaynak protokolü değiştiren kullanıcı sessiz bir boşluk
+görüyordu. Düzeltildi.
+
+**Ölçüm:** birim 6832 → 6848 (yeşil), e2e 1346 → 1351.
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 
@@ -1976,10 +1993,11 @@ Faz 9'a girmeden bilinmesi gerekenler — hiçbiri Faz 9'u engellemiyor:
   reverse-engineering · test-automation** klasörleri hiç açılmadı~~ →
   **üçü yazıldı** (log-analyzer §34 `b39fc2e`, reverse-engineering §35+§36
   `61233e0`, test-automation §38 `af1f975`). Açılmamış TEK klasör
-  **`protocol-converter` (§33)** ve bekletilmesi bilinçli: `plugin.encoder`in
-  tüketicisi yok (14/191 plugin'de encoder var, hiçbirini okuyan yok), yani
-  §33'ün saydığı sekiz dönüşümün hedef tarafı yazılamaz. Ayrıntı `CLAUDE.md`
-  "Bilinen borçlar" 3. maddede.
+  ~~**`protocol-converter` (§33)**~~ → **YAZILDI** (2026-08-30): önce hedef
+  tarafın on encoder'ı, sonra ekranın kendisi. Bekletilme gerekçesi
+  (`plugin.encoder`in tüketicisi yoktu) ortadan kalktı; ayrıntı `CLAUDE.md`
+  "Bilinen borçlar" 3. ve 9. maddelerde. **Spec §6'nın feature klasörlerinin
+  hepsi artık açık.**
 - ~~`src/connection/` altında **usb · bluetooth · websocket · file** yok~~ →
   **`file` yazıldı** (§8.1, `5c04ebd`) ve §48'in "büyük log dosyası" kriteri
   artık ölçülebiliyor. Kalan üçü (**usb · bluetooth · websocket**) hâlâ yok;

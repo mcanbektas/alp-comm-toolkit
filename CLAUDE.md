@@ -665,3 +665,35 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   (3 Modbus · MQTT · 2 CAN · J1939 · NMEA 2000 · 2 BACnet) + JSON/CSV hedefleri
   encoder istemiyor. **Ekranın kendisi (`features/protocol-converter`) hâlâ
   yazılmadı** — sıradaki iş odur.
+
+  **9. ✅ §33 PROTOCOL CONVERTER EKRANI YAZILDI** (2026-08-30). Spec §6'nın
+  açılmamış son feature klasörü açıldı: `src/features/protocol-converter`.
+  Zincir tek ekranda — kaynak protokolün ÇÖZÜCÜSÜ baytları alanlara açar,
+  kullanıcı alanları hedef adlara eşler, hedef biçimi çıktıyı üretir.
+
+  **Kaynak bir ALAN KİMLİĞİDİR, bayt aralığı değil.** Girdi ham bayt olsaydı
+  kullanıcı her protokolün yerleşimini elle bilmek zorunda kalırdı; oysa alanı
+  zaten parser adlandırıyor. Çeviri bu yüzden `ParsedFrame` ÜZERİNDE çalışır.
+
+  **Değer `physicalValue ?? rawValue` sırasıyla okunur.** Alan zaten bir ölçek
+  uyguluyorsa ham sayıyı çarpmak sessizce başka bir sonuç üretirdi. `physicalValue`
+  METİN de olabilir (enum etiketleri); o durumda aritmetik UYGULANMAZ, değer
+  taşınır ve kullanıcı nedenini sorun listesinde görür — metni sayıya zorlamak
+  `NaN` üretirdi.
+
+  **MQTT hedefi METİN DEĞİL GERÇEK PAKET üretir** ve baytları `mqtt` plugin'inin
+  kendi encoder'ı yazar (6. madde). Ekran kendi kodlayıcısını yazsaydı monitörün
+  çözdüğü paketten ayrışabilirdi. JSON/CSV hedefleri encoder istemez (saf
+  serileştirme; CSV'de virgüllü değer RFC 4180'e göre tırnaklanır).
+
+  **Açılış çerçevesi motorun İLK örneği DEĞİL**, Modbus RTU'nun kayıt YANITIDIR:
+  ilk örnek bir İSTEKTİR ve isteğin alanları arasında register YOKTUR — §33'ün
+  "Modbus Register 40001" örneği ancak yanıtta karşılık bulur. Protokol
+  değişince motorun kendi ilk geçerli örneği tohumlanır, ama kullanıcı hex
+  kutusuna dokunduysa yazdığı EZİLMEZ.
+
+  **Kaybolan alan bir HATA değil DURUMDUR:** kaynak protokol değişince eski
+  eşlemeler ayakta kalır ve kimlik artık yoktur. O satır düşer, sorun listesine
+  iner, ÖTEKİ satırlar üretilmeye devam eder. Hiç değer üretilmese bile sorun
+  listesi BASILIR — "çıktı yok" deyip nedenini saklamak sessiz bir boşluk
+  bırakırdı (tarayıcı turu tam olarak bunu yakaladı).

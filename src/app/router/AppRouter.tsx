@@ -59,6 +59,16 @@ const TestAutomationPage = lazy(async () => {
   return { default: module.TestAutomationPage };
 });
 
+/**
+ * Protocol Converter da TEMBEL: kaynak motoru kullanıcının seçimine göre
+ * iniyor, ekranın kendisi de ana pakete binmemeli (öteki araçlarla aynı
+ * gerekçe).
+ */
+const ProtocolConverterPage = lazy(async () => {
+  const module = await import('@/pages/ProtocolConverterPage');
+  return { default: module.ProtocolConverterPage };
+});
+
 function LazyFallback(): ReactElement {
   const { t } = useTranslation();
   return <p className="p-4 text-sm text-muted">{t('common.loading')}</p>;
@@ -127,6 +137,14 @@ export function AppRoutes(): ReactElement {
           element={
             <Suspense fallback={<LazyFallback />}>
               <TestAutomationPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="protocol-converter"
+          element={
+            <Suspense fallback={<LazyFallback />}>
+              <ProtocolConverterPage />
             </Suspense>
           }
         />
