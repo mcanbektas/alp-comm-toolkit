@@ -24,15 +24,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
-import { ByteViewer, parsedFrameToRegions } from '@/components/byte-viewer';
+import { parsedFrameToRegions } from '@/components/byte-viewer';
 import type { ByteRegion } from '@/components/byte-viewer';
 import { NumberField, SelectField } from '@/components/forms';
+import { PacketViewer } from '@/components/packet-viewer';
 import { bytesToHex, hexToBytes } from '@/protocol-core/buffers/representation';
 import { loadProtocolPlugin } from '@/protocol-core/registry';
 import type {
   DecodeOption,
   ParseResult,
-  ParsedField,
   ProtocolError,
   ProtocolPlugin,
 } from '@/protocol-core/types';
@@ -44,10 +44,6 @@ export interface DecodePanelProps {
   readonly pluginId: string;
 }
 
-const HEX_RADIX = 16;
-/** Değeri olmayan hücrenin işareti; dile bağlı değil, çeviriye girmez. */
-const EMPTY_GLYPH = '—';
-
 /**
  * Geçersiz hex girdisinde `ByteViewer`a verilen boş dizi. Modül düzeyinde sabit:
  * her render'da `new Uint8Array()` üretmek viewer'ın `useMemo` bağımlılığını
@@ -57,10 +53,6 @@ const EMPTY_BYTES = new Uint8Array();
 
 /** `EMPTY_BYTES` ile aynı gerekçe: sabit referans, boşuna `useMemo` tazelemesi yok. */
 const EMPTY_DECODE_OPTIONS: readonly DecodeOption[] = [];
-
-const HEADER_CELL_CLASS =
-  'border-b border-line px-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-muted';
-const BODY_CELL_CLASS = 'px-2 py-1.5 align-top text-sm text-text';
 
 /**
  * Form metnini `ParseContext.options` değerlerine çevirir.
@@ -138,35 +130,6 @@ function translatePluginText(
 }
 
 /**
- * Tamsayının onaltılık gösterimi. Kesirli sayıda (IEEE-754 çözümü) `null`
- * döner: 25.75 için "0x19.C" yazmak yanıltıcı olurdu.
- */
-function formatHexNumber(value: bigint | number): string | null {
-  if (typeof value === 'number' && !Number.isInteger(value)) return null;
-  const negative = value < 0;
-  const magnitude = negative ? -value : value;
-  return `${negative ? '-' : ''}0x${magnitude.toString(HEX_RADIX).toUpperCase()}`;
-}
-
-/** Ham değer sütunu: onaltılık + ondalık birlikte (spec §50 "Ham değer"). */
-function formatRawCell(value: bigint | number | string | undefined): string {
-  if (value === undefined) return EMPTY_GLYPH;
-  if (typeof value === 'string') return value;
-  const hex = formatHexNumber(value);
-  return hex === null ? String(value) : `${hex} (${String(value)})`;
-}
-
-/** Fiziksel değer sütunu; birim varsa değere yapışık gösterilir. */
-function formatPhysicalCell(
-  value: bigint | number | string | undefined,
-  unit: string | undefined,
-): string {
-  if (value === undefined) return EMPTY_GLYPH;
-  const text = typeof value === 'string' ? value : String(value);
-  return unit === undefined || unit === '' ? text : `${text} ${unit}`;
-}
-
-/**
  * Eklentinin yükleme durumu. Üç dal ayrı tutuluyor: "yükleniyor" ile
  * "yüklenemedi" tek bir `plugin === undefined` ile temsil edilseydi ekran
  * sonsuza kadar iskelet gösterir, kullanıcı neyi beklediğini bilemezdi.
@@ -187,75 +150,6 @@ type DecodeOutcome =
   | { readonly kind: 'crashed'; readonly bytes: Uint8Array; readonly detail: string }
   | { readonly kind: 'parsed'; readonly bytes: Uint8Array; readonly result: ParseResult };
 
-function FieldRow({
-  field,
-  selected,
-  onToggle,
-}: {
-  field: ParsedField;
-  selected: boolean;
-  onToggle: (fieldId: string) => void;
-}): ReactNode {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <tr
-        data-testid="decode-field-row"
-        data-field-id={field.id}
-        data-selected={String(selected)}
-        data-valid={String(field.valid)}
-        className={selected ? 'border-b border-line bg-accent-soft' : 'border-b border-line'}
-      >
-        <td className={`${BODY_CELL_CLASS} font-medium`}>
-          {/*
-            Satırın kendisi tıklanabilir yapılmadı: `<tr onClick>` klavyeyle
-            erişilemez ve ekran okuyucuya duyurulmaz. Seçim düğmesi ad hücresinde
-            durur, böylece bölge ↔ satır vurgusu iki yönden de sürülebilir.
-          */}
-          <button
-            type="button"
-            data-testid="decode-field-select"
-            aria-pressed={selected}
-            className="rounded-token-sm text-left text-text hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            onClick={() => {
-              onToggle(field.id);
-            }}
-          >
-            {field.name}
-          </button>
-        </td>
-        <td className={`${BODY_CELL_CLASS} tabular font-mono`}>{String(field.offset)}</td>
-        <td className={`${BODY_CELL_CLASS} tabular font-mono`}>{String(field.length)}</td>
-        <td className={`${BODY_CELL_CLASS} tabular font-mono`} data-testid="decode-field-raw">
-          {formatRawCell(field.rawValue)}
-        </td>
-        <td className={`${BODY_CELL_CLASS} tabular font-mono`} data-testid="decode-field-physical">
-          {formatPhysicalCell(field.physicalValue, field.unit)}
-        </td>
-        <td
-          className={field.valid ? `${BODY_CELL_CLASS} text-accent` : `${BODY_CELL_CLASS} text-danger`}
-          data-testid="decode-field-validity"
-        >
-          {t(field.valid ? 'decode.status.valid' : 'decode.status.invalid')}
-        </td>
-      </tr>
-      {field.warnings.length > 0 ? (
-        <tr className="border-b border-line">
-          <td colSpan={6} className="px-2 pb-2">
-            <ul className="flex flex-col gap-0.5 text-xs text-warn">
-              {field.warnings.map((warning) => (
-                <li key={warning} data-testid="decode-field-warning" data-field-id={field.id}>
-                  {translateDiagnostic(warning, t)}
-                </li>
-              ))}
-            </ul>
-          </td>
-        </tr>
-      ) : null}
-    </>
-  );
-}
 
 function ParseFailureCard({
   error,
@@ -534,51 +428,28 @@ function LoadedDecodeView({ plugin }: { plugin: ProtocolPlugin }): ReactNode {
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-token border border-line bg-surface p-3">
-        <ByteViewer
-          bytes={bytes}
-          regions={regions}
-          selectedRegionId={selectedRegionId}
-          onRegionSelect={toggleRegion}
-          emptyLabel={t('common.empty')}
-        />
-      </div>
-
-      {frame === undefined ? null : (
-        <div className="overflow-x-auto">
-          <table
-            data-testid="decode-field-table"
-            className="w-full min-w-[40rem] border-collapse"
-            aria-label={t('decode.table.label')}
-          >
-            <thead>
-              <tr>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.field')}</th>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.offset')}</th>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.length')}</th>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.raw')}</th>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.physical')}</th>
-                <th className={HEADER_CELL_CLASS}>{t('decode.column.validity')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {frame.fields.map((field) => (
-                <FieldRow
-                  key={field.id}
-                  field={field}
-                  selected={field.id === selectedRegionId}
-                  onToggle={toggleRegion}
-                />
-              ))}
-            </tbody>
-          </table>
-          {frame.fields.length === 0 ? (
-            <p className="px-2 py-1.5 text-sm text-muted" data-testid="decode-fields-empty">
-              {t('decode.fields.empty')}
-            </p>
-          ) : null}
-        </div>
-      )}
+      <PacketViewer
+        bytes={bytes}
+        regions={regions}
+        fields={frame?.fields}
+        selectedFieldId={selectedRegionId}
+        onSelectField={toggleRegion}
+        labels={{
+          byteEmpty: t('common.empty'),
+          fieldsEmpty: t('decode.fields.empty'),
+          tableAriaLabel: t('decode.table.label'),
+          columnField: t('decode.column.field'),
+          columnOffset: t('decode.column.offset'),
+          columnLength: t('decode.column.length'),
+          columnRaw: t('decode.column.raw'),
+          columnPhysical: t('decode.column.physical'),
+          columnValidity: t('decode.column.validity'),
+          statusValid: t('decode.status.valid'),
+          statusInvalid: t('decode.status.invalid'),
+        }}
+        translateWarning={(text) => translateDiagnostic(text, t)}
+        testIdPrefix="decode"
+      />
 
       {/*
         `success: true` ama `valid: false` mümkün: kısmi çözüm gösterilir, hata
