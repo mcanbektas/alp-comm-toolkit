@@ -6,12 +6,26 @@
  * ile ekrandan bağımsız uygulanır (spec §44).
  */
 
+import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 
-import { LiveLineChart, type ChartDatum, type ChartSeries } from '../../../components/charts/LiveLineChart';
+import type { ChartDatum, ChartSeries } from '../../../components/charts/LiveLineChart';
 import { useTranslation } from '../../../app/providers/LanguageProvider';
 import type { SignalStatistics } from '../../../protocol-core/statistics/signalStatistics';
 import type { SignalTap } from '../signalTaps';
+
+/**
+ * `LiveLineChart` TEMBEL: recharts'ı içe aktaran tek yer orası ve monitör
+ * sayfası chunk'ının çoğunu tutuyor. Tip dışında statik bir import chart'ı
+ * yine bu chunk'a dikerdi (bkz. docs/brief-monitor-grafik-ayirma.md).
+ */
+const LiveLineChart = lazy(async () => {
+  const module = await import('../../../components/charts/LiveLineChart');
+  return { default: module.LiveLineChart };
+});
+
+/** `LiveLineChart`in kendi varsayılan yüksekliğiyle AYNI — yoksa chunk inince yer tutucu zıplar. */
+const CHART_HEIGHT = 260;
 
 export interface SignalPanelProps {
   readonly taps: readonly SignalTap[];
@@ -26,6 +40,17 @@ function formatValue(value: number | undefined, unit: string): string {
   }
   const formatted = value.toLocaleString(undefined, { maximumFractionDigits: 3 });
   return unit === '' ? formatted : `${formatted} ${unit}`;
+}
+
+function ChartFallback({ label }: { label: string }): ReactNode {
+  return (
+    <div
+      className="flex items-center justify-center rounded-token border border-line bg-surface p-4 text-sm text-muted"
+      style={{ height: CHART_HEIGHT }}
+    >
+      {label}
+    </div>
+  );
 }
 
 export function SignalPanel({ taps, data, statistics, maxPoints }: SignalPanelProps): ReactNode {
@@ -45,12 +70,15 @@ export function SignalPanel({ taps, data, statistics, maxPoints }: SignalPanelPr
 
   return (
     <div className="flex flex-col gap-4">
-      <LiveLineChart
-        series={series}
-        data={data}
-        xTickFormatter={(value) => `${value.toFixed(1)} s`}
-        emptyLabel={t('monitor.chart.empty')}
-      />
+      <Suspense fallback={<ChartFallback label={t('monitor.chart.loading')} />}>
+        <LiveLineChart
+          series={series}
+          data={data}
+          height={CHART_HEIGHT}
+          xTickFormatter={(value) => `${value.toFixed(1)} s`}
+          emptyLabel={t('monitor.chart.empty')}
+        />
+      </Suspense>
 
       <p className="text-xs text-muted">{t('monitor.chart.pointNote', { count: maxPoints })}</p>
 

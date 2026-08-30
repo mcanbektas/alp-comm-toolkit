@@ -87,6 +87,44 @@ test('istatistikler ve sinyal grafiği gerçek veriyle dolar', async ({ page }) 
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
 
+/**
+ * Grafik chunk ayrımının gerçek tarayıcı turu (2026-08-30,
+ * docs/brief-monitor-grafik-ayirma.md). Chunk isteği `route` ile bilerek
+ * beklemede tutulur: yerelden ikisi de anında inerse sıralamayı zamanlamayla
+ * ölçmek yarışa girer, burada sıra zamanlamaya değil kontrole bağlanıyor.
+ */
+test('grafik ayrı chunk\'ta iner, tablo onu beklemeden dolar', async ({ page }) => {
+  let releaseChart = (): void => {};
+  const chartHeld = new Promise<void>((resolve) => {
+    releaseChart = resolve;
+  });
+  const chartChunkRequests: string[] = [];
+
+  await page.route(/\/assets\/LiveLineChart-[A-Za-z0-9_-]+\.js$/, async (route) => {
+    chartChunkRequests.push(route.request().url());
+    await chartHeld;
+    await route.continue();
+  });
+
+  const consoleErrors = await openMonitor(page);
+  await connectSimulated(page, 200);
+
+  // Tablo, grafik chunk'ı hâlâ beklemedeyken dolmalı.
+  await expect.poll(() => recordCount(page), { timeout: 10_000 }).toBeGreaterThan(20);
+  expect(chartChunkRequests.length).toBeGreaterThan(0);
+  await expect(page.getByText(tr['monitor.chart.loading'])).toBeVisible();
+  expect(await page.locator('svg.recharts-surface').count()).toBe(0);
+
+  releaseChart();
+
+  // Serbest bırakılınca grafik gerçekten çizgi basar.
+  const chartPaths = page.locator('svg.recharts-surface path.recharts-curve');
+  await expect.poll(async () => chartPaths.count(), { timeout: 10_000 }).toBeGreaterThan(0);
+  expect(chartChunkRequests).toHaveLength(1);
+
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
+});
+
 test('binlerce kayıtta bile DOM yalnız görünen satırları taşır', async ({ page }) => {
   await openMonitor(page);
   await connectSimulated(page, 5000);

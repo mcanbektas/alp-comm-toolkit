@@ -699,6 +699,7 @@ export const tr = {
 
   'monitor.chart.empty': 'Sinyal verisi bekleniyor.',
   'monitor.chart.pointNote': 'Grafik en çok {count} noktaya seyreltilir (LTTB).',
+  'monitor.chart.loading': 'Grafik yükleniyor…',
   'monitor.signal.min': 'En az',
   'monitor.signal.max': 'En çok',
   'monitor.signal.average': 'Ortalama',

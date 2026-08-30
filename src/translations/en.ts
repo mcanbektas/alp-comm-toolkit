@@ -697,6 +697,7 @@ export const en: TranslationDictionary = {
 
   'monitor.chart.empty': 'Waiting for signal data.',
   'monitor.chart.pointNote': 'Chart is downsampled to at most {count} points (LTTB).',
+  'monitor.chart.loading': 'Loading chart…',
   'monitor.signal.min': 'Min',
   'monitor.signal.max': 'Max',
   'monitor.signal.average': 'Average',
