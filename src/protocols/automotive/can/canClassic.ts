@@ -30,7 +30,11 @@ import type {
 
 import {
   CAN_CLASSIC_FRAME_LENGTH,
+  CAN_CLASSIC_MAX_PAYLOAD,
+  CAN_EFF_MASK,
   CAN_HEADER_LENGTH,
+  CAN_RTR_FLAG,
+  CAN_SFF_MASK,
   approximateFrameBits,
   decodeCanId,
   decodeSocketCanFrame,
@@ -43,6 +47,9 @@ const EXTENDED_PROTOCOL_ID = 'can-2-0b';
 /** Protokol adları veridir, çeviriye girmez (CLAUDE.md). */
 const BASE_DISPLAY_NAME = 'CAN 2.0A';
 const EXTENDED_DISPLAY_NAME = 'CAN 2.0B';
+
+/** `can_id` alanının bayt genişliği — encoder'ın gövdesinde de ilk dört bayt odur. */
+const CAN_IDENTIFIER_WORD_LENGTH = 4;
 
 const ERROR_FRAME_TOO_SHORT = 'protocol.can.classic.error.frameTooShort';
 const ERROR_FRAME_TOO_LONG = 'protocol.can.classic.error.frameTooLong';
@@ -263,6 +270,61 @@ export function buildCanClassicFrame(
 }
 
 /**
+ * ENCODER'IN GİRDİSİ: 4 baytlık identifier sözcüğü (SocketCAN düzeninde,
+ * little-endian) + en çok 8 veri baytı. Çıktı `struct can_frame`in tamamıdır;
+ * DLC ile 16 bayta kadarki dolgu BURADA hesaplanır (spec §33'ün "NMEA heading →
+ * CAN signal" dönüşümünün hedef tarafı).
+ *
+ * Neden ham çerçeve değil de gövde alınıyor: DLC veri uzunluğundan
+ * TÜRETİLEBİLİR, dolayısıyla çağırana sormak onu gövdeyle çelişebilir hâle
+ * getirmek olurdu — Modbus encoder'larının CRC/Length gerekçesiyle aynı.
+ *
+ * **Format biti çağırandan alınmaz, SAYFADAN gelir.** 2.0A base, 2.0B extended
+ * çerçeve üretir; identifier sözcüğünde ne yazarsa yazsın EFF biti sayfanın
+ * biçimine göre yazılır. Aksi hâlde 2.0B sayfası base çerçeve üretebilir ve
+ * `can20bParser` kendi ürettiğimiz çerçeveye "biçim uyuşmuyor" uyarısı basardı.
+ * RTR biti çağıranındır: uzaktan istek çerçevesi meşru bir üretimdir.
+ */
+function encodeCanClassicFrame(body: Uint8Array, extended: boolean): Uint8Array {
+  const label = extended ? 'encodeCanExtendedFrame' : 'encodeCanBaseFrame';
+  if (body.length < CAN_IDENTIFIER_WORD_LENGTH) {
+    throw new RangeError(`${label}: gövde en az ${CAN_IDENTIFIER_WORD_LENGTH} bayt olmalı (identifier sözcüğü)`);
+  }
+
+  const payload = body.subarray(CAN_IDENTIFIER_WORD_LENGTH);
+  if (payload.length > CAN_CLASSIC_MAX_PAYLOAD) {
+    throw new RangeError(
+      `${label}: veri ${payload.length} bayt, Classical CAN üst sınırı ${CAN_CLASSIC_MAX_PAYLOAD}`,
+    );
+  }
+
+  const rawId = readUint32Le(body, 0);
+  const identifier = rawId & (extended ? CAN_EFF_MASK : CAN_SFF_MASK);
+  // Base çerçevede 11 bitin ÜSTÜ sessizce kırpılsaydı, kullanıcının yazdığından
+  // BAŞKA bir ID kabloya çıkardı — susarak yanlış çerçeve üretmektense hata.
+  if (!extended && (rawId & CAN_EFF_MASK) !== identifier) {
+    throw new RangeError(
+      `${label}: identifier 0x${(rawId & CAN_EFF_MASK).toString(16).toUpperCase()} base formatın 11 bitine sığmıyor`,
+    );
+  }
+
+  return buildCanClassicFrame(identifier, Array.from(payload), {
+    extended,
+    remote: (rawId & CAN_RTR_FLAG) !== 0,
+  });
+}
+
+/** CAN 2.0A (base, 11 bit) çerçevesi üretir. Girdi için bkz. yukarısı. */
+export function encodeCanBaseFrame(body: Uint8Array): Uint8Array {
+  return encodeCanClassicFrame(body, false);
+}
+
+/** CAN 2.0B (extended, 29 bit) çerçevesi üretir. Girdi için bkz. yukarısı. */
+export function encodeCanExtendedFrame(body: Uint8Array): Uint8Array {
+  return encodeCanClassicFrame(body, true);
+}
+
+/**
  * Örnek çerçeveler spec §42 madde 4'ün "örnek veri"sidir; adlar/açıklamalar
  * çeviri anahtarı, baytlar veridir. Tüketici bu dizileri DEĞİŞTİRMEMELİ —
  * plugin nesnesi tekildir, paylaşılır.
@@ -327,6 +389,8 @@ export const can20aPlugin: ProtocolPlugin = {
   name: BASE_DISPLAY_NAME,
   category: 'automotive',
   parser: can20aParser,
+  // Girdi: identifier sözcüğü + veri baytları (bkz. `encodeCanClassicFrame`).
+  encoder: { encode: encodeCanBaseFrame },
   documentation: {
     summary: 'protocol.can.classic.base.documentation.summary',
     layer: 'data-link',
@@ -339,6 +403,8 @@ export const can20bPlugin: ProtocolPlugin = {
   name: EXTENDED_DISPLAY_NAME,
   category: 'automotive',
   parser: can20bParser,
+  // Girdi: identifier sözcüğü + veri baytları (bkz. `encodeCanClassicFrame`).
+  encoder: { encode: encodeCanExtendedFrame },
   documentation: {
     summary: 'protocol.can.classic.extended.documentation.summary',
     layer: 'data-link',

@@ -1082,6 +1082,12 @@ export const en: TranslationDictionary = {
   'builder.encoder.fixed.zmodem': 'The ZDATA header, zero position and binary16 header format are fixed.',
   'builder.encoder.fixed.modbusTcp':
     'The MBAP transaction ID is written as 0; a peer that matches responses on that field always sees the same value.',
+  'builder.encoder.fixed.mqtt':
+    'The packet is built as PUBLISH · QoS 0 · DUP 0 · RETAIN 0; the payload must be "topic length (2 bytes) + topic + payload" and the Remaining Length is computed.',
+  'builder.encoder.fixed.canBase':
+    'The payload must be "identifier word (4 bytes, little-endian) + up to 8 data bytes"; the frame is built in base format and the DLC is computed.',
+  'builder.encoder.fixed.canExtended':
+    'The payload must be "identifier word (4 bytes, little-endian) + up to 8 data bytes"; the frame is built in extended format and the DLC is computed.',
   'builder.field.postProcessing': 'Post-framing processing',
   'builder.postProcessing.none': 'None',
   'builder.postProcessing.byteStuffing': 'Byte stuffing',

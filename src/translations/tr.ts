@@ -1083,6 +1083,12 @@ export const tr = {
   'builder.encoder.fixed.zmodem': 'ZDATA başlığı, sıfır konum ve binary16 başlık biçimi sabittir.',
   'builder.encoder.fixed.modbusTcp':
     'MBAP transaction ID 0 yazılır; yanıt eşleştirmesi bu alana bakan bir karşı taraf için sabit kalır.',
+  'builder.encoder.fixed.mqtt':
+    'Paket PUBLISH · QoS 0 · DUP 0 · RETAIN 0 üretilir; yük "topic uzunluğu (2 bayt) + topic + payload" olmalı, Remaining Length hesaplanır.',
+  'builder.encoder.fixed.canBase':
+    'Yük "identifier sözcüğü (4 bayt, little-endian) + en çok 8 veri baytı" olmalı; çerçeve base formatta üretilir ve DLC hesaplanır.',
+  'builder.encoder.fixed.canExtended':
+    'Yük "identifier sözcüğü (4 bayt, little-endian) + en çok 8 veri baytı" olmalı; çerçeve extended formatta üretilir ve DLC hesaplanır.',
   'builder.field.postProcessing': 'Çerçeveleme sonrası işlem',
   'builder.postProcessing.none': 'Yok',
   'builder.postProcessing.byteStuffing': 'Bayt doldurma',

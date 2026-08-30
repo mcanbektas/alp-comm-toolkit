@@ -591,3 +591,31 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
   **§33 yine de AÇILMADI:** sekiz dönüşümün hedef tarafında şimdilik üç motor
   var.
+
+  **6. ✅ §33'ün İKİ HEDEFİ DAHA: MQTT PUBLISH ve Classical CAN** (2026-08-30,
+  modbus üçlüsüyle aynı gün, ayrı commit). `network/mqtt/mqttEncoders.ts` ve
+  `automotive/can/canClassic.ts`teki iki sarmal. Disiplin modbus'la AYNI:
+  **çağıran GÖVDEYİ verir, encoder ZARFI hesaplar.**
+
+  MQTT'de gövde `topic uzunluğu (2) + topic + payload`; encoder Fixed Header'ı
+  ve **Remaining Length**i yazar. Uzunluğu çağırana bırakmak, gövdeyle çelişen
+  bir değer yazma imkânı vermek olurdu ve MQTT'de o alan yanlışsa akış bir
+  sonraki pakette değil ORTASINDA kayar. Topic'i sabitleyip yalnız payload almak
+  ise §33'ün dönüşümünü (topic seçmek) anlamsız kılardı. Sabitlenenler:
+  PUBLISH · DUP=0 · QoS=0 · RETAIN=0 — QoS 0 gövdeyi de belirler, Packet
+  Identifier YALNIZ QoS ≥ 1'de vardır.
+
+  CAN'de gövde `identifier sözcüğü (4 bayt, SocketCAN düzeni) + en çok 8 veri
+  baytı`; DLC ve 16 baytlık dolgu hesaplanır. **Format biti çağırandan
+  ALINMAZ, sayfadan gelir**: 2.0A base, 2.0B extended üretir. Aksi hâlde 2.0B
+  sayfası base çerçeve üretebilir ve kendi ürettiğimiz çerçeveye kendi
+  `can20bParser`ımız "biçim uyuşmuyor" uyarısı basardı. Base'de 11 bite
+  sığmayan identifier sessizce KIRPILMAZ, hata fırlatır — kırpmak kullanıcının
+  yazdığından başka bir ID'yi kabloya çıkarmak olurdu. RTR biti çağıranındır.
+
+  `canFrame.ts`in `CAN_SFF_MASK`/`CAN_EFF_MASK`/`CAN_RTR_FLAG` sabitleri DIŞA
+  AÇILDI: encoder çözücüyle aynı bit tanımlarını kullanmak zorunda, ikinci bir
+  kopya ayrışmanın davetiyesiydi.
+
+  Üçünün de katalog kaydında `build` sekmesi var (kural 5. maddede). §33 hâlâ
+  açılmadı; hedef taraf artık altı motor taşıyor.

@@ -68,13 +68,17 @@ export const CAN_FD_FRAME_LENGTH = 72;
 export const CAN_CLASSIC_MAX_PAYLOAD = 8;
 export const CAN_FD_MAX_PAYLOAD = 64;
 
-/** SocketCAN bayrakları `can_id`in üst bitlerinde taşınır. */
+/**
+ * SocketCAN bayrakları `can_id`in üst bitlerinde taşınır. RTR ile iki maske
+ * DIŞA AÇIK: `canClassic.ts`in encoder'ı çözücüyle AYNI bit tanımlarını
+ * kullanmak zorunda, ikinci bir kopya ayrışmanın davetiyesi olurdu.
+ */
 const CAN_EFF_FLAG = 0x80000000;
-const CAN_RTR_FLAG = 0x40000000;
+export const CAN_RTR_FLAG = 0x40000000;
 const CAN_ERR_FLAG = 0x20000000;
 /** Base format 11 bit, extended format 29 bit. */
-const CAN_SFF_MASK = 0x000007ff;
-const CAN_EFF_MASK = 0x1fffffff;
+export const CAN_SFF_MASK = 0x000007ff;
+export const CAN_EFF_MASK = 0x1fffffff;
 
 /** `canfd_frame.flags` bitleri. FDF, çerçevenin CAN FD olduğunu bildirir. */
 const CANFD_BRS_FLAG = 0x01;

@@ -265,3 +265,39 @@ test('Modbus TCP zarfı MBAP başlığını çerçevenin önüne yazar', async (
 
   expect(consoleErrors).toEqual([]);
 });
+
+/**
+ * §33'ün iki dönüşüm HEDEFİ ekranda (MQTT · CAN). İkisinin de kısıtı gerçek:
+ * yükün belli bir yapıda olması gerekiyor ve §10 çerçevesi CAN'e uyup MQTT'ye
+ * UYMUYOR — tur bu yüzden hem üretilen çerçeveyi hem reddedilen yolu ölçüyor.
+ */
+test('CAN 2.0B zarfı SocketCAN çerçevesi üretir, MQTT aynı yükü reddeder', async ({ page }) => {
+  const consoleErrors = await openBuilder(page);
+
+  await fillSetOutputExample(page);
+  await expect(packetHex(page)).toHaveText(SPEC_PACKET_HEX);
+
+  await page.locator('#builder-post-processing').selectOption('plugin:can-2-0b');
+
+  // İlk dört bayt identifier sözcüğü (little-endian 0x022005AA), kalan dördü veri.
+  // Encoder EFF bitini kendi yazar (0x82…), DLC'yi hesaplar, 16 bayta doldurur.
+  await expect(packetHex(page)).toHaveText('AA05208204000000024B6E5500000000');
+  await expect(page.getByTestId('builder-preview-byte-count')).toHaveText('16');
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.canExtended'],
+  );
+
+  // MQTT'de aynı yükün ilk iki baytı topic uzunluğu sayılır (0xAA05) ve gövdeye
+  // sığmaz: paket ÜRETİLMEZ, kısıt sorun listesinde yazılı çıkar.
+  await page.locator('#builder-post-processing').selectOption('plugin:mqtt');
+
+  await expect(page.getByTestId('builder-preview-issues')).toContainText('encodeMqttPublishPacket');
+  await expect(page.getByTestId('builder-preview-empty')).toBeVisible();
+
+  // Kısıt sürprize dönüşmesin diye seçildiği anda ekranda önceden yazıyor.
+  await expect(page.getByTestId('builder-framing-fixed-note')).toHaveText(
+    tr['builder.encoder.fixed.mqtt'],
+  );
+
+  expect(consoleErrors).toEqual([]);
+});

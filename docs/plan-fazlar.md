@@ -83,6 +83,19 @@ bedeli; defterde ilan ediliyor, ekranda uyarı olarak görünüyor.
 
 **Ölçüm:** birim 6782 → 6794 (yeşil), e2e 1342 → 1343 (2 atlandı).
 
+## ✅ MQTT PUBLISH ve Classical CAN encoder'ları (2026-08-30)
+
+§33'ün sekiz dönüşümünden dördünün hedefi bu ikisi (Modbus register → MQTT,
+BACnet property → MQTT, NMEA heading → CAN signal, Modbus TCP → Modbus RTU).
+Modbus'takiyle aynı disiplin: gövde çağırandan, zarf encoder'dan.
+
+MQTT: gövde `topic uzunluğu + topic + payload`, encoder Fixed Header + Remaining
+Length yazar; PUBLISH · QoS 0 · DUP 0 · RETAIN 0 sabit. CAN: gövde `identifier
+sözcüğü + veri`, DLC ve dolgu hesaplanır; format biti SAYFADAN gelir (2.0A base,
+2.0B extended), base'de 11 bite sığmayan identifier kırpılmaz, reddedilir.
+
+**Ölçüm:** birim 6794 → 6809 (yeşil), e2e 1343 → 1344.
+
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
 

@@ -106,6 +106,7 @@ import type {
   ProtocolWarning,
 } from '@/protocol-core/types';
 
+import { encodeMqttPublishPacket } from './mqttEncoders';
 import { decodeVariableByteInteger } from './mqttVbi';
 
 const PROTOCOL_ID = 'mqtt';
@@ -1230,6 +1231,8 @@ export const mqttPlugin: ProtocolPlugin = {
   name: PROTOCOL_DISPLAY_NAME,
   category: 'network-ethernet',
   parser: mqttParser,
+  // Girdi: PUBLISH gövdesi — topic uzunluğu + topic + payload (`mqttEncoders.ts`).
+  encoder: { encode: encodeMqttPublishPacket },
   documentation: {
     summary: 'protocol.mqtt.documentation.summary',
     layer: 'application',

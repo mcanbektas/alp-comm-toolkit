@@ -148,6 +148,27 @@ export const ENCODER_CATALOG: readonly EncoderEntry[] = [
     fixedParametersKey: 'builder.encoder.fixed.modbusTcp',
   },
 
+  // MQTT ile CAN, §33'ün dönüşüm HEDEFLERİ. İkisinde de girdi gövdedir; zarfı
+  // (Fixed Header + Remaining Length · DLC + dolgu) encoder hesaplar.
+  {
+    pluginId: 'mqtt',
+    displayName: 'MQTT',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.mqtt',
+  },
+  {
+    pluginId: 'can-2-0a',
+    displayName: 'CAN 2.0A',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.canBase',
+  },
+  {
+    pluginId: 'can-2-0b',
+    displayName: 'CAN 2.0B',
+    role: 'payload',
+    fixedParametersKey: 'builder.encoder.fixed.canExtended',
+  },
+
   // --- values ailesi -------------------------------------------------------
   {
     pluginId: 'ascii-protocol',
