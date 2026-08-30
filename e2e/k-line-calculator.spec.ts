@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 10 dalga 14a'nın gerçek tarayıcı turu — K-Line ve Automotive Ethernet.

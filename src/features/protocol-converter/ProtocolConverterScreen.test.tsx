@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
 import { protocolRegistry } from '@/protocol-core/registry';
 import { registerBuiltInProtocols } from '@/protocols';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { ProtocolConverterScreen } from './ProtocolConverterScreen';
 

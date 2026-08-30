@@ -10,7 +10,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 const tr = translations.tr;
 

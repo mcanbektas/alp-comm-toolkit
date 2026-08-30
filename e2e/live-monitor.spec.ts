@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { buildSimulatedFrame } from '../src/connection/mock/simulatedProtocol';
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 8'in gerçek tarayıcı turu. Birim testler Worker'ı ve React döngüsünü hiç

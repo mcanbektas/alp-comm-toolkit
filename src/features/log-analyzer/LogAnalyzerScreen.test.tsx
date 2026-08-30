@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { LogAnalyzerScreen } from './LogAnalyzerScreen';
 

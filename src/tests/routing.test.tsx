@@ -7,7 +7,7 @@ import { findEntry } from '@/app/catalog';
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
 import { AppRoutes } from '@/app/router/AppRouter';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 const MODBUS_RTU_PATH = 'industrial-automation/modbus/modbus-rtu';
 
@@ -78,7 +78,7 @@ describe('routing', () => {
 });
 
 describe('language switch', () => {
-  it('swaps every visible string when the language button is pressed', () => {
+  it('swaps every visible string when the language button is pressed', async () => {
     renderAt('/');
     expect(
       screen.getByRole('heading', { level: 1, name: translations.tr['home.heading'] }),
@@ -86,8 +86,10 @@ describe('language switch', () => {
 
     fireEvent.click(screen.getByRole('button', { name: translations.tr['lang.label'] }));
 
+    // `find*` çünkü İngilizce sözlük kendi chunk'ında: seçim anında geçerli,
+    // metinler sözlük inince değişiyor (bkz. `translations/all.ts`).
     expect(
-      screen.getByRole('heading', { level: 1, name: translations.en['home.heading'] }),
+      await screen.findByRole('heading', { level: 1, name: translations.en['home.heading'] }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { level: 1, name: translations.tr['home.heading'] }),

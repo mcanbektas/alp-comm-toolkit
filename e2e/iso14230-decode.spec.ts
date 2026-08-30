@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 10 dalga 2b'nin gerçek tarayıcı turu — ISO 14230 (KWP2000).

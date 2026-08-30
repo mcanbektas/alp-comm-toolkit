@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
 
+import { translations } from '../src/translations/all';
+
+const tr = translations.tr;
+
 /**
  * Faz 2 iskeletinin gerçekten AÇILDIĞINI kanıtlar. jsdom testleri CSS'i hiç
  * değerlendirmediği için "92 test yeşil" boş bir sayfayı da yeşil gösterir;
@@ -60,4 +64,34 @@ test('360px genişlikte yatay kaydırma yok', async ({ page }) => {
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(overflow, 'sayfa yatayda taşıyor').toBeLessThanOrEqual(1);
+});
+
+/**
+ * Çeviri paketinin bölünmesi (2026-08-30) yalnız birim testle kanıtlanamaz:
+ * ölçülen şey İNEN BAYT. Tur iki şeyi birden gösteriyor — Türkçe açılışta
+ * İngilizce sözlük hiç istenmiyor, dil değişince isteniyor ve metinler
+ * gerçekten değişiyor.
+ */
+test('İngilizce sözlük ilk yükte inmez, yalnız dil değişince istenir', async ({ page }) => {
+  const dictionaryRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    // Vite chunk adı: `assets/en-<hash>.js`.
+    if (/\/assets\/en-[A-Za-z0-9_-]+\.js$/.test(url)) dictionaryRequests.push(url);
+  });
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem('alp-comm-lang', 'tr');
+  });
+  await page.goto('/comm/');
+  await expect(page.getByRole('heading', { level: 1, name: tr['home.heading'] })).toBeVisible();
+
+  // İlk yükte İngilizce sözlük İSTENMEDİ: 190 kB gzip'lik chunk hiç inmiyor.
+  expect(dictionaryRequests, `beklenmeyen istek: ${dictionaryRequests.join(' | ')}`).toEqual([]);
+
+  await page.getByRole('button', { name: tr['lang.label'] }).click();
+
+  const en = translations.en;
+  await expect(page.getByRole('heading', { level: 1, name: en['home.heading'] })).toBeVisible();
+  expect(dictionaryRequests).toHaveLength(1);
 });

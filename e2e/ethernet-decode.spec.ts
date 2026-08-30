@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 10 dalga 4a'nın gerçek tarayıcı turu — Ethernet II / IEEE 802.3 / VLAN 802.1Q.

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { allEntries } from '@/app/catalog';
 import { LanguageProvider } from '@/app/providers/LanguageProvider';
 import { resolveStatus } from '@/protocols/pluginBinding';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { FamilyPage } from './FamilyPage';
 

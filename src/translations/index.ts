@@ -1,7 +1,11 @@
-import { en } from './en';
 import { tr } from './tr';
 
 export type { TranslationDictionary } from './tr';
+/**
+ * Varsayılan sözlük. Dışa AÇIK, çünkü ilk boya senkron bir sözlük istiyor ve
+ * `tr` zaten ana pakete giriyor (spec §4: arayüz Türkçe açılır).
+ */
+export { tr } from './tr';
 
 /** Desteklenen diller. Yeni dil eklemek = burayı ve `translations` kaydını genişletmek. */
 export type Language = 'tr' | 'en';
@@ -21,7 +25,39 @@ export const LANGUAGES: readonly Language[] = ['tr', 'en'];
  */
 export type TranslationKey = keyof typeof tr;
 
-export const translations: Record<Language, Record<TranslationKey, string>> = { tr, en };
+/**
+ * Yüklenmiş sözlükler. `tr` HER ZAMAN burada: varsayılan dil ilk boyada
+ * gerekiyor (spec §4 "arayüz Türkçe açılır") ve onu da tembelleştirmek ekranı
+ * boş bir kabukla açmak olurdu.
+ */
+const loadedDictionaries = new Map<Language, Record<TranslationKey, string>>([['tr', tr]]);
+
+/** Sözlük İNMİŞSE verir; inmediyse `undefined` — çağıran ne göstereceğine kendi karar verir. */
+export function dictionaryFor(lang: Language): Record<TranslationKey, string> | undefined {
+  return loadedDictionaries.get(lang);
+}
+
+/**
+ * Sözlüğü getirir; gerekiyorsa İNDİRİR. `en` dinamik `import()` ile gelir ve
+ * kendi chunk'ına düşer — dil hiç değiştirilmezse o baytlar hiç inmez.
+ *
+ * `switch` bilerek exhaustive: yeni bir dil eklendiğinde derleyici burayı
+ * gösterir, sessizce varsayılana düşen bir dal bırakmaz.
+ */
+export async function loadDictionary(lang: Language): Promise<Record<TranslationKey, string>> {
+  const loaded = loadedDictionaries.get(lang);
+  if (loaded !== undefined) return loaded;
+
+  switch (lang) {
+    case 'tr':
+      return tr;
+    case 'en': {
+      const module = await import('./en');
+      loadedDictionaries.set('en', module.en);
+      return module.en;
+    }
+  }
+}
 
 /**
  * `{name}` biçimindeki yer tutucular. `\w+` bilinçli olarak dar: boşluk, nokta

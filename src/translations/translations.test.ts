@@ -1,4 +1,4 @@
-import { act, cleanup, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LANGUAGE_STORAGE_KEY, LanguageProvider, useTranslation } from '@/app/providers/LanguageProvider';
@@ -9,8 +9,8 @@ import {
   isLanguage,
   matchLanguageTag,
   resolveLanguage,
-  translations,
 } from '@/translations';
+import { translations } from '@/translations/all';
 import type { Language, TranslationKey } from '@/translations';
 
 /**
@@ -27,6 +27,28 @@ function placeholdersOf(text: string): ReadonlySet<string> {
  * tanımlayıp prototipteki getter'ı gölgeler, sonra geri alırız. `configurable`
  * olmadan ikinci çağrı atar — testler arası sızıntı burada başlar.
  */
+/**
+ * Aynı yardımcının ASENKRON ikizi. Gerekçe: `en` sözlüğü artık kendi
+ * chunk'ında ve dil değişimi bir `import()` bekliyor (bkz. `translations/
+ * all.ts`). Senkron sarmalla yazılan bir test, sözlük inmeden ölçüm yapardı.
+ */
+async function withBrowserLanguagesAsync(
+  tags: readonly string[],
+  run: () => Promise<void>,
+): Promise<void> {
+  const descriptor = Object.getOwnPropertyDescriptor(window.navigator, 'languages');
+  Object.defineProperty(window.navigator, 'languages', { value: tags, configurable: true });
+  try {
+    await run();
+  } finally {
+    if (descriptor === undefined) {
+      Reflect.deleteProperty(window.navigator, 'languages');
+    } else {
+      Object.defineProperty(window.navigator, 'languages', descriptor);
+    }
+  }
+}
+
 function withBrowserLanguages(tags: readonly string[], run: () => void): void {
   const descriptor = Object.getOwnPropertyDescriptor(window.navigator, 'languages');
   Object.defineProperty(window.navigator, 'languages', { value: tags, configurable: true });
@@ -218,8 +240,8 @@ describe('LanguageProvider', () => {
     });
   });
 
-  it('switches dictionary, persists the choice and updates <html lang>', () => {
-    withBrowserLanguages(['tr-TR'], () => {
+  it('switches dictionary, persists the choice and updates <html lang>', async () => {
+    await withBrowserLanguagesAsync(['tr-TR'], async () => {
       const { result } = renderTranslation();
       expect(document.documentElement.lang).toBe('tr');
 
@@ -227,10 +249,14 @@ describe('LanguageProvider', () => {
         result.current.setLang('en');
       });
 
+      // Seçim ANINDA geçerli; metinler sözlük İNİNCE değişir. İkisi ayrı
+      // sorudur ve dinamik chunk'tan sonra ayrı zamanlarda cevaplanır.
       expect(result.current.lang).toBe('en');
-      expect(result.current.t('nav.home')).toBe('Home');
       expect(document.documentElement.lang).toBe('en');
       expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
+      await waitFor(() => {
+        expect(result.current.t('nav.home')).toBe('Home');
+      });
     });
   });
 
@@ -270,10 +296,10 @@ describe('LanguageProvider', () => {
     }
   });
 
-  it('keeps the t identity stable while the language does not change', () => {
+  it('keeps the t identity stable while the language does not change', async () => {
     // `t` her render'da yeni referans olursa onu bağımlılık dizisine koyan her
     // `useMemo`/`useEffect` boşuna yeniden koşar.
-    withBrowserLanguages(['tr-TR'], () => {
+    await withBrowserLanguagesAsync(['tr-TR'], async () => {
       const { result, rerender } = renderTranslation();
       const first = result.current.t;
       rerender();
@@ -282,7 +308,11 @@ describe('LanguageProvider', () => {
       act(() => {
         result.current.setLang('en');
       });
-      expect(result.current.t).not.toBe(first);
+      // Kimlik SÖZLÜK değişince değişir, seçim anında değil: `t` artık dile
+      // değil inen sözlüğe bağlı.
+      await waitFor(() => {
+        expect(result.current.t).not.toBe(first);
+      });
     });
   });
 });

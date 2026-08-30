@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { isParseSuccess } from '@/protocol-core/types';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { parseUsb, usbParser, usbPlugin } from './usb';
 import type { UsbFrameMetadata } from './usb';

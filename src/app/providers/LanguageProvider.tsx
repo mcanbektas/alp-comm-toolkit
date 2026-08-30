@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 // `matchLanguageTag` bilerek kullanılmıyor — bkz. detectInitialLanguage yorumu.
-import { DEFAULT_LANGUAGE, interpolate, resolveLanguage, translations } from '@/translations';
+import { DEFAULT_LANGUAGE, dictionaryFor, interpolate, loadDictionary, resolveLanguage, tr } from '@/translations';
 import type { Language, TranslationKey } from '@/translations';
 
 /** localStorage anahtarı. Süit içindeki diğer SPA'larla çakışmaması için `alp-comm-` önekli. */
@@ -63,6 +63,30 @@ export function LanguageProvider({ children }: { children: ReactNode }): ReactEl
   // Başlangıç değeri lazy: localStorage ve navigator okuması her render'da değil,
   // yalnız ilk mount'ta yapılsın.
   const [lang, setLangState] = useState<Language>(detectInitialLanguage);
+  /**
+   * GÖSTERİLEN sözlük. `lang`den AYRI bir durum, çünkü ikisi bir an için
+   * ayrışır: `en` kendi chunk'ında ve dil değişince indirilmesi gerekiyor.
+   *
+   * İnene kadar önceki sözlük durur — ekranı boşaltmak ya da anahtarları ham
+   * basmak, yarım saniyelik bir indirme için ödenecek bedel değil. Açılışta
+   * seçili dil `en` olsa bile ilk boya Türkçedir ve sözlük inince değişir;
+   * varsayılan dili de tembelleştirmek uygulamayı boş bir kabukla açardı.
+   */
+  const [dictionary, setDictionary] = useState<Record<TranslationKey, string>>(
+    () => dictionaryFor(detectInitialLanguage()) ?? tr,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadDictionary(lang).then((loaded) => {
+      // Kullanıcı dili tekrar değiştirdiyse geç gelen sözlük YAZILMAZ; yoksa
+      // eski seçim yeni ekranın üstüne düşerdi (`DecodePanel`in aynı deseni).
+      if (!cancelled) setDictionary(loaded);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
 
   // `<html lang>` yalnız süs değil: ekran okuyucunun sesletimi ve tarayıcının
   // çeviri önerisi buna bakar.
@@ -79,10 +103,10 @@ export function LanguageProvider({ children }: { children: ReactNode }): ReactEl
 
   const t = useCallback(
     (key: TranslationKey, vars?: Readonly<Record<string, string | number>>): string =>
-      // `translations` ve sözlükler sonlu mapped type; anahtarın karşılığı
-      // derleyici tarafından garanti, çalışma zamanı fallback'i gereksiz.
-      interpolate(translations[lang][key], vars),
-    [lang],
+      // Sözlükler sonlu mapped type; anahtarın karşılığı derleyici tarafından
+      // garanti, çalışma zamanı fallback'i gereksiz.
+      interpolate(dictionary[key], vars),
+    [dictionary],
   );
 
   const value = useMemo<LanguageContextValue>(() => ({ t, lang, setLang }), [t, lang, setLang]);

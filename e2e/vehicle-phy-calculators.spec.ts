@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 10 dalga 11h'nin gerçek tarayıcı turu — CAN / LIN / FlexRay PHY.

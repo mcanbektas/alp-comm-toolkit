@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { TestAutomationScreen } from './TestAutomationScreen';
 import { SCENARIO_STORAGE_KEY } from './useTestAutomation';

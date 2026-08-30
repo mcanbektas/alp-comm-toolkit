@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { allEntries } from '../src/app/catalog';
-import { translations } from '../src/translations';
+import { translations } from '../src/translations/all';
 
 /**
  * Faz 9'un gerçek tarayıcı turu — protokol sayfasındaki `decode` sekmesi.

@@ -161,6 +161,24 @@ paketi yok): SHA-1 el sıkışma + tek parçalı çerçeve, yankı köprüsü.
 
 **Ölçüm:** birim 6848 → 6860 (yeşil), e2e 1351 → 1353.
 
+## ✅ Çeviri paketi bölündü (2026-08-30)
+
+Ölçüm: `LanguageProvider` chunk'ı 1,4 MB ham / **379 kB gzip**'ti ve yarısı
+(`en`) Türkçe açılan arayüzde hiç okunmuyordu. Şimdi 712 kB / **199 kB gzip**;
+`en` kendi chunk'ında (190 kB gzip) ve yalnız dil değişince iniyor.
+
+Kritik ayrıntı: `translations` kaydı `translations/all.ts`e taşındı. Bir modül
+hem statik hem dinamik içe aktarılırsa paketleyici onu statik chunk'a koyar —
+`index.ts`teki tek bir `import { en }` satırı dinamik dalı anlamsız kılıyordu.
+163 test/e2e dosyasının importu buna göre taşındı; uygulama kodu `all.ts`e
+dokunmaz.
+
+Bedeli: dil değişimi ile metin değişimi ayrı anlarda oluyor (seçim anında,
+metinler chunk inince). Üç test asenkron oldu. Tarayıcı turu ölçümü ağdan
+yapıyor: Türkçe açılışta `assets/en-*.js` isteği yok, dil değişince bir tane.
+
+**Ölçüm:** birim 6860 (yeşil), e2e 1353 → 1354.
+
 Monitör yalnız dinlediği için köprüye İTME kipi eklendi
 (`?push=<hex>&interval=<ms>`); turdaki baytları `buildSimulatedFrame` üretiyor,
 test elle çerçeve yazmıyor. Monitörde bus load hesaplanmaz: köprünün ardındaki

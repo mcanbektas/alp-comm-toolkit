@@ -8,7 +8,7 @@ import { registerProtocolPlugin } from '@/protocol-core/registry';
 import type { ProtocolPluginModule } from '@/protocol-core/registry';
 import { SPEC_SENSOR_FRAME, SPEC_SENSOR_PROTOCOL } from '@/protocol-core/schemas/specFixture';
 import type { ParseResult, ProtocolParser, ProtocolPlugin } from '@/protocol-core/types';
-import { translations } from '@/translations';
+import { translations } from '@/translations/all';
 
 import { DecodePanel } from './DecodePanel';
 

@@ -742,3 +742,28 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   dinleme yolunu. Turdaki baytları test ELLE YAZMIYOR — `buildSimulatedFrame`
   üretiyor; elle yazılmış bir çerçeve, çerçeveleme ayarıyla sessizce
   ayrışabilirdi.
+
+  **11. ✅ ÇEVİRİ PAKETİ BÖLÜNDÜ — ilk yükten 190 kB gzip düştü** (2026-08-30).
+  Ölçüm önce: `LanguageProvider` chunk'ı **1,4 MB ham / 379 kB gzip** ve
+  içindeki `en` sözlüğü, Türkçe açılan arayüzde dil değiştirilmedikçe HİÇ
+  okunmuyordu. Sonra: chunk **712 kB / 199 kB gzip**, `en` kendi chunk'ında
+  (704 kB / 190 kB gzip) ve YALNIZ dil değişince iniyor.
+
+  **`translations` kaydı `translations/all.ts`e taşındı** ve `index.ts`ten
+  çıkarıldı. Sebep teknik: bir modül hem STATİK hem DİNAMİK içe aktarılırsa
+  paketleyici onu statik chunk'a koyar — `index.ts`te duran tek bir
+  `import { en }` satırı, dinamik dalı da anlamsız kılıyordu. `all.ts` yalnız
+  testlerin ve dil eşitliği denetiminin girişi; uygulama kodu ORAYA DOKUNMAZ.
+
+  **`tr` tembelleştirilmedi:** varsayılan dil ilk boyada gerekli (spec §4), onu
+  da indirmeye bırakmak uygulamayı boş bir kabukla açardı.
+
+  **`t` artık `lang`e değil İNEN SÖZLÜĞE bağlı.** Dil değişimi ile metin
+  değişimi ARTIK AYRI ANLARDA olur: seçim anında geçerli, metinler chunk inince
+  değişir; arada eski sözlük durur (ekranı boşaltmak ya da ham anahtar basmak
+  yarım saniyelik indirme için ödenecek bedel değil). Üç test bu yüzden asenkron
+  oldu — davranış regresyonu değil, zamanlamanın gerçeği.
+
+  **Tarayıcı turu ölçümü ağdan yapıyor** (`smoke.spec.ts`): Türkçe açılışta
+  `assets/en-*.js` isteği HİÇ YOK, dil düğmesine basınca TAM BİR tane var.
+  Birim test bunu kanıtlayamazdı — ölçülen şey inen bayt.
