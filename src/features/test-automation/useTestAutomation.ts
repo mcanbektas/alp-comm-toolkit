@@ -27,6 +27,7 @@ import { createSimulatedDevice } from '@/connection/mock/simulatedDevice';
 import { encodeTemplateFrame } from '@/features/packet-builder/packetTemplates';
 import type { TemplateFrameFailure } from '@/features/packet-builder/packetTemplates';
 import { createSerialSource } from '@/connection/serial/serialSource';
+import { createWebSocketSource } from '@/connection/websocket/webSocketSource';
 import { DEFAULT_SERIAL_OPTIONS } from '@/connection/serial/serialOptions';
 import { getWebSerial, isWebSerialSupported } from '@/connection/serial/webSerialTypes';
 import { downloadTextFile } from '@/utils/downloadTextFile';
@@ -43,7 +44,7 @@ import type { TestScenario } from './scenario';
 
 export { SCENARIO_STORAGE_KEY } from './scenarioStorage';
 
-export type TestSourceKind = 'simulated-device' | 'serial';
+export type TestSourceKind = 'simulated-device' | 'serial' | 'websocket';
 
 /**
  * Statik bir cihaz akışında anlamlı çerçeveleme yöntemleri — RE ekranındaki
@@ -67,12 +68,17 @@ export interface ConnectionConfig {
   readonly framingMethod: TestFramingMethod;
   /** Yönteme göre okunur: imza/ayraç için hex, uzunluk ve süre için sayı. */
   readonly framingParameter: string;
+  /** Yalnız `'websocket'` kaynağında okunur. */
+  readonly webSocketUrl: string;
 }
 
 export const DEFAULT_CONNECTION: ConnectionConfig = {
   sourceKind: 'simulated-device',
   framingMethod: 'fixed-length',
   framingParameter: '9',
+  // Köprü genellikle kullanıcının kendi makinesinde koşar; boş kutu ilk
+  // koşuda kesin hata demekti.
+  webSocketUrl: 'ws://localhost:8080',
 };
 
 /**
@@ -237,6 +243,14 @@ export function useTestAutomation(): UseTestAutomationResult {
         const port = await serial.requestPort({});
         io = createByteSourceIo({
           source: createSerialSource(port, DEFAULT_SERIAL_OPTIONS),
+          framing,
+          encodeTemplate,
+        });
+      } else if (connection.sourceKind === 'websocket') {
+        // Köprü SENARYOYU bilmez, yalnız baytları taşır: cihazın kendisi karşı
+        // uçtadır. Simüle cihazdan farkı bu — burada yanıtları biz üretmiyoruz.
+        io = createByteSourceIo({
+          source: createWebSocketSource(connection.webSocketUrl),
           framing,
           encodeTemplate,
         });

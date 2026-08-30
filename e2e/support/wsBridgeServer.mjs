@@ -10,6 +10,12 @@
  * çerçeve, uzantı ve 64 bit uzunluk BİLEREK yok — test verisi 125 baytın
  * altında ve köprü yalnız bu turda kullanılıyor.
  *
+ * İki kip:
+ * - **Yankı** (varsayılan): gelen çerçeve aynen geri gider. Gönderim yolunu ölçer.
+ * - **İtme**: `ws://host:port/?push=<hex>&interval=<ms>` ile bağlanıldığında o
+ *   baytlar aralıklarla İTİLİR. Monitör gibi yalnız DİNLEYEN ekranlar aksi
+ *   hâlde sınanamazdı: hattı besleyen bir karşı taraf gerekiyor.
+ *
  * Kullanımı: `node e2e/support/wsBridgeServer.mjs [port]`
  */
 
@@ -91,6 +97,18 @@ const server = createServer((_request, response) => {
   response.end('ws bridge up');
 });
 
+/** `?push=AA0510…&interval=100` — hex baytları ve itme aralığını okur. */
+function pushOptions(url) {
+  const query = new URL(url, 'http://localhost').searchParams;
+  const hex = query.get('push');
+  if (hex === null || hex.length === 0 || hex.length % 2 !== 0) return null;
+
+  const bytes = Buffer.from(hex, 'hex');
+  if (bytes.length === 0) return null;
+  const interval = Number(query.get('interval') ?? '100');
+  return { bytes, interval: Number.isFinite(interval) && interval > 0 ? interval : 100 };
+}
+
 server.on('upgrade', (request, socket) => {
   const key = request.headers['sec-websocket-key'];
   if (typeof key !== 'string') {
@@ -108,6 +126,19 @@ server.on('upgrade', (request, socket) => {
     ].join('\r\n'),
   );
 
+  const push = pushOptions(request.url ?? '/');
+  const timer =
+    push === null
+      ? null
+      : setInterval(() => {
+          socket.write(encodeFrame(OPCODE_BINARY, push.bytes));
+        }, push.interval);
+
+  const stopPush = () => {
+    if (timer !== null) clearInterval(timer);
+  };
+  socket.on('close', stopPush);
+
   let pending = Buffer.alloc(0);
   socket.on('data', (chunk) => {
     pending = Buffer.concat([pending, chunk]);
@@ -118,6 +149,7 @@ server.on('upgrade', (request, socket) => {
       pending = Buffer.from(frame.rest);
 
       if (frame.opcode === OPCODE_CLOSE) {
+        stopPush();
         socket.end(encodeFrame(OPCODE_CLOSE, Buffer.alloc(0)));
         return;
       }
@@ -134,6 +166,7 @@ server.on('upgrade', (request, socket) => {
   });
 
   socket.on('error', () => {
+    stopPush();
     socket.destroy();
   });
 });

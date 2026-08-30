@@ -27,6 +27,7 @@ import type {
 import { createFileSource, type FileSourceOptions } from '../../connection/file/fileSource';
 import { createSimulatedSource, type SimulatedSourceOptions } from '../../connection/mock/simulatedSource';
 import { createSerialSource } from '../../connection/serial/serialSource';
+import { createWebSocketSource } from '../../connection/websocket/webSocketSource';
 import type { SerialConnectionOptions } from '../../connection/serial/serialOptions';
 import { serialBitsPerByte } from '../../connection/serial/serialOptions';
 import type { WebSerialPort } from '../../connection/serial/webSerialTypes';
@@ -75,6 +76,7 @@ export interface LiveMonitorApi {
   connectSerial(port: WebSerialPort, options: SerialConnectionOptions): Promise<void>;
   connectSimulated(options?: SimulatedSourceOptions): Promise<void>;
   connectFile(records: readonly LogRecord[], options?: FileSourceOptions): Promise<void>;
+  connectWebSocket(url: string): Promise<void>;
   disconnect(): Promise<void>;
   clear(): void;
   setDisplayPaused(paused: boolean): void;
@@ -324,6 +326,17 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     [ingestor, startSource],
   );
 
+  const connectWebSocket = useCallback(
+    async (url: string) => {
+      // Köprünün ARDINDAKİ hattın baud hızı bilinmiyor: WebSocket yalnız
+      // baytları taşır, hattın fiziğini taşımaz. Uydurulmuş bir baud değeri
+      // bus load yüzdesini de uydururdu (dosya kaynağının gerekçesiyle aynı).
+      ingestor.setLink(undefined);
+      await startSource(createWebSocketSource(url));
+    },
+    [ingestor, startSource],
+  );
+
   const disconnect = useCallback(async () => {
     await teardown();
     setState((previous) => ({ ...previous, status: 'idle', sourceKind: undefined }));
@@ -370,6 +383,7 @@ export function useLiveMonitor(config: LiveMonitorConfig): LiveMonitorApi {
     connectSerial,
     connectSimulated,
     connectFile,
+    connectWebSocket,
     disconnect,
     clear,
     setDisplayPaused,

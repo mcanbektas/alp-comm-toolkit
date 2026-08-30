@@ -36,6 +36,24 @@ describe('TestAutomationScreen', () => {
     expect(screen.getByTestId('ta-step-report')).toBeInTheDocument();
   });
 
+  /**
+   * WebSocket kaynağı (spec §8.1) TA'da da seçilebilir. Adres kutusu YALNIZ o
+   * kaynakta görünür: simüle cihazda ve seri portta karşılığı yok.
+   */
+  it('WebSocket kaynağı seçilince adres kutusu çıkar', () => {
+    renderScreen();
+    expect(screen.queryByTestId('ta-websocket-url')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('ta-source'), { target: { value: 'websocket' } });
+
+    expect(screen.getByTestId('ta-websocket-url')).toHaveValue('ws://localhost:8080');
+
+    fireEvent.change(screen.getByTestId('ta-websocket-url'), {
+      target: { value: 'ws://localhost:9099' },
+    });
+    expect(screen.getByTestId('ta-websocket-url')).toHaveValue('ws://localhost:9099');
+  });
+
   it('varsayılan senaryo simüle cihazda GEÇER', async () => {
     renderScreen();
     fireEvent.click(screen.getByTestId('ta-run'));

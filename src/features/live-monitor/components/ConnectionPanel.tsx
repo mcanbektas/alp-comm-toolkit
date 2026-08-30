@@ -27,7 +27,7 @@ import type { DisplayMode, TimestampResolution } from '../types';
 import { FRAMING_PRESETS } from '../presets';
 import type { ReplayPacing } from '../../../connection/file/replaySchedule';
 
-export type MonitorSourceKind = 'serial' | 'simulated' | 'file';
+export type MonitorSourceKind = 'serial' | 'simulated' | 'file' | 'websocket';
 
 export interface ConnectionPanelProps {
   readonly sourceKind: MonitorSourceKind;
@@ -45,6 +45,9 @@ export interface ConnectionPanelProps {
   readonly replaySpeed: number;
   readonly onReplaySpeedChange: (speed: number) => void;
   readonly onSourceKindChange: (kind: MonitorSourceKind) => void;
+  /** WebSocket köprüsünün adresi; yalnız o kaynak seçiliyken görünür. */
+  readonly webSocketUrl: string;
+  readonly onWebSocketUrlChange: (url: string) => void;
   readonly serialOptions: SerialConnectionOptions;
   readonly onSerialOptionsChange: (options: SerialConnectionOptions) => void;
   readonly presetId: string;
@@ -124,6 +127,7 @@ const SOURCE_HINT_KEYS: Record<MonitorSourceKind, TranslationKey> = {
   serial: 'monitor.source.serialHint',
   simulated: 'monitor.source.simulatedHint',
   file: 'monitor.source.fileHint',
+  websocket: 'monitor.source.websocketHint',
 };
 
 const PACING_KEYS = {
@@ -180,9 +184,35 @@ export function ConnectionPanel(props: ConnectionPanelProps): ReactNode {
         >
           {t('monitor.source.file')}
         </button>
+        <button
+          type="button"
+          data-testid="monitor-source-websocket"
+          className={buttonClass(props.sourceKind === 'websocket')}
+          onClick={() => props.onSourceKindChange('websocket')}
+          disabled={props.connected}
+        >
+          {t('monitor.source.websocket')}
+        </button>
       </div>
 
       <p className="text-sm text-muted">{t(SOURCE_HINT_KEYS[props.sourceKind])}</p>
+
+      {/* Adres yalnız WebSocket seçiliyken sorulur: öteki kaynaklarda karşılığı yok. */}
+      {props.sourceKind === 'websocket' ? (
+        <label className="flex max-w-md flex-col gap-1 text-sm text-muted" htmlFor="monitor-websocket-url">
+          {t('monitor.field.webSocketUrl')}
+          <input
+            id="monitor-websocket-url"
+            data-testid="monitor-websocket-url"
+            className="rounded-token-sm border border-line bg-surface px-2 py-1 font-mono text-sm text-text"
+            value={props.webSocketUrl}
+            disabled={props.connected}
+            onChange={(event) => {
+              props.onWebSocketUrlChange(event.target.value);
+            }}
+          />
+        </label>
+      ) : null}
 
       {props.sourceKind === 'file' ? (
         <div className="flex flex-col gap-2">

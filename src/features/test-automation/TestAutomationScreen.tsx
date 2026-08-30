@@ -66,9 +66,25 @@ export function TestAutomationScreen(): ReactNode {
               onChange={(event) => automation.setConnection({ sourceKind: event.target.value as TestSourceKind })}
             >
               <option value="simulated-device">{t('testAutomation.source.simulated')}</option>
+              <option value="websocket">{t('testAutomation.source.websocket')}</option>
               <option value="serial">{t('testAutomation.source.serial')}</option>
             </select>
           </label>
+
+          {/* Adres yalnız WebSocket seçiliyken sorulur; öteki kaynaklarda karşılığı yok. */}
+          {connection.sourceKind === 'websocket' ? (
+            <label className="flex flex-col gap-1 text-xs text-muted" htmlFor="ta-websocket-url">
+              {t('testAutomation.source.websocketUrl')}
+              <input
+                id="ta-websocket-url"
+                data-testid="ta-websocket-url"
+                className={`${FIELD_CLASS} font-mono`}
+                value={connection.webSocketUrl}
+                disabled={running}
+                onChange={(event) => automation.setConnection({ webSocketUrl: event.target.value })}
+              />
+            </label>
+          ) : null}
 
           <label className="flex flex-col gap-1 text-xs text-muted" htmlFor="ta-framing">
             {t('testAutomation.source.framing')}

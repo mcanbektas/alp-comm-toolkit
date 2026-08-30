@@ -57,6 +57,8 @@ export function LiveMonitorScreen(): ReactNode {
   const { t } = useTranslation();
 
   const [sourceKind, setSourceKind] = useState<MonitorSourceKind>('simulated');
+  /** Köprü genellikle kullanıcının kendi makinesinde koşar; boş kutu ilk denemede kesin hata demekti. */
+  const [webSocketUrl, setWebSocketUrl] = useState('ws://localhost:8080');
   const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID);
   const [serialOptions, setSerialOptions] = useState<SerialConnectionOptions>(DEFAULT_SERIAL_OPTIONS);
   const [displayMode, setDisplayMode] = useState<DisplayMode>('hex');
@@ -130,11 +132,15 @@ export function LiveMonitorScreen(): ReactNode {
       });
       return;
     }
+    if (sourceKind === 'websocket') {
+      await monitor.connectWebSocket(webSocketUrl);
+      return;
+    }
     // `requestPort` KULLANICI JESTİ içinde çağrılmalı — bu geri çağırım tıklama
     // işleyicisinden senkron başlar, o yüzden izin istemi açılır (spec §41).
     const port = await requestSerialPort();
     await monitor.connectSerial(port, serialOptions);
-  }, [fileRecords, framesPerSecond, monitor, pacing, preset.framing, replaySpeed, serialOptions, sourceKind, t]);
+  }, [fileRecords, framesPerSecond, monitor, pacing, preset.framing, replaySpeed, serialOptions, sourceKind, t, webSocketUrl]);
 
   const handleDisconnect = useCallback(() => {
     void monitor.disconnect();
@@ -164,6 +170,8 @@ export function LiveMonitorScreen(): ReactNode {
         </h2>
         <ConnectionPanel
           sourceKind={sourceKind}
+          webSocketUrl={webSocketUrl}
+          onWebSocketUrlChange={setWebSocketUrl}
           onSourceKindChange={setSourceKind}
           serialOptions={serialOptions}
           onSerialOptionsChange={setSerialOptions}

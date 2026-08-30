@@ -729,6 +729,16 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `webServer` koşuyor. Tur yalnız bağlantıyı değil veri yolunu da ölçüyor:
   köprü gönderileni yankılıyor, ekranda "son yanıt" olarak görünüyor.
 
-  **Kalan iş:** Live Monitor ve Test Automation ekranları bu kaynağı HENÜZ
-  listelemiyor; sözleşme aynı olduğu için ikisi de yalnız kendi kaynak
-  seçimlerine bir dal eklemekle kazanır.
+  **✅ Aynı gün kapandı: Live Monitor ve Test Automation da bağlandı.** Üç ekran
+  da aynı kaynağı kullanıyor; sözleşmenin vaat ettiği "bir kez yaz, üçü de
+  kullansın" ölçüldü.
+
+  Monitörde **bus load HESAPLANMAZ**: WebSocket yalnız baytları taşır, hattın
+  fiziğini taşımaz — köprünün ardındaki baud hızı bilinmiyor. Uydurulmuş bir
+  değer yüzdeyi de uydururdu (dosya kaynağının gerekçesiyle aynı).
+
+  Monitör YALNIZ DİNLER, o yüzden köprüye **itme kipi** eklendi
+  (`?push=<hex>&interval=<ms>`): yankı kipi gönderim yolunu ölçer, itme kipi
+  dinleme yolunu. Turdaki baytları test ELLE YAZMIYOR — `buildSimulatedFrame`
+  üretiyor; elle yazılmış bir çerçeve, çerçeveleme ayarıyla sessizce
+  ayrışabilirdi.

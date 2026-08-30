@@ -8641,6 +8641,10 @@ export const en: TranslationDictionary = {
   'monitor.source.fileHint':
     'Replays a recorded log file as if it were a live link: framing, validation and statistics run on real data. The file is read in the browser; no byte is sent to a server.',
   'monitor.field.logFile': 'Log file',
+  'monitor.source.websocket': 'WebSocket',
+  'monitor.source.websocketHint':
+    'A WebSocket bridge carries a remote line into the browser; the address must be ws:// or wss://. The baud rate behind the bridge is unknown, so bus load is not computed.',
+  'monitor.field.webSocketUrl': 'WebSocket address',
   'monitor.field.pacing': 'Playback pacing',
   'monitor.field.replaySpeed': 'Playback speed',
   'monitor.pacing.realtime': 'Real time',
@@ -8836,6 +8840,8 @@ export const en: TranslationDictionary = {
   'testAutomation.source.kind': 'Source',
   'testAutomation.source.simulated': 'Simulated device',
   'testAutomation.source.serial': 'Web Serial',
+  'testAutomation.source.websocket': 'WebSocket bridge',
+  'testAutomation.source.websocketUrl': 'WebSocket address',
   'testAutomation.source.simulatedHint':
     'The simulated device answers an AA 01 request with the spec §43 sample frame: AA 05 10 03 34 12 7F 4F 55.',
   'testAutomation.source.serialUnsupported': 'This browser does not support Web Serial.',

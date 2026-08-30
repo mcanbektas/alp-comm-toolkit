@@ -8633,6 +8633,10 @@ export const tr = {
   'monitor.source.fileHint':
     'Kaydedilmiş bir log dosyasını canlı hatmış gibi geri oynatır: çerçeveleme, doğrulama ve istatistik zinciri gerçek veriyle koşar. Dosya tarayıcıda okunur, hiçbir bayt sunucuya gitmez.',
   'monitor.field.logFile': 'Log dosyası',
+  'monitor.source.websocket': 'WebSocket',
+  'monitor.source.websocketHint':
+    'WebSocket köprüsü uzak bir hattı tarayıcıya taşır; adres ws:// ya da wss:// olmalı. Köprünün ardındaki hattın baud hızı bilinmediği için bus load hesaplanmaz.',
+  'monitor.field.webSocketUrl': 'WebSocket adresi',
   'monitor.field.pacing': 'Oynatma temposu',
   'monitor.field.replaySpeed': 'Oynatma hızı',
   'monitor.pacing.realtime': 'Gerçek zamanlı',
@@ -8828,6 +8832,8 @@ export const tr = {
   'testAutomation.source.kind': 'Kaynak',
   'testAutomation.source.simulated': 'Simüle cihaz',
   'testAutomation.source.serial': 'Web Serial',
+  'testAutomation.source.websocket': 'WebSocket köprüsü',
+  'testAutomation.source.websocketUrl': 'WebSocket adresi',
   'testAutomation.source.simulatedHint':
     'Simüle cihaz AA 01 isteğine spec §43 örnek çerçevesiyle yanıt verir: AA 05 10 03 34 12 7F 4F 55.',
   'testAutomation.source.serialUnsupported': 'Bu tarayıcı Web Serial desteklemiyor.',

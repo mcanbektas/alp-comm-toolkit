@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+import { buildSimulatedFrame } from '../src/connection/mock/simulatedProtocol';
 import { translations } from '../src/translations';
 
 /**
@@ -265,4 +266,29 @@ test('dosya seçilmeden bağlanmaya çalışmak uyarı verir', async ({ page }) 
 
   await expect(page.getByTestId('monitor-file-error')).toHaveText(tr['monitor.file.needsFile']);
   await expect(page.getByRole('button', { name: tr['monitor.action.connect'] })).toBeVisible();
+});
+
+/**
+ * WebSocket kaynağı (spec §8.1) — monitör yalnız DİNLER, o yüzden köprü İTME
+ * kipinde çalışıyor (`?push=<hex>`). Baytlar simülasyon protokolünün gerçek
+ * çerçevesidir: hex'i test kurmuyor, `buildSimulatedFrame` üretiyor — elle
+ * yazılmış bir çerçeve, çerçeveleme ayarıyla sessizce ayrışabilirdi.
+ */
+test('WebSocket köprüsünden gelen çerçeveler tabloda görünür', async ({ page }) => {
+  const consoleErrors = await openMonitor(page);
+
+  const frame = buildSimulatedFrame({ temperatureDeciC: 250, voltageMilliV: 12000, rpm: 1500 });
+  const hex = Array.from(frame, (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+  await page.getByTestId('monitor-source-websocket').click();
+  await page.getByTestId('monitor-websocket-url').fill(`ws://localhost:9099/?push=${hex}&interval=50`);
+  await page.getByRole('button', { name: tr['monitor.action.connect'] }).click();
+
+  await expect(page.getByRole('button', { name: tr['monitor.action.disconnect'] })).toBeVisible();
+  await expect.poll(() => recordCount(page), { timeout: 10_000 }).toBeGreaterThan(3);
+  // Çerçeve gerçekten çözülüyor: köprüden gelen bayt da doğrulanmış çerçeve olur.
+  await expect(page.getByText(tr['monitor.validity.valid']).first()).toBeVisible();
+
+  await page.getByRole('button', { name: tr['monitor.action.disconnect'] }).click();
+  expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });

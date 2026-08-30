@@ -159,7 +159,12 @@ Tarayıcı turu için `e2e/support/wsBridgeServer.mjs` elle yazıldı (depoda `w
 paketi yok): SHA-1 el sıkışma + tek parçalı çerçeve, yankı köprüsü.
 `playwright.config.ts` artık iki `webServer` koşuyor.
 
-**Ölçüm:** birim 6848 → 6859 (yeşil), e2e 1351 → 1352.
+**Ölçüm:** birim 6848 → 6860 (yeşil), e2e 1351 → 1353.
+
+Monitör yalnız dinlediği için köprüye İTME kipi eklendi
+(`?push=<hex>&interval=<ms>`); turdaki baytları `buildSimulatedFrame` üretiyor,
+test elle çerçeve yazmıyor. Monitörde bus load hesaplanmaz: köprünün ardındaki
+baud hızı bilinmiyor.
 
 
 ## 🏁 **Faz 10 KAPANDI — katalog borcu SIFIR (2026-08-27).**
@@ -2021,9 +2026,10 @@ Faz 9'a girmeden bilinmesi gerekenler — hiçbiri Faz 9'u engellemiyor:
   **`file` yazıldı** (§8.1, `5c04ebd`) ve **`websocket` yazıldı** (2026-08-30):
   Packet Builder'ın "planlandı" rozeti kalktı, seçenek gerçek bir köprüye
   bağlanıyor ve tarayıcı turu elle yazılmış bir RFC 6455 köprüsüyle veri yolunu
-  ölçüyor. Kalan ikisi (**usb · bluetooth**) hâlâ yok. WebSocket'i Live Monitor
-  ile Test Automation da henüz listelemiyor — sözleşme aynı, ikisi de yalnız
-  kendi kaynak seçimine bir dal eklemekle kazanır.
+  ölçüyor. **Üç ekran da bağlandı** (Packet Builder · Live Monitor · Test
+  Automation): sözleşmenin "bir kez yaz, üçü de kullansın" vaadi ölçüldü.
+  Kalan ikisi (**usb · bluetooth**) hâlâ yok ve ikisi de headless tarayıcıda
+  sınanamaz, o yüzden birim testle sınırlı kalacak.
 - ~~`src/protocols/` klasörünün kendisi yok~~ → **açıldı ve doldu**: 8 domain
   klasörü + `pluginBinding.ts`, 191 plugin dosyası (2026-08-29 sayımı).
 - `src/components/` altında **packet-viewer · signal-viewer · protocol-tree**
