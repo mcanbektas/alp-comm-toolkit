@@ -1382,6 +1382,70 @@ export const en: TranslationDictionary = {
   'definition.eds.issue.duplicateObject':
     'The same index/sub-index is defined more than once; the first definition was kept.',
 
+  // --- XIF (LonWorks) definition file ---
+  'definition.xif.action.import': 'Import XIF file',
+  'definition.xif.sampleNotice':
+    'Showing a sample definition: the real XIF file published by the manufacturer of the WattNode power/energy meter. You can import your own XIF file; it never leaves your device.',
+  'definition.xif.fileName': 'File name',
+  'definition.xif.programId': 'Program ID',
+  'definition.xif.formatVersion': 'Format version',
+  'definition.xif.nvCount': 'Network variables',
+  'definition.xif.configPropertyCount': 'Configuration properties',
+  'definition.xif.messageTagCount': 'Message tags',
+  'definition.xif.channelBitRate': 'Channel bit rate (bit/s)',
+  'definition.xif.line': 'Line',
+  'definition.xif.userDefinedType': 'User-defined',
+  'definition.xif.typeNotOnWire':
+    'The SNVT types shown here are the device DECLARATION, not a measurement. A LonTalk network variable message carries only a 14-bit selector; the selector is an index into the device binding table, and the type is NOT on the wire. This table therefore states an NV type, but that type CANNOT be verified from a captured frame. To interpret raw bytes as a type, use the network variable type option on the Decode tab; there too the choice is a declaration.',
+  'definition.xif.snvtTableNote':
+    'The SNVT index on every row is the file own data. A name is added only for indexes present in this build scalar SNVT table (75 of 221 types); a row without a name does not have an undefined type, it is simply absent from that table.',
+  'definition.xif.configFileNote':
+    'Configuration file name, index, type and length are read; the configuration property records INSIDE a template file are NOT decoded — their layout is a separate specification.',
+  'definition.xif.table.networkVariables': 'Network variables',
+  'definition.xif.table.configProperties': 'Configuration properties (CPNV)',
+  'definition.xif.table.messageTags': 'Message tags',
+  'definition.xif.table.configFiles': 'Configuration files',
+  'definition.xif.column.index': 'Index',
+  'definition.xif.column.name': 'Name',
+  'definition.xif.column.direction': 'Direction',
+  'definition.xif.column.snvt': 'SNVT',
+  'definition.xif.column.elements': 'Elements',
+  'definition.xif.column.arraySize': 'Array size',
+  'definition.xif.column.class': 'Class',
+  'definition.xif.column.service': 'Service type',
+  'definition.xif.column.documentation': 'Self-documentation',
+  'definition.xif.column.defaultValue': 'Default value',
+  'definition.xif.column.bindable': 'Bindable',
+  'definition.xif.column.fileIndex': 'File index',
+  'definition.xif.column.fileType': 'File type',
+  'definition.xif.column.length': 'Length',
+  'definition.xif.direction.input': 'Input',
+  'definition.xif.direction.output': 'Output',
+  'definition.xif.service.acknowledged': 'Acknowledged',
+  'definition.xif.service.repeated': 'Repeated',
+  'definition.xif.service.unacknowledged': 'Unacknowledged',
+  'definition.xif.class.config': 'Configuration',
+  'definition.xif.class.network': 'Network',
+  'definition.xif.error.readFailed': 'Could not read the file.',
+  'definition.xif.error.parseFailed':
+    'The XIF file could not be parsed; the header section was unreadable (no program ID line found).',
+  'definition.xif.issue.emptyInput': 'The file is empty.',
+  'definition.xif.issue.noHeader':
+    'No header section was found; it is the only required section of a XIF file.',
+  'definition.xif.issue.malformedFileLine':
+    'The first line is not in the expected form; file name, generating tool and format version could not be read.',
+  'definition.xif.issue.unknownRecord':
+    'An unrecognised record type was skipped up to the next blank line; it may come from a newer format version.',
+  'definition.xif.issue.truncatedRecord': 'The record is truncated; some of its lines are missing.',
+  'definition.xif.issue.nvCountMismatch':
+    'The static network variable count declared in the header does not match the number of records in the file (declared / found).',
+  'definition.xif.issue.tagCountMismatch':
+    'The message tag count declared in the header does not match the number of records in the file (declared / found).',
+  'definition.xif.issue.nvValueOverflow':
+    'The NVVAL section carries more values than there are configuration network variables (values / configuration NVs).',
+  'definition.xif.issue.duplicateNvIndex':
+    'The same network variable index is defined more than once.',
+
   // --- Custom schema definition panel ---
   'definition.schema.action.import': 'Import schema file (JSON)',
   'definition.schema.action.export': 'Download schema as JSON',

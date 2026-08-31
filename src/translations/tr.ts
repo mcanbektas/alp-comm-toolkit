@@ -1382,6 +1382,70 @@ export const tr = {
   'definition.eds.issue.duplicateObject':
     'Aynı index/sub-index birden çok kez tanımlanmış; ilk tanım geçerli sayıldı.',
 
+  // --- XIF (LonWorks) tanım dosyası ---
+  'definition.xif.action.import': 'XIF dosyası içe aktar',
+  'definition.xif.sampleNotice':
+    'Örnek tanım gösteriliyor: WattNode güç/enerji ölçerin üreticisi tarafından yayımlanmış gerçek XIF dosyası. Kendi XIF dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.xif.fileName': 'Dosya adı',
+  'definition.xif.programId': 'Program ID',
+  'definition.xif.formatVersion': 'Biçim sürümü',
+  'definition.xif.nvCount': 'Network variable',
+  'definition.xif.configPropertyCount': 'Configuration property',
+  'definition.xif.messageTagCount': 'Message tag',
+  'definition.xif.channelBitRate': 'Kanal bit hızı (bit/s)',
+  'definition.xif.line': 'Satır',
+  'definition.xif.userDefinedType': 'Kullanıcı tanımlı',
+  'definition.xif.typeNotOnWire':
+    'Buradaki SNVT tipleri cihazın BİLDİRİMİDİR, bir ölçüm değil. LonTalk network variable mesajı yalnız 14 bitlik bir selector taşır; selector cihazın bağlama tablosundaki bir indekstir, tip bilgisi telde YOKTUR. Yani bu tablo bir NV nin tipini söyler ama yakalanmış bir çerçeveden bu tip DOĞRULANAMAZ. Ham baytları bir tipe göre yorumlamak için Decode sekmesindeki network variable tipi seçeneğini kullanın; orada da seçim bir bildirimdir.',
+  'definition.xif.snvtTableNote':
+    'SNVT indeksi her satırda dosyanın kendi verisidir. Ad yalnız bu sürümün skaler SNVT tablosunda (221 tipin 75 i) karşılığı olan indekslerde eklenir; adı görünmeyen bir satırın tipi tanımsız değildir, yalnız bu tabloda yoktur.',
+  'definition.xif.configFileNote':
+    'Konfigürasyon dosyalarının adı, indeksi, tipi ve uzunluğu okunur; şablon dosyasının İÇİNDEKİ configuration property kayıtları ÇÖZÜLMEZ — yerleşimleri ayrı bir spesifikasyondur.',
+  'definition.xif.table.networkVariables': 'Network variable\'lar',
+  'definition.xif.table.configProperties': 'Configuration property\'ler (CPNV)',
+  'definition.xif.table.messageTags': 'Message tag\'ler',
+  'definition.xif.table.configFiles': 'Konfigürasyon dosyaları',
+  'definition.xif.column.index': 'Index',
+  'definition.xif.column.name': 'Ad',
+  'definition.xif.column.direction': 'Yön',
+  'definition.xif.column.snvt': 'SNVT',
+  'definition.xif.column.elements': 'Eleman',
+  'definition.xif.column.arraySize': 'Dizi boyu',
+  'definition.xif.column.class': 'Sınıf',
+  'definition.xif.column.service': 'Servis tipi',
+  'definition.xif.column.documentation': 'Self-documentation',
+  'definition.xif.column.defaultValue': 'Varsayılan değer',
+  'definition.xif.column.bindable': 'Bağlanabilir',
+  'definition.xif.column.fileIndex': 'Dosya indeksi',
+  'definition.xif.column.fileType': 'Dosya tipi',
+  'definition.xif.column.length': 'Uzunluk',
+  'definition.xif.direction.input': 'Giriş',
+  'definition.xif.direction.output': 'Çıkış',
+  'definition.xif.service.acknowledged': 'Acknowledged',
+  'definition.xif.service.repeated': 'Repeated',
+  'definition.xif.service.unacknowledged': 'Unacknowledged',
+  'definition.xif.class.config': 'Configuration',
+  'definition.xif.class.network': 'Network',
+  'definition.xif.error.readFailed': 'Dosya okunamadı.',
+  'definition.xif.error.parseFailed':
+    'XIF dosyası çözümlenemedi; başlık bölümü okunamadı (program ID satırı bulunamadı).',
+  'definition.xif.issue.emptyInput': 'Dosya boş.',
+  'definition.xif.issue.noHeader':
+    'Başlık bölümü bulunamadı; XIF\'in tek zorunlu bölümü budur.',
+  'definition.xif.issue.malformedFileLine':
+    'İlk satır beklenen biçimde değil; dosya adı, üretici araç ve biçim sürümü okunamadı.',
+  'definition.xif.issue.unknownRecord':
+    'Tanınmayan kayıt tipi bir sonraki boş satıra kadar atlandı; daha yeni bir biçim sürümü olabilir.',
+  'definition.xif.issue.truncatedRecord': 'Kayıt yarım kalmış; satırları eksik.',
+  'definition.xif.issue.nvCountMismatch':
+    'Başlığın bildirdiği statik network variable sayısı dosyadaki kayıt sayısıyla tutmuyor (bildirilen / bulunan).',
+  'definition.xif.issue.tagCountMismatch':
+    'Başlığın bildirdiği message tag sayısı dosyadaki kayıt sayısıyla tutmuyor (bildirilen / bulunan).',
+  'definition.xif.issue.nvValueOverflow':
+    'NVVAL bölümü konfigürasyon network variable sayısından fazla değer taşıyor (değer / configuration NV).',
+  'definition.xif.issue.duplicateNvIndex':
+    'Aynı network variable indeksi birden çok kez tanımlanmış.',
+
   // --- Özel şema (custom-schema) tanım paneli ---
   'definition.schema.action.import': 'Şema dosyası içe aktar (JSON)',
   'definition.schema.action.export': 'Şemayı JSON olarak indir',

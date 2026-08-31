@@ -244,21 +244,34 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   mimarisi bunu doğruluyor: `packet-lon.c`in TEK giriş noktası
   `dissector_add_uint("cnip.protocol", 0, lon_handle)`. **"Belgesiz" ile
   "erişilemez" ayrı gerekçelerdir**; ikincisi bir sonraki nesle "ara, bulunur"
-  demez. `lonworks`un rozetine katkı veren öteki üç kalem: SNVT tipi telde YOK,
-  XIF paneli yazılmadı (aşağıdaki borç), Gateway Mapping analyzer işi.
-  **XIF parser'ı + `xif` `definitions` paneli YAZILMADI ve bu bir BORÇTUR**
-  (dalga 17). Biçim BELGELİ; kaynakları burada listeli ki bir sonraki nesil
-  aramak zorunda kalmasın: LONMARK Device Interface File Reference Guide rev
-  4.501 (`lonmark.org/wp-content/uploads/2020/12/LmXif4501.pdf`, girişsiz,
-  429 KB), `izot/shortstack`ta ~20 gerçek `.xif` örneği, `g3gg0/LonScan`ın
-  açık C# parser'ı (~250 satır, sabit satır atlamalarıyla kırılgan).
-  Yazılmama gerekçesi `[Karar 15h-1]`in aynısı: domain'i KAPATAN dalgada
-  ikinci bir motor riski artırır. `definitions` sekmesi bu yüzden "planlandı"
-  basıyor ve BU DOĞRU DAVRANIŞTIR (`ProtocolPage.tsx`in `DEFINITION_PANELS`inde
-  `xif` yok; emsal `lin` ve `arinc-429`, ikisi de `ready`);
-  `e2e/lonworks-decode.spec.ts` bunu sınıyor. `seatalk` bu sınıftan
-  DEĞİLDİR: rozeti kaynak güvenilirliğinden ve komut bitinin çerçevede
-  taşınmamasından geliyor (aşağıda).
+  demez. `lonworks`un rozetine katkı veren öteki iki kalem: SNVT tipi telde
+  YOK, Gateway Mapping analyzer işi.
+  **✅ KAPANDI: XIF parser'ı + `xif` `definitions` paneli YAZILDI** (2026-08-31,
+  `docs/brief-xif-definitions-panel.md`). Eski not "YAZILMADI, BORÇTUR" diyordu;
+  artık geçersiz. Söz dizimi kaynağı LONMARK Device Interface File Reference
+  Guide rev 4.501 (`lonmark.org/wp-content/uploads/2020/12/LmXif4501.pdf`,
+  girişsiz) + `g3gg0/LonScan`ın açık C# parser'ı (yalnız alan listesi için
+  çapraz referans; satır atlama mantığı KOPYALANMADI, kaynağın kendi notuna
+  göre kırılgan). **Brifin fixture kaynağı varsayımı ÇÜRÜDÜ**: `izot/shortstack`
+  deposundaki 20 `.xif` dosyasının HEPSİ okundu ve hepsi ShortStack microserver
+  arayüzü — statik NV sayısı hepsinde 0, bir NV tablosu panelinin açılış örneği
+  olamazlardı (ölçüm `xifFixture.ts` dosya başında). Fixture bunun yerine
+  Continental Control Systems'in gerçek, üretici-yayımlı `WNC-FT-B-303.XIF`
+  dosyası (WattNode güç ölçer, 28 NV, 6 config-class, kısaltılmadı); bir
+  `izot/shortstack` dosyası da "sıfır NV geçerlidir" testi için ayrıca tutuldu.
+  `ProtocolPage.tsx`in `DEFINITION_PANELS`inde `xif` artık VAR (onuncu panel);
+  `e2e/lonworks-decode.spec.ts`in eski "planlandı basar" testi bu yüzden
+  güncellendi, ayrıntılı tur `e2e/xif-definitions.spec.ts`te. Rozet yine
+  `partial` ve ÖYLE KALMALI: XIF borcu kapandı ama SNVT tipi telde yok +
+  Gateway Mapping analyzer maddeleri duruyor. **Hex çöz alt aracı BİLİNÇLİ
+  EKLENMEDİ** (EDS panelinin aksine): NV mesajı telde yalnız 14 bitlik selector
+  taşır, tip bilgisi taşımaz; üstelik gerçek fixture'da NV'lerin yalnız
+  %14'ü (4/28) skaler SNVT tablosunda çözülebiliyor — ölçüldü. Yetenek zaten
+  `lonworks`un `decode` sekmesindeki `nvType` `decodeOptions` kanalında var,
+  ikinci bir bildirim noktası ayrışma riski olurdu. Gerekçenin tamamı
+  `XifPanel.tsx` dosya başında. `seatalk` bu sınıftan DEĞİLDİR: rozeti kaynak
+  güvenilirliğinden ve komut bitinin çerçevede taşınmamasından geliyor
+  (aşağıda).
   **Aynı 24 bitin ANLAMI çerçeveden çerçeveye değişebilir ve tek bir gösterge
   ikisini de yanlış anlatır** (dalga 15h): Mode S'te DF11/17/18'in PI alanı düz
   CRC'dir ve PASS/FAIL doğrulanır, ama DF0/4/5/16/20/21'in AP alanı
@@ -477,12 +490,15 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `ProtocolPage.tsx`in `DEFINITION_PANELS`inde bugün **DOKUZ panel** var:
   `dbc · eds · custom-schema · vendor-map · a2l · gsdml · iodd · scl · dsdl`.
 
-  **Panel borcunun bugünkü ölçümü (2026-08-29, KODDAN sayıldı — 12 biçimin
-  kayıt dağılımı ve panel durumu):** paneli olmayan ÜÇ biçim kaldı —
-  **`gsd` (1 kayıt) · `ldf` (1 kayıt) · `xif` (1 kayıt)**, toplam **3 kayıt**.
-  `custom-schema` 21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2 kayıt
-  taşıyor ve hepsinin paneli var. `xif`in gerekçesi ve kaynakları yukarıda
-  duruyor; `gsd` ile `ldf` aynı sınıf, birer kayıt ilgilendiriyor.
+  **Panel borcunun bugünkü ölçümü (2026-08-31, KODDAN sayıldı — xif kapanışıyla
+  GÜNCELLENDİ, 12 biçimin kayıt dağılımı ve panel durumu):** paneli olmayan
+  İKİ biçim kaldı — **`gsd` (1 kayıt) · `ldf` (1 kayıt)**, toplam **2 kayıt**.
+  `custom-schema` 21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2,
+  `xif` 1 kayıt taşıyor ve hepsinin paneli var. `xif`in gerekçesi, kaynakları
+  ve fixture kararı yukarıda duruyor; `gsd` ile `ldf` aynı sınıf, birer kayıt
+  ilgilendiriyor, ikisi de bu depoda HİÇ araştırılmadı (format grameri
+  sıfırdan çıkarılmalı — bkz. `docs/brief-xif-definitions-panel.md`nin
+  "Bu işten sonraki adaylar" bölümü).
 
   **Ders (yazılı borç çürür):** bu not aylarca "19 kayıt bekliyor" dedi ve
   yanlıştı. Yukarıdaki `createSchemaParser` maddesinde de aynısı olmuştu

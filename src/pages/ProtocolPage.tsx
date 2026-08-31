@@ -142,6 +142,12 @@ const DsdlPanel = lazy(async () => {
   return { default: module.DsdlPanel };
 });
 
+/** XIF paneli de TEMBEL: yalnız LonWorks'ün `definitions` sekmesinde gerekir. */
+const XifPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/XifPanel');
+  return { default: module.XifPanel };
+});
+
 /**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
@@ -167,6 +173,7 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   iodd: IoddPanel,
   scl: SclPanel,
   dsdl: DsdlPanel,
+  xif: XifPanel,
 };
 
 /**

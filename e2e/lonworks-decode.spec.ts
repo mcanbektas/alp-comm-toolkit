@@ -18,7 +18,9 @@ import { translations } from '../src/translations/all';
  *   · HER NV çözümünde "tip telde yok" uyarısı görünüyor mu,
  *   · `nvPayloadType` SNVT_temp_p seçilince 2.02 °C, SNVT_temp seçilince
  *     −253.8 °C okunuyor mu (ölçek formülünün EKRANDAKİ kanıtı),
- *   · `definitions` sekmesi "planlandı" basıyor mu (XIF paneli YAZILMADI).
+ *   · `definitions` sekmesi XIF panelini açıyor mu. (Bu satır 2026-08-31'de
+ *     GÜNCELLENDİ: eskiden "planlandı" basmasını sınıyordu; XIF motoru
+ *     yazılınca varsayım geçersizleşti, ayrıntılı tur `xif-definitions.spec.ts`te.)
  * Desen `iec-61162-decode.spec.ts` (16c) ve `seatalk-decode.spec.ts`ten.
  */
 
@@ -289,15 +291,18 @@ test('ham PDU + kuyruk CRC şıkkı seçilince CRC-16/GENIBUS GERÇEKTEN doğrul
   await expect(fieldRow(page, 'lontalk-crc')).toHaveAttribute('data-valid', 'true');
 });
 
-test('`definitions` sekmesi "planlandı" basar — XIF paneli bu dalgada YAZILMADI', async ({
+test('`definitions` sekmesi XIF panelini açar — "planlandı" bildirimi KALKTI', async ({
   page,
 }) => {
   const consoleErrors = await openPage(page, DEFINITIONS_PATH);
 
+  await expect(page.getByTestId('xif-panel')).toBeVisible();
   await expect(page.getByTestId('eds-panel')).toHaveCount(0);
   await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
-  await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
-  // Sayfanın KENDİ rozeti yine "Kısmi"dir: sekme planlı, kayıt değil.
+  await expect(page.getByText(tr['protocol.plannedNotice'])).toHaveCount(0);
+  // Sayfanın KENDİ rozeti yine "Kısmi"dir ve öyle KALMALI: XIF borcu kapandı
+  // ama rozete katkı veren öteki kalemler (14908-2/-3 ham L2 yakalama yolu
+  // yok, SNVT tipi telde yok, Gateway Mapping) duruyor.
   await expect(page.getByText(tr['status.partial'], { exact: true })).toBeVisible();
 
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
