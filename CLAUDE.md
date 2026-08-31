@@ -989,3 +989,69 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
 
   Doğrulama: typecheck temiz, birim 6897/1 atlandı (+6 yeni), e2e 1359/2
   atlandı (+1 yeni — gerçek tarayıcıda uçtan uca gezinme + hex override).
+
+  **15. ✅ CANLI MQTT TAŞIMASI YAZILDI — uygulamadan İLK kez dışarı ağ
+  bağlantısı açılıyor** (2026-08-31). Protocol Converter'ın `mqtt-publish`
+  hedefi artık yalnız Packet Builder'a hex vermiyor, paketi GERÇEK bir
+  broker'a yayınlıyor. Üç katman, deponun var olan dikişine göre bölündü:
+  `protocols/network/mqtt/mqttSession.ts` (saf protokol: CONNECT üretimi,
+  CONNACK okuması, akış birleştirici), `features/protocol-converter/
+  mqttPublisher.ts` (oturum sürücüsü, `ByteSource` üstünde) ve
+  `useMqttPublish.ts` + `components/BrokerPanel.tsx` (yalnız durum ve
+  gösterim). `connection/websocket` DEĞİŞMEDEN yeniden kullanıldı;
+  `protocol-core/types.ts` açılmadı.
+
+  **Reddedilen üç seçenek:** yeni bir `'mqtt'` `ByteSourceKind` (yayın oturumu
+  istek/yanıttır, bayt kaynağı değil — üstelik monitörün kaynak seçicilerinde
+  yanlışlıkla görünürdü); CONNECT'i `mqttEncoders.ts`e koymak (o dosyanın
+  ilan ettiği disiplin "çağıran GÖVDEYİ verir" ve kaydı Packet Builder
+  HEDEFİdir; CONNECT'in gövdesi kullanıcı yükü değil oturum durumudur);
+  CONNACK'i `mqtt.ts` parser'ından geçirmek (`ParseResult` "çerçeve çözüldü
+  ama bağlantı reddedildi"i İFADE EDEMEZ).
+
+  **Sürüm 3.1.1 (Protocol Level 4) ve bu bir tercih DEĞİL:**
+  `encodeMqttPublishPacket` zaten 3.1.1 biçimli PUBLISH yazıyor (Property
+  Length baytı YOK). v5 CONNECT göndermek broker'ı aynı bağlantıda v5 PUBLISH
+  beklemeye zorlar ve akış paketin ORTASINDAN kayardı.
+
+  **YALNIZ ANONİM BROKER — ve bu bilinçli bir kapıdır.** Kullanıcı adı/parola
+  bayrakları 0. Bu depoda kimlik bilgisi deposu YOK ve CLAUDE.md "Sırlar
+  depoya girmez" diyor; parolayı `localStorage`a ya da §40 proje dosyasına
+  yazmak yeni bir güvenlik yüzeyi açardı, o karar kullanıcınındır. Kısıt
+  EKRANDA yazılı — "neden bağlanamadım"ı broker'ın return code 4/5'ine
+  bırakmak, kısıtı hata gibi gösterirdi. `wss://` ÇALIŞIR ve ayrı konudur:
+  sunucu sertifikasını tarayıcı doğrular, bizim kodumuza sır girmez.
+
+  **"Kullanıcı verisi yerelde kalır" kuralının SINIRLANDIRILMIŞ istisnası.**
+  Kural, BİZİM seçtiğimiz bir sunucuya ARKA PLANDA veri gitmesini yasaklar.
+  Burada adresi kullanıcı yazar, gönderim ancak açık bir tıklamayla başlar,
+  zamanlayıcı/yeniden deneme/otomatik gönderim YOKTUR, ve hedef (topic → adres)
+  hem düğmenin yanında hem sonuç satırında YAZILI durur. Emsali zaten vardı:
+  `connection/websocket` kullanıcının verdiği adrese `write()` ile bayt
+  gönderiyor. Gerekçe `mqttPublisher.ts` dosya başında.
+
+  **QoS 0'ın dürüst sınırı:** PUBACK yalnız QoS ≥ 1'de vardır, yani "broker
+  mesajı aldı/işledi" BU YOLDAN BİLİNEMEZ. Sonuç `sent` diye adlandırılır,
+  `delivered` değil; ekran "gönderildi" der ve kanıtlananın CONNACK kabulü +
+  açık sokete yazma olduğunu YAZAR.
+
+  **Tarayıcı turu baytın ULAŞTIĞINI kanıtlıyor, düğmenin varlığını değil:**
+  `e2e/support/mqttBrokerServer.mjs` gerçek bir MQTT-over-WebSocket broker
+  stub'ı (CONNECT ayrıştırır, CONNACK yazar, PUBLISH kaydeder, `mqtt` alt
+  protokolünü ZORUNLU tutar — OASIS §6, yani turumuz istemcinin onu sunduğunu
+  da ölçüyor) ve aldıklarını `GET /published?clientId=…` altında açıyor; tur
+  EKRANA değil BROKER'IN KAYDINA bakıyor. `clientId` süzmesi zorunlu, çünkü
+  Playwright `fullyParallel` koşuyor. RFC 6455 çerçevelemesi
+  `e2e/support/webSocketFraming.mjs`e ÇIKARILDI ve iki stub da onu içe
+  aktarıyor — ikinci kopya yok. Üretim bağımlılığı EKLENMEDİ (10. maddedeki
+  `ws` kararıyla aynı). Üçüncü `webServer`, port 9098.
+
+  **UDP KAPSAM DIŞI ve bu ölçülmüş bir kısıttır:** tarayıcıda ham soket API'si
+  yok. Eski notun "MQTT/UDP taşıması yok" ikilisi bu yüzden ayrıldı — MQTT
+  yarısı yapıldı, UDP yarısı YAPILAMAZ ve bir daha aday olarak açılmamalı.
+
+  Doğrulama: typecheck temiz, birim 7096/1 atlandı (+40 yeni), e2e 1397/2
+  atlandı (+3 yeni). Ana thread ayrıca elle turladı: Modbus RTU çerçevesi →
+  Register 0 = 100 → ×0.1 → 10 → `sensors/temperature` → broker kaydında
+  `3017001373656E736F72732F74656D70657261747572653130` (25 bayt, Remaining
+  Length 0x17 = 2+19+2 elle doğrulandı), konsol temiz.

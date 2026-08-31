@@ -9,6 +9,18 @@
  *
  * Ekran HESAP YAPMAZ (CLAUDE.md mimari kuralı): çeviri `converterEngine.ts`te
  * saf ve senkron, ekran yalnız durumu toplayıp sonucu çizer.
+ *
+ * ── ÜÇÜNCÜ BÖLÜM: BROKER'A YAYINLA ─────────────────────────────────────────
+ * `mqtt-publish` hedefinde üretilen paket artık yalnız Packet Builder'a
+ * taşınmıyor, kullanıcının verdiği bir MQTT broker'ına GERÇEKTEN
+ * gönderilebiliyor (MQTT over WebSocket). Bu, CLAUDE.md'nin *"kullanıcı
+ * verisi yerelde kalır"* kuralının bilinçli ve sınırlı istisnasıdır;
+ * gerekçenin tamamı `mqttPublisher.ts` dosya başında, ekrandaki karşılığı
+ * `components/BrokerPanel.tsx`te.
+ *
+ * Bölüm YALNIZ `mqtt-publish` hedefinde basılır: JSON/CSV metin üretir,
+ * gönderilecek bir paket yoktur ve gönderilemeyecek bir hedefe adres kutusu
+ * göstermek boş bir vaat olurdu.
  */
 
 import { useCallback } from 'react';
@@ -19,10 +31,14 @@ import { useTranslation } from '@/app/providers/LanguageProvider';
 import { useConverterHandoffStore } from '@/app/store/converterHandoffStore';
 import { bytesToHex } from '@/protocol-core/buffers/representation';
 
+import { BrokerPanel } from './components/BrokerPanel';
 import { MappingPanel } from './components/MappingPanel';
 import { OutputPanel } from './components/OutputPanel';
-import type { ConvertedPacket, DestinationKind } from './converterTypes';
+import { useMqttPublish } from './useMqttPublish';
 import { sourceOptions, useProtocolConverter } from './useProtocolConverter';
+
+import type { ConvertedPacket, DestinationKind } from './converterTypes';
+import type { MqttPublishOptions } from './useMqttPublish';
 
 const SECTION_CLASS = 'flex flex-col gap-3 rounded-token border border-line bg-surface p-4';
 const SECTION_TITLE_CLASS = 'font-display text-sm font-semibold uppercase tracking-wide text-muted';
@@ -31,9 +47,20 @@ const LABEL_CLASS = 'flex flex-col gap-1 text-xs text-muted';
 
 const DESTINATION_KINDS: readonly DestinationKind[] = ['mqtt-publish', 'json', 'csv'];
 
-export function ProtocolConverterScreen(): ReactNode {
+/**
+ * `publishOptions` YALNIZ testler için: jsdom'da `WebSocket` yok, ekranın
+ * gerçek soket açmasını beklemek yerine sahte `ByteSource` enjekte edilir
+ * (`webSocketSource.ts`in `socketFactory` disiplininin ekran seviyesi).
+ * Uygulama rotası bu prop'u vermez.
+ */
+interface ProtocolConverterScreenProps {
+  readonly publishOptions?: MqttPublishOptions;
+}
+
+export function ProtocolConverterScreen({ publishOptions }: ProtocolConverterScreenProps = {}): ReactNode {
   const { t } = useTranslation();
   const converter = useProtocolConverter();
+  const publisher = useMqttPublish(publishOptions ?? {});
   const { state, pluginState, parseState, output } = converter;
   const options = sourceOptions();
   const fields = parseState.status === 'ok' ? parseState.frame.fields : [];
@@ -171,6 +198,13 @@ export function ProtocolConverterScreen(): ReactNode {
 
         <OutputPanel output={output} onSendToPacketBuilder={handleSendToPacketBuilder} />
       </section>
+
+      {state.destination === 'mqtt-publish' ? (
+        <section className={SECTION_CLASS} data-testid="converter-broker-section">
+          <h2 className={SECTION_TITLE_CLASS}>{t('converter.section.broker')}</h2>
+          <BrokerPanel packets={output?.packets ?? []} publisher={publisher} />
+        </section>
+      ) : null}
     </div>
   );
 }

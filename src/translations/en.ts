@@ -2132,6 +2132,26 @@ export const en: TranslationDictionary = {
   'converter.issue.missingDestination': 'The destination name is empty, so the row was left out: {detail}',
   'converter.issue.notNumeric': 'The field is not numeric, so no transform was applied: {detail}',
   'converter.issue.encodeFailed': 'The destination packet could not be produced: {detail}',
+  'converter.section.broker': 'Publish to a broker',
+  'converter.broker.intro':
+    'The packet is really sent to the address you enter: the bytes leave this machine. Sending starts only with the button below, and the destination address and topic are printed next to it.',
+  'converter.broker.limits':
+    'Only brokers that need no authentication (anonymous) are supported: this app has no password store, and putting a password into the browser is a separate security decision. wss:// works, the browser validates the server certificate.',
+  'converter.broker.qos0':
+    'The packet goes out at QoS 0, which has no acknowledgement: the screen says "sent", it cannot say "delivered". What is proven is that the connection was accepted with a CONNACK and the bytes were written to an open socket.',
+  'converter.broker.url': 'Broker address (MQTT over WebSocket)',
+  'converter.broker.clientId': 'Client identifier',
+  'converter.broker.publish': 'Publish',
+  'converter.broker.publishing': 'Sending…',
+  'converter.broker.destination': '{topic} → {url}',
+  'converter.broker.noPacket': 'No packet to send; at least one mapping has to produce output first.',
+  'converter.broker.sent': '{byteCount} bytes sent — {topic} → {url}',
+  'converter.broker.error.connectFailed': 'Could not connect to the broker: {detail}',
+  'converter.broker.error.connackTimeout': 'The broker opened the connection but sent no CONNACK.',
+  'converter.broker.error.closedEarly': 'The broker closed the line without answering.',
+  'converter.broker.error.connackMalformed': 'The broker reply could not be read as a CONNACK: {detail}',
+  'converter.broker.error.rejected': 'The broker refused the connection (return code {detail}).',
+  'converter.broker.error.writeFailed': 'Could not send the packet: {detail}',
 
   'testAutomation.title': 'Test Automation Studio',
   'testAutomation.intro':

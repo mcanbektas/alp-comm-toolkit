@@ -118,3 +118,104 @@ test('yatay taşma yok', async ({ page }) => {
   );
   expect(overflow, 'sayfa yatayda taşıyor').toBeLessThanOrEqual(0);
 });
+
+/**
+ * ── BROKER'A YAYINLA (§33'ün canlı ucu) ────────────────────────────────────
+ *
+ * Bu üç tur ötekilerden FARKLI bir şey ölçüyor: ekranın ne yazdığını değil,
+ * KARŞI TARAFIN NE ALDIĞINI. `e2e/support/mqttBrokerServer.mjs` gerçek bir
+ * MQTT over WebSocket el sıkışması yapıyor (CONNECT ayrıştırılır, CONNACK
+ * üretilir) ve aldığı PUBLISH'leri `GET /published` altında açıyor. "Düğme
+ * çalışıyor" ile "baytlar broker'a ULAŞTI" arasındaki fark tam olarak burası.
+ *
+ * `fullyParallel` açık olduğu için her tur KENDİ istemci kimliğini yazıyor ve
+ * sunucuyu o kimlikle süzüyor — paylaşılan durum aksi hâlde turlar arasında
+ * karışırdı.
+ */
+const BROKER_URL = 'ws://localhost:9098';
+
+interface PublishedRow {
+  readonly clientId: string;
+  readonly topic: string;
+  readonly payload: string;
+  readonly packetHex: string;
+}
+
+async function publishedFor(clientId: string): Promise<PublishedRow[]> {
+  const response = await fetch(`http://localhost:9098/published?clientId=${clientId}`);
+  return (await response.json()) as PublishedRow[];
+}
+
+test('paket gerçek bir broker\'a yayınlanır ve broker aldığı baytları doğrular', async ({ page }) => {
+  const consoleErrors = await openConverter(page);
+  await expect(page.getByTestId('converter-packets')).toContainText('sensors/temperature: 30170013');
+
+  const clientId = 'e2epublish01';
+  await page.getByTestId('converter-broker-url').fill(BROKER_URL);
+  await page.getByTestId('converter-broker-client-id').fill(clientId);
+
+  // Hedef, gönderim ANINDA düğmenin yanında yazılı (bkz. `BrokerPanel.tsx`).
+  await expect(page.getByTestId('converter-broker-target-mapping-1')).toHaveText(
+    `sensors/temperature → ${BROKER_URL}`,
+  );
+
+  await page.getByTestId('converter-broker-publish-mapping-1').click();
+
+  await expect(page.getByTestId('converter-broker-sent')).toContainText('sensors/temperature');
+  await expect(page.getByTestId('converter-broker-sent')).toContainText(BROKER_URL);
+  await expect(page.getByTestId('converter-broker-error')).toHaveCount(0);
+
+  // ASIL İDDİA: ekran değil SUNUCU konuşuyor. Baytlar `mqtt` plugin'inin kendi
+  // encoder'ının yazdığı paketin AYNISI ve topic/payload broker tarafında
+  // ayrıştırılabildi.
+  const rows = await publishedFor(clientId);
+  expect(rows).toEqual([
+    {
+      clientId,
+      topic: 'sensors/temperature',
+      payload: '10',
+      packetHex: '3017001373656E736F72732F74656D70657261747572653130',
+    },
+  ]);
+
+  expect(consoleErrors).toEqual([]);
+});
+
+/** Reddi sessizce yutmak, gönderilmemiş bir paketi gönderilmiş göstermek olurdu. */
+test('broker CONNECT\'i reddedince gerçek hata çıkar ve PUBLISH hiç gönderilmez', async ({ page }) => {
+  const consoleErrors = await openConverter(page);
+
+  const clientId = 'e2ereject01';
+  await page.getByTestId('converter-broker-url').fill(`${BROKER_URL}/?reject=5`);
+  await page.getByTestId('converter-broker-client-id').fill(clientId);
+  await page.getByTestId('converter-broker-publish-mapping-1').click();
+
+  // OASIS §3.2.2.3'ün kendi metni — protokol terimi, çeviriye girmez.
+  await expect(page.getByTestId('converter-broker-error')).toContainText('Connection Refused, not authorized');
+  await expect(page.getByTestId('converter-broker-sent')).toHaveCount(0);
+
+  // Broker'a PUBLISH ULAŞMADI: ret CONNACK aşamasında oldu.
+  expect(await publishedFor(clientId)).toEqual([]);
+
+  expect(consoleErrors).toEqual([]);
+});
+
+/** Adresi olmayan bir broker: zaman aşımı sessizlik değil, yazılı bir hata olmalı. */
+test('ulaşılamayan adreste bağlantı hatası basılır', async ({ page }) => {
+  const consoleErrors = await openConverter(page);
+
+  // `ws://` şemasına uyan ama hiçbir şeyin dinlemediği bir port.
+  await page.getByTestId('converter-broker-url').fill('ws://localhost:9097');
+  await page.getByTestId('converter-broker-publish-mapping-1').click();
+
+  await expect(page.getByTestId('converter-broker-error')).toBeVisible();
+  await expect(page.getByTestId('converter-broker-sent')).toHaveCount(0);
+
+  // Ekranın sessiz kalmadığı YUKARIDA ölçülüyor (hata görünür, "gönderildi" yok).
+  // Buradaki iddia AYRI ve NEGATİF: konsolda BEKLENMEDİK bir hata olmamalı. Tek
+  // hoş görülen, tarayıcının kendi yazdığı 9097 soket hatasıdır. Dizi BOŞ olması
+  // da geçerlidir ve testin geçmesi DOĞRUDUR — bir tarayıcının başarısız
+  // WebSocket'i konsola yazıp yazmaması sürüme göre değişir, oraya iddia bağlamak
+  // testi kırılgan yapardı. Yani bu satır varlık DEĞİL, kirlilik yokluğu ölçer.
+  expect(consoleErrors.every((message) => message.includes('9097'))).toBe(true);
+});

@@ -2133,6 +2133,26 @@ export const tr = {
   'converter.issue.missingDestination': 'Hedef ad boş, satır çıktıya girmedi: {detail}',
   'converter.issue.notNumeric': 'Alan sayısal değil, dönüşüm uygulanmadı: {detail}',
   'converter.issue.encodeFailed': 'Hedef paket üretilemedi: {detail}',
+  'converter.section.broker': 'Broker\'a yayınla',
+  'converter.broker.intro':
+    'Paket seçtiğiniz adrese GERÇEKTEN gönderilir: baytlar bu makineden çıkar. Gönderim yalnız aşağıdaki düğmeyle başlar ve hedef adres ile topic düğmenin yanında yazılıdır.',
+  'converter.broker.limits':
+    'Yalnız kimlik doğrulaması istemeyen (anonim) broker desteklenir: uygulamada parola deposu yok ve parolayı tarayıcıya yazmak ayrı bir güvenlik kararıdır. wss:// çalışır, sunucu sertifikasını tarayıcı doğrular.',
+  'converter.broker.qos0':
+    'Paket QoS 0 ile çıkar ve QoS 0\'ın onayı yoktur: ekran "gönderildi" der, "teslim edildi" diyemez. Kanıtlanan şey, bağlantının CONNACK ile kabul edilmesi ve baytların açık sokete yazılmasıdır.',
+  'converter.broker.url': 'Broker adresi (MQTT over WebSocket)',
+  'converter.broker.clientId': 'İstemci kimliği',
+  'converter.broker.publish': 'Yayınla',
+  'converter.broker.publishing': 'Gönderiliyor…',
+  'converter.broker.destination': '{topic} → {url}',
+  'converter.broker.noPacket': 'Gönderilecek paket yok; önce en az bir eşleme çıktı üretmeli.',
+  'converter.broker.sent': '{byteCount} bayt gönderildi — {topic} → {url}',
+  'converter.broker.error.connectFailed': 'Broker\'a bağlanılamadı: {detail}',
+  'converter.broker.error.connackTimeout': 'Broker bağlantıyı açtı ama CONNACK göndermedi.',
+  'converter.broker.error.closedEarly': 'Broker cevap vermeden hattı kapattı.',
+  'converter.broker.error.connackMalformed': 'Broker cevabı CONNACK olarak okunamadı: {detail}',
+  'converter.broker.error.rejected': 'Broker bağlantıyı reddetti (return code {detail}).',
+  'converter.broker.error.writeFailed': 'Paket gönderilemedi: {detail}',
 
   'testAutomation.title': 'Test Automation Studio',
   'testAutomation.intro':

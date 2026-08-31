@@ -16,7 +16,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // İKİ sunucu: uygulamanın derlenmiş çıktısı ve WebSocket köprüsü.
+  // ÜÇ sunucu: uygulamanın derlenmiş çıktısı, WebSocket köprüsü ve MQTT broker'ı.
   webServer: [
     // Derlenmiş çıktıyı sınar, dev sunucusunu değil: kırılan şey üretimde de kırıktır.
     {
@@ -36,6 +36,19 @@ export default defineConfig({
     {
       command: 'node e2e/support/wsBridgeServer.mjs 9099',
       url: 'http://localhost:9099',
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
+    /**
+     * MQTT over WebSocket broker'ı (spec §33'ün "broker'a yayınla" ucu).
+     * Yankı köprüsü YETMEZ: MQTT'de kanıt, karşı tarafın CONNECT'i ayrıştırıp
+     * CONNACK üretmesidir — o olmadan istemci PUBLISH'i hiç göndermez. Stub
+     * aldığı PUBLISH'leri `GET /published` altında açıyor, böylece tur ekranın
+     * ne dediğine değil SUNUCUNUN NE ALDIĞINA bakabiliyor.
+     */
+    {
+      command: 'node e2e/support/mqttBrokerServer.mjs 9098',
+      url: 'http://localhost:9098',
       reuseExistingServer: false,
       timeout: 30_000,
     },
