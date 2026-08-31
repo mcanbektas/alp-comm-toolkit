@@ -148,6 +148,12 @@ const XifPanel = lazy(async () => {
   return { default: module.XifPanel };
 });
 
+/** GSD paneli de TEMBEL: yalnız PROFIBUS DP'nin `definitions` sekmesinde gerekir. */
+const GsdPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/GsdPanel');
+  return { default: module.GsdPanel };
+});
+
 /**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
@@ -174,6 +180,7 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   scl: SclPanel,
   dsdl: DsdlPanel,
   xif: XifPanel,
+  gsd: GsdPanel,
 };
 
 /**
@@ -322,7 +329,7 @@ export function ProtocolPage(): ReactElement {
   /**
    * Hangi tanım paneli açılacağı kaydın `definitions` listesinden gelir
    * (alias zincirine inilmez — hangi biçimlerin gösterileceği sayfanın kendi
-   * verisidir). Motoru olmayan bir biçim (`gsd`, `ldf`, …) listede olsa da
+   * verisidir). Motoru olmayan bir biçim (`ldf`, …) listede olsa da
    * `DEFINITION_PANELS`te karşılığı yoksa `undefined` kalır ve "planlandı"
    * dalına düşülür — birden çok biçim varsa (`marine-j1939`'un
    * `['dbc', 'custom-schema']`ı gibi) İLK eşleşen kazanır.

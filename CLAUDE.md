@@ -490,15 +490,38 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `ProtocolPage.tsx`in `DEFINITION_PANELS`inde bugün **DOKUZ panel** var:
   `dbc · eds · custom-schema · vendor-map · a2l · gsdml · iodd · scl · dsdl`.
 
-  **Panel borcunun bugünkü ölçümü (2026-08-31, KODDAN sayıldı — xif kapanışıyla
+  **Panel borcunun bugünkü ölçümü (2026-08-31, KODDAN sayıldı — gsd kapanışıyla
   GÜNCELLENDİ, 12 biçimin kayıt dağılımı ve panel durumu):** paneli olmayan
-  İKİ biçim kaldı — **`gsd` (1 kayıt) · `ldf` (1 kayıt)**, toplam **2 kayıt**.
-  `custom-schema` 21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2,
-  `xif` 1 kayıt taşıyor ve hepsinin paneli var. `xif`in gerekçesi, kaynakları
-  ve fixture kararı yukarıda duruyor; `gsd` ile `ldf` aynı sınıf, birer kayıt
-  ilgilendiriyor, ikisi de bu depoda HİÇ araştırılmadı (format grameri
-  sıfırdan çıkarılmalı — bkz. `docs/brief-xif-definitions-panel.md`nin
-  "Bu işten sonraki adaylar" bölümü).
+  TEK biçim kaldı — **`ldf` (1 kayıt)**, toplam **1 kayıt**. `custom-schema`
+  21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2, `xif` 1, `gsd` 1
+  kayıt taşıyor ve hepsinin paneli var. `ldf` bu depoda HİÇ araştırılmadı
+  (format grameri sıfırdan çıkarılmalı — şema tabloları frame/signal/schedule
+  EDS/XIF/GSD'den daha karmaşık olabilir, kendi brif turunu gerektirir).
+
+  **✅ KAPANDI: GSD parser'ı + `gsd` `definitions` paneli YAZILDI** (2026-08-31,
+  aynı oturumda XIF'in hemen ardından). `profibus-dp` kaydının `definitions`
+  sekmesi artık gerçek bir modül/parametre tablosu basıyor. Söz dizimi kaynağı
+  ÜÇ bağımsız ikincil kaynaktan (PI'nin kendi normatif belgesi ÜCRETLİ ve bu
+  depoda YOK — `profibusDp.ts`in FDL notuyla aynı durum): Siemens/ComDeC'in
+  GSD-file v2.2 kılavuzu, felser.ch PROFIBUS Manual (`profibusDp.ts`nin
+  zaten kullandığı kaynak), `pyprofibus`in açık parser'ı (yalnız çapraz
+  referans, KOD KOPYALANMADI — üstelik pyprofibus'un okumadığı iki şey,
+  `ExtUserPrmData` tip satırı ve `Module_Reference`, burada okunuyor).
+  Kimlik baytı çözümü (giriş/çıkış uzunluğu + yön) **14 gerçek `.gsd` dosyası
+  / 288 modül** üzerinde ölçüldü: hiçbir modül yarım kalmadı, hiçbiri
+  dosyanın kendi azami uzunluğunu aşmadı, çözüm üreticinin kendi metniyle
+  birebir tuttu. Fixture Siemens SINAMICS G120 (`SI028158.gsd`, açık kaynak
+  Proview aynasından, üreticinin kendi portalından DEĞİL) — üç iç tutarlılıkla
+  doğrulandı, hiçbir alan uydurulmadı (ayrıntı `gsdFixture.ts` dosya başında).
+  **Hex çöz alt aracı XIF'inkinden FARKLI gerekçeyle eklenmedi**: eksik olan
+  tip değil YERLEŞİM — modül tablosu zaten giriş/çıkış uzunluğunu ve yönünü
+  veriyor, ama hangi modüllerin gerçekten takılı olduğu GSD'de yazmıyor
+  (Chk_Cfg telgrafıyla taşınır, ölçüldü: fixture `Max_Module = 2` derken 7
+  modül tanımlıyor). Gerekçenin tamamı `GsdPanel.tsx` dosya başında. Stale
+  "planlandı" testi YOKTU: `e2e/profibus-dp-decode.spec.ts`teki tek
+  `plannedNotice` iddiası `decode` sekmesi içindi (zaten `ready`), definitions
+  sekmesiyle ilgisizdi; `e2e/xml-device-definitions.spec.ts` ve
+  `e2e/xif-definitions.spec.ts` ikisi de `lin`/LDF'i örnekliyordu, dokunulmadı.
 
   **Ders (yazılı borç çürür):** bu not aylarca "19 kayıt bekliyor" dedi ve
   yanlıştı. Yukarıdaki `createSchemaParser` maddesinde de aynısı olmuştu

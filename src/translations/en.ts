@@ -1446,6 +1446,89 @@ export const en: TranslationDictionary = {
   'definition.xif.issue.duplicateNvIndex':
     'The same network variable index is defined more than once.',
 
+  // --- GSD (PROFIBUS DP) definition file ---
+  'definition.gsd.action.import': 'Import GSD file',
+  'definition.gsd.sampleNotice':
+    'A sample definition is shown: the real GSD file published by the manufacturer for the SINAMICS G120 drive. You can import your own GSD file; it never leaves your device.',
+  'definition.gsd.vendorName': 'Vendor',
+  'definition.gsd.modelName': 'Model',
+  'definition.gsd.orderNumber': 'Order number',
+  'definition.gsd.identNumber': 'Ident number',
+  'definition.gsd.gsdRevision': 'GSD revision',
+  'definition.gsd.slaveFamily': 'Slave family',
+  'definition.gsd.stationKind': 'Station type',
+  'definition.gsd.moduleCount': 'Module definitions',
+  'definition.gsd.maxInputLength': 'Max input (bytes)',
+  'definition.gsd.maxOutputLength': 'Max output (bytes)',
+  'definition.gsd.line': 'Line',
+  'definition.gsd.preset': '(preset)',
+  'definition.gsd.noIoData': 'No cyclic data',
+  'definition.gsd.manufacturerBytes': 'Manufacturer specific:',
+  'definition.gsd.configurationNotInFile':
+    'This file lists the modules the device CAN carry; which of them are actually plugged, and in what order, IS NOT IN THE GSD — it is chosen in the configuration tool and travels in the Chk_Cfg telegram. The input and output lengths below are therefore PER-MODULE declarations, not the layout of a captured Data Exchange telegram. That is also why the Decode tab leaves the user data raw.',
+  'definition.gsd.identifierNote':
+    'Input and output lengths are decoded from the module identifier (configuration) bytes: bit 7 carries consistency, bit 6 whether the unit is a byte or a word, bits 5-4 the direction (00 special format, 01 input, 10 output, 11 both) and bits 3-0 the length minus one. In the special format the lengths sit in the bytes that follow and the field is six bits wide. The meaning of the manufacturer-specific bytes lives in the vendor documentation rather than in the GSD, so they are shown uninterpreted.',
+  'definition.gsd.simpleParameterNote':
+    'This file does not use the extended parameter format (ExtUserPrmData / PrmText); the user parameters are declared as a single constant block:',
+  'definition.gsd.table.modules': 'Module definitions',
+  'definition.gsd.table.parameters': 'Parameter definitions',
+  'definition.gsd.table.baudRates': 'Transmission rates',
+  'definition.gsd.table.diagnosis': 'Diagnosis texts',
+  'definition.gsd.column.reference': 'Reference',
+  'definition.gsd.column.name': 'Name',
+  'definition.gsd.column.configBytes': 'Identifier bytes',
+  'definition.gsd.column.inputBytes': 'Input (bytes)',
+  'definition.gsd.column.outputBytes': 'Output (bytes)',
+  'definition.gsd.column.layout': 'Layout',
+  'definition.gsd.column.info': 'Description',
+  'definition.gsd.column.dataType': 'Data type',
+  'definition.gsd.column.bits': 'Bits',
+  'definition.gsd.column.defaultValue': 'Default',
+  'definition.gsd.column.range': 'Range',
+  'definition.gsd.column.choices': 'Choices',
+  'definition.gsd.column.baudRate': 'Transmission rate',
+  'definition.gsd.column.supported': 'Supported',
+  'definition.gsd.column.maxTsdr': 'MaxTsdr (bit times)',
+  'definition.gsd.column.diagnosisCode': 'Code',
+  'definition.gsd.column.diagnosisType': 'Type',
+  'definition.gsd.column.diagnosisText': 'Text',
+  'definition.gsd.direction.input': 'Input',
+  'definition.gsd.direction.output': 'Output',
+  'definition.gsd.unit.byte': 'byte',
+  'definition.gsd.unit.word': 'word',
+  'definition.gsd.station.modular': 'Modular',
+  'definition.gsd.station.compact': 'Compact',
+  'definition.gsd.type.bit': 'Bit',
+  'definition.gsd.type.bitArea': 'Bit area',
+  'definition.gsd.type.unsigned8': 'Unsigned8',
+  'definition.gsd.type.unsigned16': 'Unsigned16',
+  'definition.gsd.type.unsigned32': 'Unsigned32',
+  'definition.gsd.type.signed8': 'Signed8',
+  'definition.gsd.type.signed16': 'Signed16',
+  'definition.gsd.type.signed32': 'Signed32',
+  'definition.gsd.error.readFailed': 'Could not read the file.',
+  'definition.gsd.error.parseFailed':
+    'The GSD file could not be parsed; it carries neither the #Profibus_DP marker nor a Vendor_Name keyword.',
+  'definition.gsd.issue.emptyInput': 'The file is empty.',
+  'definition.gsd.issue.notGsd':
+    'This is not a GSD file: neither the #Profibus_DP format marker nor a Vendor_Name keyword is present.',
+  'definition.gsd.issue.noModules':
+    'The file declares no modules, so no cyclic input/output layout can be shown.',
+  'definition.gsd.issue.malformedLine':
+    'The line is neither a keyword/value pair nor a known section line; it was skipped.',
+  'definition.gsd.issue.unclosedSection':
+    'A section started before the previous one was closed (a missing EndModule / EndPrmText / EndExtUserPrmData).',
+  'definition.gsd.issue.truncatedConfig':
+    'The identifier bytes of the module end in the middle of a declaration, so its input/output length is incomplete.',
+  'definition.gsd.issue.unknownPrmTextRef':
+    'A parameter points at a PrmText block that does not exist (reference number).',
+  'definition.gsd.issue.unknownPrmDataRef':
+    'A reference points at an ExtUserPrmData definition that does not exist (reference number).',
+  'definition.gsd.issue.moduleExceedsLimit':
+    'The input or output length of the module exceeds the maximum the file itself declares.',
+  'definition.gsd.issue.duplicateModuleReference':
+    'The same Module_Reference number is used by more than one module; it has to be unique per device.',
+
   // --- Custom schema definition panel ---
   'definition.schema.action.import': 'Import schema file (JSON)',
   'definition.schema.action.export': 'Download schema as JSON',

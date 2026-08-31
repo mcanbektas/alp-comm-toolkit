@@ -1396,9 +1396,9 @@ export const tr = {
   'definition.xif.line': 'Satır',
   'definition.xif.userDefinedType': 'Kullanıcı tanımlı',
   'definition.xif.typeNotOnWire':
-    'Buradaki SNVT tipleri cihazın BİLDİRİMİDİR, bir ölçüm değil. LonTalk network variable mesajı yalnız 14 bitlik bir selector taşır; selector cihazın bağlama tablosundaki bir indekstir, tip bilgisi telde YOKTUR. Yani bu tablo bir NV nin tipini söyler ama yakalanmış bir çerçeveden bu tip DOĞRULANAMAZ. Ham baytları bir tipe göre yorumlamak için Decode sekmesindeki network variable tipi seçeneğini kullanın; orada da seçim bir bildirimdir.',
+    'Buradaki SNVT tipleri cihazın BİLDİRİMİDİR, bir ölçüm değil. LonTalk network variable mesajı yalnız 14 bitlik bir selector taşır; selector cihazın bağlama tablosundaki bir indekstir, tip bilgisi telde YOKTUR. Yani bu tablo bir NV\'nin tipini söyler ama yakalanmış bir çerçeveden bu tip DOĞRULANAMAZ. Ham baytları bir tipe göre yorumlamak için Decode sekmesindeki network variable tipi seçeneğini kullanın; orada da seçim bir bildirimdir.',
   'definition.xif.snvtTableNote':
-    'SNVT indeksi her satırda dosyanın kendi verisidir. Ad yalnız bu sürümün skaler SNVT tablosunda (221 tipin 75 i) karşılığı olan indekslerde eklenir; adı görünmeyen bir satırın tipi tanımsız değildir, yalnız bu tabloda yoktur.',
+    'SNVT indeksi her satırda dosyanın kendi verisidir. Ad yalnız bu sürümün skaler SNVT tablosunda (221 tipin 75\'i) karşılığı olan indekslerde eklenir; adı görünmeyen bir satırın tipi tanımsız değildir, yalnız bu tabloda yoktur.',
   'definition.xif.configFileNote':
     'Konfigürasyon dosyalarının adı, indeksi, tipi ve uzunluğu okunur; şablon dosyasının İÇİNDEKİ configuration property kayıtları ÇÖZÜLMEZ — yerleşimleri ayrı bir spesifikasyondur.',
   'definition.xif.table.networkVariables': 'Network variable\'lar',
@@ -1445,6 +1445,89 @@ export const tr = {
     'NVVAL bölümü konfigürasyon network variable sayısından fazla değer taşıyor (değer / configuration NV).',
   'definition.xif.issue.duplicateNvIndex':
     'Aynı network variable indeksi birden çok kez tanımlanmış.',
+
+  // --- GSD (PROFIBUS DP) tanım dosyası ---
+  'definition.gsd.action.import': 'GSD dosyası içe aktar',
+  'definition.gsd.sampleNotice':
+    'Örnek tanım gösteriliyor: SINAMICS G120 sürücüsü için üreticisi tarafından yayımlanmış gerçek GSD dosyası. Kendi GSD dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.gsd.vendorName': 'Üretici',
+  'definition.gsd.modelName': 'Model',
+  'definition.gsd.orderNumber': 'Sipariş numarası',
+  'definition.gsd.identNumber': 'Ident numarası',
+  'definition.gsd.gsdRevision': 'GSD revizyonu',
+  'definition.gsd.slaveFamily': 'Slave ailesi',
+  'definition.gsd.stationKind': 'İstasyon tipi',
+  'definition.gsd.moduleCount': 'Modül tanımı',
+  'definition.gsd.maxInputLength': 'Azami giriş (bayt)',
+  'definition.gsd.maxOutputLength': 'Azami çıkış (bayt)',
+  'definition.gsd.line': 'Satır',
+  'definition.gsd.preset': '(sabit takılı)',
+  'definition.gsd.noIoData': 'Döngüsel veri yok',
+  'definition.gsd.manufacturerBytes': 'Üreticiye özel:',
+  'definition.gsd.configurationNotInFile':
+    'Bu dosya cihazın TAŞIYABİLECEĞİ modülleri sayar; hangilerinin gerçekten takılı olduğu ve hangi sırayla oturduğu GSD\'de YAZMAZ — konfigürasyon aracında seçilir ve Chk_Cfg telgrafıyla taşınır. Aşağıdaki giriş/çıkış uzunlukları bu yüzden MODÜL BAŞINA bildirimlerdir, yakalanmış bir Data Exchange telgrafının yerleşimi değildir. Decode sekmesinin kullanıcı verisini ham bırakma gerekçesi de budur.',
+  'definition.gsd.identifierNote':
+    'Giriş/çıkış uzunlukları modülün kimlik (konfigürasyon) baytlarından çözülür: bit 7 tutarlılığı, bit 6 birimin bayt mı word mü olduğunu, bit 5-4 yönü (00 özel biçim · 01 giriş · 10 çıkış · 11 ikisi), bit 3-0 ise uzunluğu bir eksiğiyle taşır. Özel biçimde uzunluk ardından gelen ayrı baytlardadır ve alan altı bittir. Üreticiye özel baytların anlamı GSD\'de değil üreticinin kendi belgesindedir, o yüzden yorumlanmadan gösterilir.',
+  'definition.gsd.simpleParameterNote':
+    'Bu dosya genişletilmiş parametre biçimini (ExtUserPrmData / PrmText) kullanmıyor; kullanıcı parametreleri tek bir sabit blok olarak bildirilmiş:',
+  'definition.gsd.table.modules': 'Modül tanımları',
+  'definition.gsd.table.parameters': 'Parametre tanımları',
+  'definition.gsd.table.baudRates': 'İletim hızları',
+  'definition.gsd.table.diagnosis': 'Teşhis metinleri',
+  'definition.gsd.column.reference': 'Referans',
+  'definition.gsd.column.name': 'Ad',
+  'definition.gsd.column.configBytes': 'Kimlik baytları',
+  'definition.gsd.column.inputBytes': 'Giriş (bayt)',
+  'definition.gsd.column.outputBytes': 'Çıkış (bayt)',
+  'definition.gsd.column.layout': 'Yerleşim',
+  'definition.gsd.column.info': 'Açıklama',
+  'definition.gsd.column.dataType': 'Veri tipi',
+  'definition.gsd.column.bits': 'Bit',
+  'definition.gsd.column.defaultValue': 'Varsayılan',
+  'definition.gsd.column.range': 'Aralık',
+  'definition.gsd.column.choices': 'Seçenekler',
+  'definition.gsd.column.baudRate': 'İletim hızı',
+  'definition.gsd.column.supported': 'Destekleniyor',
+  'definition.gsd.column.maxTsdr': 'MaxTsdr (bit süresi)',
+  'definition.gsd.column.diagnosisCode': 'Kod',
+  'definition.gsd.column.diagnosisType': 'Tip',
+  'definition.gsd.column.diagnosisText': 'Metin',
+  'definition.gsd.direction.input': 'Giriş',
+  'definition.gsd.direction.output': 'Çıkış',
+  'definition.gsd.unit.byte': 'bayt',
+  'definition.gsd.unit.word': 'word',
+  'definition.gsd.station.modular': 'Modüler',
+  'definition.gsd.station.compact': 'Kompakt',
+  'definition.gsd.type.bit': 'Bit',
+  'definition.gsd.type.bitArea': 'Bit alanı',
+  'definition.gsd.type.unsigned8': 'Unsigned8',
+  'definition.gsd.type.unsigned16': 'Unsigned16',
+  'definition.gsd.type.unsigned32': 'Unsigned32',
+  'definition.gsd.type.signed8': 'Signed8',
+  'definition.gsd.type.signed16': 'Signed16',
+  'definition.gsd.type.signed32': 'Signed32',
+  'definition.gsd.error.readFailed': 'Dosya okunamadı.',
+  'definition.gsd.error.parseFailed':
+    'GSD dosyası çözümlenemedi; dosyada ne #Profibus_DP işareti ne de Vendor_Name anahtarı bulundu.',
+  'definition.gsd.issue.emptyInput': 'Dosya boş.',
+  'definition.gsd.issue.notGsd':
+    'Dosya bir GSD değil: #Profibus_DP biçim işareti de Vendor_Name anahtarı da yok.',
+  'definition.gsd.issue.noModules':
+    'Dosyada hiç modül tanımı yok; döngüsel giriş/çıkış yerleşimi gösterilemez.',
+  'definition.gsd.issue.malformedLine':
+    'Satır ne bir anahtar/değer çifti ne de bilinen bir bölüm satırı; atlandı.',
+  'definition.gsd.issue.unclosedSection':
+    'Bir bölüm kapatılmadan yenisi başladı (EndModule / EndPrmText / EndExtUserPrmData eksik).',
+  'definition.gsd.issue.truncatedConfig':
+    'Modülün kimlik baytları bir bildirimin ortasında bitiyor; giriş/çıkış uzunluğu eksik okundu.',
+  'definition.gsd.issue.unknownPrmTextRef':
+    'Parametre var olmayan bir PrmText bloğunu gösteriyor (referans numarası).',
+  'definition.gsd.issue.unknownPrmDataRef':
+    'Var olmayan bir ExtUserPrmData tanımına referans verilmiş (referans numarası).',
+  'definition.gsd.issue.moduleExceedsLimit':
+    'Modülün giriş ya da çıkış uzunluğu dosyanın kendi bildirdiği azami uzunluğu aşıyor.',
+  'definition.gsd.issue.duplicateModuleReference':
+    'Aynı Module_Reference numarası birden çok modülde kullanılmış; cihaz başına eşsiz olmalıdır.',
 
   // --- Özel şema (custom-schema) tanım paneli ---
   'definition.schema.action.import': 'Şema dosyası içe aktar (JSON)',
