@@ -214,13 +214,19 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   çıkabilir). §40'ın "Test scenarios" yuvası METİN taşır ve `formatVersion` 1'de
   KALDI: sürümü artırmak, salt ekleme yapan bir değişiklik için var olan bütün
   proje dosyalarını reddetmek olurdu.
-  `features/` altında hiç açılmamış TEK klasör kaldı: `protocol-converter`
-  (§33). Bekletilmesi bilinçli: 191 plugin dosyasından yalnız 14'ünde `encoder`
-  var (13'ü `serial/framing`, biri `wireless/rftelemetry`; TÜKETİCİLERİ
-  2026-08-29'da yazıldı, aşağıdaki 3. madde), yani §33'ün saydığı sekiz dönüşümün HEDEF tarafı
-  (Modbus, MQTT, NMEA, DBC, J1939, BACnet) yazılmamış; üstüne iki bağlantıyı
-  aynı anda tutan köprü katmanı ve MQTT/UDP taşıması da yok. §33 ayrıca §46'nın
-  geliştirme sırasında ve §50'nin revize ana sayfa kategorilerinde HİÇ geçmiyor,
+  **⚠ BU MADDE ÇÜRÜDÜ (2026-08-31 ölçümü) — aşağıdaki 9. madde asıl kaydı.**
+  Eski hâli "`features/` altında hiç açılmamış TEK klasör kaldı:
+  `protocol-converter` (§33) ... sekiz dönüşümün HEDEF tarafı yazılmamış"
+  diyordu; ikisi de artık yanlış. `features/protocol-converter/` 9 dosya ve
+  rotası bağlı (`AppRouter.tsx:164`); hedef encoder'ların hepsi yazıldı
+  (`encoderCatalog.ts` bugün **24 kayıt: 20 `payload` + 4 `values`**, eski
+  not 14/10/4 diyordu). **Hâlâ DOĞRU olan tek alt cümle:** iki bağlantıyı
+  aynı anda tutan köprü katmanı ve canlı MQTT/UDP taşıması YOK — kodda
+  `mqtt.connect`/`dgram` geçmiyor, `package.json`da böyle bir bağımlılık
+  yok. UDP yarısı tarayıcıda zaten YAPILAMAZ (ham soket API'si yok); MQTT
+  yarısı WebSocket `ByteSource`u üstüne CONNECT/CONNACK el sıkışmasıyla
+  yapılabilir ve `types.ts`e dokunmaz. §33 ayrıca §46'nın geliştirme
+  sırasında ve §50'nin revize ana sayfa kategorilerinde HİÇ geçmiyor,
   §38 ikisinde de adıyla var.
   **`partial` rozetli kayıtların ÇOĞU bilinçli kapsam kararıdır, eksik
   iş değil**: `iec-61850` GOOSE-only, `cc-link-ie` 0x890F-only (Field Basic ayrı

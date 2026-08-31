@@ -2065,15 +2065,22 @@ Faz 9'a girmeden bilinmesi gerekenler — hiçbiri Faz 9'u engellemiyor:
   bağlanıyor ve tarayıcı turu elle yazılmış bir RFC 6455 köprüsüyle veri yolunu
   ölçüyor. **Üç ekran da bağlandı** (Packet Builder · Live Monitor · Test
   Automation): sözleşmenin "bir kez yaz, üçü de kullansın" vaadi ölçüldü.
-  Kalan ikisi (**usb · bluetooth**) hâlâ yok ve ikisi de headless tarayıcıda
-  sınanamaz, o yüzden birim testle sınırlı kalacak.
+  ~~Kalan ikisi (**usb · bluetooth**) hâlâ yok~~ → **ÇÜRÜDÜ (2026-08-31
+  ölçümü): ikisi de yazıldı** (`connection/usb/usbSource.ts`,
+  `connection/bluetooth/bluetoothSource.ts`, ikisinin de testi var) ve Live
+  Monitor'a bağlandı; `connection/` klasör borcu sıfır. Bağlanmanın KENDİSİ
+  hâlâ headless tarayıcıda sınanamıyor (işletim sistemi cihaz seçicisi),
+  turlar form seviyesinde kalıyor.
 - ~~`src/protocols/` klasörünün kendisi yok~~ → **açıldı ve doldu**: 8 domain
   klasörü + `pluginBinding.ts`, 191 plugin dosyası (2026-08-29 sayımı).
-- `src/components/` altında **packet-viewer · signal-viewer · protocol-tree**
-  hâlâ yok (bugün: `byte-viewer · charts · common · forms · layout ·
-  navigation · virtualized-tables`). Spec §6'nın klasör listesindeki bu üç
-  görüntüleyici yazılmadı; işlevlerinin bir kısmını `byte-viewer` ve
-  `DecodePanel` karşılıyor.
+- ~~`src/components/` altında **packet-viewer · signal-viewer · protocol-tree**
+  hâlâ yok~~ → **ÇÜRÜDÜ (2026-08-31 ölçümü): üçü de var.** `packet-viewer`i
+  `features/protocol-decode/DecodePanel.tsx`, `signal-viewer`ı
+  `features/live-monitor/components/SignalPanel.tsx` içe aktarıyor.
+  `protocol-tree` (3 dosya) YAZILDI ama **hiçbir tüketicisi yok** — id-önek
+  gruplaması reddedilince bilinçli olarak bağlanmadı (`e9613e9`). Dizin
+  dışındaki tek eşleşme `protocols/wireless/matter/matter.ts:24`teki bir
+  YORUM, import değil. Sonraki oturum için açık karar: bağla ya da sil.
 
 **Bu bölümün satırları 2026-08-29'da KODDAN yeniden ölçüldü.** Öncesinde dört
 maddenin üçü çürüktü (feature klasörleri, `connection/file`, `src/protocols/`);

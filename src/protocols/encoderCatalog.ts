@@ -4,14 +4,19 @@
  * ## Neden ayrı bir defter gerekiyor
  *
  * `ProtocolEncoder<TMessage>` tek bir şey söyler: "bir mesajı bayta çeviririm".
- * SÖYLEMEDİĞİ şey, o mesajın NE olduğudur. Ölçüldüğünde (2026-08-29) 14
- * encoder'ın girdisi iki kümeye düşüyor ve ikisi boru hattının FARKLI
- * aşamalarına ait:
+ * SÖYLEMEDİĞİ şey, o mesajın NE olduğudur. Encoder'ların girdisi iki kümeye
+ * düşüyor ve ikisi boru hattının FARKLI aşamalarına ait:
  *
- * - **`payload`** (10 kayıt): yük → çerçevelenmiş bayt. Bir taşıma zarfıdır;
+ * - **`payload`** (20 kayıt): yük → çerçevelenmiş bayt. Bir taşıma zarfıdır;
  *   Packet Builder'da çerçeveleme (post-processing) aşamasına düşer.
  * - **`values`** (4 kayıt): alan kimliği → değer eşlemesi (`EncodeValues`) →
  *   çerçeve. Bir üretim yoludur; form doldurulup çerçeve ÜRETİLİR.
+ *
+ * **Sayı ölçümü 2026-08-31'de yenilendi: 24 kayıt (20 + 4).** Önceki başlık
+ * "14 encoder (10 + 4)" diyordu ve ÇÜRÜMÜŞTÜ — §33'ün hedef encoder'ları
+ * (3 Modbus · MQTT · 2 CAN · J1939 · NMEA 2000 · 2 BACnet) o sayımdan SONRA
+ * eklendi. Bu satırı kullanmadan önce yeniden say: doğrusu `ENCODER_CATALOG`
+ * dizisinin kendisi, bu yorum değil.
  *
  * Bu ayrımı tipe yazmak `protocol-core/types.ts`teki sözleşmeyi açmak olurdu
  * (CLAUDE.md'de kilitli karar). Bunun yerine ayrım BİLDİRİM olarak burada
