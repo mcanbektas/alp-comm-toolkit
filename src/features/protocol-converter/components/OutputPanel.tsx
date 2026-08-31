@@ -11,15 +11,17 @@ import type { ReactNode } from 'react';
 import { useTranslation } from '@/app/providers/LanguageProvider';
 import { bytesToHex } from '@/protocol-core/buffers/representation';
 
-import type { ConversionOutput } from '../converterTypes';
+import type { ConversionOutput, ConvertedPacket } from '../converterTypes';
 
 const TABLE_CELL_CLASS = 'border-b border-line px-2 py-1 text-left text-sm text-text';
 
 interface OutputPanelProps {
   readonly output: ConversionOutput | null;
+  /** Yalnız gerçek bayt üreten (`mqtt-publish`) hedefte anlamlı — bkz. `converterTypes.ts`. */
+  readonly onSendToPacketBuilder: (packet: ConvertedPacket) => void;
 }
 
-export function OutputPanel({ output }: OutputPanelProps): ReactNode {
+export function OutputPanel({ output, onSendToPacketBuilder }: OutputPanelProps): ReactNode {
   const { t } = useTranslation();
 
   if (output === null) {
@@ -89,12 +91,22 @@ export function OutputPanel({ output }: OutputPanelProps): ReactNode {
       </pre>
 
       {output.packets.length > 0 ? (
-        <ul className="flex flex-col gap-1" data-testid="converter-packets">
+        <ul className="flex flex-col gap-2" data-testid="converter-packets">
           {output.packets.map((packet) => (
-            <li key={packet.mappingId} className="font-mono text-xs text-text">
+            <li key={packet.mappingId} className="flex flex-wrap items-center gap-2">
               {/* Hex, monitörün çözdüğü paketin AYNISIDIR: baytları `mqtt`
                   plugin'inin kendi encoder'ı üretti. */}
-              {packet.topic}: {bytesToHex(packet.bytes)}
+              <span className="font-mono text-xs text-text">
+                {packet.topic}: {bytesToHex(packet.bytes)}
+              </span>
+              <button
+                type="button"
+                data-testid={`converter-send-to-builder-${packet.mappingId}`}
+                className="rounded-token-sm border border-line bg-raised px-2 py-1 text-xs text-text hover:border-line-strong hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                onClick={() => onSendToPacketBuilder(packet)}
+              >
+                {t('converter.output.sendToBuilder')}
+              </button>
             </li>
           ))}
         </ul>

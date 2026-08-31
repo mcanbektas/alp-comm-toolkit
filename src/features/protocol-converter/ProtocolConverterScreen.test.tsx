@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
+import { useConverterHandoffStore } from '@/app/store/converterHandoffStore';
 import { protocolRegistry } from '@/protocol-core/registry';
 import { registerBuiltInProtocols } from '@/protocols';
 import { translations } from '@/translations/all';
@@ -18,11 +20,14 @@ const tr = translations.tr;
  */
 registerBuiltInProtocols(protocolRegistry);
 
+/** `useNavigate` (Packet Builder'a gönder) bir `<Router>` bağlamı ister — `PacketBuilderScreen.test.tsx` ile aynı desen. */
 function renderScreen(): void {
   render(
-    <LanguageProvider>
-      <ProtocolConverterScreen />
-    </LanguageProvider>,
+    <MemoryRouter>
+      <LanguageProvider>
+        <ProtocolConverterScreen />
+      </LanguageProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -37,6 +42,7 @@ describe('ProtocolConverterScreen', () => {
   beforeEach(() => {
     window.localStorage.clear();
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'tr');
+    useConverterHandoffStore.getState().clearPendingPacket();
   });
 
   it('boş açılmaz: spec §33 örneği hazır gelir ve gerçek paket üretir', async () => {
@@ -102,5 +108,16 @@ describe('ProtocolConverterScreen', () => {
 
     fireEvent.click(screen.getByTestId('converter-mapping-2-remove'));
     expect(screen.queryByTestId('converter-mapping-2-source')).not.toBeInTheDocument();
+  });
+
+  it('"Packet Builder\'a gönder" paketi handoff store\'a hex+etiketiyle bırakır', async () => {
+    renderScreen();
+    await waitForParsedFrame();
+
+    fireEvent.click(screen.getByTestId('converter-send-to-builder-mapping-1'));
+
+    const state = useConverterHandoffStore.getState();
+    expect(state.pendingHex).toBe('3017001373656E736F72732F74656D70657261747572653130');
+    expect(state.pendingLabel).toBe('sensors/temperature');
   });
 });

@@ -11,13 +11,17 @@
  * saf ve senkron, ekran yalnız durumu toplayıp sonucu çizer.
  */
 
+import { useCallback } from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
+import { useConverterHandoffStore } from '@/app/store/converterHandoffStore';
+import { bytesToHex } from '@/protocol-core/buffers/representation';
 
 import { MappingPanel } from './components/MappingPanel';
 import { OutputPanel } from './components/OutputPanel';
-import type { DestinationKind } from './converterTypes';
+import type { ConvertedPacket, DestinationKind } from './converterTypes';
 import { sourceOptions, useProtocolConverter } from './useProtocolConverter';
 
 const SECTION_CLASS = 'flex flex-col gap-3 rounded-token border border-line bg-surface p-4';
@@ -33,6 +37,23 @@ export function ProtocolConverterScreen(): ReactNode {
   const { state, pluginState, parseState, output } = converter;
   const options = sourceOptions();
   const fields = parseState.status === 'ok' ? parseState.frame.fields : [];
+
+  const navigate = useNavigate();
+  const setPendingPacket = useConverterHandoffStore((store) => store.setPendingPacket);
+
+  /**
+   * Bir sonraki `/packet-builder` ziyaretinde `hexOverride`e uygulanacak
+   * ham hex `converterHandoffStore`a bırakılır — feature'lar arası doğrudan
+   * import yasak (CLAUDE.md mimari kuralı), `protocolSchemaStore.ts`nin
+   * Studio↔Builder köprüsüyle AYNI desen.
+   */
+  const handleSendToPacketBuilder = useCallback(
+    (packet: ConvertedPacket) => {
+      setPendingPacket(bytesToHex(packet.bytes), packet.topic);
+      navigate('/packet-builder');
+    },
+    [navigate, setPendingPacket],
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -148,7 +169,7 @@ export function ProtocolConverterScreen(): ReactNode {
           </select>
         </label>
 
-        <OutputPanel output={output} />
+        <OutputPanel output={output} onSendToPacketBuilder={handleSendToPacketBuilder} />
       </section>
     </div>
   );

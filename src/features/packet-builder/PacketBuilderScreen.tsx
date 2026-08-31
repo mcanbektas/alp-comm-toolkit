@@ -23,11 +23,12 @@
  * tuşta duyuru almaz; "şu an elimde ne var" sorusunun cevabı bu düğmededir.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useTranslation } from '@/app/providers/LanguageProvider';
+import { useConverterHandoffStore } from '@/app/store/converterHandoffStore';
 import { CopyButton, ResultField, SelectField, TextField } from '@/components/forms';
 import { ProjectPanel } from '@/features/projects';
 import { bytesToHex } from '@/protocol-core/buffers/representation';
@@ -143,6 +144,26 @@ export function PacketBuilderScreen(): ReactNode {
   const [exportErrorKey, setExportErrorKey] = useState<string | null>(null);
   /** Şablon adı yerel kalır: kaydedilene kadar store'a girmesinin bir anlamı yok. */
   const [templateName, setTemplateName] = useState('');
+  /** Protocol Converter'dan az önce uygulanmış paketin etiketi — bkz. aşağıdaki effect. */
+  const [appliedHandoffLabel, setAppliedHandoffLabel] = useState<string | null>(null);
+
+  const pendingHandoffHex = useConverterHandoffStore((store) => store.pendingHex);
+  const pendingHandoffLabel = useConverterHandoffStore((store) => store.pendingLabel);
+  const clearPendingHandoff = useConverterHandoffStore((store) => store.clearPendingPacket);
+  const { setHexOverride } = builder;
+
+  /**
+   * TÜKET-VE-SİL: Protocol Converter'dan gelen bekleyen bir paket varsa hemen
+   * `hexOverride`e uygulanır ve store temizlenir — silinmezse ekrana sonradan
+   * (geri tuşu, sekme değişimi) dönüldüğünde ESKİ paket sessizce yeniden
+   * uygulanırdı (bkz. `converterHandoffStore.ts`).
+   */
+  useEffect(() => {
+    if (pendingHandoffHex === null) return;
+    setHexOverride(pendingHandoffHex);
+    setAppliedHandoffLabel(pendingHandoffLabel);
+    clearPendingHandoff();
+  }, [pendingHandoffHex, pendingHandoffLabel, clearPendingHandoff, setHexOverride]);
 
   const outgoing = builder.outgoingBytes;
   const outgoingHex = useMemo(() => (outgoing === null ? '' : bytesToHex(outgoing)), [outgoing]);
@@ -188,6 +209,16 @@ export function PacketBuilderScreen(): ReactNode {
         <p className="max-w-3xl text-sm text-muted">{t('builder.intro')}</p>
         <p className="max-w-3xl text-xs text-muted">{t('builder.privacy')}</p>
       </header>
+
+      {appliedHandoffLabel === null ? null : (
+        <p
+          role="status"
+          data-testid="builder-handoff-applied"
+          className="rounded-token border border-line bg-accent-soft p-3 text-sm text-text"
+        >
+          {t('builder.handoff.applied', { label: appliedHandoffLabel })}
+        </p>
+      )}
 
       {/* --- Şema durumu şeridi ------------------------------------------- */}
       <section className={sectionClass()} data-testid="builder-schema-strip">

@@ -90,6 +90,25 @@ test('kaynak protokol değişince kayıp alan sorun listesine iner', async ({ pa
   expect(consoleErrors).toEqual([]);
 });
 
+/**
+ * Converter → Packet Builder köprüsü (2026-08-31). `converterHandoffStore`
+ * ile jsdom'da da sınanabilir ama gezinme + hex'in Builder'ın kendi HEX
+ * override'ına gerçekten uygulandığı yalnız burada, gerçek rota geçişiyle
+ * kanıtlanır.
+ */
+test('paket Packet Builder\'a gönderilince hex override olarak uygulanır', async ({ page }) => {
+  const consoleErrors = await openConverter(page);
+  await expect(page.getByTestId('converter-packets')).toContainText('sensors/temperature: 30170013');
+
+  await page.getByTestId('converter-send-to-builder-mapping-1').click();
+
+  await expect(page.getByRole('heading', { level: 1, name: tr['builder.title'] })).toBeVisible();
+  await expect(page.getByTestId('builder-handoff-applied')).toContainText('sensors/temperature');
+  await expect(page.getByTestId('builder-preview-hex')).toContainText('30170013');
+
+  expect(consoleErrors).toEqual([]);
+});
+
 test('yatay taşma yok', async ({ page }) => {
   await openConverter(page);
   await expect(page.getByTestId('converter-value-mapping-1')).toHaveText('10');

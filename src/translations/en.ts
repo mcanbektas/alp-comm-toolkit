@@ -1020,6 +1020,7 @@ export const en: TranslationDictionary = {
     'Fill in the schema fields, let length and checksum be computed for you, see the packet as hex and send it to the connected source.',
   'builder.privacy':
     'The schema, the field values and the generated packets stay in this browser; no byte is sent to a server.',
+  'builder.handoff.applied': 'Packet from Protocol Converter loaded into the hex field: {label}',
   'builder.section.schema': 'Schema',
   'builder.section.connection': 'Connection',
   'builder.section.form': 'Field values',
@@ -1877,6 +1878,7 @@ export const en: TranslationDictionary = {
   'converter.output.sourceField': 'Source field',
   'converter.output.destinationName': 'Destination name',
   'converter.output.value': 'Value',
+  'converter.output.sendToBuilder': 'Send to Packet Builder',
   'converter.issue.unknownField': 'The mapped field is missing from this frame: {detail}',
   'converter.issue.missingDestination': 'The destination name is empty, so the row was left out: {detail}',
   'converter.issue.notNumeric': 'The field is not numeric, so no transform was applied: {detail}',

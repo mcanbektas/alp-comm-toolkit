@@ -1023,6 +1023,7 @@ export const tr = {
     'Şemadaki alanları doldurun; uzunluk ve checksum kendiliğinden hesaplansın, paketi hex olarak görün ve bağlı kaynağa gönderin.',
   'builder.privacy':
     'Şema, alan değerleri ve üretilen paketler yalnız bu tarayıcıda kalır; hiçbir bayt sunucuya gönderilmez.',
+  'builder.handoff.applied': 'Protocol Converter\'dan gelen paket hex alanına yüklendi: {label}',
   'builder.section.schema': 'Şema',
   'builder.section.connection': 'Bağlantı',
   'builder.section.form': 'Alan değerleri',
@@ -1878,6 +1879,7 @@ export const tr = {
   'converter.output.sourceField': 'Kaynak alan',
   'converter.output.destinationName': 'Hedef ad',
   'converter.output.value': 'Değer',
+  'converter.output.sendToBuilder': 'Packet Builder\'a gönder',
   'converter.issue.unknownField': 'Eşlemedeki alan bu çerçevede yok: {detail}',
   'converter.issue.missingDestination': 'Hedef ad boş, satır çıktıya girmedi: {detail}',
   'converter.issue.notNumeric': 'Alan sayısal değil, dönüşüm uygulanmadı: {detail}',

@@ -856,3 +856,42 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `connection/` KLASÖR BORCU SIFIRLANDI: `serial`/`usb`/`bluetooth`/
   `websocket`/`file`/`mock` hepsi dolu, spec §6'nın `connection/` iskeleti
   tamamlandı.
+
+  **14. ✅ Protocol Converter → Packet Builder KÖPRÜSÜ YAZILDI** (2026-08-31).
+  `mqtt-publish` hedefinde üretilen GERÇEK paket artık tek tıkla Packet
+  Builder'ın HEX override'ına taşınabiliyor — spec §33'ün "çıktıyı Packet
+  Builder'a/monitöre aktarmak" adayının ilk yarısı.
+
+  **Feature'lar arası import YASAĞI köprüyü `app/store/`e itti** —
+  `protocolSchemaStore.ts`nin Studio↔Builder deseninin AYNISI: yeni
+  `app/store/converterHandoffStore.ts` (Zustand, KALICI DEĞİL — `uiStore.ts`
+  ile aynı gerekçe, bekleyen bir aktarım yeniden yüklemeyi hak etmiyor).
+  Converter yazar (`setPendingPacket(hex, topic)`), Builder okur ve
+  TÜKET-VE-SİL uygular (`useEffect` içinde `setHexOverride` + hemen
+  `clearPendingPacket` — silinmeseydi ekrana sonradan dönüldüğünde ESKİ paket
+  sessizce yeniden uygulanırdı).
+
+  **Landing yeri `hexOverride`, yeni bir "manuel mod" DEĞİL** —
+  `PacketBuilderApi.hexOverride: string | null` zaten vardı (spec §10 "HEX
+  düzenleme"); köprü onu DIŞARIDAN dolduran ikinci bir yazardan ibaret.
+  Yeni bir üretim yolu icat etmek yerine var olanı kullanmak riski oldukça
+  düşürdü.
+
+  **`bytesToHex`/`hexToBytes` biçim uyumu KONTROL EDİLDİ, varsayılmadı**:
+  `bytesToHex` boşluksuz büyük harf üretir, `hexToBytes` boşlukları
+  temizleyip çift hane sayısını doğrular — round-trip birebir çalışıyor,
+  ayrı bir ayrıştırıcı yazmaya gerek kalmadı.
+
+  **Converter → MONİTÖR köprüsü BİLEREK YAPILMADI.** İlk bakışta dosya
+  oynatma kaynağı (`createFileSource`, tek `LogRecord`) üzerinden mümkün
+  görünüyordu, ama monitörün `FrameTable`ı PROTOKOL ÇÖZMEZ — yalnız genel
+  çerçeveleme + sayısal musluklar (`monitorIngestor.ts`, `ProtocolPlugin`/
+  `parser.parse` HİÇ geçmiyor). Dönüştürülmüş TEK bir paketi "dosya oynatma"
+  gibi enjekte etmek hem mekanizma uyuşmazlığı (oynatma hızı/tempo tek kayıt
+  için anlamsız) hem de kazanç getirmiyordu: monitörde adlandırılmış alan
+  görünmeyecekti, Converter'ın kendi hex çıktısından fazlasını vermezdi.
+  Değer/risk dengesi olumsuz çıkınca YAPILMADI — spec'in "monitöre aktarmak"
+  adayı hâlâ açık, gerçek bir ihtiyaç/tasarım çıkarsa buraya dönülmeli.
+
+  Doğrulama: typecheck temiz, birim 6897/1 atlandı (+6 yeni), e2e 1359/2
+  atlandı (+1 yeni — gerçek tarayıcıda uçtan uca gezinme + hex override).

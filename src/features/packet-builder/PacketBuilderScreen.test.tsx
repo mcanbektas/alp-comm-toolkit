@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LanguageProvider } from '@/app/providers/LanguageProvider';
+import { useConverterHandoffStore } from '@/app/store/converterHandoffStore';
 import { useProtocolSchemaStore } from '@/app/store/protocolSchemaStore';
 import type { ByteSource, ByteSourceHandlers } from '@/connection/types';
 import { SPEC_SENSOR_PROTOCOL_JSON } from '@/protocol-core/schemas/specFixture';
@@ -154,6 +155,7 @@ beforeEach(() => {
   holder.requestSerialPort.mockReset();
   holder.downloadTextFile.mockReset();
   useProtocolSchemaStore.setState({ schemaJson: SPEC_SENSOR_PROTOCOL_JSON });
+  useConverterHandoffStore.getState().clearPendingPacket();
 });
 
 afterEach(() => {
@@ -251,6 +253,17 @@ describe('PacketBuilderScreen', () => {
     expect(screen.getByTestId('builder-build-byte-count')).toHaveTextContent('0');
     expect(screen.getByTestId('builder-export-unavailable')).toBeInTheDocument();
     expect(screen.getByTestId('builder-export-hex')).toBeDisabled();
+  });
+
+  it('applies a packet handed off from Protocol Converter as a hex override and consumes it once', () => {
+    useConverterHandoffStore.getState().setPendingPacket('AABBCC', 'sensors/temperature');
+
+    renderScreen();
+
+    expect(screen.getByTestId('builder-handoff-applied')).toHaveTextContent('sensors/temperature');
+    expect(screen.getByTestId('builder-preview-hex')).toHaveTextContent('AABBCC');
+    // Tüket-ve-sil: store bir sonraki ziyarette AYNI paketi yeniden uygulamamalı.
+    expect(useConverterHandoffStore.getState().pendingHex).toBeNull();
   });
 
   it('lists every schema field in wire order for the step-by-step section', () => {
