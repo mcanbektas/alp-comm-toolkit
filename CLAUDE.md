@@ -490,13 +490,62 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   `ProtocolPage.tsx`in `DEFINITION_PANELS`inde bugün **DOKUZ panel** var:
   `dbc · eds · custom-schema · vendor-map · a2l · gsdml · iodd · scl · dsdl`.
 
-  **Panel borcunun bugünkü ölçümü (2026-08-31, KODDAN sayıldı — gsd kapanışıyla
-  GÜNCELLENDİ, 12 biçimin kayıt dağılımı ve panel durumu):** paneli olmayan
-  TEK biçim kaldı — **`ldf` (1 kayıt)**, toplam **1 kayıt**. `custom-schema`
-  21, `vendor-map` 9, `dbc` 6, `a2l` 3, `dsdl` 2, `eds` 2, `xif` 1, `gsd` 1
-  kayıt taşıyor ve hepsinin paneli var. `ldf` bu depoda HİÇ araştırılmadı
-  (format grameri sıfırdan çıkarılmalı — şema tabloları frame/signal/schedule
-  EDS/XIF/GSD'den daha karmaşık olabilir, kendi brif turunu gerektirir).
+  **🏁 PANEL BORCU SIFIRLANDI (2026-08-31, ldf kapanışıyla — KODDAN sayıldı):**
+  `DefinitionFormat`ın **on iki üyesinin HEPSİNİN paneli var**; paneli olmayan
+  biçim KALMADI. Kayıt dağılımı: `custom-schema` 21, `vendor-map` 9, `dbc` 6,
+  `a2l` 3, `dsdl` 2, `eds` 2, `xif` 1, `gsd` 1, `ldf` 1 — artı `gsdml`/`iodd`/
+  `scl` XML üçlüsü. Ölçüm: 172 kayıt, 44'ünde `definitions` sekmesi var, boş
+  biçim listesi taşıyan kayıt SIFIR.
+
+  **Bunun YAPISAL sonucu var ve kodda karşılığı verildi:** `definitions`
+  sekmesinin "planlandı" yedek dalına GERÇEK katalog verisiyle artık
+  ULAŞILAMIYOR. Dokuz e2e tanım turu `lin`i "motoru olmayan biçim" bekçisi
+  olarak kullanıyordu (üç değil — DOKUZ; ölçüm brifin tahminini aştı) ve hepsi
+  dayanaksız kaldı. Üç seçenekten silmek de sahte katalog kaydı uydurmak da
+  REDDEDİLDİ (ikincisini `ProtocolPage.test.tsx`in kendi giriş notu yasaklıyor);
+  bekçiler bunun yerine DAHA GÜÇLÜ bir iddiaya çevrildi: "benim panelim `lin`de
+  AÇILMAZ, `lin`in kendi biçiminin paneli (LDF) AÇILIR" — yokluk değil doğru
+  DAĞITIM kanıtlanıyor. Erişilemez yedek dal `ProtocolPage.test.tsx`e taşındı:
+  `resolveDefinitionPanel` saf işlev olarak ÇIKARILDI ve katalogdan TÜREYEN bir
+  kapsam değişmezi eklendi — panelsiz bir biçim eklendiği gün kırılır. Yedek dal
+  ve `Partial<Record<...>>` BİLEREK korundu (gerekçe `ProtocolPage.tsx`te).
+
+  **✅ KAPANDI: LDF parser'ı + `ldf` `definitions` paneli YAZILDI** (2026-08-31,
+  aynı oturumda XIF ve GSD'nin ardından — üçü art arda). `lin` kaydının
+  `definitions` sekmesi artık gerçek bir çerçeve/sinyal/çizelge tablosu basıyor.
+  Söz dizimi kaynağı bu kez BİRİNCİL: **LIN Specification Package rev 2.2A**
+  (31.12.2010) bölüm 9, indirildi ve okundu — iki bağımsız ayna aynı dosyayı
+  veriyor. `ISO 17987-6` ücretli, OKUNMADI ve iddia EDİLMEDİ. Lehçeler: 2.0/2.1/
+  2.2 tam (tek gerçek ayrım `configurable_frames`, ikisi de okunuyor), 1.3
+  KISMİ ve bu açıkça yazılı — 1.3'ün id→uzunluk kuralı 2.2A'da YOK, o yüzden
+  UYGULANMADI: uzunluk `undefined` kalır ve satır numaralı uyarı düşer.
+  Fixture Vector Informatik'in kendi DaVinci çıktısı (koltuk motoru kümesi,
+  Apache-2.0 `ecubus/EcuBus-Pro` aynasından — üretici portalından DEĞİL, GSD
+  dalgasıyla aynı katman ve aynı açıklıkla); 27 gerçek `.ldf` toplanıp
+  §9.2 bölümlerine göre puanlandı, izinli lisanslılar içinde en geniş kesiti
+  (12 bölümün 10'u) bu taşıyordu. İkinci fixture LIN 1.3 lehçesi için
+  (MIT `c4deszes/ldfparser`), tier'ı ayrıca belirtilmiş.
+  **Çöz alt aracı BU KEZ EKLENDİ — önceki iki dalganın kararını TERSİNE
+  çevirerek, ölçümle.** XIF'te tip telde yoktu, GSD'de yerleşim dosyada yoktu;
+  LDF'te İKİSİ DE VAR (§9.2.4.1 bit ofseti, §9.2.6.1 ölçekleme) ve ölçüldü:
+  7/7 koşulsuz çerçeve tam yerleşim taşıyor (XIF'te oran %14, GSD'de sıfırdı).
+  Üstelik yetenek başka hiçbir yerde YOK — `linPlugin`in `decodeOptions`u yok,
+  `data` tek ayrışmamış blok. En güçlü gerekçe: `lin.ts` kendi başında checksum
+  konvansiyonunun "telden OKUNAMAZ, gönderenin yapılandırmasıdır" diyor; LDF
+  TAM OLARAK o yapılandırmadır (§2.3.1.5), yani `resolveLdfChecksumModel`
+  motorun kendi yazdığı bir boşluğu kapatıyor ve panel kararı GEREKÇESİYLE
+  basıyor. Açılış çerçevesi ve örnek baytlar SABİT DEĞİL, motorda türetiliyor
+  (`chooseDefaultLdfFrame` + `buildLdfSampleData`, dosyanın kendi `init_value`
+  larını paketler) — bir sabit ancak tek dosyanın tek çerçevesi için doğru
+  olabilirdi ve kullanıcı kendi LDF'ini yüklediği anda çürürdü.
+  **Fixture'ın KENDİ kusuru düzeltilmeden gösteriliyor:** Vector'ün
+  `Motor1Position`ı (32 bit bayt dizisi) bit 7'den başlıyor ve §2.2.3'ü ihlal
+  ediyor (kardeşi `Motor2Position` bit 8'de, kurallı). Ayrıştırıcı satır
+  numaralı uyarı basar, çözücü o sinyalde okuma UYDURMAZ.
+  `computeLinParity` `lin.ts`ten DIŞA AÇILDI (panel PID'i ikinci kez
+  hesaplamasın diye; `features/`→`protocols/` emsali
+  `CellularInitializationDashboard`). `protocol-core/` hâlâ `protocols/`ten
+  içe aktarmıyor.
 
   **✅ KAPANDI: GSD parser'ı + `gsd` `definitions` paneli YAZILDI** (2026-08-31,
   aynı oturumda XIF'in hemen ardından). `profibus-dp` kaydının `definitions`

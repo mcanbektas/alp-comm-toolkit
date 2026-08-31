@@ -31,7 +31,11 @@
  *    çözer, üstelik `nvTypeNotOnWire` uyarısını KOŞULSUZ basar. İkinci bir
  *    bildirim noktası açmak ikisinin ayrışmasına davetiye olurdu.
  *
- * Emsal: `DbcPanel` de hex çöz aracı taşımaz. Onun yerine bu panel tip
+ * Karşı emsal (2026-08-31'de DÜZELTİLDİ — bu satır önce "`DbcPanel` de hex çöz
+ * aracı taşımaz" diyordu ve YANLIŞTI): `DbcPanel` bir çöz aracı TAŞIR
+ * (`dbc-sample-hex` → `decodeDbcMessage` → `dbc-decoded-table`), `LdfPanel` de
+ * öyle. İkisinde de tip VE yerleşim dosyada, çerçeve de telden adreslenebiliyor;
+ * ayrım tam olarak budur. Burada üçü de tutmadığı için araç YOK: bu panel tip
  * bilgisini GÖSTERİR ve telde doğrulanamayacağını KOŞULSUZ yazar.
  */
 

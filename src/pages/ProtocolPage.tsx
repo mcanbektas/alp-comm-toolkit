@@ -154,6 +154,12 @@ const GsdPanel = lazy(async () => {
   return { default: module.GsdPanel };
 });
 
+/** LDF paneli de TEMBEL: yalnız LIN'in `definitions` sekmesinde gerekir. */
+const LdfPanel = lazy(async () => {
+  const module = await import('@/features/protocol-definitions/LdfPanel');
+  return { default: module.LdfPanel };
+});
+
 /**
  * Cellular Initialization Dashboard da TEMBEL, aynı gerekçeyle: yalnız
  * `lte-modem-at`in `data` sekmesinde gerekir (karar 6'yla aynı sınıf iş).
@@ -168,6 +174,16 @@ const CellularInitializationDashboard = lazy(async () => {
  * `showsDbcPanel` boolean'ıydı; ikinci biçim (EDS) eklenince üçlü ternary'yi
  * büyütmek yerine seçici bir yapıya çevrildi — üçüncü bir biçim geldiğinde
  * yalnız bu tabloya satır eklenir, render dalına dokunulmaz.
+ *
+ * ── ⚠ LDF DALGASINDAN İTİBAREN: TABLO ARTIK **TAM** ─────────────────────────
+ * `ldf`in eklenmesiyle `DefinitionFormat`ın on iki üyesinin HEPSİNİN karşılığı
+ * var. Yani aşağıdaki `find` artık GERÇEK katalog verisiyle `undefined`
+ * DÖNEMEZ ve "planlandı" dalına kataloğun içinden ULAŞILAMAZ. `Partial<>`
+ * BİLEREK korunuyor: tabloyu `Record<>`e çevirmek, yeni bir biçim eklendiği
+ * anda derlemeyi kırarak paneli yazmadan kayıt eklemeyi imkânsız kılardı ve
+ * hoşgörülü render dalını da anlamsızlaştırırdı. Yedek dal AYAKTA kalır ve
+ * `ProtocolPage.test.tsx` onu iki testle kapsar (biri kapsamı katalogdan
+ * ÖLÇER, biri çözüm mantığını doğrudan sınar).
  */
 const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   dbc: DbcPanel,
@@ -181,7 +197,30 @@ const DEFINITION_PANELS: Partial<Record<DefinitionFormat, ComponentType>> = {
   dsdl: DsdlPanel,
   xif: XifPanel,
   gsd: GsdPanel,
+  ldf: LdfPanel,
 };
+
+/**
+ * Kaydın `definitions` listesini panele çevirir — İLK eşleşen kazanır
+ * (`marine-j1939`in `['dbc', 'custom-schema']`ı gibi çok biçimli kayıtlar için).
+ * Liste boşsa ya da hiçbir biçimin motoru yoksa `undefined` döner ve sayfa
+ * "planlandı" dalına düşer.
+ *
+ * `ProtocolPage`in içinden ÇIKARILDI, çünkü LDF dalgasından sonra o yedek dala
+ * gerçek katalog verisiyle ulaşılamıyor (yukarıdaki nota bakın) ve e2e ile
+ * kapsanamıyor. Saf bir işlev olarak burada durunca `ProtocolPage.test.tsx`
+ * onu KATALOĞU SAHTELEMEDEN, doğrudan sınayabiliyor.
+ */
+export function resolveDefinitionPanel(
+  definitions: readonly DefinitionFormat[] | undefined,
+): ComponentType | undefined {
+  return definitions?.map((format) => DEFINITION_PANELS[format]).find((panel) => panel !== undefined);
+}
+
+/** Bir biçimin panel motoru var mı — kapsam değişmezini ölçen testin kapısı. */
+export function hasDefinitionPanel(format: DefinitionFormat): boolean {
+  return DEFINITION_PANELS[format] !== undefined;
+}
 
 /**
  * Spec §43'ün custom binary protocol fixture'ı: `AA 05 10 03 34 12 7F 4F 55`.
@@ -329,15 +368,16 @@ export function ProtocolPage(): ReactElement {
   /**
    * Hangi tanım paneli açılacağı kaydın `definitions` listesinden gelir
    * (alias zincirine inilmez — hangi biçimlerin gösterileceği sayfanın kendi
-   * verisidir). Motoru olmayan bir biçim (`ldf`, …) listede olsa da
-   * `DEFINITION_PANELS`te karşılığı yoksa `undefined` kalır ve "planlandı"
-   * dalına düşülür — birden çok biçim varsa (`marine-j1939`'un
-   * `['dbc', 'custom-schema']`ı gibi) İLK eşleşen kazanır.
+   * verisidir). Çözüm `resolveDefinitionPanel`de; `undefined` dönerse
+   * "planlandı" dalına düşülür.
+   *
+   * ⚠ LDF dalgasından itibaren on iki biçimin hepsinin paneli var, yani bu
+   * çağrı GERÇEK katalog verisiyle `undefined` DÖNMEZ. Yedek dal yine de
+   * duruyor ve `ProtocolPage.test.tsx` onu doğrudan sınıyor — biçim listesi
+   * büyüdüğünde panelsiz bir kayıt yine buraya düşecek.
    */
   const DefinitionPanel =
-    activeTab === 'definitions'
-      ? protocol.definitions?.map((format) => DEFINITION_PANELS[format]).find((panel) => panel !== undefined)
-      : undefined;
+    activeTab === 'definitions' ? resolveDefinitionPanel(protocol.definitions) : undefined;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">

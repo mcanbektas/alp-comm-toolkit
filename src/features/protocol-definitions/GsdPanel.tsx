@@ -35,9 +35,14 @@
  *    bu fixture'ın cihazından ALINMAMIŞTIR; Chk_Cfg telgrafı örnek kümesinde
  *    hiç yok. İki tarafı birbirine çözdürmek uydurma bir eşleşme üretirdi.
  *
- * Emsal: `XifPanel` ve `DbcPanel` de hex çöz aracı taşımaz. Onun yerine bu
- * panel modülün BAYT UZUNLUĞUNU ve YÖNÜNÜ — yani telde eksik olan tam bilgiyi —
- * gösterir ve konfigürasyonun bu dosyada olmadığını KOŞULSUZ yazar.
+ * Emsal `XifPanel`dir, o da araç taşımaz. (2026-08-31'de DÜZELTİLDİ: bu satır
+ * `DbcPanel`i de aynı kefeye koyuyordu ve YANLIŞTI — `DbcPanel` bir çöz aracı
+ * TAŞIR, `dbc-sample-hex` → `decodeDbcMessage` → `dbc-decoded-table`; `LdfPanel`
+ * de öyle. Ayrım şu: DBC ve LDF'te tip VE yerleşim dosyada, çerçeve de telden
+ * adreslenebiliyor. Burada yerleşimin hangi modüle ait olduğu dosyada YOK.)
+ * Onun yerine bu panel modülün BAYT UZUNLUĞUNU ve YÖNÜNÜ — yani telde eksik
+ * olan tam bilgiyi — gösterir ve konfigürasyonun bu dosyada olmadığını
+ * KOŞULSUZ yazar.
  */
 
 import { useCallback, useState } from 'react';

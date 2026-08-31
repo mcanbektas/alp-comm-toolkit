@@ -1529,6 +1529,108 @@ export const en: TranslationDictionary = {
   'definition.gsd.issue.duplicateModuleReference':
     'The same Module_Reference number is used by more than one module; it has to be unique per device.',
 
+  // --- LDF (LIN Description File) definition panel ---
+  'definition.ldf.action.import': 'Import LDF file',
+  'definition.ldf.sampleNotice':
+    'A real vendor file is shown (a seat motor LIN cluster produced with Vector DaVinci Network Designer). You can import your own .ldf file; it never leaves your device.',
+  'definition.ldf.protocolVersion': 'LIN protocol version',
+  'definition.ldf.languageVersion': 'LDF language version',
+  'definition.ldf.speed': 'Speed (kbit/s)',
+  'definition.ldf.master': 'Master node',
+  'definition.ldf.timeBase': 'Time base (ms)',
+  'definition.ldf.jitter': 'Jitter (ms)',
+  'definition.ldf.slaves': 'Slave nodes',
+  'definition.ldf.frameCount': 'Frame count',
+  'definition.ldf.signalCount': 'Signal count',
+  'definition.ldf.line': 'Line',
+  'definition.ldf.noSignals': 'No signal placement',
+  'definition.ldf.checksumNote':
+    'The checksum model is RESOLVED from this file: whether a LIN frame uses the classic or the enhanced checksum cannot be read off the wire, because it is the sender configuration. Spec 2.3.1.5 determines it per frame identifier: classic when the involved slave node is LIN 1.x, enhanced when it is LIN 2.x; identifiers 60 (0x3C) and 61 (0x3D) always use classic. The table below prints the verdict and its reason for every frame.',
+  'definition.ldf.offsetNote':
+    'The offset is the least significant bit position of the signal in the data field (spec 9.2.4.1), and the signal is transmitted LSB first. The protected identifier (PID) is the 6-bit frame identifier plus two parity bits; that is what travels on the wire.',
+  'definition.ldf.noNodeAttributes':
+    'This file has no Node_attributes section. The LIN 1.3 dialect has no such section; diagnostic addresses are given in a separate section.',
+  'definition.ldf.signalGroupsNote':
+    'Signal group (a LIN 1.3 leftover, marked deprecated by spec 9.2.3.3):',
+  'definition.ldf.table.frames': 'Frames',
+  'definition.ldf.table.signals': 'Signals',
+  'definition.ldf.table.nodes': 'Node attributes',
+  'definition.ldf.table.schedules': 'Schedule tables',
+  'definition.ldf.table.decoded': 'Decode a captured frame',
+  'definition.ldf.column.frameId': 'Identifier',
+  'definition.ldf.column.protectedId': 'PID',
+  'definition.ldf.column.name': 'Name',
+  'definition.ldf.column.kind': 'Kind',
+  'definition.ldf.column.publisher': 'Publisher',
+  'definition.ldf.column.lengthBytes': 'Length (bytes)',
+  'definition.ldf.column.checksumModel': 'Checksum model',
+  'definition.ldf.column.layout': 'Layout',
+  'definition.ldf.column.sizeBits': 'Size (bits)',
+  'definition.ldf.column.signalKind': 'Signal kind',
+  'definition.ldf.column.initValue': 'Initial value',
+  'definition.ldf.column.subscribers': 'Subscribers',
+  'definition.ldf.column.encoding': 'Encoding type',
+  'definition.ldf.column.linProtocol': 'LIN version',
+  'definition.ldf.column.configuredNad': 'Configured NAD',
+  'definition.ldf.column.productId': 'Product id (supplier / function / variant)',
+  'definition.ldf.column.timing': 'Timing (ms)',
+  'definition.ldf.column.configurableFrames': 'Configurable frames (ordered)',
+  'definition.ldf.column.entryCount': 'Entries',
+  'definition.ldf.column.cycleTime': 'Cycle time (ms)',
+  'definition.ldf.column.entries': 'Entry list',
+  'definition.ldf.column.offset': 'Offset (bits)',
+  'definition.ldf.kind.unconditional': 'Unconditional',
+  'definition.ldf.kind.sporadic': 'Sporadic',
+  'definition.ldf.kind.eventTriggered': 'Event triggered',
+  'definition.ldf.kind.diagnostic': 'Diagnostic',
+  'definition.ldf.signalKind.scalar': 'Scalar',
+  'definition.ldf.signalKind.byteArray': 'Byte array',
+  'definition.ldf.checksum.classic': 'Classic',
+  'definition.ldf.checksum.enhanced': 'Enhanced',
+  'definition.ldf.checksum.unknown': 'Undetermined',
+  'definition.ldf.checksum.reason.reservedDiagnostic':
+    'Reserved diagnostic identifier: always classic',
+  'definition.ldf.checksum.reason.linOneSlave': 'The slave node declares LIN 1.x',
+  'definition.ldf.checksum.reason.linTwoSlave': 'The slave node declares LIN 2.x',
+  'definition.ldf.checksum.reason.mixedSlaves':
+    'Mixed cluster: one slave node is LIN 1.x, so classic',
+  'definition.ldf.checksum.reason.clusterVersion':
+    'No node attributes; taken from the cluster version',
+  'definition.ldf.checksum.reason.noSlaveVersion':
+    'The file carries no version information; nothing was assumed',
+  'definition.ldf.decode.frameLabel': 'Frame',
+  'definition.ldf.decode.hexLabel': 'Data field (hex)',
+  'definition.ldf.decode.scopeNote':
+    'The input is the data field only: the Sync, PID and checksum bytes are not entered here. Signals are read LSB first (spec 2.2.3) and the physical value comes from the scale and the offset (spec 9.2.6.1, equation 17). The opening bytes are not invented: they are packed from the initial values the file declares for the selected frame signals (spec 9.2.3.1), and they are re-derived whenever the frame changes. You can type over them.',
+  'definition.ldf.decode.signalNotDefined': 'Signal not defined',
+  'definition.ldf.decode.unaligned': 'Not on a byte boundary',
+  'definition.ldf.decode.outOfFrame': 'Does not fit the frame',
+  'definition.ldf.error.readFailed': 'The file could not be read.',
+  'definition.ldf.error.parseFailed':
+    'The file could not be read as a LIN Description File. A .ldf file starting with a LIN_description_file declaration is expected.',
+  'definition.ldf.issue.emptyInput': 'The file is empty.',
+  'definition.ldf.issue.notLdf':
+    'The file does not start with a LIN_description_file declaration; this is not an LDF.',
+  'definition.ldf.issue.noFrames': 'The file contains no frame definition.',
+  'definition.ldf.issue.malformedEntry': 'A declaration could not be read and was skipped:',
+  'definition.ldf.issue.unclosedSection':
+    'The curly braces are unbalanced; a section may be left unclosed.',
+  'definition.ldf.issue.unknownSection': 'An unrecognised section was skipped:',
+  'definition.ldf.issue.frameLengthMissing':
+    'The frame declares no length field (LIN 1.3 dialect). No length was derived:',
+  'definition.ldf.issue.signalNotDefined':
+    'The frame places a signal that has no definition in the Signals section:',
+  'definition.ldf.issue.signalOutOfFrame':
+    'The signal does not fit the declared frame length (offset plus size overflows):',
+  'definition.ldf.issue.unalignedByteArray':
+    'A byte array signal does not start on a byte boundary; spec 2.2.3 requires every byte to map to a single frame byte:',
+  'definition.ldf.issue.duplicateFrameId':
+    'The same frame identifier is used by more than one frame; it has to be unique within the cluster:',
+  'definition.ldf.issue.unknownEncodingSignal':
+    'Signal_representation binds an encoding to a signal that is not defined:',
+  'definition.ldf.issue.speedOutOfRange':
+    'The declared speed is outside the spec 9.2.1.3 range (1-20 kbit/s):',
+
   // --- Custom schema definition panel ---
   'definition.schema.action.import': 'Import schema file (JSON)',
   'definition.schema.action.export': 'Download schema as JSON',

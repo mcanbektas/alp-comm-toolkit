@@ -81,8 +81,16 @@ function byteAt(data: Uint8Array, offset: number): number {
   return data[offset] ?? 0;
 }
 
-/** Spec özet 10:667-668'in P0/P1 formülü — bit numaraları ID'nin kendi 6 bitidir. */
-function computeLinParity(id: number): number {
+/**
+ * Spec özet 10:667-668'in P0/P1 formülü — bit numaraları ID'nin kendi 6 bitidir.
+ *
+ * DIŞA AÇIK, çünkü `LdfPanel` çerçeve tablosunda korumalı kimliği (PID) de
+ * gösteriyor: LDF çerçeveleri 0-59 arası KİMLİKLE tanımlar ama telde taşınan
+ * PID'dir. Formülü panelde YENİDEN YAZMAK ikinci bir bildirim yeri açardı;
+ * tek kaynak burasıdır. `features/` katmanının `protocols/`ten içe aktarması
+ * yerleşik desen (`CellularInitializationDashboard` → `lteModemAt`).
+ */
+export function computeLinParity(id: number): number {
   const bit = (n: number): number => (id >>> n) & 1;
   const p0 = bit(0) ^ bit(1) ^ bit(2) ^ bit(4);
   const p1 = 1 ^ (bit(1) ^ bit(3) ^ bit(4) ^ bit(5));

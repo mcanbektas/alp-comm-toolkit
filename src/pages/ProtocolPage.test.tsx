@@ -4,11 +4,12 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { allEntries } from '@/app/catalog';
+import { DEFINITION_FORMATS } from '@/app/catalog/types';
 import { LANGUAGE_STORAGE_KEY, LanguageProvider } from '@/app/providers/LanguageProvider';
 import { registerBuiltInProtocols } from '@/protocols';
 import { translations } from '@/translations/all';
 
-import { ProtocolPage } from './ProtocolPage';
+import { hasDefinitionPanel, ProtocolPage, resolveDefinitionPanel } from './ProtocolPage';
 
 /**
  * Sayfa GERÇEK katalogla ve GERÇEK kayıt defteriyle koşuyor: sınanan şey tam da
@@ -153,5 +154,76 @@ describe('ProtocolPage cellular initialization dashboard', () => {
 
     expect(screen.getByText(translations.tr['protocol.plannedNotice'])).toBeInTheDocument();
     expect(screen.queryByTestId('cellular-dashboard')).not.toBeInTheDocument();
+  });
+});
+
+
+/**
+ * ── LDF DALGASININ YAPISAL SONUCU ───────────────────────────────────────────
+ * `ldf` panelinin gelmesiyle `DefinitionFormat`ın ON İKİ üyesinin de karşılığı
+ * oldu; yani `definitions` sekmesinin "planlandı" yedek dalına GERÇEK katalog
+ * verisiyle ARTIK ULAŞILAMIYOR. Dokuz e2e tanım turunun "motoru olmayan
+ * biçimde panel açılmaz" bekçisi bu yüzden anlamını yitirdi ve "panel biçime
+ * göre SEÇİLİYOR mu" testine çevrildi (bkz. `e2e/ldf-definitions.spec.ts`).
+ *
+ * Yedek dal KODDA DURUYOR ve kapsanmalı. E2E ile kapsanamayacağı için buraya
+ * İKİ birim testi kondu; ikisi de KATALOĞU SAHTELEMİYOR — dosyanın kendi giriş
+ * notundaki "kataloğu taklit etmek zinciri taklit etmek olur" kuralı geçerli:
+ *
+ *   1. **Kapsam DEĞİŞMEZİ** — kataloğun kullandığı her biçimin paneli var mı.
+ *      Bu, dokuz e2e bekçisinin toplamından GÜÇLÜ: tek bir seçilmiş kaydı
+ *      değil, `DEFINITION_FORMATS`ın hepsini ve `definitions` sekmesi taşıyan
+ *      44 kaydın hepsini ölçüyor. Yeni bir biçim panelsiz eklenirse KIRILIR.
+ *   2. **Çözüm MANTIĞI** — `resolveDefinitionPanel` saf bir işlev olarak
+ *      `undefined` dönebiliyor mu. Yedek dalın kapısı budur; sahte bir katalog
+ *      kaydı uydurmadan doğrudan sınanıyor.
+ */
+describe('ProtocolPage definition panel resolution', () => {
+  it('covers every definition format the catalog actually uses', () => {
+    const used = new Set(
+      allEntries().flatMap((entry) => entry.protocol.definitions ?? []),
+    );
+    expect(used.size).toBeGreaterThan(0);
+
+    const uncovered = [...used].filter((format) => !hasDefinitionPanel(format));
+    expect(uncovered, `panelsiz biçim(ler): ${uncovered.join(', ')}`).toEqual([]);
+  });
+
+  it('covers every declared definition format, not only the used ones', () => {
+    // LDF dalgasından itibaren bu daha güçlü iddia da tutuyor. Tutmadığı gün
+    // yedek dal yeniden erişilebilir demektir ve e2e bekçisi geri gelebilir.
+    const uncovered = DEFINITION_FORMATS.filter((format) => !hasDefinitionPanel(format));
+    expect(uncovered, `panelsiz biçim(ler): ${uncovered.join(', ')}`).toEqual([]);
+  });
+
+  it('leaves no record with a definitions tab but an empty format list', () => {
+    // `protocol.definitions` opsiyoneldir; boş bırakılan bir kayıt da yedek
+    // dala düşerdi. Bugün böyle bir kayıt YOK — değişirse burada görülür.
+    const empty = allEntries().filter(
+      (entry) =>
+        entry.protocol.tabs.includes('definitions') &&
+        (entry.protocol.definitions === undefined || entry.protocol.definitions.length === 0),
+    );
+    expect(empty.map((entry) => entry.path)).toEqual([]);
+  });
+
+  it('returns undefined for an empty or absent format list — the planned branch gate', () => {
+    expect(resolveDefinitionPanel(undefined)).toBeUndefined();
+    expect(resolveDefinitionPanel([])).toBeUndefined();
+  });
+
+  it('picks the FIRST format that has a panel', () => {
+    // `marine-j1939`in `['dbc', 'custom-schema']`ı gibi çok biçimli kayıtlar.
+    const first = resolveDefinitionPanel(['dbc', 'custom-schema']);
+    const dbcOnly = resolveDefinitionPanel(['dbc']);
+    expect(first).toBe(dbcOnly);
+    expect(first).not.toBe(resolveDefinitionPanel(['custom-schema']));
+  });
+
+  it('mounts the LDF panel on the LIN definitions tab', async () => {
+    renderAt('/automotive/vehicle-network-protocols/lin?tab=definitions');
+
+    expect(await screen.findByTestId('ldf-panel')).toBeInTheDocument();
+    expect(screen.queryByText(translations.tr['protocol.plannedNotice'])).not.toBeInTheDocument();
   });
 });

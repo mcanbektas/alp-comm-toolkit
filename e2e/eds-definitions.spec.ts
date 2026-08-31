@@ -19,7 +19,14 @@ const CANONICAL_DEFINITIONS_PATH =
   '/comm/industrial-automation/cip-can-based/canopen?tab=definitions';
 const ALIAS_DEFINITIONS_PATH =
   '/comm/automotive/vehicle-network-protocols/canopen?tab=definitions';
-/** Regresyon bekçisi: LIN `definitions: ['ldf']` taşır ama LDF motoru yok. */
+/**
+ * Regresyon bekçisi: LIN `definitions: ['ldf']` taşır — yani BAŞKA bir biçim.
+ * LDF dalgasına kadar burası "motoru olmayan biçim" örneğiydi ve "planlandı"
+ * bildirimini kanıtlardı; LDF motoru gelince katalogda motorsuz biçim KALMADI,
+ * bekçi de "panel biçime göre SEÇİLİYOR mu" testine çevrildi. Tam gerekçe:
+ * `e2e/ldf-definitions.spec.ts`. Erişilemez hâle gelen "planlandı" yedek dalı
+ * `src/pages/ProtocolPage.test.tsx`te birim testiyle kapsanıyor.
+ */
 const NON_EDS_DEFINITIONS_PATH = '/comm/automotive/vehicle-network-protocols/lin?tab=definitions';
 
 async function openPage(page: Page, path: string): Promise<string[]> {
@@ -137,12 +144,15 @@ test('alias sayfası da EDS panelini açar', async ({ page }) => {
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
 
-test('EDS/DBC saymayan protokolde panel AÇILMAZ, "planlandı" bildirimi durur', async ({ page }) => {
+test('LIN kaydında bu panel AÇILMAZ, kaydın KENDİ biçimi olan LDF paneli açılır', async ({ page }) => {
   await openPage(page, NON_EDS_DEFINITIONS_PATH);
 
+  // Panel tanım biçimine bağlıdır, sekmenin varlığına değil: LIN yalnız
+  // `ldf` sayıyor, o yüzden bu biçimin paneli açılmamalı ve LDF paneli açılmalı.
   await expect(page.getByTestId('eds-panel')).toHaveCount(0);
   await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
-  await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
+  await expect(page.getByTestId('ldf-panel')).toBeVisible();
+  await expect(page.getByText(tr['protocol.plannedNotice'])).toHaveCount(0);
 });
 
 test('1440 ve 390 pikselde yatay taşma yok', async ({ page }) => {

@@ -1529,6 +1529,108 @@ export const tr = {
   'definition.gsd.issue.duplicateModuleReference':
     'Aynı Module_Reference numarası birden çok modülde kullanılmış; cihaz başına eşsiz olmalıdır.',
 
+  // --- LDF (LIN Description File) tanım paneli ---
+  'definition.ldf.action.import': 'LDF dosyası içe aktar',
+  'definition.ldf.sampleNotice':
+    'Gerçek bir üretici dosyası gösteriliyor (Vector DaVinci Network Designer ile üretilmiş koltuk motoru LIN kümesi). Kendi .ldf dosyanızı içe aktarabilirsiniz; dosya cihazınızdan çıkmaz.',
+  'definition.ldf.protocolVersion': 'LIN protokol sürümü',
+  'definition.ldf.languageVersion': 'LDF dil sürümü',
+  'definition.ldf.speed': 'Hız (kbit/s)',
+  'definition.ldf.master': 'Master düğüm',
+  'definition.ldf.timeBase': 'Zaman tabanı (ms)',
+  'definition.ldf.jitter': 'Seğirme (ms)',
+  'definition.ldf.slaves': 'Slave düğümler',
+  'definition.ldf.frameCount': 'Çerçeve sayısı',
+  'definition.ldf.signalCount': 'Sinyal sayısı',
+  'definition.ldf.line': 'Satır',
+  'definition.ldf.noSignals': 'Sinyal yerleşimi yok',
+  'definition.ldf.checksumNote':
+    'Checksum modeli bu dosyadan ÇÖZÜLÜR: LIN çerçevesinin klasik mi geliştirilmiş mi checksum kullandığı telden okunamaz, çünkü bu göndericinin yapılandırmasıdır. Spec 2.3.1.5 bunu çerçeve kimliği başına belirler: karışan slave düğüm LIN 1.x ise klasik, LIN 2.x ise geliştirilmiş; 60 (0x3C) ve 61 (0x3D) kimlikleri ise her zaman klasik. Aşağıdaki tablo her çerçeve için kararı ve kararın gerekçesini yazar.',
+  'definition.ldf.offsetNote':
+    'Ofset, sinyalin veri alanındaki en az anlamlı bit konumudur (spec 9.2.4.1) ve sinyal LSB önce gönderilir. Korumalı kimlik (PID) 6 bitlik çerçeve kimliğine iki eşlik biti eklenerek hesaplanır; telde taşınan budur.',
+  'definition.ldf.noNodeAttributes':
+    'Bu dosyada Node_attributes bölümü yok. LIN 1.3 lehçesinde böyle bir bölüm bulunmaz; teşhis adresleri ayrı bir bölümde verilir.',
+  'definition.ldf.signalGroupsNote':
+    'Sinyal grubu (LIN 1.3 kalıntısı, spec 9.2.3.3 bunu kullanımdan kalkmış sayar):',
+  'definition.ldf.table.frames': 'Çerçeveler',
+  'definition.ldf.table.signals': 'Sinyaller',
+  'definition.ldf.table.nodes': 'Düğüm öznitelikleri',
+  'definition.ldf.table.schedules': 'Çizelge tabloları',
+  'definition.ldf.table.decoded': 'Yakalanan çerçeveyi çöz',
+  'definition.ldf.column.frameId': 'Kimlik',
+  'definition.ldf.column.protectedId': 'PID',
+  'definition.ldf.column.name': 'Ad',
+  'definition.ldf.column.kind': 'Tür',
+  'definition.ldf.column.publisher': 'Yayıncı',
+  'definition.ldf.column.lengthBytes': 'Boy (bayt)',
+  'definition.ldf.column.checksumModel': 'Checksum modeli',
+  'definition.ldf.column.layout': 'Yerleşim',
+  'definition.ldf.column.sizeBits': 'Boy (bit)',
+  'definition.ldf.column.signalKind': 'Sinyal türü',
+  'definition.ldf.column.initValue': 'Başlangıç değeri',
+  'definition.ldf.column.subscribers': 'Aboneler',
+  'definition.ldf.column.encoding': 'Kodlama tipi',
+  'definition.ldf.column.linProtocol': 'LIN sürümü',
+  'definition.ldf.column.configuredNad': 'Yapılandırılmış NAD',
+  'definition.ldf.column.productId': 'Ürün kimliği (tedarikçi / işlev / varyant)',
+  'definition.ldf.column.timing': 'Zamanlama (ms)',
+  'definition.ldf.column.configurableFrames': 'Yapılandırılabilir çerçeveler (sıralı)',
+  'definition.ldf.column.entryCount': 'Girdi',
+  'definition.ldf.column.cycleTime': 'Tur süresi (ms)',
+  'definition.ldf.column.entries': 'Girdiler',
+  'definition.ldf.column.offset': 'Ofset (bit)',
+  'definition.ldf.kind.unconditional': 'Koşulsuz',
+  'definition.ldf.kind.sporadic': 'Sporadik',
+  'definition.ldf.kind.eventTriggered': 'Olay tetiklemeli',
+  'definition.ldf.kind.diagnostic': 'Teşhis',
+  'definition.ldf.signalKind.scalar': 'Skaler',
+  'definition.ldf.signalKind.byteArray': 'Bayt dizisi',
+  'definition.ldf.checksum.classic': 'Klasik',
+  'definition.ldf.checksum.enhanced': 'Geliştirilmiş',
+  'definition.ldf.checksum.unknown': 'Belirlenemiyor',
+  'definition.ldf.checksum.reason.reservedDiagnostic':
+    'Ayrılmış teşhis kimliği: her zaman klasik',
+  'definition.ldf.checksum.reason.linOneSlave': 'Slave düğüm LIN 1.x bildiriyor',
+  'definition.ldf.checksum.reason.linTwoSlave': 'Slave düğüm LIN 2.x bildiriyor',
+  'definition.ldf.checksum.reason.mixedSlaves':
+    'Karışık küme: bir slave düğüm LIN 1.x, o yüzden klasik',
+  'definition.ldf.checksum.reason.clusterVersion':
+    'Düğüm özniteliği yok; kümenin kendi sürümünden',
+  'definition.ldf.checksum.reason.noSlaveVersion':
+    'Dosyada sürüm bilgisi yok; varsayım üretilmedi',
+  'definition.ldf.decode.frameLabel': 'Çerçeve',
+  'definition.ldf.decode.hexLabel': 'Veri alanı (hex)',
+  'definition.ldf.decode.scopeNote':
+    'Girdi yalnız veri alanıdır: Sync, PID ve checksum baytları buraya yazılmaz. Sinyaller LSB önce okunur (spec 2.2.3) ve fiziksel değer ölçek ile ofsetten hesaplanır (spec 9.2.6.1, denklem 17). Açılış baytları uydurulmadı: seçili çerçevenin sinyallerinin dosyada bildirilen başlangıç değerlerinden (spec 9.2.3.1) paketlendi ve çerçeve değiştikçe yeniden türetilir. Üzerine yazabilirsiniz.',
+  'definition.ldf.decode.signalNotDefined': 'Sinyal tanımlı değil',
+  'definition.ldf.decode.unaligned': 'Bayt sınırında değil',
+  'definition.ldf.decode.outOfFrame': 'Çerçeveye sığmıyor',
+  'definition.ldf.error.readFailed': 'Dosya okunamadı.',
+  'definition.ldf.error.parseFailed':
+    'Dosya bir LIN Description File olarak okunamadı. İlk satırında LIN_description_file bildirimi bulunan bir .ldf dosyası bekleniyor.',
+  'definition.ldf.issue.emptyInput': 'Dosya boş.',
+  'definition.ldf.issue.notLdf':
+    'Dosya LIN_description_file bildirimiyle başlamıyor; bu bir LDF değil.',
+  'definition.ldf.issue.noFrames': 'Dosyada hiç çerçeve tanımı yok.',
+  'definition.ldf.issue.malformedEntry': 'Bildirim okunamadı, atlandı:',
+  'definition.ldf.issue.unclosedSection':
+    'Küme parantezleri dengeli değil; bir bölüm kapatılmamış olabilir.',
+  'definition.ldf.issue.unknownSection': 'Tanınmayan bölüm atlandı:',
+  'definition.ldf.issue.frameLengthMissing':
+    'Çerçevenin boy alanı yazılmamış (LIN 1.3 lehçesi). Uzunluk türetilmedi:',
+  'definition.ldf.issue.signalNotDefined':
+    'Çerçeve, Signals bölümünde tanımı olmayan bir sinyale yerleşim veriyor:',
+  'definition.ldf.issue.signalOutOfFrame':
+    'Sinyal, çerçevenin bildirdiği boya sığmıyor (ofset artı boy taşıyor):',
+  'definition.ldf.issue.unalignedByteArray':
+    'Bayt dizisi sinyali bayt sınırında başlamıyor; spec 2.2.3 her baytın tek bir çerçeve baytına oturmasını istiyor:',
+  'definition.ldf.issue.duplicateFrameId':
+    'Aynı çerçeve kimliği birden çok çerçevede kullanılmış; küme içinde eşsiz olmalıdır:',
+  'definition.ldf.issue.unknownEncodingSignal':
+    'Signal_representation, tanımlı olmayan bir sinyale kodlama bağlıyor:',
+  'definition.ldf.issue.speedOutOfRange':
+    'Bildirilen hız spec 9.2.1.3 aralığının (1-20 kbit/s) dışında:',
+
   // --- Özel şema (custom-schema) tanım paneli ---
   'definition.schema.action.import': 'Şema dosyası içe aktar (JSON)',
   'definition.schema.action.export': 'Şemayı JSON olarak indir',

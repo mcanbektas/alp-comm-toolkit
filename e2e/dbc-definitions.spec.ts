@@ -19,13 +19,12 @@ const CAN_DEFINITIONS_PATH = '/comm/automotive/can-family/can-2-0a?tab=definitio
 const ALIAS_DEFINITIONS_PATH =
   '/comm/marine-navigation/marine-machinery/marine-j1939?tab=definitions';
 /**
- * Regresyon bekçisi: `definitions` sekmesi VAR ama DBC saymayan bir kayıt.
- *
- * Dalga 1c'den ÖNCE bu yol CANopen'a işaret ediyordu, ama CANopen artık EDS
- * paneli açıyor (dalga 1c) — o yol bu bekçi için artık YANLIŞ. PSI5'in
- * dalga 3'teki taşınma gerekçesiyle aynı mantıkla LIN'e taşındı: LIN
- * `definitions: ['ldf']` taşıyor ama LDF motoru plan-fazlar.md'nin hiçbir
- * dalgasında yok, yakın vadede bir panel almayacak.
+ * Regresyon bekçisi: LIN `definitions: ['ldf']` taşır — yani BAŞKA bir biçim.
+ * LDF dalgasına kadar burası "motoru olmayan biçim" örneğiydi ve "planlandı"
+ * bildirimini kanıtlardı; LDF motoru gelince katalogda motorsuz biçim KALMADI,
+ * bekçi de "panel biçime göre SEÇİLİYOR mu" testine çevrildi. Tam gerekçe:
+ * `e2e/ldf-definitions.spec.ts`. Erişilemez hâle gelen "planlandı" yedek dalı
+ * `src/pages/ProtocolPage.test.tsx`te birim testiyle kapsanıyor.
  */
 const NON_DBC_DEFINITIONS_PATH = '/comm/automotive/vehicle-network-protocols/lin?tab=definitions';
 
@@ -207,12 +206,14 @@ test('alias sayfası da DBC panelini açar', async ({ page }) => {
   expect(consoleErrors, `konsol hataları: ${consoleErrors.join(' | ')}`).toEqual([]);
 });
 
-test('DBC saymayan protokolde panel AÇILMAZ, "planlandı" bildirimi durur', async ({ page }) => {
+test('LIN kaydında bu panel AÇILMAZ, kaydın KENDİ biçimi olan LDF paneli açılır', async ({ page }) => {
   await openPage(page, NON_DBC_DEFINITIONS_PATH);
 
-  // Regresyon bekçisi: panel tanım biçimine bağlıdır, sekmenin varlığına değil.
+  // Panel tanım biçimine bağlıdır, sekmenin varlığına değil: LIN yalnız
+  // `ldf` sayıyor, o yüzden bu biçimin paneli açılmamalı ve LDF paneli açılmalı.
   await expect(page.getByTestId('dbc-panel')).toHaveCount(0);
-  await expect(page.getByText(tr['protocol.plannedNotice'])).toBeVisible();
+  await expect(page.getByTestId('ldf-panel')).toBeVisible();
+  await expect(page.getByText(tr['protocol.plannedNotice'])).toHaveCount(0);
 });
 
 test('1440 ve 390 pikselde yatay taşma yok', async ({ page }) => {
