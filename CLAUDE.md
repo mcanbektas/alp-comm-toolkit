@@ -1055,3 +1055,36 @@ Görünen hiçbir metin koda gömülmez. Protokol ve araç adları veridir, çev
   Register 0 = 100 → ×0.1 → 10 → `sensors/temperature` → broker kaydında
   `3017001373656E736F72732F74656D70657261747572653130` (25 bayt, Remaining
   Length 0x17 = 2+19+2 elle doğrulandı), konsol temiz.
+
+  **16. 🔒 KAPSAM KARARI (2026-09-01, KULLANICI KARARI): ÇAPRAZ-PROTOKOL
+  KORELASYON/PANO KATMANI BİLİNÇLİ OLARAK KAPSAM DIŞI.** Spec kapsama ölçümü
+  (12 özet dosyası koda karşı bölüm bölüm, HEAD `34f5f6e`) decode yüzeyinin
+  TAM olduğunu doğruladı ve altı ayrı dosyada aynı deseni buldu: tek tek
+  çözücüler derin ve doğru, üstlerindeki çapraz-protokol katmanı hiç
+  açılmamış. Bu katman artık YAZILI kapsam dışıdır — `iec-61850` GOOSE-only /
+  `ads-b` 1090ES-only kesintileriyle aynı statü. Kapsadığı adlandırılmış
+  özellikler: Industrial Transaction Analyzer (özet 03:187-258), Automotive
+  Network Analyzer (04:415-503), denizcilik analiz süiti (05:302-381,
+  geodesic-distance dahil), havacılık süiti (06: MAVLink Parameter /
+  Coordinate Frame / Attitude Convention / Flight Latency / Protocol Bridge
+  Analyzer'ları), bina-otomasyonu gateway/korelasyon süiti (07:362-424),
+  kablosuz korelasyon süiti + Correlation Timeline (09:221-258), Network
+  Communication Analyzer (08:857). Gerekçe: bunların hepsi AYNI ANDA birden
+  çok protokolün verisini ister — tek protokolün kendi sekmesine yönlendirerek
+  karşılanamazlar; ürünün tutarlı önceliği decode motorlarını derin ve doğru
+  yapmak oldu ve ölçüm bu ertelemenin altı dosyada tutarlı olduğunu gösterdi.
+  Bir gün gerçek ihtiyaç çıkarsa yeniden açılacak olan şey ÖZELLİK değil BU
+  KARARDIR. Kararın uygulaması: bu özellikleri vaat eden katalog `tools:`
+  etiketleri kaldırıldı/yeniden yazıldı — "MIB Import" etiketi dahil
+  (`snmp.ts` motorun yazılmadığını zaten açıkça söylüyordu; etiket vaadi
+  sürdüremez).
+
+  Aynı ölçümün AÇIK BIRAKTIĞI küçük kalemler (kesilmedi, adı kondu):
+  ana sayfa bilgi mimarisi (spec 5 grup / 17 kategori, gerçek nav düz liste —
+  her hedef çalışıyor, gruplama yok); `canParse`ın düz boolean olması (spec
+  "aday + güven skoru" diyor; düzeltmek `types.ts` sözleşmesine dokunur, kendi
+  tasarım turunu ister); spec'in kendi dosya ağacının adlandırdığı
+  `crc-finder.worker.ts` ve `network-parser.worker.ts`in yokluğu (gerçek
+  worker üç tane; CRC Finder ana thread'de); tazelik modelinin paylaşılan
+  altyapı olmaması; AT Command Studio'nun motoru yazılıp bağlanmamış 2 aracı
+  (kendi dosya başında zaten ertelenmiş olarak kayıtlı).

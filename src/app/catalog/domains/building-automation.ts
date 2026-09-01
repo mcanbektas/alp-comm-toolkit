@@ -317,10 +317,12 @@ export const buildingAutomationDomain: CatalogDomain = {
             'SNVT',
             'Configuration Properties',
             'XIF Import',
-            'Gateway Mapping',
           ],
           // XIF, cihazın dış arayüzünü (NV'ler ve configuration property'ler)
           // tanımlayan resmi LonMark dosyasıdır; semantik çözüm buna bağlı.
+          // Gateway Mapping etiketi kaldırıldı: `summary` onu zaten KAPSAM DIŞI
+          // sayıyordu ve `lonworks.ts:28` gerekçeyi yazıyor ("analyzer işi,
+          // çözücünün değil") — CLAUDE.md 16. madde.
           definitions: ['xif'],
         },
       ],

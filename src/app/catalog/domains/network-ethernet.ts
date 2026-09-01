@@ -464,11 +464,13 @@ export const networkEthernetDomain: CatalogDomain = {
             'OID Resolver',
             'VarBind Viewer',
             'GET / GET-NEXT / GET-BULK / SET / RESPONSE / TRAP / INFORM / REPORT',
-            'MIB Import',
             'SNMPv3 Security View',
           ],
-          // MIB, listedeki hazır biçimlerin hiçbiri değil; OID/Name/Syntax/Access
-          // metadata'sı toolkit'in kendi şemasına aktarılır.
+          // MIB dosyası İÇE AKTARILMAZ: `snmp.ts` dosya başı ("MIB İMPORTU BU
+          // DALGANIN İŞİ DEĞİL") motorun yazılmadığını zaten söylüyor, etiket de
+          // bu yüzden kaldırıldı (CLAUDE.md 16. madde). Kanal açık KALIR: hazır
+          // biçimlerin hiçbiri MIB değildir, OID/Name/Syntax/Access metadata'sı
+          // toolkit'in kendi şemasına elle girilir.
           definitions: ['custom-schema'],
         },
         {

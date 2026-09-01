@@ -149,7 +149,6 @@ export const wirelessIotDomain: CatalogDomain = {
           tabs: ['overview', 'decode', 'diagnostics', 'examples'],
           tools: [
             'Mesh Topology Graph (Leader / Router / REED / End Device / SED)',
-            'Border Router Analyzer (Thread ↔ infrastructure interface, prefixes, routes, NAT64)',
             'Address Map (Extended Address, RLOC16, Mesh-Local, Link-Local, Global / ULA)',
             '6LoWPAN Header Decompression & Compression Saving',
             'Fragment Reassembly (missing fragment, reassembly timeout)',
@@ -269,7 +268,6 @@ export const wirelessIotDomain: CatalogDomain = {
             'Connection Timeline (Probe → Auth → Assoc → Handshake → Data → Disassoc)',
             'Capture Metadata View (RSSI, channel, bandwidth, MCS, spatial streams, PHY)',
             'Airtime & Channel Occupancy',
-            'Coexistence Analyzer (2.4 GHz overlap with BLE / Zigbee / Thread)',
           ],
         },
         {
@@ -361,7 +359,6 @@ export const wirelessIotDomain: CatalogDomain = {
             'DIF / VIF Meter Record Parser',
             'Security State (AES-128, OMS transport security, key ID, frame counter)',
             'Meter Dashboard (energy, power, volume, flow, temperature, battery)',
-            'Gateway Correlation (meter record → MQTT topic, scale error warning)',
           ],
           aliasOf: 'industrial-automation/metering/wireless-m-bus',
         },
@@ -389,7 +386,6 @@ export const wirelessIotDomain: CatalogDomain = {
             'QoS, Retain and Duplicate Inspector',
             'QoS ACK Latency',
             'Device Health (keep alive, will, stale sensor data)',
-            'Gateway Correlation (wireless protocol → MQTT topic)',
           ],
           aliasOf: 'network-ethernet/web-messaging/mqtt',
         },
@@ -506,10 +502,12 @@ export const wirelessIotDomain: CatalogDomain = {
           // wireless/cellular/gnssModem.ts). `tabs`'ta `decode` zaten
           // vardı, dokunulmadı. GNSS Control Commands (power/update rate/
           // constellation), tam vendor URC sözlüğü, Position Dashboard
-          // UI'ı, TTFF Calculator, Fix Loss Detector ve GNSS+Cellular
-          // Correlation Timeline bu dalgada YOK — hepsi stateful/timeline
-          // araçlar, lte-modem-at'in Cellular Initialization Dashboard'uyla
-          // aynı sınıf iş (karar 4), kendi turlarını bekliyor.
+          // UI'ı, TTFF Calculator ve Fix Loss Detector bu dalgada YOK — hepsi
+          // stateful/timeline araçlar, lte-modem-at'in Cellular Initialization
+          // Dashboard'uyla aynı sınıf iş (karar 4), kendi turlarını bekliyor.
+          // GNSS + Cellular Correlation Timeline ise BEKLEMİYOR: çapraz-protokol
+          // korelasyon katmanıyla birlikte KAPSAM DIŞI kaldı, etiketi kaldırıldı
+          // (CLAUDE.md 16. madde).
           status: 'ready',
           pluginId: 'gnss-modem',
           tabs: ['overview', 'live', 'decode', 'timing', 'data', 'diagnostics', 'examples'],
@@ -520,7 +518,6 @@ export const wirelessIotDomain: CatalogDomain = {
             'Position Dashboard (fix 2D / 3D, latitude, longitude, altitude, satellites, HDOP, speed, course)',
             'TTFF Calculator',
             'Fix Loss Detector (satellite decline, position age, GNSS_FIX_LOST)',
-            'GNSS + Cellular Correlation Timeline (position with cell ID, RSRP, RSRQ)',
           ],
           // NMEA parser'ı yeniden yazılmaz; marine kaydındaki kanonik motor
           // kullanılır (kaynak: 09-kablosuz-iot.md, "3.5'teki parser aynen kullanılır").

@@ -461,12 +461,13 @@ export const marineNavigationDomain: CatalogDomain = {
             'Navigation & Waypoint',
             'Instrument Control',
             'Vendor Message Map',
-            'SeaTalk1 → SeaTalkNG Gateway View',
-            'Conversion Correlation',
             'Duplicate Source Warning',
           ],
           // Açık bir NMEA standardı değil: mesaj tablosu vendor dokümanından ya da
           // kullanıcının doğruladığı eşlemeden yüklenir, tahmin edilmez.
+          // SeaTalk1 → SeaTalkNG gateway görünümü ve dönüşüm korelasyonu KAPSAM
+          // DIŞI (CLAUDE.md 16. madde): iki protokolün verisini AYNI ANDA ister,
+          // tek kaydın kendi sekmesiyle karşılanamaz.
           definitions: ['vendor-map'],
           related: ['marine-navigation/nmea-family/nmea-2000'],
         },
